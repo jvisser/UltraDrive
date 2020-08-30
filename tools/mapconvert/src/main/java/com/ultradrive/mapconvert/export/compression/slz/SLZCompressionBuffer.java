@@ -6,53 +6,60 @@ import java.util.List;
 
 class SLZCompressionBuffer
 {
-    private final List<Byte> currentTokenBatchCompressionBuffer = new ArrayList<>();
+    private static final int MAX_TOKENS = 8;
 
-    private int currentTokenCount = 0;
-    private byte currentCompressionMarkers = 0;
+    private final List<Byte> tokenBuffer = new ArrayList<>();
+
+    private int tokenCount = 0;
+    private byte tokenCompressionFlags = 0;
 
     public void writeToken(SLZToken token)
     {
-        currentCompressionMarkers <<= 1;
-        currentTokenCount++;
+        tokenCompressionFlags <<= 1;
+        tokenCount++;
 
-        token.write(currentTokenBatchCompressionBuffer);
+        token.write(tokenBuffer);
+
         if (token.isCompressed())
         {
-            currentCompressionMarkers |= 1;
+            tokenCompressionFlags |= 1;
         }
     }
 
     public List<Byte> complete()
     {
         List<Byte> compressedBytes = new ArrayList<>();
-        if (currentTokenCount < 8)
-        {
-            currentCompressionMarkers <<= 8 - currentTokenCount;
 
-            compressedBytes.add(currentCompressionMarkers);
-            compressedBytes.addAll(currentTokenBatchCompressionBuffer);
+        if (tokenCount < 8)
+        {
+            tokenCompressionFlags <<= MAX_TOKENS - tokenCount;
+
+            compressedBytes.add(tokenCompressionFlags);
+            compressedBytes.addAll(tokenBuffer);
         }
+
         return compressedBytes;
     }
 
     public boolean isFull()
     {
-        return currentTokenCount == 8;
+        return tokenCount == MAX_TOKENS;
     }
 
     public List<Byte> reset()
     {
         List<Byte> compressedBytes = new ArrayList<>();
+
         if (isFull())
         {
-            compressedBytes.add(currentCompressionMarkers);
-            compressedBytes.addAll(currentTokenBatchCompressionBuffer);
+            compressedBytes.add(tokenCompressionFlags);
+            compressedBytes.addAll(tokenBuffer);
 
-            currentTokenBatchCompressionBuffer.clear();
-            currentCompressionMarkers = 0;
-            currentTokenCount = 0;
+            tokenBuffer.clear();
+            tokenCompressionFlags = 0;
+            tokenCount = 0;
         }
+
         return compressedBytes;
     }
 }
