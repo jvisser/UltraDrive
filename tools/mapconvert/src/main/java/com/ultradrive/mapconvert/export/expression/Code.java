@@ -49,7 +49,7 @@ public final class Code
         }
     }
 
-    private static class GridIterator<T> implements Iterator<String>
+    private static class GroupingIterator<T> implements Iterator<String>
     {
         private final Iterator<T> delegate;
         // When line prefix is defined non continuous output is assumed (ie each line defines a single piece of data)
@@ -57,7 +57,7 @@ public final class Code
         private final String separator;
         private final int columns;
 
-        public GridIterator(Iterator<T> delegate, String linePrefix, String separator, int columns)
+        public GroupingIterator(Iterator<T> delegate, String linePrefix, String separator, int columns)
         {
             this.delegate = delegate;
             this.linePrefix = linePrefix;
@@ -92,14 +92,14 @@ public final class Code
         }
     }
 
-    private static class GridIterable<T> implements Iterable<String>
+    private static class GroupingIterable<T> implements Iterable<String>
     {
         private final Iterable<T> delegate;
         private final String linePrefix;
         private final String separator;
         private final int columns;
 
-        private GridIterable(Iterable<T> delegate, String linePrefix, String separator, int columns)
+        private GroupingIterable(Iterable<T> delegate, String linePrefix, String separator, int columns)
         {
             this.delegate = delegate;
             this.linePrefix = linePrefix;
@@ -110,7 +110,7 @@ public final class Code
         @Override
         public Iterator<String> iterator()
         {
-            return new GridIterator<>(delegate.iterator(), linePrefix, separator, columns);
+            return new GroupingIterator<>(delegate.iterator(), linePrefix, separator, columns);
         }
     }
 
@@ -166,14 +166,14 @@ public final class Code
         return String.format(format, values);
     }
 
-    public <T> Iterable<String> grid(String linePrefix, String separator, int columns, Iterable<T> iterable)
+    public <T> Iterable<String> group(String linePrefix, String separator, int columns, Iterable<T> iterable)
     {
-        return new GridIterable<>(iterable, linePrefix, separator, columns);
+        return new GroupingIterable<>(iterable, linePrefix, separator, columns);
     }
 
-    public <T> Iterable<String> grid(String separator, int columns, Iterable<T> iterable)
+    public <T> Iterable<String> group(String separator, int columns, Iterable<T> iterable)
     {
-        return new GridIterable<>(iterable, "", separator, columns);
+        return new GroupingIterable<>(iterable, "", separator, columns);
     }
 
     public <T extends Packable> Iterable<Integer> pack(Iterable<T> iterable)
