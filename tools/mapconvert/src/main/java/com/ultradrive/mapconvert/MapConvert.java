@@ -47,13 +47,13 @@ public final class MapConvert
 
     private TileMapCompilation compileMaps(MapConvertConfiguration config) throws IOException
     {
-        TiledObjectFactory factory = new TiledObjectFactory(config.getObjectTypesFile());
+        TiledObjectFactory tiledObjectFactory = new TiledObjectFactory(config.getObjectTypesFile());
 
         TileMapCompiler mapCompiler = new TileMapCompiler(config.getBasePatternId());
 
         Files.walk(Path.of(config.getMapBaseDirectory()), config.getDirectorySearchDepth())
                 .filter(path -> path.toString().endsWith("." + TILED_MAP_FILE_EXTENSION))
-                .map(path -> factory.getMapDataSource(path.toAbsolutePath().toString()))
+                .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
                 .forEach(mapCompiler::addMapDataSource);
 
         return mapCompiler.compile();
