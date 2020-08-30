@@ -35,7 +35,7 @@ class MapConvertConfiguration
         options.addRequiredOption(OPTION_TEMPLATE_DIR, "template-dir", true, "Thymeleaf template directory directory.");
         options.addRequiredOption(OPTION_OUTPUT_DIR, "output-dir", true, "Output directory.");
         options.addOption(OPTION_OBJECT_TYPES_FILE, "object-types-file", true, "Location of the tiled objecttypes.xml file.");
-        options.addOption(OPTION_BASE_PATTERN_ID, "base-pattern-id", false, "Lowest possible pattern id.");
+        options.addOption(OPTION_BASE_PATTERN_ID, "base-pattern-id", true, "Lowest possible pattern id.");
         options.addOption(OPTION_RECURSIVE, "recursive", false, "Search for maps recursively from map base directory.");
         options.addOption(OPTION_IMAGE, "image", false, "Save .png images of the maps in the output directory.");
     }
