@@ -60,4 +60,5 @@ public class SLZCompressor implements Compressor
         buffer.add(bytes[1]);
 
         return buffer;
-    }}
+    }
+}
