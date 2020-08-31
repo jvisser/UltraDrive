@@ -1,34 +1,32 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
 import com.ultradrive.mapconvert.common.OrientableGrid;
-import com.ultradrive.mapconvert.common.OrientablePoolable;
 import com.ultradrive.mapconvert.common.Orientation;
-import com.ultradrive.mapconvert.common.Point;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
-
-import java.util.Iterator;
+import com.ultradrive.mapconvert.processing.tileset.common.MetaTile;
 import java.util.List;
 import java.util.Objects;
 
 
-public class Block implements OrientablePoolable<Block, BlockReference>, Iterable<PatternReference>
+public class Block extends MetaTile<Block, BlockReference, PatternReference>
 {
     private final int collisionId;
     private final BlockAnimationMetaData animationMetaData;
-    private final OrientableGrid<PatternReference> patternReferences;
 
     public Block(int collisionId, BlockAnimationMetaData animationMetaData, List<PatternReference> patternReferences)
     {
+        super(patternReferences);
+
         this.collisionId = collisionId;
         this.animationMetaData = animationMetaData;
-        this.patternReferences = new OrientableGrid<>(patternReferences);
     }
 
     private Block(int collisionId, BlockAnimationMetaData animationMetaData, OrientableGrid<PatternReference> patternReferences)
     {
+        super(patternReferences);
+
         this.collisionId = collisionId;
         this.animationMetaData = animationMetaData;
-        this.patternReferences = patternReferences;
     }
 
     @Override
@@ -39,7 +37,7 @@ public class Block implements OrientablePoolable<Block, BlockReference>, Iterabl
             return this;
         }
 
-        return new Block(collisionId, animationMetaData, patternReferences.reorient(orientation));
+        return new Block(collisionId, animationMetaData, tileReferences.reorient(orientation));
     }
 
     @Override
@@ -59,36 +57,24 @@ public class Block implements OrientablePoolable<Block, BlockReference>, Iterabl
         {
             return false;
         }
-        final Block block = (Block) o;
-        return collisionId == block.collisionId &&
-               animationMetaData.equals(block.animationMetaData) &&
-               patternReferences.equals(block.patternReferences);
+        if (!super.equals(o))
+        {
+            return false;
+        }
+        final Block that = (Block) o;
+        return collisionId == that.collisionId &&
+               animationMetaData.equals(that.animationMetaData);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(collisionId, animationMetaData, patternReferences);
-    }
-
-    public PatternReference getPatternReference(Point point)
-    {
-        return patternReferences.getValue(point);
-    }
-
-    public PatternReference getPatternReference(int patternReferenceId)
-    {
-        return patternReferences.getValue(patternReferenceId);
+        return Objects.hash(super.hashCode(), collisionId, animationMetaData);
     }
 
     public int getCollisionId()
     {
         return collisionId;
-    }
-
-    public Iterator<PatternReference> iterator()
-    {
-        return patternReferences.iterator();
     }
 
     public boolean hasAnimation()
@@ -99,10 +85,5 @@ public class Block implements OrientablePoolable<Block, BlockReference>, Iterabl
     public BlockAnimationMetaData getAnimationMetaData()
     {
         return animationMetaData;
-    }
-
-    public int getPatternCount()
-    {
-        return patternReferences.getSize();
     }
 }

@@ -92,7 +92,7 @@ public class SquashedTileMap implements Iterable<PatternReference>
 
         Point blockCoordinate =
                 chunkReference.getOrientation().translate(new Point(blockColumn, blockRow), chunkSizeInBlocks);
-        BlockReference blockReference = chunk.getBlockReference(blockCoordinate);
+        BlockReference blockReference = chunk.getTileReference(blockCoordinate);
         Block block = tileset.getBlock(blockReference.getReferenceId());
 
         Orientation patternReferenceOrientation =
@@ -100,7 +100,7 @@ public class SquashedTileMap implements Iterable<PatternReference>
         Point patternReferenceCoordinate =
                 patternReferenceOrientation.translate(new Point(patternColumn, patternRow), blockSizeInPatterns);
 
-        return block.getPatternReference(patternReferenceCoordinate)
+        return block.getTileReference(patternReferenceCoordinate)
                 .reorient(patternReferenceOrientation);
     }
 
