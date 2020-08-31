@@ -1,10 +1,11 @@
 package com.ultradrive.mapconvert.processing.tileset.chunk;
 
 import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.processing.tileset.common.MetaTileReference;
 import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 
 
-public class ChunkReference extends TileReference<ChunkReference>
+public class ChunkReference extends MetaTileReference<ChunkReference>
 {
     public static class Builder extends TileReference.Builder<ChunkReference>
     {
@@ -33,23 +34,5 @@ public class ChunkReference extends TileReference<ChunkReference>
     public Builder builder()
     {
         return new Builder(this);
-    }
-
-    @Override
-    public int pack()
-    {
-        int packedReference = referenceId & 0x7ff;
-
-        if (orientation.isHorizontalFlip())
-        {
-            packedReference |= 0x0800;
-        }
-
-        if (orientation.isVerticalFlip())
-        {
-            packedReference |= 0x1000;
-        }
-
-        return packedReference;
     }
 }

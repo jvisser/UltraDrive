@@ -178,11 +178,11 @@ public final class Code
 
     public <T extends Packable> Iterable<Integer> pack(Iterable<T> iterable)
     {
-        return new TransformingIterable<>(iterable, Packable::pack);
+        return new TransformingIterable<>(iterable, t -> t.pack().intValue());
     }
 
     public int pack(Packable packable)
     {
-        return packable.pack();
+        return packable.pack().intValue();
     }
 }
