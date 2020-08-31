@@ -1,30 +1,36 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
-public enum BlockSolidity
+import com.ultradrive.mapconvert.common.BitPacker;
+import com.ultradrive.mapconvert.common.Packable;
+import java.util.List;
+
+
+public enum BlockSolidity implements Packable
 {
-    NONE(0x0000),
-    TOP(0x1000),
-    LEFT_RIGHT_BOTTOM(0x2000),
-    ALL(0x3000);
+    NONE,
+    TOP,
+    LEFT_RIGHT_BOTTOM,
+    ALL;
 
-    private final int value;
-
-    BlockSolidity(int value)
-    {
-        this.value = value;
-    }
+    private static final int BIT_COUNT = 2;
 
     public static BlockSolidity fromId(int id)
     {
-        if ((id & ~0x03) != 0)
+        if ((id & -(1 << BIT_COUNT)) != 0)
         {
             return NONE;
         }
-        return BlockSolidity.values()[id & 0x03];
+        return BlockSolidity.values()[id & ((1 << BIT_COUNT) - 1)];
     }
 
-    int getValue()
+    @Override
+    public BitPacker pack()
     {
-        return value;
+        return new BitPacker().add(getValue(), BIT_COUNT);
+    }
+
+    private int getValue()
+    {
+        return List.of(values()).indexOf(this);
     }
 }

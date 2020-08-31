@@ -1,31 +1,42 @@
 package com.ultradrive.mapconvert.processing.tileset.block.pattern;
 
-public enum PatternPaletteId
-{
-    FIRST(0x0000, 0, 15),
-    SECOND(0x2000, 16, 31),
-    THIRD(0x4000, 32, 47),
-    FORTH(0x6000, 48, 63),
-    INVALID(-1, -1, -1);
+import com.ultradrive.mapconvert.common.BitPacker;
+import com.ultradrive.mapconvert.common.Packable;
+import java.util.List;
 
-    private final int value;
+
+public enum PatternPaletteId implements Packable
+{
+    FIRST(0, 15),
+    SECOND(16, 31),
+    THIRD( 32, 47),
+    FORTH( 48, 63),
+    INVALID(-1, -1);
+
+    private static final int BIT_COUNT = 2;
+
     private final int startIndex;
     private final int endIndex;
 
     public static PatternPaletteId fromId(int paletteId)
     {
-        if ((paletteId & ~0x03) != 0)
+        if ((paletteId & -(1 << BIT_COUNT)) != 0)
         {
             return INVALID;
         }
-        return PatternPaletteId.values()[paletteId & 0x03];
+        return PatternPaletteId.values()[paletteId & ((1 << BIT_COUNT) - 1)];
     }
 
-    PatternPaletteId(int value, int startIndex, int endIndex)
+    PatternPaletteId(int startIndex, int endIndex)
     {
-        this.value = value;
         this.startIndex = startIndex;
         this.endIndex = endIndex;
+    }
+
+    @Override
+    public BitPacker pack()
+    {
+        return new BitPacker().add(getValue(), BIT_COUNT);
     }
 
     public int toGlobalColorIndex(int localColorIndex)
@@ -35,7 +46,12 @@ public enum PatternPaletteId
 
     public int getValue()
     {
-        return value;
+        if (isInvalid())
+        {
+            return -1;
+        }
+
+        return List.of(values()).indexOf(this);
     }
 
     public int getEndIndex()

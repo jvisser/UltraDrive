@@ -1,12 +1,16 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
+import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.processing.tileset.common.MetaTileReference;
 import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 import java.util.Objects;
 
 
-public class BlockReference extends TileReference<BlockReference>
+public class BlockReference extends MetaTileReference<BlockReference>
 {
+    private static final int TYPE_BIT_COUNT = 2;
+
     private final BlockSolidity solidity;
     private final int type;
 
@@ -87,21 +91,11 @@ public class BlockReference extends TileReference<BlockReference>
     }
 
     @Override
-    public int pack()
+    public BitPacker pack()
     {
-        int packedReference = solidity.getValue() | (referenceId & 0x3ff) | ((type & 0x03) << 14);
-
-        if (orientation.isHorizontalFlip())
-        {
-            packedReference |= 0x0400;
-        }
-
-        if (orientation.isVerticalFlip())
-        {
-            packedReference |= 0x0800;
-        }
-
-        return packedReference;
+        return super.pack()
+                .add(solidity)
+                .add(type, TYPE_BIT_COUNT);
     }
 
     public BlockSolidity getSolidity()

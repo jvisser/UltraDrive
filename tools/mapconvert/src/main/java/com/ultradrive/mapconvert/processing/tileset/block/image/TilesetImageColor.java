@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.image;
 
+import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.Packable;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,12 +39,15 @@ public class TilesetImageColor implements Packable
     }
 
     @Override
-    public int pack()
+    public BitPacker pack()
     {
         int r = get3BitComponentValue((rgb >> 16) & 0xff);
         int g = get3BitComponentValue((rgb >> 8) & 0xff);
         int b = get3BitComponentValue(rgb & 0xff);
 
-        return b << 9 | g << 5 | r << 1;
+        return new BitPacker()
+                .pad(1).add(b, 3)
+                .pad(1).add(g, 3)
+                .pad(1).add(r, 3);
     }
 }
