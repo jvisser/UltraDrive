@@ -1,24 +1,27 @@
 package com.ultradrive.mapconvert.processing.tileset.block.pattern;
 
-public enum PatternPriority
+import com.ultradrive.mapconvert.common.BitPacker;
+import com.ultradrive.mapconvert.common.Packable;
+
+
+public enum PatternPriority implements Packable
 {
-    LOW(0x0000),
-    HIGH(0x8000);
-
-    private final int value;
-
-    PatternPriority(int value)
-    {
-        this.value = value;
-    }
+    LOW,
+    HIGH;
 
     public static PatternPriority fromInt(int value)
     {
         return value == 0 ? LOW : HIGH;
     }
 
-    int getValue()
+    @Override
+    public BitPacker pack()
     {
-        return value;
+        return new BitPacker().add(isHigh());
+    }
+
+    boolean isHigh()
+    {
+        return this == HIGH;
     }
 }

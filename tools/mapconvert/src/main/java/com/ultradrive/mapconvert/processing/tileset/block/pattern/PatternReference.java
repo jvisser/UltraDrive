@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.pattern;
 
+import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 import java.util.Objects;
@@ -7,6 +8,8 @@ import java.util.Objects;
 
 public class PatternReference extends TileReference<PatternReference>
 {
+    private static final int REFERENCE_ID_BIT_COUNT = 11;
+
     private final PatternPaletteId paletteId;
     private final PatternPriority priority;
 
@@ -92,21 +95,14 @@ public class PatternReference extends TileReference<PatternReference>
     }
 
     @Override
-    public int pack()
+    public BitPacker pack()
     {
-        int packedReference = priority.getValue() | paletteId.getValue() | (referenceId & 0x7ff);
-
-        if (orientation.isHorizontalFlip())
-        {
-            packedReference |= 0x0800;
-        }
-
-        if (orientation.isVerticalFlip())
-        {
-            packedReference |= 0x1000;
-        }
-
-        return packedReference;
+        return new BitPacker(Short.SIZE)
+                .add(referenceId, REFERENCE_ID_BIT_COUNT)
+                .add(orientation.isHorizontalFlip())
+                .add(orientation.isVerticalFlip())
+                .add(paletteId)
+                .add(priority);
     }
 
     public PatternPaletteId getPaletteId()

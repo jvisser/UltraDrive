@@ -28,7 +28,7 @@ class PatternTest
     void pack()
     {
         Integer[] packedPattern = StreamSupport.stream(createPattern(0).spliterator(), false)
-                .map(PatternRow::pack)
+                .map(patternRow -> patternRow.pack().intValue())
                 .toArray(Integer[]::new);
 
         assertArrayEquals(new Integer[] {
