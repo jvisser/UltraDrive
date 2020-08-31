@@ -48,7 +48,7 @@ public class Tileset
 
     public MetaTileMetrics getChunkMetrics()
     {
-        return chunkTileset.getBlockMetrics();
+        return chunkTileset.getTileMetrics();
     }
 
     public Chunk getChunk(int chunkId)
@@ -58,7 +58,7 @@ public class Tileset
 
     public MetaTileMetrics getBlockMetrics()
     {
-        return blockTileset.getBlockMetrics();
+        return blockTileset.getTileMetrics();
     }
 
     public Block getBlock(int blockId)

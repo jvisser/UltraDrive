@@ -6,12 +6,12 @@ import java.util.List;
 public class MetaTileset<T extends MetaTile<T, ?, ?>>
 {
     private final List<T> tiles;
-    private final MetaTileMetrics blockMetrics;
+    private final MetaTileMetrics tileMetrics;
 
-    public MetaTileset(List<T> tiles, MetaTileMetrics blockMetrics)
+    public MetaTileset(List<T> tiles, MetaTileMetrics tileMetrics)
     {
         this.tiles = tiles;
-        this.blockMetrics = blockMetrics;
+        this.tileMetrics = tileMetrics;
     }
 
     public List<T> getTiles()
@@ -24,9 +24,9 @@ public class MetaTileset<T extends MetaTile<T, ?, ?>>
         return tiles.get(referenceId);
     }
 
-    public MetaTileMetrics getBlockMetrics()
+    public MetaTileMetrics getTileMetrics()
     {
-        return blockMetrics;
+        return tileMetrics;
     }
 
 }
