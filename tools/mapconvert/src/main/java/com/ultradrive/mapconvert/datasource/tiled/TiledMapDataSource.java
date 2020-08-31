@@ -4,12 +4,11 @@ import com.ultradrive.mapconvert.common.Orientation;
 import com.ultradrive.mapconvert.datasource.MapDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;
+import java.io.File;
 import org.tiledreader.TiledMap;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
-
-import java.io.File;
 
 import static java.lang.String.format;
 
@@ -17,7 +16,7 @@ public class TiledMapDataSource extends AbstractTiledMap implements MapDataSourc
 {
     private static final String CHUNK_TILESET_NAME = "chunks";
 
-    private final static String CHUNK_LAYER_NAME = "Chunks";
+    private static final String CHUNK_LAYER_NAME = "Chunks";
 
     private final TiledObjectFactory tiledObjectFactory;
 

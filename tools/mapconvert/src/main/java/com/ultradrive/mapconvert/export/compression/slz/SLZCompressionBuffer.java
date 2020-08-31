@@ -30,7 +30,7 @@ class SLZCompressionBuffer
     {
         List<Byte> compressedBytes = new ArrayList<>();
 
-        if (tokenCount < 8)
+        if (tokenCount < MAX_TOKENS)
         {
             tokenCompressionFlags <<= MAX_TOKENS - tokenCount;
 

@@ -3,19 +3,22 @@ package com.ultradrive.mapconvert.datasource.tiled;
 import com.ultradrive.mapconvert.datasource.ChunkDataSource;
 import com.ultradrive.mapconvert.datasource.model.ChunkElementModel;
 import com.ultradrive.mapconvert.datasource.model.ChunkModel;
-import org.tiledreader.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.tiledreader.TiledMap;
+import org.tiledreader.TiledReader;
+import org.tiledreader.TiledTile;
+import org.tiledreader.TiledTileLayer;
+import org.tiledreader.TiledTileset;
 
 
 class TiledChunkDataSource extends TiledMetaTileset implements ChunkDataSource
 {
     private static final String BLOCK_TILESET_NAME = "blocks";
 
-    private final static String CHUNK_TYPE_LAYER_NAME = "Type";
-    private final static String CHUNK_SOLIDITY_LAYER_NAME = "Solidity";
-    private final static String CHUNK_BLOCK_LAYER_NAME = "Block";
+    private static final String CHUNK_TYPE_LAYER_NAME = "Type";
+    private static final String CHUNK_SOLIDITY_LAYER_NAME = "Solidity";
+    private static final String CHUNK_BLOCK_LAYER_NAME = "Block";
 
     static TiledChunkDataSource fromFile(TiledReader reader, String path)
     {

@@ -18,7 +18,10 @@ class SLZCompressorTest
     void compress()
     {
         List<Byte> unCompressedBytes = IntStream.range(0, 100)
-                .mapToObj(value -> "CompressionTest ")
+                .mapToObj(value -> "If two or more (distinct) class modifiers appear in a class declaration, then it is " +
+                                   "customary, though not required, that they appear in the order consistent with that " +
+                                   "shown above in the production for ClassModifier. " +
+                                   "(small text at the bottom of the paragraph!)")
                 .flatMap(s -> s.chars().mapToObj(value -> (byte) value))
                 .collect(Collectors.toList());
 
@@ -26,8 +29,8 @@ class SLZCompressorTest
 
         List<Byte> decompressedBytes = slzDecompress(slzCompressedResult);
 
-        assertEquals(1600, unCompressedBytes.size());
-        assertEquals(208, slzCompressedResult.getCompressedSize());
+        assertEquals(26000, unCompressedBytes.size());
+        assertEquals(3269, slzCompressedResult.getCompressedSize());
         assertEquals(unCompressedBytes, decompressedBytes);
     }
 
@@ -56,8 +59,8 @@ class SLZCompressorTest
                 short info = readShort(compressedBytes, readPosition);
                 readPosition += 2;
 
-                int distance = ((info >> 4) & 0x0fff) + 3;
-                int length = (info & 0x0F) + 3;
+                int distance = ((info >>> SLZToken.LENGTH_BITS) & SLZToken.DISTANCE_MASK) + 3;
+                int length = (info & SLZToken.LENGTH_MASK) + 3;
 
                 int src = result.size() - distance;
                 while (length-- > 0)

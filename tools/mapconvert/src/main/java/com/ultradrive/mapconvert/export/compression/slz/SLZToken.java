@@ -6,8 +6,13 @@ import java.util.List;
 
 class SLZToken
 {
-    private final static int MAX_SEARCH_DISTANCE = (1 << 12) - 1 + 3;
-    private final static int MAX_TOKEN_LENGTH = (1 << 4) - 1 + 3;
+    public static final short LENGTH_BITS = 4;
+    public static final short LENGTH_MASK = (1 << LENGTH_BITS) - 1;
+    public static final short DISTANCE_BITS = Short.SIZE - LENGTH_BITS;
+    public static final short DISTANCE_MASK = (1 << DISTANCE_BITS) - 1;
+
+    private static final int MAX_SEARCH_DISTANCE = (1 << DISTANCE_BITS) - 1 + 3;
+    private static final int MAX_TOKEN_LENGTH = (1 << LENGTH_BITS) - 1 + 3;
 
     private final int distance;
     private final int length;
@@ -94,8 +99,8 @@ class SLZToken
             int d = distance - 3;
             int l = length - 3;
 
-            buffer.add((byte)(d >>> 4));
-            buffer.add((byte)(d << 4 | (l & 0x0f)));
+            buffer.add((byte)(d >>> LENGTH_BITS));
+            buffer.add((byte)(d << LENGTH_BITS | (l & LENGTH_MASK)));
         }
         else
         {
@@ -108,23 +113,8 @@ class SLZToken
         return position < 0;
     }
 
-    public int getPosition()
-    {
-        return position;
-    }
-
     public boolean isCompressed()
     {
         return distance > 0 && length > 0;
-    }
-
-    public int getDistance()
-    {
-        return distance;
-    }
-
-    public int getLength()
-    {
-        return length;
     }
 }
