@@ -1,6 +1,8 @@
 package com.ultradrive.mapconvert.export.expression;
 
 import java.util.Iterator;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 public class Collection
@@ -52,8 +54,33 @@ public class Collection
         }
     }
 
+    private static class ConcatenatingIterable<T> implements Iterable<T>
+    {
+        private final Iterable<T> first;
+        private final Iterable<T> second;
+
+        private ConcatenatingIterable(Iterable<T> first, Iterable<T> second)
+        {
+            this.first = first;
+            this.second = second;
+        }
+
+        @Override
+        public Iterator<T> iterator()
+        {
+            return Stream.concat(
+                    StreamSupport.stream(first.spliterator(), false),
+                    StreamSupport.stream(second.spliterator(), false)).iterator();
+        }
+    }
+
     public <R, T extends Iterable<R>> FlatteningIterable<R, T> flatten(Iterable<T> iterableIterable)
     {
         return new FlatteningIterable<>(iterableIterable);
+    }
+
+    public <T> Iterable<T> concat(Iterable<T> first, Iterable<T> second)
+    {
+        return new ConcatenatingIterable<>(first, second);
     }
 }
