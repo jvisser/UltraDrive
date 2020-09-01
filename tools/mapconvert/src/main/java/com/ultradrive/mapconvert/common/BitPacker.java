@@ -35,7 +35,7 @@ public final class BitPacker
 
     public BitPacker add(long value)
     {
-        return add(value, maxBits);
+        return add(value, Long.SIZE);
     }
 
     public BitPacker add(int value)
@@ -82,7 +82,7 @@ public final class BitPacker
 
     public int intValue()
     {
-        if (value < 0xffffffff)
+        if (value > 0xffffffffL)
         {
             throw new IllegalArgumentException("Not enough storage in Integer");
         }
@@ -92,7 +92,7 @@ public final class BitPacker
 
     public short shortValue()
     {
-        if (value < 0xffff)
+        if (value > 0xffffL)
         {
             throw new IllegalArgumentException("Not enough storage in Short");
         }
@@ -102,12 +102,32 @@ public final class BitPacker
 
     public byte byteValue()
     {
-        if (value < 0xff)
+        if (value > 0xffL)
         {
             throw new IllegalArgumentException("Not enough storage in Byte");
         }
 
         return (byte) value;
+    }
+
+    public Number numberValue()
+    {
+        if (maxBits <= Byte.SIZE)
+        {
+            return byteValue();
+        }
+
+        if (maxBits <= Short.SIZE)
+        {
+            return shortValue();
+        }
+
+        if (maxBits <= Integer.SIZE)
+        {
+            return intValue();
+        }
+
+        return value;
     }
 
     public BitPacker pad(int i)

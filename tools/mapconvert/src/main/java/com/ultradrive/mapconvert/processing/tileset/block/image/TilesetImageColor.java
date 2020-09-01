@@ -45,7 +45,7 @@ public class TilesetImageColor implements Packable
         int g = get3BitComponentValue((rgb >> 8) & 0xff);
         int b = get3BitComponentValue(rgb & 0xff);
 
-        return new BitPacker()
+        return new BitPacker(Short.SIZE)
                 .pad(1).add(b, 3)
                 .pad(1).add(g, 3)
                 .pad(1).add(r, 3);

@@ -1,54 +1,13 @@
 package com.ultradrive.mapconvert.export.expression;
 
 import com.ultradrive.mapconvert.common.Packable;
+import com.ultradrive.mapconvert.export.expression.common.FormattingIterable;
+import com.ultradrive.mapconvert.export.expression.common.TransformingIterable;
 import java.util.Iterator;
-import java.util.function.Function;
 
 
 public final class Code
 {
-    private static class FormattingIterator<T> implements Iterator<String>
-    {
-        private final Iterator<T> delegate;
-        private final String format;
-
-        public FormattingIterator(Iterator<T> delegate, String format)
-        {
-            this.delegate = delegate;
-            this.format = format;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-            return delegate.hasNext();
-        }
-
-        @Override
-        public String next()
-        {
-            return String.format(format, delegate.next());
-        }
-    }
-
-    private static class FormattingIterable<T> implements Iterable<String>
-    {
-        private final Iterable<T> delegate;
-        private final String format;
-
-        FormattingIterable(Iterable<T> delegate, String format)
-        {
-            this.delegate = delegate;
-            this.format = format;
-        }
-
-        @Override
-        public Iterator<String> iterator()
-        {
-            return new FormattingIterator<>(delegate.iterator(), format);
-        }
-    }
-
     private static class GroupingIterator<T> implements Iterator<String>
     {
         private final Iterator<T> delegate;
@@ -114,51 +73,19 @@ public final class Code
         }
     }
 
-    private static class TransformingIterator<T, R> implements Iterator<R>
-    {
-        private final Iterator<T> delegate;
-        private final Function<T, R> transform;
-
-        private TransformingIterator(Iterator<T> delegate, Function<T, R> transform)
-        {
-            this.delegate = delegate;
-            this.transform = transform;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-            return delegate.hasNext();
-        }
-
-        @Override
-        public R next()
-        {
-            return transform.apply(delegate.next());
-        }
-    }
-
-    private static class TransformingIterable<T, R> implements Iterable<R>
-    {
-        private final Iterable<T> delegate;
-        private final Function<T, R> transform;
-
-        private TransformingIterable(Iterable<T> delegate, Function<T, R> transform)
-        {
-            this.delegate = delegate;
-            this.transform = transform;
-        }
-
-        @Override
-        public Iterator<R> iterator()
-        {
-            return new TransformingIterator<>(delegate.iterator(), transform);
-        }
-    }
-
     public <T> Iterable<String> format(String format, Iterable<T> iterable)
     {
-        return new FormattingIterable<>(iterable, format);
+        return new FormattingIterable<>(
+                new TransformingIterable<>(iterable,
+                                           value ->
+                                           {
+                                               if (value instanceof Packable)
+                                               {
+                                                   return ((Packable) value).pack().numberValue();
+                                               }
+                                               return value;
+                                           }),
+                format);
     }
 
     public String format(String format, Object... values)
@@ -174,15 +101,5 @@ public final class Code
     public <T> Iterable<String> group(String separator, int columns, Iterable<T> iterable)
     {
         return new GroupingIterable<>(iterable, "", separator, columns);
-    }
-
-    public <T extends Packable> Iterable<Integer> pack(Iterable<T> iterable)
-    {
-        return new TransformingIterable<>(iterable, t -> t.pack().intValue());
-    }
-
-    public int pack(Packable packable)
-    {
-        return packable.pack().intValue();
     }
 }
