@@ -20,10 +20,10 @@ public class PatternRow implements Iterable<Integer>, Packable
     @Override
     public BitPacker pack()
     {
-        int packedValue = lineValues.stream()
-                .reduce(0, (i, v) -> (i << Pattern.PIXEL_VALUE_BITS) | v);
-
-        return new BitPacker(PIXEL_BIT_COUNT).add(packedValue, PIXEL_BIT_COUNT);
+        return lineValues.stream()
+                .reduce(new BitPacker(PIXEL_BIT_COUNT),
+                        (bp, v) -> bp.insert(v, Pattern.PIXEL_VALUE_BITS),
+                        BitPacker::add);
     }
 
     @Override
