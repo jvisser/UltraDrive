@@ -31,7 +31,7 @@ class SLZCompressionBuffer
 
     public List<Byte> complete()
     {
-        if (!tokenCompressionMarkers.isFull())
+        if (!tokenCompressionMarkers.isEmpty())
         {
             tokenCompressionMarkers = tokenCompressionMarkers.padStart(MAX_TOKENS - tokenCompressionMarkers.getSize());
 
