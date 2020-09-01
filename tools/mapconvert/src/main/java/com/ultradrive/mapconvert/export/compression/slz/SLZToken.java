@@ -66,17 +66,17 @@ class SLZToken
             int maxDistance = Math.min(nextPosition, MAX_SEARCH_DISTANCE);
             int maxLength = Math.min(inputBytes.length - nextPosition, MAX_TOKEN_LENGTH);
 
-            int backComparisonPosition = nextPosition - maxDistance;
-            for (int currentDistance = maxDistance; currentDistance >= 3; currentDistance--, backComparisonPosition++)
+            int readBehindPosition = nextPosition - maxDistance;
+            for (int currentDistance = maxDistance; currentDistance >= 3; currentDistance--, readBehindPosition++)
             {
-                if (!inputBytes[backComparisonPosition].equals(inputBytes[nextPosition]))
+                if (!inputBytes[readBehindPosition].equals(inputBytes[nextPosition]))
                 {
                     continue;
                 }
 
                 for (int currentLength = maxLength; currentLength > curNextLength; currentLength--)
                 {
-                    if (Arrays.compare(inputBytes, backComparisonPosition, backComparisonPosition + currentLength,
+                    if (Arrays.compare(inputBytes, readBehindPosition, readBehindPosition + currentLength,
                                        inputBytes, nextPosition, nextPosition + currentLength) == 0)
                     {
                         nextDistance = currentDistance;
