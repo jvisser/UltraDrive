@@ -1,10 +1,11 @@
 package com.ultradrive.mapconvert.export.compression.slz;
 
+import com.ultradrive.mapconvert.export.compression.common.CompressionToken;
 import java.util.Arrays;
 import java.util.List;
 
 
-class SLZToken
+class SLZToken implements CompressionToken
 {
     public static final short LENGTH_BITS = 4;
     public static final short LENGTH_MASK = (1 << LENGTH_BITS) - 1;
@@ -50,6 +51,29 @@ class SLZToken
         return new SLZToken(0, 0, -1, (byte) 0);
     }
 
+    @Override
+    public void write(List<Byte> buffer)
+    {
+        if (isCompressed())
+        {
+            int d = distance - 3;
+            int l = length - 3;
+
+            buffer.add((byte)(d >>> LENGTH_BITS));
+            buffer.add((byte)(d << LENGTH_BITS | (l & LENGTH_MASK)));
+        }
+        else
+        {
+            buffer.add(value);
+        }
+    }
+
+    @Override
+    public boolean isCompressed()
+    {
+        return distance > 0 && length > 0;
+    }
+
     public SLZToken next(Byte[] inputBytes)
     {
         int nextPosition = isCompressed() ? position + length : position + 1;
@@ -92,29 +116,8 @@ class SLZToken
         return new SLZToken(nextDistance, nextLength, nextPosition, inputBytes[nextPosition]);
     }
 
-    public void write(List<Byte> buffer)
-    {
-        if (isCompressed())
-        {
-            int d = distance - 3;
-            int l = length - 3;
-
-            buffer.add((byte)(d >>> LENGTH_BITS));
-            buffer.add((byte)(d << LENGTH_BITS | (l & LENGTH_MASK)));
-        }
-        else
-        {
-            buffer.add(value);
-        }
-    }
-
     public boolean isTerminal()
     {
         return position < 0;
-    }
-
-    public boolean isCompressed()
-    {
-        return distance > 0 && length > 0;
     }
 }
