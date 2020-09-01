@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.common;
 
-public enum Orientation
+public enum Orientation implements Packable
 {
     DEFAULT(false, false),
     HORIZONTAL_FLIP(true, false),
@@ -57,6 +57,14 @@ public enum Orientation
         boolean newVerticalFlip = verticalFlip ^ other.verticalFlip;
 
         return get(newHorizontalFlip, newVerticalFlip);
+    }
+
+    @Override
+    public BitPacker pack()
+    {
+        return new BitPacker()
+                .add(isHorizontalFlip())
+                .add(isVerticalFlip());
     }
 
     public boolean isHorizontalFlip()

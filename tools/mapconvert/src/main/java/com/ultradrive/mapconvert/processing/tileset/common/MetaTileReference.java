@@ -18,7 +18,6 @@ public abstract class MetaTileReference<T extends TileReference<T>> extends Tile
     {
         return new BitPacker(Short.SIZE)
                 .add(referenceId, REFERENCE_ID_BIT_COUNT)
-                .add(orientation.isHorizontalFlip())
-                .add(orientation.isVerticalFlip());
+                .add(orientation);
     }
 }
