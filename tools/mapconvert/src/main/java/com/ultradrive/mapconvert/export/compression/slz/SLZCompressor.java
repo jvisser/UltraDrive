@@ -18,29 +18,25 @@ public class SLZCompressor implements Compressor
     {
         Byte[] uncompressedBytes = collectInputBytes(input);
 
-        List<Byte> compressedBytes = compressBytes(uncompressedBytes);
-
-        return new CompressionResult(compressedBytes, uncompressedBytes.length);
+        return new CompressionResult(
+                compressBytes(uncompressedBytes),
+                uncompressedBytes.length);
     }
 
     private List<Byte> compressBytes(Byte[] inputBytes)
     {
-        List<Byte> compressedBytes = createSLZBuffer(inputBytes);
-
         SLZCompressionBuffer compressionBuffer = new SLZCompressionBuffer();
-
         SLZToken token = SLZToken.init(inputBytes);
+
         while (!token.isTerminal())
         {
             compressionBuffer.writeToken(token);
-            if (compressionBuffer.isFull())
-            {
-                compressedBytes.addAll(compressionBuffer.reset());
-            }
 
             token = token.next(inputBytes);
         }
 
+        List<Byte> compressedBytes = new ArrayList<>();
+        compressedBytes.addAll(createHeader(inputBytes.length));
         compressedBytes.addAll(compressionBuffer.complete());
 
         return compressedBytes;
@@ -51,11 +47,11 @@ public class SLZCompressor implements Compressor
         return StreamSupport.stream(input.spliterator(), false).toArray(Byte[]::new);
     }
 
-    private List<Byte> createSLZBuffer(Byte[] inputBytes)
+    private List<Byte> createHeader(int uncompressedSize)
     {
         List<Byte> buffer = new ArrayList<>();
 
-        byte[] bytes = Endianess.BIG.toBytes((short) inputBytes.length);
+        byte[] bytes = Endianess.BIG.toBytes((short) uncompressedSize);
         buffer.add(bytes[0]);
         buffer.add(bytes[1]);
 
