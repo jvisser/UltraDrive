@@ -13,4 +13,11 @@ public class Compression
 
         return compressor.compress(input);
     }
+
+    public CompressionResult comper(Iterable<Byte> input)
+    {
+        Compressor compressor = CompressionType.COMPER.getCompressor();
+
+        return compressor.compress(input);
+    }
 }

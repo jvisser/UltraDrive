@@ -1,11 +1,11 @@
-package com.ultradrive.mapconvert.export.compression.slz;
+package com.ultradrive.mapconvert.export.compression.common;
 
 import com.ultradrive.mapconvert.common.BitPacker;
 import java.util.ArrayList;
 import java.util.List;
 
 
-class SLZCompressionBuffer
+public class CompressionBuffer
 {
     private static final int MAX_TOKENS = 8;
 
@@ -14,7 +14,7 @@ class SLZCompressionBuffer
 
     private BitPacker tokenCompressionMarkers = new BitPacker(MAX_TOKENS);
 
-    public void writeToken(SLZToken token)
+    public void writeToken(CompressionToken token)
     {
         token.write(tokenBuffer);
 

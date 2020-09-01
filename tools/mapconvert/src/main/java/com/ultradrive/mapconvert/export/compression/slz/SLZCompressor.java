@@ -3,6 +3,7 @@ package com.ultradrive.mapconvert.export.compression.slz;
 import com.ultradrive.mapconvert.common.Endianess;
 import com.ultradrive.mapconvert.export.compression.CompressionResult;
 import com.ultradrive.mapconvert.export.compression.Compressor;
+import com.ultradrive.mapconvert.export.compression.common.CompressionBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -25,7 +26,7 @@ public class SLZCompressor implements Compressor
 
     private List<Byte> compressBytes(Byte[] inputBytes)
     {
-        SLZCompressionBuffer compressionBuffer = new SLZCompressionBuffer();
+        CompressionBuffer compressionBuffer = new CompressionBuffer();
         SLZToken token = SLZToken.init(inputBytes);
 
         while (!token.isTerminal())
