@@ -39,6 +39,26 @@ public enum Endianess
         return toBytes(shortTransform.apply(value), Short.BYTES);
     }
 
+    public byte[] toBytes(Number number)
+    {
+        if (number instanceof  Integer)
+        {
+            return toBytes(number.intValue());
+        }
+
+        if (number instanceof Short)
+        {
+            return toBytes(number.shortValue());
+        }
+
+        if (number instanceof Byte)
+        {
+            return toBytes(number.byteValue());
+        }
+
+        return toBytes(number.longValue());
+    }
+
     public long longFromBytes(byte[] bytes)
     {
         long value = fromBytes(bytes, Long.BYTES);
