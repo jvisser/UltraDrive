@@ -33,6 +33,44 @@ public final class BitPacker
         this.maxBits = maxBits;
     }
 
+    public BitPacker insert(long value)
+    {
+        return insert(value, Long.SIZE);
+    }
+
+    public BitPacker insert(int value)
+    {
+        return insert(value, Integer.SIZE);
+    }
+
+    public BitPacker insert(short value)
+    {
+        return insert(value, Short.SIZE);
+    }
+
+    public BitPacker insert(byte value)
+    {
+        return insert(value, Byte.SIZE);
+    }
+
+    public BitPacker insert(boolean value)
+    {
+        return insert(value ? 1 : 0, 1);
+    }
+
+    public BitPacker insert(long value, int bitCount)
+    {
+        if (shift + bitCount > maxBits)
+        {
+            throw new IllegalArgumentException(format("Overflow (shift:%d + bitCount:%d > maxBits:%d)", shift, bitCount, maxBits));
+        }
+
+        return new BitPacker((this.value << bitCount) | (value & ((1L << bitCount) - 1)),
+                             shift + bitCount,
+                             maxBits);
+
+    }
+
     public BitPacker add(long value)
     {
         return add(value, Long.SIZE);
@@ -53,6 +91,11 @@ public final class BitPacker
         return add(value, Byte.SIZE);
     }
 
+    public BitPacker add(boolean value)
+    {
+        return add(value ? 1 : 0, 1);
+    }
+
     public BitPacker add(long value, int bitCount)
     {
         if (shift + bitCount > maxBits)
@@ -63,11 +106,6 @@ public final class BitPacker
         return new BitPacker(this.value | ((value & ((1L << bitCount) - 1)) << shift),
                              shift + bitCount,
                              maxBits);
-    }
-
-    public BitPacker add(boolean value)
-    {
-        return add(value ? 1 : 0, 1);
     }
 
     public BitPacker add(BitPacker other)
@@ -135,8 +173,28 @@ public final class BitPacker
         return add(0, i);
     }
 
+    public BitPacker padStart(int i)
+    {
+        return insert(0, i);
+    }
+
+    public BitPacker reverse()
+    {
+        return new BitPacker(Long.reverse(value ) >>> (Long.SIZE - shift), shift, maxBits);
+    }
+
     public int getSize()
     {
         return shift;
+    }
+
+    public boolean isFull()
+    {
+        return shift >= maxBits;
+    }
+
+    public boolean isEmpty()
+    {
+        return shift == 0;
     }
 }
