@@ -118,6 +118,11 @@ public final class BitPacker
         return add(packable.pack());
     }
 
+    public long longValue()
+    {
+        return value;
+    }
+
     public int intValue()
     {
         if (value > 0xffffffffL)
