@@ -99,8 +99,7 @@ public class PatternReference extends TileReference<PatternReference>
     {
         return new BitPacker(Short.SIZE)
                 .add(referenceId, REFERENCE_ID_BIT_COUNT)
-                .add(orientation.isHorizontalFlip())
-                .add(orientation.isVerticalFlip())
+                .add(orientation)
                 .add(paletteId)
                 .add(priority);
     }
