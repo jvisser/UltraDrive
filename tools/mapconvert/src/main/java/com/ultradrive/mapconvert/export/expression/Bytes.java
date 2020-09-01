@@ -1,6 +1,7 @@
 package com.ultradrive.mapconvert.export.expression;
 
 import com.ultradrive.mapconvert.common.Endianess;
+import com.ultradrive.mapconvert.common.Packable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -128,6 +129,16 @@ public class Bytes
         {
             return new ByteToNumberIterator<>(numberValueTransform, byteCountPerValue, delegate.iterator());
         }
+    }
+
+    public <T extends Packable> Iterable<Byte>fromBE(Iterable<T> packableIterator)
+    {
+        return new ByteIterable<>(packable -> Endianess.BIG.toBytes(packable.pack().numberValue()), packableIterator);
+    }
+
+    public <T extends Packable> Iterable<Byte>fromLE(Iterable<T> packableIterator)
+    {
+        return new ByteIterable<>(packable -> Endianess.LITTLE.toBytes(packable.pack().numberValue()), packableIterator);
     }
 
     public <T extends Number> Iterable<Byte> from16BE(Iterable<T> numberIterable)
