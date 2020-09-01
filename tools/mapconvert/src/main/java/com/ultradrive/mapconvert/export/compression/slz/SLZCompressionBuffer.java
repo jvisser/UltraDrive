@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.export.compression.slz;
 
+import com.ultradrive.mapconvert.common.BitPacker;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,31 +11,24 @@ class SLZCompressionBuffer
 
     private final List<Byte> tokenBuffer = new ArrayList<>();
 
-    private int tokenCount = 0;
-    private byte tokenCompressionFlags = 0;
+    private BitPacker tokenCompressionMarkers = new BitPacker(MAX_TOKENS);
 
     public void writeToken(SLZToken token)
     {
-        tokenCompressionFlags <<= 1;
-        tokenCount++;
-
         token.write(tokenBuffer);
 
-        if (token.isCompressed())
-        {
-            tokenCompressionFlags |= 1;
-        }
+        tokenCompressionMarkers = tokenCompressionMarkers.insert(token.isCompressed());
     }
 
     public List<Byte> complete()
     {
         List<Byte> compressedBytes = new ArrayList<>();
 
-        if (tokenCount < MAX_TOKENS)
+        if (!isFull())
         {
-            tokenCompressionFlags <<= MAX_TOKENS - tokenCount;
+            tokenCompressionMarkers = tokenCompressionMarkers.padStart(MAX_TOKENS - tokenCompressionMarkers.getSize());
 
-            compressedBytes.add(tokenCompressionFlags);
+            compressedBytes.add(tokenCompressionMarkers.byteValue());
             compressedBytes.addAll(tokenBuffer);
         }
 
@@ -43,7 +37,7 @@ class SLZCompressionBuffer
 
     public boolean isFull()
     {
-        return tokenCount == MAX_TOKENS;
+        return tokenCompressionMarkers.isFull();
     }
 
     public List<Byte> reset()
@@ -52,12 +46,11 @@ class SLZCompressionBuffer
 
         if (isFull())
         {
-            compressedBytes.add(tokenCompressionFlags);
+            compressedBytes.add(tokenCompressionMarkers.byteValue());
             compressedBytes.addAll(tokenBuffer);
 
             tokenBuffer.clear();
-            tokenCompressionFlags = 0;
-            tokenCount = 0;
+            tokenCompressionMarkers = new BitPacker(MAX_TOKENS);
         }
 
         return compressedBytes;
