@@ -133,32 +133,32 @@ public class Bytes
 
     public <T extends Packable> Iterable<Byte>fromBE(Iterable<T> packableIterator)
     {
-        return new ByteIterable<>(packable -> Endianess.BIG.toBytes(packable.pack().numberValue()), packableIterator);
+        return new ByteIterable<>(packableToBytes(Endianess.BIG), packableIterator);
     }
 
     public <T extends Packable> Iterable<Byte>fromLE(Iterable<T> packableIterator)
     {
-        return new ByteIterable<>(packable -> Endianess.LITTLE.toBytes(packable.pack().numberValue()), packableIterator);
+        return new ByteIterable<>(packableToBytes(Endianess.LITTLE), packableIterator);
     }
 
     public <T extends Number> Iterable<Byte> from16BE(Iterable<T> numberIterable)
     {
-        return new ByteIterable<>(number -> Endianess.BIG.toBytes(number.shortValue()), numberIterable);
+        return new ByteIterable<>(shortToBytes(Endianess.BIG), numberIterable);
     }
 
     public <T extends Number> Iterable<Byte> from32BE(Iterable<T> numberIterable)
     {
-        return new ByteIterable<>(number -> Endianess.BIG.toBytes(number.intValue()), numberIterable);
+        return new ByteIterable<>(intToBytes(Endianess.BIG), numberIterable);
     }
 
     public <T extends Number> Iterable<Byte> from16LE(Iterable<T> numberIterable)
     {
-        return new ByteIterable<>(number -> Endianess.LITTLE.toBytes(number.shortValue()), numberIterable);
+        return new ByteIterable<>(shortToBytes(Endianess.LITTLE), numberIterable);
     }
 
     public <T extends Number> Iterable<Byte> from32LE(Iterable<T> numberIterable)
     {
-        return new ByteIterable<>(number -> Endianess.LITTLE.toBytes(number.intValue()), numberIterable);
+        return new ByteIterable<>(intToBytes(Endianess.LITTLE), numberIterable);
     }
 
     public Iterable<Short> to16BE(Iterable<Byte> byteIterable)
@@ -189,5 +189,20 @@ public class Bytes
     public Iterable<Byte> fromString(String string)
     {
         return fromString(Collections.singleton(string));
+    }
+
+    private <T extends Number> Function<T, byte[]> shortToBytes(Endianess endianess)
+    {
+        return number -> endianess.toBytes(number.shortValue());
+    }
+
+    private <T extends Number> Function<T, byte[]> intToBytes(Endianess endianess)
+    {
+        return number -> endianess.toBytes(number.intValue());
+    }
+
+    private <T extends Packable> Function<T, byte[]> packableToBytes(Endianess endianess)
+    {
+        return packable -> endianess.toBytes(packable.pack().numberValue());
     }
 }
