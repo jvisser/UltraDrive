@@ -53,7 +53,7 @@ public enum Endianess
 
         if (number instanceof Byte)
         {
-            return toBytes(number.byteValue());
+            return toBytes(number.byteValue(), 1);
         }
 
         return toBytes(number.longValue());
