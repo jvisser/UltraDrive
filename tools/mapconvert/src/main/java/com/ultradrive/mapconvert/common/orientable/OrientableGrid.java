@@ -1,5 +1,6 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
 
+import com.ultradrive.mapconvert.common.Point;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

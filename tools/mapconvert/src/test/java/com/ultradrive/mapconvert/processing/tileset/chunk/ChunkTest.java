@@ -1,14 +1,13 @@
 package com.ultradrive.mapconvert.processing.tileset.chunk;
 
-import com.ultradrive.mapconvert.common.Orientation;
-import com.ultradrive.mapconvert.common.SymmetryTester;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
+import com.ultradrive.mapconvert.common.orientable.SymmetryTester;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockReference;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockSolidity;
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 
 
 class ChunkTest

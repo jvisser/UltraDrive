@@ -1,7 +1,7 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
-import com.ultradrive.mapconvert.common.OrientableGrid;
-import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.common.orientable.OrientableGrid;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTile;
 import java.util.List;

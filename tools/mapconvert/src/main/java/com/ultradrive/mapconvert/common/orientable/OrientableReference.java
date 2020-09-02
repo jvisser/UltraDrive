@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
 
 public interface OrientableReference<S extends OrientableReference<S>> extends Orientable<S>
 {

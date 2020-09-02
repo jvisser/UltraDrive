@@ -1,15 +1,15 @@
 package com.ultradrive.mapconvert.processing.tileset.block.pattern;
 
-import com.ultradrive.mapconvert.common.Invariant;
-import com.ultradrive.mapconvert.common.OrientableGrid;
-import com.ultradrive.mapconvert.common.OrientablePoolable;
-import com.ultradrive.mapconvert.common.Orientation;
 import com.ultradrive.mapconvert.common.Point;
+import com.ultradrive.mapconvert.common.orientable.Invariant;
+import com.ultradrive.mapconvert.common.orientable.OrientableGrid;
+import com.ultradrive.mapconvert.common.orientable.OrientablePoolable;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import static com.ultradrive.mapconvert.common.Invariant.of;
+import static com.ultradrive.mapconvert.common.orientable.Invariant.of;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 

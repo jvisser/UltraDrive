@@ -1,7 +1,7 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
 import com.ultradrive.mapconvert.common.BitPacker;
-import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileReference;
 import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 import java.util.Objects;
