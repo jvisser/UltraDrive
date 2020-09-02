@@ -51,10 +51,7 @@ public class CompressionBuffer
 
     private void writeTokenBatch()
     {
-        for (byte b : endianess.toBytes(tokenCompressionMarkers.numberValue()))
-        {
-            compressedResult.add(b);
-        }
+        compressedResult.addAll(endianess.toBytes(tokenCompressionMarkers.numberValue()));
         compressedResult.addAll(tokenBuffer);
     }
 }
