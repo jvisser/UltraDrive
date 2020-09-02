@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.datasource.model;
 
-import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 
 
 public class ResourceReference

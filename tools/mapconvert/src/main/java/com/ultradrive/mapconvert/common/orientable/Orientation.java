@@ -1,4 +1,9 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
+
+import com.ultradrive.mapconvert.common.BitPacker;
+import com.ultradrive.mapconvert.common.Packable;
+import com.ultradrive.mapconvert.common.Point;
+
 
 public enum Orientation implements Packable
 {

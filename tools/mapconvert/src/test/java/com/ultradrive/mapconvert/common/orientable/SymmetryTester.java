@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

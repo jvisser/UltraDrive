@@ -1,4 +1,5 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
+
 
 public class TestOrientablePoolableReference implements OrientableReference<TestOrientablePoolableReference>
 {

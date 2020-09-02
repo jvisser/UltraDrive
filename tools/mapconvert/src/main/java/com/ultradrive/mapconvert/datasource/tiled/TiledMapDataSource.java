@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.datasource.tiled;
 
-import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.datasource.MapDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;

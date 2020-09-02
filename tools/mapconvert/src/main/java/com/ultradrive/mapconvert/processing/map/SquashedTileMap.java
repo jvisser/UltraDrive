@@ -1,7 +1,7 @@
 package com.ultradrive.mapconvert.processing.map;
 
-import com.ultradrive.mapconvert.common.Orientation;
 import com.ultradrive.mapconvert.common.Point;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockReference;

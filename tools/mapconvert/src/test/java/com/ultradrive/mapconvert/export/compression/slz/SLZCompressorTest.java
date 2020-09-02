@@ -2,7 +2,7 @@ package com.ultradrive.mapconvert.export.compression.slz;
 
 import com.ultradrive.mapconvert.common.Endianess;
 import com.ultradrive.mapconvert.export.compression.CompressionResult;
-import com.ultradrive.mapconvert.export.expression.Compression;
+import com.ultradrive.mapconvert.export.compression.CompressionType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +25,7 @@ class SLZCompressorTest
                 .flatMap(s -> s.chars().mapToObj(value -> (byte) value))
                 .collect(Collectors.toList());
 
-        CompressionResult slzCompressedResult = new Compression().slz(unCompressedBytes);
+        CompressionResult slzCompressedResult = CompressionType.SLZ.compress(unCompressedBytes);
 
         List<Byte> decompressedBytes = slzDecompress(slzCompressedResult);
 

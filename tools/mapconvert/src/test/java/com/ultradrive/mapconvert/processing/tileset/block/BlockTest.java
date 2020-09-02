@@ -1,14 +1,13 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
-import com.ultradrive.mapconvert.common.Orientation;
-import com.ultradrive.mapconvert.common.SymmetryTester;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
+import com.ultradrive.mapconvert.common.orientable.SymmetryTester;
 import com.ultradrive.mapconvert.datasource.model.BlockAnimationModel;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPaletteId;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPriority;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 
 class BlockTest

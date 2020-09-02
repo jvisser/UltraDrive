@@ -1,14 +1,17 @@
 package com.ultradrive.mapconvert.processing.tileset.block;
 
-import com.ultradrive.mapconvert.common.*;
+import com.ultradrive.mapconvert.common.Point;
+import com.ultradrive.mapconvert.common.orientable.Invariant;
+import com.ultradrive.mapconvert.common.orientable.Orientable;
+import com.ultradrive.mapconvert.common.orientable.OrientableGrid;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPriority;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.ultradrive.mapconvert.common.Invariant.of;
+import static com.ultradrive.mapconvert.common.orientable.Invariant.of;
 
 
 class BlockPatternPriority implements Orientable<BlockPatternPriority>

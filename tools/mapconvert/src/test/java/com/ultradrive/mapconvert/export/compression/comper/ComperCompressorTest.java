@@ -2,7 +2,7 @@ package com.ultradrive.mapconvert.export.compression.comper;
 
 import com.ultradrive.mapconvert.common.Endianess;
 import com.ultradrive.mapconvert.export.compression.CompressionResult;
-import com.ultradrive.mapconvert.export.expression.Compression;
+import com.ultradrive.mapconvert.export.compression.CompressionType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +26,7 @@ class ComperCompressorTest
                 .flatMap(s -> s.chars().mapToObj(value -> (byte) value))
                 .collect(Collectors.toList());
 
-        CompressionResult slzCompressedResult = new Compression().comper(unCompressedBytes);
+        CompressionResult slzCompressedResult = CompressionType.COMPER.compress(unCompressedBytes);
 
         List<Byte> decompressedBytes = comperDecompress(slzCompressedResult.getBytes());
 

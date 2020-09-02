@@ -1,13 +1,12 @@
 package com.ultradrive.mapconvert.datasource.tiled;
 
-import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.datasource.model.ResourceReference;
+import java.util.Objects;
 import org.tiledreader.TiledMap;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
-
-import java.util.Objects;
 
 abstract class AbstractTiledMap
 {

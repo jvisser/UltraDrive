@@ -1,9 +1,10 @@
 package com.ultradrive.mapconvert.export;
 
-import com.ultradrive.mapconvert.export.expression.Bytes;
-import com.ultradrive.mapconvert.export.expression.Code;
-import com.ultradrive.mapconvert.export.expression.Collection;
-import com.ultradrive.mapconvert.export.expression.Compression;
+import com.ultradrive.mapconvert.common.Endianess;
+import com.ultradrive.mapconvert.common.collection.iterables.ByteIterableFactory;
+import com.ultradrive.mapconvert.export.compression.CompressionType;
+import com.ultradrive.mapconvert.export.expression.CollectionExpressions;
+import com.ultradrive.mapconvert.export.expression.FormattingExpressions;
 import java.util.Map;
 import java.util.Set;
 import org.thymeleaf.context.IExpressionContext;
@@ -14,10 +15,12 @@ import org.thymeleaf.expression.IExpressionObjectFactory;
 
 class MapExporterDialect extends AbstractDialect implements IExpressionObjectDialect, IExpressionObjectFactory
 {
-    private final Map<String, Object> expressionObjects = Map.of("code", new Code(),
-                                                                 "bytes", new Bytes(),
-                                                                 "compression", new Compression(),
-                                                                 "collection", new Collection());
+    private final Map<String, Object> expressionObjects = Map.of("format", new FormattingExpressions(),
+                                                                 "collection", new CollectionExpressions(),
+                                                                 "byteBE", new ByteIterableFactory(Endianess.BIG),
+                                                                 "byteLE", new ByteIterableFactory(Endianess.LITTLE),
+                                                                 "slz", CompressionType.SLZ,
+                                                                 "comper", CompressionType.COMPER);
 
     protected MapExporterDialect()
     {

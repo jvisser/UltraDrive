@@ -1,7 +1,7 @@
 package com.ultradrive.mapconvert.processing.tileset.common;
 
 import com.ultradrive.mapconvert.common.BitPacker;
-import com.ultradrive.mapconvert.common.Orientation;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 
 
 public abstract class MetaTileReference<T extends TileReference<T>> extends TileReference<T>

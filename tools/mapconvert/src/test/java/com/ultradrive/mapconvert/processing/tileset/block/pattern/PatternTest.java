@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.pattern;
 
-import com.ultradrive.mapconvert.common.SymmetryTester;
+import com.ultradrive.mapconvert.common.orientable.SymmetryTester;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.StreamSupport;

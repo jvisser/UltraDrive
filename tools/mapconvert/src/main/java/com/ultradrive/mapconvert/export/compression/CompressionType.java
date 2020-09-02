@@ -16,8 +16,8 @@ public enum CompressionType
         this.compressor = compressor;
     }
 
-    public Compressor getCompressor()
+    public CompressionResult compress(Iterable<Byte> bytes)
     {
-        return compressor;
+        return compressor.compress(bytes);
     }
 }
