@@ -47,9 +47,8 @@ class ComperCompressorTest
         {
             if (tokens == 0)
             {
-                byte[] a = new byte[]{data.get(sourcPos), data.get(sourcPos+1)};
+                flags = Endianess.BIG.shortFromBytes(List.of(data.get(sourcPos), data.get(sourcPos+1)));
                 sourcPos+=2;
-                flags = Endianess.BIG.shortFromBytes(a);
                 tokens = 16;
             }
 

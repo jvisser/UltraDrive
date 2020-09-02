@@ -82,6 +82,6 @@ class SLZCompressorTest
 
     private short readShort(List<Byte> compressedBytes, int position)
     {
-        return Endianess.BIG.shortFromBytes(new byte[] { compressedBytes.get(position), compressedBytes.get(position + 1) });
+        return Endianess.BIG.shortFromBytes(List.of(compressedBytes.get(position), compressedBytes.get(position + 1)));
     }
 }

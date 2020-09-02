@@ -52,12 +52,6 @@ public class SLZCompressor implements Compressor
 
     private List<Byte> createHeader(int uncompressedSize)
     {
-        List<Byte> buffer = new ArrayList<>();
-
-        byte[] bytes = Endianess.BIG.toBytes((short) uncompressedSize);
-        buffer.add(bytes[0]);
-        buffer.add(bytes[1]);
-
-        return buffer;
+        return Endianess.BIG.toBytes((short) uncompressedSize);
     }
 }

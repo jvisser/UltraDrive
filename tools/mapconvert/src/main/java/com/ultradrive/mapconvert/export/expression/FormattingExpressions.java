@@ -8,14 +8,14 @@ import java.util.Iterator;
 
 public final class FormattingExpressions
 {
-    private static class GroupingIterable<T> implements Iterable<String>
+    private static class ArrayFormattingIterable<T> implements Iterable<String>
     {
         private final Iterable<T> delegate;
         private final String linePrefix;
         private final String separator;
         private final int columns;
 
-        GroupingIterable(Iterable<T> delegate, String linePrefix, String separator, int columns)
+        ArrayFormattingIterable(Iterable<T> delegate, String linePrefix, String separator, int columns)
         {
             this.delegate = delegate;
             this.linePrefix = linePrefix;
@@ -23,7 +23,7 @@ public final class FormattingExpressions
             this.columns = columns;
         }
 
-        private static class GroupingIterator<T> implements Iterator<String>
+        private static class ArrayFormattingIterator<T> implements Iterator<String>
         {
             private final Iterator<T> delegate;
             // When line prefix is defined non continuous output is assumed (ie each line defines a single piece of data)
@@ -31,7 +31,7 @@ public final class FormattingExpressions
             private final String separator;
             private final int columns;
 
-            public GroupingIterator(Iterator<T> delegate, String linePrefix, String separator, int columns)
+            public ArrayFormattingIterator(Iterator<T> delegate, String linePrefix, String separator, int columns)
             {
                 this.delegate = delegate;
                 this.linePrefix = linePrefix;
@@ -69,7 +69,7 @@ public final class FormattingExpressions
         @Override
         public Iterator<String> iterator()
         {
-            return new GroupingIterable.GroupingIterator<>(delegate.iterator(), linePrefix, separator, columns);
+            return new ArrayFormattingIterator<>(delegate.iterator(), linePrefix, separator, columns);
         }
     }
 
@@ -93,13 +93,13 @@ public final class FormattingExpressions
         return String.format(format, values);
     }
 
-    public <T> Iterable<String> group(String linePrefix, String separator, int columns, Iterable<T> iterable)
+    public <T> Iterable<String> formatArray(String linePrefix, String separator, int columns, Iterable<T> iterable)
     {
-        return new GroupingIterable<>(iterable, linePrefix, separator, columns);
+        return new ArrayFormattingIterable<>(iterable, linePrefix, separator, columns);
     }
 
-    public <T> Iterable<String> group(String separator, int columns, Iterable<T> iterable)
+    public <T> Iterable<String> formatArray(String separator, int columns, Iterable<T> iterable)
     {
-        return new GroupingIterable<>(iterable, "", separator, columns);
+        return new ArrayFormattingIterable<>(iterable, "", separator, columns);
     }
 }

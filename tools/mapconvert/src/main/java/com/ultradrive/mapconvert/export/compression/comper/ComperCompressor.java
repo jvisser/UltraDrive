@@ -9,7 +9,7 @@ import java.util.stream.StreamSupport;
 
 
 /**
- * Java implementation of Comper compression by vladikcomper (https://github.com/vladikcomper)
+ * Java port of Comper compression by vladikcomper (https://github.com/vladikcomper)
  */
 public class ComperCompressor implements Compressor
 {
