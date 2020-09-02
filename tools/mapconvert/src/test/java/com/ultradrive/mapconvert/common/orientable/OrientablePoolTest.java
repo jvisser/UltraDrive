@@ -1,8 +1,8 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
 
 import org.junit.jupiter.api.Test;
 
-import static com.ultradrive.mapconvert.common.TestOrientable.of;
+import static com.ultradrive.mapconvert.common.orientable.TestOrientable.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 

@@ -1,9 +1,9 @@
 package com.ultradrive.mapconvert.processing.tileset.common;
 
 
-import com.ultradrive.mapconvert.common.OrientableGrid;
-import com.ultradrive.mapconvert.common.OrientablePoolable;
 import com.ultradrive.mapconvert.common.Point;
+import com.ultradrive.mapconvert.common.orientable.OrientableGrid;
+import com.ultradrive.mapconvert.common.orientable.OrientablePoolable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;

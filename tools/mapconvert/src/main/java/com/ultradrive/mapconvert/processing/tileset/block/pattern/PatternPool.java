@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.pattern;
 
-import com.ultradrive.mapconvert.common.OrientablePool;
+import com.ultradrive.mapconvert.common.orientable.OrientablePool;
 
 
 public class PatternPool extends OrientablePool<Pattern, PatternReference>

@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.common;
+package com.ultradrive.mapconvert.common.orientable;
 
 import java.util.Objects;
 

@@ -1,8 +1,8 @@
 package com.ultradrive.mapconvert.processing.tileset.common;
 
-import com.ultradrive.mapconvert.common.OrientableReference;
-import com.ultradrive.mapconvert.common.Orientation;
 import com.ultradrive.mapconvert.common.Packable;
+import com.ultradrive.mapconvert.common.orientable.OrientableReference;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import java.util.Objects;
 
 

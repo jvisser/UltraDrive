@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.export.expression.common;
+package com.ultradrive.mapconvert.common.collection.iterables;
 
 import java.util.Iterator;
 import java.util.function.Function;

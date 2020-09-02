@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.chunk;
 
-import com.ultradrive.mapconvert.common.OrientablePool;
+import com.ultradrive.mapconvert.common.orientable.OrientablePool;
 
 
 class ChunkPool extends OrientablePool<Chunk, ChunkReference>
