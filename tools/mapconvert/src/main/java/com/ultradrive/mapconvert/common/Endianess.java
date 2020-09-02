@@ -1,9 +1,12 @@
 package com.ultradrive.mapconvert.common;
 
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 
 
 public enum Endianess
@@ -24,22 +27,22 @@ public enum Endianess
         this.shortTransform = shortTransform;
     }
 
-    public byte[] toBytes(long value)
+    public List<Byte> toBytes(long value)
     {
         return toBytes(longTransform.apply(value), Long.BYTES);
     }
 
-    public byte[] toBytes(int value)
+    public List<Byte> toBytes(int value)
     {
         return toBytes(integerTransform.apply(value), Integer.BYTES);
     }
 
-    public byte[] toBytes(short value)
+    public List<Byte> toBytes(short value)
     {
         return toBytes(shortTransform.apply(value), Short.BYTES);
     }
 
-    public byte[] toBytes(Number number)
+    public List<Byte> toBytes(Number number)
     {
         if (number instanceof  Integer)
         {
@@ -59,53 +62,46 @@ public enum Endianess
         return toBytes(number.longValue());
     }
 
-    public long longFromBytes(byte[] bytes)
+    public long longFromBytes(List<Byte> bytes)
     {
         long value = fromBytes(bytes, Long.BYTES);
 
         return longTransform.apply(value);
     }
 
-    public int intFromBytes(byte[] bytes)
+    public int intFromBytes(List<Byte> bytes)
     {
         int value = (int) fromBytes(bytes, Integer.BYTES);
 
         return integerTransform.apply(value);
     }
 
-    public short shortFromBytes(byte[] bytes)
+    public short shortFromBytes(List<Byte> bytes)
     {
         short value = (short) fromBytes(bytes, Short.BYTES);
 
         return shortTransform.apply(value);
     }
 
-    private long fromBytes(byte[] bytes, int byteCount)
+    private long fromBytes(List<Byte> bytes, int byteCount)
     {
-        if (bytes.length < byteCount)
+        if (bytes.size() < byteCount)
         {
             throw new IllegalArgumentException("Insufficient data to reconstruct value");
         }
 
-        long result = 0;
-        int shift = 0;
+        BitPacker bitPacker = new BitPacker();
         for (byte byteValue : bytes)
         {
-            result |= (((long) byteValue & 0xff) << shift);
-            shift += 8;
+            bitPacker = bitPacker.add(byteValue);
         }
-        return result;
+        return bitPacker.longValue();
     }
 
-    private byte[] toBytes(long value, int byteCount)
+    private List<Byte> toBytes(long value, int byteCount)
     {
-        byte[] result = new byte[byteCount];
-
-        for (int i = 0; i < byteCount; i++)
-        {
-            result[i] = (byte) ((value >>> (i << 3)) & 0xff);
-        }
-
-        return result;
+        return IntStream.range(0, byteCount)
+                .mapToObj(b -> (byte) ((value >>> (b << 3)) & 0xff))
+                .collect(toList());
     }
 }

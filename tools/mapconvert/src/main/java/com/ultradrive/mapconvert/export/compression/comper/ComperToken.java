@@ -60,11 +60,7 @@ class ComperToken implements CompressionToken, Comparable<ComperToken>
         }
         else
         {
-            // Uncompressed
-            byte[] bytes = Endianess.BIG.toBytes(value);
-
-            compressionBuffer.add(bytes[0]);
-            compressionBuffer.add(bytes[1]);
+            compressionBuffer.addAll(Endianess.BIG.toBytes(value));
         }
     }
 
