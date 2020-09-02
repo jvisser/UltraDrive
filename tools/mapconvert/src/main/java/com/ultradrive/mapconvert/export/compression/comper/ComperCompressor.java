@@ -1,10 +1,10 @@
 package com.ultradrive.mapconvert.export.compression.comper;
 
 import com.ultradrive.mapconvert.common.Endianess;
+import com.ultradrive.mapconvert.common.collection.iterables.ByteIterableFactory;
 import com.ultradrive.mapconvert.export.compression.CompressionResult;
 import com.ultradrive.mapconvert.export.compression.Compressor;
-import java.util.ArrayList;
-import java.util.List;
+import com.ultradrive.mapconvert.export.compression.common.CompressionBuffer;
 import java.util.stream.StreamSupport;
 
 
@@ -13,48 +13,51 @@ import java.util.stream.StreamSupport;
  */
 public class ComperCompressor implements Compressor
 {
-    private Byte[] collectInputBytes(Iterable<Byte> input)
-    {
-        return StreamSupport.stream(input.spliterator(), false).toArray(Byte[]::new);
-    }
+    private static final int MAX_SEARCH_DISTANCE = 0x100;
+    private static final int MAX_TOKENS = 16;
 
     @Override
-    public CompressionResult compress(Iterable<Byte> source1)
+    public CompressionResult compress(Iterable<Byte> input)
     {
-        Byte[] source = collectInputBytes(source1);
-        int size_bytes = source.length;
-        Byte[] buffer_bytes = new Byte[size_bytes + (size_bytes & 1)];
-        System.arraycopy(source, 0, buffer_bytes, 0, size_bytes);
+        ComperToken[] tokens = buildLZSSGraph(input);
 
-        int size = (size_bytes + 1) / 2;
-        short[] buffer = new short[size];
-        for (int i = 0; i < size; ++i)
+        CompressionBuffer compressionBuffer = new CompressionBuffer(Endianess.BIG, MAX_TOKENS);
+
+        ComperToken currentToken = tokens[0];
+        while(currentToken.hasNext())
         {
-            buffer[i] = (short)((buffer_bytes[i * 2] << 8) | ((short)(buffer_bytes[(i * 2) + 1]) & 0xff));
+            compressionBuffer.writeToken(currentToken);
+
+            currentToken = currentToken.getNext();
         }
 
-        ComperToken[] tokens = new ComperToken[size + 1];
+        compressionBuffer.writeToken(ComperToken.terminal());
 
-        // Initialise the array
-        tokens[0] = new ComperToken(0, 0, buffer[0]);
-        for (int i = 1; i < size + 1; ++i)
-            tokens[i] = new ComperToken(Integer.MAX_VALUE, i, buffer[Math.min(i, size -1)]);
+        return new CompressionResult(compressionBuffer.complete(), (tokens.length - 1) * 2);
+    }
 
-        // Find matches
+    private ComperToken[] buildLZSSGraph(Iterable<Byte> input)
+    {
+        ComperToken[] tokens = createTokens(input);
+
+        int size = tokens.length - 1;
         for (int currentPosition = 0; currentPosition < size; ++currentPosition)
         {
-            int max_read_ahead = Math.min(0x100, size - currentPosition);
-            int max_read_behind = Math.max(0, currentPosition - 0x100);
+            int maxReadAhead = Math.min(MAX_SEARCH_DISTANCE, size - currentPosition);
+            int maxReadBehind = Math.max(0, currentPosition - MAX_SEARCH_DISTANCE);
 
-            // Search for dictionary matches
-            for (int readBehindPosition = currentPosition; readBehindPosition-- > max_read_behind;)
+            ComperToken currentToken = tokens[currentPosition];
+            for (int readBehindPosition = currentPosition; readBehindPosition-- > maxReadBehind;)
             {
-                for (int readAheadOffset = 0; readAheadOffset < max_read_ahead; ++readAheadOffset)
+                for (int readAheadOffset = 0; readAheadOffset < maxReadAhead; ++readAheadOffset)
                 {
-                    if (buffer[currentPosition + readAheadOffset] == buffer[readBehindPosition + readAheadOffset])
+                    if (tokens[currentPosition + readAheadOffset].equals(tokens[readBehindPosition + readAheadOffset]))
                     {
-                        // Update this node's optimal edge if this one is better
-                        tokens[currentPosition + readAheadOffset + 1].linkWeighed(tokens[currentPosition], readBehindPosition);
+                        ComperToken token = tokens[currentPosition + readAheadOffset + 1];
+                        if (token.compareTo(currentToken) > 0)
+                        {
+                            token.link(currentToken, readBehindPosition);
+                        }
                     }
                     else
                     {
@@ -63,81 +66,44 @@ public class ComperCompressor implements Compressor
                 }
             }
 
-            // Do literal match
-            // Update this node's optimal edge if this one is better (or the same, since literal matches usually decode faster)
-            if (tokens[currentPosition + 1].cost >= tokens[currentPosition].cost + 1 + 16)
+            ComperToken nextToken = tokens[currentPosition + 1];
+            if (nextToken.compareTo(currentToken) >= 0)
             {
-                tokens[currentPosition + 1].cost = tokens[currentPosition].cost + 1 + 16;
-                tokens[currentPosition + 1].previousToken = tokens[currentPosition];
-                tokens[currentPosition + 1].length = 0;
+                nextToken.linkUncompressed(currentToken);
             }
         }
 
-        // Reverse the edge link order, so the array can be traversed from start to end, rather than vice versa
-        tokens[0].previousToken = null;
-        tokens[size].nextToken = null;
+        completeBiDirectionalLinks(tokens);
 
-        ComperToken currentToken = tokens[size];
-        while (currentToken.previousToken != null)
+        return tokens;
+    }
+
+    private void completeBiDirectionalLinks(ComperToken[] tokens)
+    {
+        tokens[0].terminatePrevious();
+        tokens[tokens.length - 1].terminateNext();
+
+        ComperToken currentToken = tokens[tokens.length - 1];
+        while (currentToken.hasPrevious())
         {
-            currentToken.previousToken.nextToken = currentToken;
-            currentToken = currentToken.previousToken;
+            currentToken.linkNext();
+
+            currentToken = currentToken.getPrevious();
         }
+    }
 
-        /*
-         * LZSS graph complete
-         */
+    private ComperToken[] createTokens(Iterable<Byte> input)
+    {
+        Short[] buffer = StreamSupport.stream(new ByteIterableFactory(Endianess.BIG).to16(input).spliterator(), false)
+                .toArray(Short[]::new);
 
-        int tokenCount = 0;
-        short tokenCompressionFlags = 0;
+        ComperToken[] tokens = new ComperToken[buffer.length + 1];
 
-        List<Byte> data = new ArrayList<>();
-        List<Byte> compressionBuffer = new ArrayList<>();
-
-        currentToken = tokens[0];
-        while(currentToken.nextToken != null)
+        tokens[0] = new ComperToken(0, 0, buffer[0]);
+        for (int i = 1; i < tokens.length; ++i)
         {
-            currentToken.write(compressionBuffer);
-            if (currentToken.isCompressed())
-            {
-                tokenCompressionFlags |= 1;
-            }
-
-            tokenCount++;
-            if (tokenCount == 16)
-            {
-                byte[] bytes = Endianess.BIG.toBytes(tokenCompressionFlags);
-                data.add(bytes[0]);
-                data.add(bytes[1]);
-
-                data.addAll(compressionBuffer);
-
-                compressionBuffer.clear();
-
-                tokenCompressionFlags = 0;
-                tokenCount = 0;
-            }
-            tokenCompressionFlags <<= 1;
-
-            currentToken = currentToken.nextToken;
+            tokens[i] = new ComperToken(Integer.MAX_VALUE, i, buffer[Math.min(i, buffer.length - 1)]);
         }
-
-        tokenCompressionFlags |= 1;
-        tokenCount++;
-
-        if (!compressionBuffer.isEmpty())
-        {
-            compressionBuffer.add((byte)0);
-            compressionBuffer.add((byte)0);
-        }
-
-        tokenCompressionFlags <<= 16 - tokenCount;
-        byte[] bytes = Endianess.BIG.toBytes(tokenCompressionFlags);
-        data.add(bytes[0]);
-        data.add(bytes[1]);
-
-        data.addAll(compressionBuffer);
-
-        return new CompressionResult(data, source.length);
+        return tokens;
     }
 }

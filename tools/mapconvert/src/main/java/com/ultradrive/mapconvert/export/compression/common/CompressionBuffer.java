@@ -1,18 +1,27 @@
 package com.ultradrive.mapconvert.export.compression.common;
 
 import com.ultradrive.mapconvert.common.BitPacker;
+import com.ultradrive.mapconvert.common.Endianess;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class CompressionBuffer
 {
-    private static final int MAX_TOKENS = 8;
-
     private final List<Byte> compressedResult = new ArrayList<>();
     private final List<Byte> tokenBuffer = new ArrayList<>();
 
-    private BitPacker tokenCompressionMarkers = new BitPacker(MAX_TOKENS);
+    private final Endianess endianess;
+    private final int maxTokens;
+
+    private BitPacker tokenCompressionMarkers;
+
+    public CompressionBuffer(Endianess endianess, int maxTokens)
+    {
+        this.endianess = endianess;
+        this.maxTokens = maxTokens;
+        tokenCompressionMarkers = new BitPacker(maxTokens);
+    }
 
     public void writeToken(CompressionToken token)
     {
@@ -21,11 +30,10 @@ public class CompressionBuffer
         tokenCompressionMarkers = tokenCompressionMarkers.insert(token.isCompressed());
         if (tokenCompressionMarkers.isFull())
         {
-            compressedResult.add(tokenCompressionMarkers.byteValue());
-            compressedResult.addAll(tokenBuffer);
+            writeTokenBatch();
 
             tokenBuffer.clear();
-            tokenCompressionMarkers = new BitPacker(MAX_TOKENS);
+            tokenCompressionMarkers = new BitPacker(maxTokens);
         }
     }
 
@@ -33,12 +41,20 @@ public class CompressionBuffer
     {
         if (!tokenCompressionMarkers.isEmpty())
         {
-            tokenCompressionMarkers = tokenCompressionMarkers.padStart(MAX_TOKENS - tokenCompressionMarkers.getSize());
+            tokenCompressionMarkers = tokenCompressionMarkers.padStart(maxTokens - tokenCompressionMarkers.getSize());
 
-            compressedResult.add(tokenCompressionMarkers.byteValue());
-            compressedResult.addAll(tokenBuffer);
+            writeTokenBatch();
         }
 
         return compressedResult;
+    }
+
+    private void writeTokenBatch()
+    {
+        for (byte b : endianess.toBytes(tokenCompressionMarkers.numberValue()))
+        {
+            compressedResult.add(b);
+        }
+        compressedResult.addAll(tokenBuffer);
     }
 }
