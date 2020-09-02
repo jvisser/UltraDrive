@@ -3,20 +3,23 @@ package com.ultradrive.mapconvert.export.compression.comper;
 import com.ultradrive.mapconvert.common.Endianess;
 import com.ultradrive.mapconvert.export.compression.common.CompressionToken;
 import java.util.List;
+import java.util.Objects;
 
 
-class ComperToken implements CompressionToken
+class ComperToken implements CompressionToken, Comparable<ComperToken>
 {
-    public int cost;
+    private final static int COST_INCREMENT = 17;
 
-    public ComperToken nextToken;
-    public ComperToken previousToken;
+    private final int index;
+    private final short value;
 
-    public int length;
-    public int offset;
+    private ComperToken next;
+    private ComperToken previous;
 
-    public int index;
-    public short value;
+    private int cost;
+    private int length;
+    private int offset;
+
 
     public ComperToken(int cost, int index, short value)
     {
@@ -25,16 +28,35 @@ class ComperToken implements CompressionToken
         this.value = value;
     }
 
+    public static CompressionToken terminal()
+    {
+        return new ComperToken(0, 0, (short) 0)
+        {
+            @Override
+            public void write(List<Byte> compressionBuffer)
+            {
+                compressionBuffer.add((byte) 0);
+                compressionBuffer.add((byte) 0);
+            }
+
+            @Override
+            public boolean isCompressed()
+            {
+                return true;
+            }
+        };
+    }
+
     @Override
     public void write(List<Byte> compressionBuffer)
     {
         if (isCompressed())
         {
-            int length = nextToken.length;
-            int distance = nextToken.index - nextToken.length - nextToken.offset;
+            int length = next.length;
+            int distance = next.index - next.length - next.offset;
 
-            compressionBuffer.add((byte)-distance);
-            compressionBuffer.add((byte)(length - 1));
+            compressionBuffer.add((byte) -distance);
+            compressionBuffer.add((byte) (length - 1));
         }
         else
         {
@@ -47,19 +69,85 @@ class ComperToken implements CompressionToken
     }
 
     @Override
-    public boolean isCompressed()
+    public boolean equals(Object o)
     {
-        return nextToken != null && nextToken.length != 0;
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        final ComperToken that = (ComperToken) o;
+        return value == that.value;
     }
 
-    public void linkWeighed(ComperToken token, int offset)
+    @Override
+    public int hashCode()
     {
-        if (cost > token.cost + 1 + 16)
-        {
-            cost = token.cost + 1 + 16;
-            previousToken = token;
-            length = index - token.index;
-            this.offset = offset;
-        }
+        return Objects.hash(index, value);
+    }
+
+    @Override
+    public boolean isCompressed()
+    {
+        return hasNext() && next.length != 0;
+    }
+
+    @Override
+    public int compareTo(ComperToken token)
+    {
+        return cost - (token.cost + COST_INCREMENT);
+    }
+
+    public void link(ComperToken token, int offset)
+    {
+        cost = token.cost + COST_INCREMENT;
+        previous = token;
+        length = index - token.index;
+        this.offset = offset;
+    }
+
+    public void linkUncompressed(ComperToken token)
+    {
+        cost = token.cost + COST_INCREMENT;
+        previous = token;
+        length = 0;
+    }
+
+    public boolean hasNext()
+    {
+        return next != null;
+    }
+
+    public void linkNext()
+    {
+        previous.next = this;
+    }
+
+    public void terminatePrevious()
+    {
+        previous = null;
+    }
+
+    public void terminateNext()
+    {
+        next = null;
+    }
+
+    public boolean hasPrevious()
+    {
+        return previous != null;
+    }
+
+    public ComperToken getPrevious()
+    {
+        return previous;
+    }
+
+    public ComperToken getNext()
+    {
+        return next;
     }
 }

@@ -14,6 +14,8 @@ import java.util.stream.StreamSupport;
  */
 public class SLZCompressor implements Compressor
 {
+    private static final int MAX_TOKENS = 8;
+
     @Override
     public CompressionResult compress(Iterable<Byte> input)
     {
@@ -26,7 +28,7 @@ public class SLZCompressor implements Compressor
 
     private List<Byte> compressBytes(Byte[] inputBytes)
     {
-        CompressionBuffer compressionBuffer = new CompressionBuffer();
+        CompressionBuffer compressionBuffer = new CompressionBuffer(Endianess.BIG, MAX_TOKENS);
         SLZToken token = SLZToken.init(inputBytes);
 
         while (!token.isTerminal())
