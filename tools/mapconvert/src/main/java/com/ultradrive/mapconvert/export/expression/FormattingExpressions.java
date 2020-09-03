@@ -102,4 +102,14 @@ public final class FormattingExpressions
     {
         return new ArrayFormattingIterable<>(iterable, "", separator, columns);
     }
+
+    public <T> Iterable<String> formatArray(String linePrefix, String separator, int columns, String elementFormat, Iterable<T> iterable)
+    {
+        return formatArray(linePrefix, separator, columns, format(elementFormat, iterable));
+    }
+
+    public <T> Iterable<String> formatArray(String separator, int columns, String elementFormat, Iterable<T> iterable)
+    {
+        return formatArray( "", separator, columns, format(elementFormat, iterable));
+    }
 }
