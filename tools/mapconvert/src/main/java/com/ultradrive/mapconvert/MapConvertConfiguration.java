@@ -28,7 +28,7 @@ class MapConvertConfiguration
     private boolean recursive;
     private boolean saveImages;
 
-    public MapConvertConfiguration()
+    MapConvertConfiguration()
     {
         options = new Options();
         options.addRequiredOption(OPTION_MAP_DIR, "map-dir", true, "Map base directory.");

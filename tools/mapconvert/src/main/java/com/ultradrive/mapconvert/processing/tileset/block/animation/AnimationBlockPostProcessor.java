@@ -2,11 +2,15 @@ package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
+import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -20,18 +24,18 @@ public class AnimationBlockPostProcessor
 
     private final List<Block> blocks;
     private final MetaTileMetrics blockMetrics;
-    private final ImageBlockPatternProducer patternProducer;
-    private final int patternBaseId;
+    private final ImageBlockPatternProducer imagePatternProducer;
+    private final ImageBlockPatternReferenceProducer patternReferenceProducer;
 
     public AnimationBlockPostProcessor(List<Block> blocks,
                                        MetaTileMetrics blockMetrics,
-                                       int patternBaseId,
-                                       ImageBlockPatternProducer patternProducer)
+                                       ImageBlockPatternProducer imagePatternProducer,
+                                       ImageBlockPatternReferenceProducer patternReferenceProducer)
     {
         this.blocks = blocks;
         this.blockMetrics = blockMetrics;
-        this.patternBaseId = patternBaseId;
-        this.patternProducer = patternProducer;
+        this.imagePatternProducer = imagePatternProducer;
+        this.patternReferenceProducer = patternReferenceProducer;
     }
 
     public AnimationBlockPostProcessingResult process()
@@ -43,18 +47,22 @@ public class AnimationBlockPostProcessor
                         .map(SourceAnimationFrameReference::getAnimationFrame))
                 .collect(toSet());
 
-        Map<SourceAnimationFrame, AnimationFrame> resultAnimationFrameMapping = createResultAnimationFrames(allSourceAnimationFrames);
-        Map<SourceAnimation, Animation> resultAnimationMapping = createResultAnimations(sourceAnimations, resultAnimationFrameMapping);
-        List<Block> resultBlocks = patchAnimationBlockPatternReferences(resultAnimationMapping);
+        AnimationOptimizer optimizer = new AnimationOptimizer(
+                createAnimations(sourceAnimations, createAnimationFrames(allSourceAnimationFrames)),
+                patternReferenceProducer);
+
+        AnimationOptimizationResult optimizedAnimations = optimizer.optimize();
+
+        List<Block> resultBlocks = patchAnimationBlockPatternReferences(optimizedAnimations);
 
         return new AnimationBlockPostProcessingResult(
                 List.copyOf(resultBlocks),
-                List.copyOf(resultAnimationMapping.values()),
-                List.copyOf(resultAnimationFrameMapping.values()));
+                List.copyOf(optimizedAnimations.getOptimizedAnimations()),
+                List.copyOf(optimizedAnimations.getAnimationFrames()));
     }
 
 
-    private Map<SourceAnimationFrame, AnimationFrame> createResultAnimationFrames(Set<SourceAnimationFrame> sourceAnimationFrames)
+    private Map<SourceAnimationFrame, AnimationFrame> createAnimationFrames(Set<SourceAnimationFrame> sourceAnimationFrames)
     {
         int frameId = 0;
         Map<SourceAnimationFrame, AnimationFrame> animationFrameMap = new HashMap<>();
@@ -77,14 +85,14 @@ public class AnimationBlockPostProcessor
     private Stream<Pattern> getGraphicPatterns(int graphicId)
     {
         return IntStream.range(0, blockMetrics.getTotalSubTiles())
-                .mapToObj(patternId -> patternProducer.getTilesetImagePattern(graphicId, patternId).getPattern());
+                .mapToObj(patternId -> imagePatternProducer.getTilesetImagePattern(graphicId, patternId).getPattern());
     }
 
-    private Map<SourceAnimation, Animation> createResultAnimations(List<SourceAnimation> sourceAnimations, Map<SourceAnimationFrame, AnimationFrame> animationFrameMap)
+    private Map<SourceAnimation, Animation> createAnimations(List<SourceAnimation> sourceAnimations, Map<SourceAnimationFrame, AnimationFrame> animationFrameMap)
     {
         Map<SourceAnimation, Animation> resultAnimationMapping = new HashMap<>();
 
-        int currentPatternId = patternBaseId;
+        int currentPatternId = patternReferenceProducer.getNextPatternId();
         for (SourceAnimation sourceAnimation : sourceAnimations)
         {
             Animation resultAnimation = createResultAnimation(animationFrameMap, currentPatternId, sourceAnimation);
@@ -106,13 +114,16 @@ public class AnimationBlockPostProcessor
         return new Animation(sourceAnimation.getAnimationId(), animationFrames, currentPatternId);
     }
 
-    private List<Block> patchAnimationBlockPatternReferences(Map<SourceAnimation, Animation> resultAnimationMapping)
+    private List<Block> patchAnimationBlockPatternReferences(AnimationOptimizationResult optimizedAnimations)
     {
         List<Block> patchedBlocks = new ArrayList<>(blocks);
 
-        resultAnimationMapping.forEach((sourceAnimation, animation) ->
+        optimizedAnimations.getOptimizedAnimationMapping().forEach((sourceAnimation, animation) ->
         {
-            int currentPatternIndex = animation.getPatternBaseId();
+            List<PatternReference> animationPatternReferences =
+                    optimizedAnimations.getAnimationPatternReferences(animation);
+
+            int currentAnimationPatternIndex = 0;
             for (Block block : sourceAnimation.getBlocks())
             {
                 List<PatternReference> resultReferences = new ArrayList<>();
@@ -121,17 +132,16 @@ public class AnimationBlockPostProcessor
                     AnimationBlockPatternReferenceEncoding encoding =
                             new AnimationBlockPatternReferenceEncoding(blockMetrics, reference);
 
-                    PatternReference.Builder builder = reference.builder();
-                    builder.setReferenceId(currentPatternIndex + encoding.getBlockLocalPatternId());
-
-                    resultReferences.add(builder.build());
+                    resultReferences.add(animationPatternReferences
+                                                 .get(currentAnimationPatternIndex + encoding.getBlockLocalPatternId())
+                                                 .reorient(reference.getOrientation()));
                 }
 
                 patchedBlocks.set(
                         patchedBlocks.indexOf(block),
                         new Block(block.getCollisionId(), block.getAnimationMetaData(), resultReferences));
 
-                currentPatternIndex += blockMetrics.getTotalSubTiles();
+                currentAnimationPatternIndex += blockMetrics.getTotalSubTiles();
             }
         });
 

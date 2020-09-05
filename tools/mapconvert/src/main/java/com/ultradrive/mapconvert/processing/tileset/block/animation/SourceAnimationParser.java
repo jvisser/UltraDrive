@@ -3,8 +3,11 @@ package com.ultradrive.mapconvert.processing.tileset.block.animation;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockAnimationMetaData;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
@@ -17,7 +20,7 @@ class SourceAnimationParser
     private final List<Block> blocks;
     private final MetaTileMetrics blockMetrics;
 
-    public SourceAnimationParser(List<Block> blocks, MetaTileMetrics blockMetrics)
+    SourceAnimationParser(List<Block> blocks, MetaTileMetrics blockMetrics)
     {
         this.blocks = blocks;
         this.blockMetrics = blockMetrics;

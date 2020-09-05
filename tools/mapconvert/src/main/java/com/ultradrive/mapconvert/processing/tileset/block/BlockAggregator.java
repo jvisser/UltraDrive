@@ -8,7 +8,6 @@ import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlo
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPool;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +72,10 @@ public class BlockAggregator
     {
         PatternPool patternPool = blockFactory.getPatternPool();
         AnimationBlockPostProcessor animationBlockPostProcessor =
-                new AnimationBlockPostProcessor(blockPool.getCache(), blockMetrics, blockFactory.getNextPatternId(), imagePatternProducer);
+                new AnimationBlockPostProcessor(blockPool.getCache(),
+                                                blockMetrics,
+                                                imagePatternProducer,
+                                                blockFactory.getImagePatternReferenceProducer());
 
         AnimationBlockPostProcessingResult animationProcessingResult = animationBlockPostProcessor.process();
 

@@ -8,7 +8,7 @@ class SourceAnimationFrame
 {
     private final List<Integer> frameGraphicIds;
 
-    public SourceAnimationFrame(List<Integer> frameGraphicIds)
+    SourceAnimationFrame(List<Integer> frameGraphicIds)
     {
         this.frameGraphicIds = frameGraphicIds;
     }

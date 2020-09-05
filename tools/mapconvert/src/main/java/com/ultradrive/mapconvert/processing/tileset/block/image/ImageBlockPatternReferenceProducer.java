@@ -1,6 +1,7 @@
 package com.ultradrive.mapconvert.processing.tileset.block.image;
 
 import com.ultradrive.mapconvert.processing.tileset.block.BlockPatternReferenceProducer;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPool;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 
@@ -23,11 +24,22 @@ public class ImageBlockPatternReferenceProducer implements BlockPatternReference
     {
         TilesetImagePattern imagePattern = imagePatternProducer.getTilesetImagePattern(graphicsId, blockLocalPatternId);
 
-        PatternReference.Builder patternReferenceBuilder = patternPool.getReference(imagePattern.getPattern());
+        PatternReference.Builder patternReferenceBuilder = getReference(imagePattern.getPattern());
         patternReferenceBuilder.setPaletteId(imagePattern.getPaletteId());
-        patternReferenceBuilder.offsetReference(patternBaseId);
 
         return patternReferenceBuilder;
+    }
+
+    public PatternReference.Builder getReference(Pattern pattern)
+    {
+        PatternReference.Builder patternReferenceBuilder = patternPool.getReference(pattern);
+        patternReferenceBuilder.offsetReference(patternBaseId);
+        return patternReferenceBuilder;
+    }
+
+    public int getNextPatternId()
+    {
+        return patternPool.getSize() + patternBaseId;
     }
 
     public PatternPool getPatternPool()
