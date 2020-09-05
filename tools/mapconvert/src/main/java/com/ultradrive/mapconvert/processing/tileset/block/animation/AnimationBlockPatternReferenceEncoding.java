@@ -10,13 +10,13 @@ class AnimationBlockPatternReferenceEncoding
     private final MetaTileMetrics blockMetrics;
     private final int referenceId;
 
-    public AnimationBlockPatternReferenceEncoding(MetaTileMetrics blockMetrics, PatternReference patternReference)
+    AnimationBlockPatternReferenceEncoding(MetaTileMetrics blockMetrics, PatternReference patternReference)
     {
         this.blockMetrics = blockMetrics;
         this.referenceId = patternReference.getReferenceId();
     }
 
-    public AnimationBlockPatternReferenceEncoding(MetaTileMetrics blockMetrics, int graphicsId, int blockLocalPatternId)
+    AnimationBlockPatternReferenceEncoding(MetaTileMetrics blockMetrics, int graphicsId, int blockLocalPatternId)
     {
         this.blockMetrics = blockMetrics;
         this.referenceId = -(graphicsId * blockMetrics.getTotalSubTiles() + blockLocalPatternId);

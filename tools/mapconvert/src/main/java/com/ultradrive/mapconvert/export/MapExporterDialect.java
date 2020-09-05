@@ -22,7 +22,7 @@ class MapExporterDialect extends AbstractDialect implements IExpressionObjectDia
                                                                  "slz", CompressionType.SLZ,
                                                                  "comper", CompressionType.COMPER);
 
-    protected MapExporterDialect()
+    MapExporterDialect()
     {
         super("MapExporterDialect");
     }
