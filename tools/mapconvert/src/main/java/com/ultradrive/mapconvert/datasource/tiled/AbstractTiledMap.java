@@ -12,7 +12,7 @@ abstract class AbstractTiledMap
 {
     protected final TiledMap map;
 
-    protected AbstractTiledMap(TiledMap map)
+    AbstractTiledMap(TiledMap map)
     {
         this.map = map;
     }

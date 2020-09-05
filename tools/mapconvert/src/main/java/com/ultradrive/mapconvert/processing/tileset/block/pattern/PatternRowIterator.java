@@ -10,7 +10,7 @@ class PatternRowIterator implements Iterator<PatternRow>
 
     private int currentRow;
 
-    public PatternRowIterator(Pattern pattern)
+    PatternRowIterator(Pattern pattern)
     {
         this.pattern = pattern;
 

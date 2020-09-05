@@ -8,7 +8,7 @@ class SourceAnimationFrameReference
     private final SourceAnimationFrame animationFrame;
     private final int frameTime;
 
-    public SourceAnimationFrameReference(SourceAnimationFrame animationFrame, int frameTime)
+    SourceAnimationFrameReference(SourceAnimationFrame animationFrame, int frameTime)
     {
         this.animationFrame = animationFrame;
         this.frameTime = frameTime;

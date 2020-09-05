@@ -20,8 +20,7 @@ class ComperToken implements CompressionToken, Comparable<ComperToken>
     private int length;
     private int offset;
 
-
-    public ComperToken(int cost, int index, short value)
+    ComperToken(int cost, int index, short value)
     {
         this.cost = cost;
         this.index = index;

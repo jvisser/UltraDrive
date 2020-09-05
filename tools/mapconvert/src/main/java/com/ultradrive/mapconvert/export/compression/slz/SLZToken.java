@@ -37,7 +37,7 @@ class SLZToken implements CompressionToken
         this.value = value;
     }
 
-    public static SLZToken init(Byte[] inputBytes)
+    static SLZToken init(Byte[] inputBytes)
     {
         if (inputBytes.length == 0)
         {

@@ -18,7 +18,7 @@ class BlockPatternPriority implements Orientable<BlockPatternPriority>
 {
     private final OrientableGrid<Invariant<PatternPriority>> patternPriorities;
 
-    public BlockPatternPriority(int priorityMask, int width)
+    BlockPatternPriority(int priorityMask, int width)
     {
         List<Invariant<PatternPriority>> priorities = IntStream.range(0, width * width)
                 .mapToObj(bitNumber -> of(PatternPriority.fromInt(priorityMask & (1 << bitNumber))))

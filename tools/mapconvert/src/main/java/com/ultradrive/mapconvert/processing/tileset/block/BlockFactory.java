@@ -8,7 +8,6 @@ import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatter
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPool;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -20,14 +19,12 @@ class BlockFactory
     private final AnimationBlockPatternReferenceProducer animationPatternReferenceProducer;
 
     private final MetaTileMetrics blockMetrics;
-    private final int patternBaseId;
 
-    public BlockFactory(MetaTileMetrics blockMetrics, int patternBaseId, ImageBlockPatternProducer imagePatternProducer)
+    BlockFactory(MetaTileMetrics blockMetrics, int patternBaseId, ImageBlockPatternProducer imagePatternProducer)
     {
         this.imagePatternReferenceProducer = new ImageBlockPatternReferenceProducer(imagePatternProducer, patternBaseId);
         this.animationPatternReferenceProducer = new AnimationBlockPatternReferenceProducer(blockMetrics);
         this.blockMetrics = blockMetrics;
-        this.patternBaseId = patternBaseId;
     }
 
     public Block createBlock(BlockModel blockModel)
@@ -78,8 +75,8 @@ class BlockFactory
         return imagePatternReferenceProducer.getPatternPool();
     }
 
-    public int getNextPatternId()
+    public ImageBlockPatternReferenceProducer getImagePatternReferenceProducer()
     {
-        return getPatternPool().getSize() + patternBaseId;
+        return imagePatternReferenceProducer;
     }
 }
