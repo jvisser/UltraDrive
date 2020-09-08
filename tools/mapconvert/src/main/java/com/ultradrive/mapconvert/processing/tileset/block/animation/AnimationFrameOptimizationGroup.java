@@ -31,11 +31,7 @@ class AnimationFrameOptimizationGroup
 
     public AnimationFrameOptimizationResult optimize()
     {
-        Set<Integer> dynamicPatternIndices = new HashSet<>();
-
         Set<IntermediateAnimationFrame> intermediateAnimationFrames = createIntermediateAnimationFrames();
-
-        Set<Set<Integer>> patternSimilarityProjection = getPatternSimilarityProjection(intermediateAnimationFrames);
 
         Map<IntermediateAnimationFrame, AnimationFrame.Builder> animationFrameBuilders =
                 intermediateAnimationFrames.stream()
@@ -43,22 +39,24 @@ class AnimationFrameOptimizationGroup
                                 intermediateAnimationFrame.getSourceAnimationFrame().getFrameId())));
 
         int dynamicPatternCount = 0;
+        Set<Integer> dynamicPatternIndices = new HashSet<>();
         PatternReference[] animationPatternReferences = new PatternReference[getFrameSize()];
-        for (Set<Integer> patternSimilarityGroup : patternSimilarityProjection)
+
+        for (Set<Integer> patternSimilarityGroup : getPatternSimilarityProjection(intermediateAnimationFrames))
         {
             IntermediateAnimationFrame firstFrame = intermediateAnimationFrames.iterator().next();
             int firstPatternIndex = patternSimilarityGroup.iterator().next();
 
-            PatternReference reference;
+            PatternReference patternReference;
             if (isSimilarityGroupContentStatic(intermediateAnimationFrames, patternSimilarityGroup))
             {
                 Pattern groupPattern = firstFrame.getPattern(firstPatternIndex);
 
-                reference = patternReferenceProducer.getReference(groupPattern).build();
+                patternReference = patternReferenceProducer.getReference(groupPattern).build();
             }
             else
             {
-                reference = new PatternReference(dynamicPatternCount++);
+                patternReference = new PatternReference(dynamicPatternCount++);
 
                 animationFrameBuilders.forEach((intermediateAnimationFrame, builder) -> builder
                         .addPattern(intermediateAnimationFrame.getPattern(firstPatternIndex)));
@@ -67,7 +65,7 @@ class AnimationFrameOptimizationGroup
             }
 
             patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
-                    reference.reorient(firstFrame.getOrientation(patternIndex)));
+                    patternReference.reorient(firstFrame.getOrientation(patternIndex)));
         }
 
         return new AnimationFrameOptimizationResult(
@@ -75,8 +73,7 @@ class AnimationFrameOptimizationGroup
                 Arrays.asList(animationPatternReferences),
                 animationFrameBuilders.entrySet().stream()
                         .collect(toMap(entry -> entry.getKey().getSourceAnimationFrame(),
-                                       entry -> entry.getValue().build()))
-        );
+                                       entry -> entry.getValue().build())));
     }
 
     private Set<IntermediateAnimationFrame> createIntermediateAnimationFrames()
@@ -130,11 +127,12 @@ class AnimationFrameOptimizationGroup
 
     private Set<Set<Integer>> getPatternSimilarityProjection(Set<IntermediateAnimationFrame> intermediateAnimationFrames)
     {
-        List<Set<Set<Integer>>> patternSimilarityGroups =
+        List<Set<Set<Integer>>> patternSimilarityGroupsPerFrame =
                 intermediateAnimationFrames.stream().map(IntermediateAnimationFrame::getPatternSimilarityGroups)
                         .collect(toList());
 
-        return splitByOrientationDifference(intermediateAnimationFrames, projectFramePatternSimilarityGroups(patternSimilarityGroups));
+        return splitByOrientationDifference(intermediateAnimationFrames,
+                                            projectFramePatternSimilarityGroups(patternSimilarityGroupsPerFrame));
     }
 
     private Set<Set<Integer>> projectFramePatternSimilarityGroups(List<Set<Set<Integer>>> similarityGroups)
