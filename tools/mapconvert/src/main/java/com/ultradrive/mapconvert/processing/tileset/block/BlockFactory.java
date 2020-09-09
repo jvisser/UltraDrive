@@ -5,7 +5,7 @@ import com.ultradrive.mapconvert.datasource.model.ResourceReference;
 import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
-import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPool;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.List;
@@ -70,9 +70,9 @@ class BlockFactory
                 .collect(Collectors.toList());
     }
 
-    public PatternPool getPatternPool()
+    public List<Pattern> getStaticPatterns()
     {
-        return imagePatternReferenceProducer.getPatternPool();
+        return imagePatternReferenceProducer.getPatternPool().getCache();
     }
 
     public ImageBlockPatternReferenceProducer getImagePatternReferenceProducer()
