@@ -32,7 +32,6 @@ public class BlockAggregator
         this.blockMetrics = blockMetrics;
         this.patternBaseId = patternBaseId;
 
-
         this.blockFactory = new BlockFactory(blockMetrics, patternBaseId, imagePatternProducer);
         this.blockPool = new BlockPool();
         this.blockReferenceIndex = new HashMap<>();

@@ -109,7 +109,7 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource, 
                     })
                     .collect(Collectors.toUnmodifiableList());
 
-            return new BlockAnimationModel(animationId, animationFrames);
+            return new BlockAnimationModel(animationId, animationFrames, blockTile.getProperties());
         }
     }
 

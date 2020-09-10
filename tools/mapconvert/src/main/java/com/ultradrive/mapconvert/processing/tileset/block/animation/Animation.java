@@ -11,12 +11,15 @@ public class Animation implements Iterable<AnimationFrameReference>
 {
     private final String animationId;
     private final List<AnimationFrameReference> animationFrames;
+    private final Map<String, Object> properties;
     private final int patternBaseId;
 
-    public Animation(String animationId, List<AnimationFrameReference> animationFrames, int patternBaseId)
+    public Animation(String animationId, List<AnimationFrameReference> animationFrames,
+                     Map<String, Object> properties, int patternBaseId)
     {
         this.animationId = animationId;
         this.animationFrames = animationFrames;
+        this.properties = properties;
         this.patternBaseId = patternBaseId;
     }
 
@@ -41,6 +44,11 @@ public class Animation implements Iterable<AnimationFrameReference>
         return animationFrames.get(frameId);
     }
 
+    public Map<String, Object> getProperties()
+    {
+        return properties;
+    }
+
     public int getPatternBaseId()
     {
         return patternBaseId;
@@ -59,6 +67,6 @@ public class Animation implements Iterable<AnimationFrameReference>
                                              newFrames.get(animationFrameReference.getAnimationFrame()),
                                              animationFrameReference.getFrameTime()))
                                      .collect(toList()),
-                             newPatternBaseId);
+                             properties, newPatternBaseId);
     }
 }
