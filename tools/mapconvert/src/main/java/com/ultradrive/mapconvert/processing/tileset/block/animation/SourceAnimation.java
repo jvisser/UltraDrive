@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -10,12 +11,16 @@ class SourceAnimation
     private final String animationId;
     private final List<Block> blocks;
     private final List<SourceAnimationFrameReference> animationFrameReferences;
+    private final Map<String, Object> properties;
 
-    SourceAnimation(String animationId, List<Block> blocks, List<SourceAnimationFrameReference> animationFrameReferences)
+    SourceAnimation(String animationId, List<Block> blocks,
+                    List<SourceAnimationFrameReference> animationFrameReferences,
+                    Map<String, Object> properties)
     {
         this.animationId = animationId;
         this.blocks = blocks;
         this.animationFrameReferences = animationFrameReferences;
+        this.properties = properties;
     }
 
     @Override
@@ -52,5 +57,10 @@ class SourceAnimation
     public List<SourceAnimationFrameReference> getAnimationFrameReferences()
     {
         return animationFrameReferences;
+    }
+
+    public Map<String, Object> getProperties()
+    {
+        return properties;
     }
 }
