@@ -95,7 +95,7 @@ public class AnimationBlockPostProcessor
         int currentPatternId = patternReferenceProducer.getNextPatternId();
         for (SourceAnimation sourceAnimation : sourceAnimations)
         {
-            Animation resultAnimation = createResultAnimation(animationFrameMap, currentPatternId, sourceAnimation);
+            Animation resultAnimation = createAnimation(animationFrameMap, currentPatternId, sourceAnimation);
             resultAnimationMapping.put(sourceAnimation, resultAnimation);
 
             currentPatternId += resultAnimation.getSize();
@@ -103,7 +103,7 @@ public class AnimationBlockPostProcessor
         return resultAnimationMapping;
     }
 
-    private Animation createResultAnimation(Map<SourceAnimationFrame, AnimationFrame> animationFrameMap, int currentPatternId, SourceAnimation sourceAnimation)
+    private Animation createAnimation(Map<SourceAnimationFrame, AnimationFrame> animationFrameMap, int currentPatternId, SourceAnimation sourceAnimation)
     {
         List<AnimationFrameReference> animationFrames = sourceAnimation.getAnimationFrameReferences().stream()
                 .map(sourceAnimationFrameReference -> new AnimationFrameReference(
@@ -111,7 +111,8 @@ public class AnimationBlockPostProcessor
                         sourceAnimationFrameReference.getFrameTime()))
                 .collect(toList());
 
-        return new Animation(sourceAnimation.getAnimationId(), animationFrames, currentPatternId);
+        return new Animation(sourceAnimation.getAnimationId(), animationFrames, sourceAnimation.getProperties(),
+                             currentPatternId);
     }
 
     private List<Block> patchAnimationBlockPatternReferences(AnimationOptimizationResult optimizedAnimations)

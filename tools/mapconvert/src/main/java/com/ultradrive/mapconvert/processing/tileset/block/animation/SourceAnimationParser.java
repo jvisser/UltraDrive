@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 
 class SourceAnimationParser
@@ -62,7 +63,15 @@ class SourceAnimationParser
             }
         }
 
-        return new SourceAnimation(animationId, animationBlocksOrderedByGraphicId, animationFrames);
+        return new SourceAnimation(animationId, animationBlocksOrderedByGraphicId, animationFrames,
+                                   getAnimationProperties(animationBlocksOrderedByGraphicId));
+    }
+
+    private Map<String, Object> getAnimationProperties(List<Block> animationBlocks)
+    {
+        return animationBlocks.stream()
+                .flatMap(a -> a.getAnimationMetaData().getProperties().entrySet().stream())
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (o, o2) -> o));
     }
 
     private void verifyAnimationRoots(String animationId, List<Block> animationBlocks)
