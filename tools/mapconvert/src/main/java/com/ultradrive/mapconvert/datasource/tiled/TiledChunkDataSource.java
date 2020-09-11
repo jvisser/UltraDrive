@@ -20,25 +20,26 @@ class TiledChunkDataSource extends TiledMetaTileset implements ChunkDataSource
     private static final String CHUNK_SOLIDITY_LAYER_NAME = "Solidity";
     private static final String CHUNK_BLOCK_LAYER_NAME = "Block";
 
-    static TiledChunkDataSource fromFile(TiledReader reader, String path)
+    static TiledChunkDataSource fromFile(TiledReader reader, String path, TiledPropertyTransformer propertyTransformer)
     {
         TiledTileset chunkTileset = reader.getTileset(path);
         TiledMap chunkMap = reader.getMap(chunkTileset.getImage().getSource());
 
-        return new TiledChunkDataSource(chunkTileset, chunkMap);
+        return new TiledChunkDataSource(chunkTileset, chunkMap, propertyTransformer);
     }
 
-    private TiledChunkDataSource(TiledTileset chunkTileset, TiledMap chunkMap)
+    private TiledChunkDataSource(TiledTileset chunkTileset, TiledMap chunkMap,
+                                 TiledPropertyTransformer propertyTransformer)
     {
-        super(chunkTileset, chunkMap);
+        super(chunkTileset, chunkMap, propertyTransformer);
     }
 
-    public TiledBlockDataSource readBlockTileset(TiledReader reader)
+    public TiledBlockDataSource readBlockDataSource(TiledReader reader)
     {
         TiledTileset blockTileset = getTileset(BLOCK_TILESET_NAME);
         TiledMap blockMap = reader.getMap(blockTileset.getImage().getSource());
 
-        return new TiledBlockDataSource(blockTileset, blockMap);
+        return new TiledBlockDataSource(blockTileset, blockMap, propertyTransformer);
     }
 
     @Override

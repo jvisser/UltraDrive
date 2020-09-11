@@ -5,6 +5,7 @@ import com.ultradrive.mapconvert.datasource.MapDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;
 import java.io.File;
+import java.util.Map;
 import org.tiledreader.TiledMap;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
@@ -19,12 +20,15 @@ public class TiledMapDataSource extends AbstractTiledMap implements MapDataSourc
     private static final String CHUNK_LAYER_NAME = "Chunks";
 
     private final TiledObjectFactory tiledObjectFactory;
+    private final TiledPropertyTransformer propertyTransformer;
 
-    TiledMapDataSource(TiledObjectFactory tiledObjectFactory, TiledMap map)
+    TiledMapDataSource(TiledObjectFactory tiledObjectFactory, TiledMap map,
+                       TiledPropertyTransformer propertyTransformer)
     {
         super(map);
 
         this.tiledObjectFactory = tiledObjectFactory;
+        this.propertyTransformer = propertyTransformer;
     }
 
     @Override
@@ -74,5 +78,11 @@ public class TiledMapDataSource extends AbstractTiledMap implements MapDataSourc
                 Orientation.get(
                         layer.getTileHorizontalFlip(column, row),
                         layer.getTileVerticalFlip(column, row)));
+    }
+
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        return propertyTransformer.getProperties(map);
     }
 }
