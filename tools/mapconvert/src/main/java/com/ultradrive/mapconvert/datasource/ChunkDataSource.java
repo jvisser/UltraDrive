@@ -1,6 +1,9 @@
 package com.ultradrive.mapconvert.datasource;
 
-public interface ChunkDataSource extends ChunkModelProducer
+import com.ultradrive.mapconvert.common.PropertySource;
+
+
+public interface ChunkDataSource extends ChunkModelProducer, PropertySource
 {
     int getChunkSize();
 }

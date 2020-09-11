@@ -1,18 +1,22 @@
 package com.ultradrive.mapconvert.datasource.tiled;
 
+import com.ultradrive.mapconvert.common.PropertySource;
+import java.util.Map;
+import java.util.Objects;
 import org.tiledreader.TiledMap;
 import org.tiledreader.TiledTileset;
 
-import java.util.Objects;
 
-
-abstract class TiledMetaTileset extends AbstractTiledMap
+abstract class TiledMetaTileset extends AbstractTiledMap implements PropertySource
 {
     protected final TiledTileset tileset;
+    protected final TiledPropertyTransformer propertyTransformer;
 
-    TiledMetaTileset(TiledTileset tileset, TiledMap map)
+    TiledMetaTileset(TiledTileset tileset, TiledMap map,
+                     TiledPropertyTransformer propertyTransformer)
     {
         super(map);
+        this.propertyTransformer = propertyTransformer;
 
         if (tileset.getTileWidth() != tileset.getTileHeight())
         {
@@ -43,6 +47,12 @@ abstract class TiledMetaTileset extends AbstractTiledMap
     public int hashCode()
     {
         return Objects.hash(getSourceFileName());
+    }
+
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        return propertyTransformer.getProperties(tileset);
     }
 
     String getSourceFileName()

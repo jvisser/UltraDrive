@@ -1,11 +1,12 @@
 package com.ultradrive.mapconvert.datasource.model;
 
+import com.ultradrive.mapconvert.common.PropertySource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 
-public final class BlockAnimationModel
+public final class BlockAnimationModel implements PropertySource
 {
     private final String animationId;
     private final List<BlockAnimationFrameModel> animationFrames;
@@ -34,6 +35,7 @@ public final class BlockAnimationModel
         return animationFrames;
     }
 
+    @Override
     public Map<String, Object> getProperties()
     {
         return properties;
