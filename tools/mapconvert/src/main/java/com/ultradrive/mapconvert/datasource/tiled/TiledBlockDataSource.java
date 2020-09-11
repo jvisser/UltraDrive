@@ -1,11 +1,9 @@
 package com.ultradrive.mapconvert.datasource.tiled;
 
 import com.ultradrive.mapconvert.datasource.BlockDataSource;
-import com.ultradrive.mapconvert.datasource.CollisionDataSource;
 import com.ultradrive.mapconvert.datasource.model.BlockAnimationFrameModel;
 import com.ultradrive.mapconvert.datasource.model.BlockAnimationModel;
 import com.ultradrive.mapconvert.datasource.model.BlockModel;
-import com.ultradrive.mapconvert.datasource.model.CollisionMetaData;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,12 +11,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.tiledreader.TiledMap;
+import org.tiledreader.TiledReader;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
 
 
-class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource, CollisionDataSource
+class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource
 {
     private static final String BLOCK_GRAPHICS_TILESET_NAME = "graphicblocks";
     private static final String BLOCK_COLLISION_TILESET_NAME = "collisionblocks";
@@ -28,23 +27,25 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource, 
     private static final String BLOCK_PRIORITY_LAYER_NAME = "Priority";
 
     private static final String ANIMATION_ID_PROPERTY_NAME = "animation_id";
-    private static final String COLLISION_ANGLE_PROPERTY_NAME = "angle";
-
-    private final TiledTileset collisionTileset;
 
     private final URL blockImageSource;
-    private final URL blockCollisionImageSource;
 
-    TiledBlockDataSource(TiledTileset blockTileset, TiledMap blockMap)
+    TiledBlockDataSource(TiledTileset blockTileset, TiledMap blockMap, TiledPropertyTransformer propertyTransformer)
     {
-        super(blockTileset, blockMap);
+        super(blockTileset, blockMap, propertyTransformer);
 
-        this.collisionTileset = getTileset(BLOCK_COLLISION_TILESET_NAME);
-        this.blockImageSource = getTilesetImageURL(blockTileset, BLOCK_GRAPHICS_TILESET_NAME);
-        this.blockCollisionImageSource = getTilesetImageURL(blockTileset, BLOCK_COLLISION_TILESET_NAME);
+        this.blockImageSource = getTilesetImageURL(BLOCK_GRAPHICS_TILESET_NAME);
     }
 
-    private URL getTilesetImageURL(TiledTileset blockTileset, String tilesetName)
+    public TiledCollisionDataSource readCollisionTileset(TiledReader reader)
+    {
+        return new TiledCollisionDataSource(
+                getTileset(BLOCK_COLLISION_TILESET_NAME),
+                getTilesetImageURL(BLOCK_COLLISION_TILESET_NAME),
+                propertyTransformer);
+    }
+
+    private URL getTilesetImageURL(String tilesetName)
     {
         TiledTileset graphicsTileset = getTileset(tilesetName);
         try
@@ -109,37 +110,7 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource, 
                     })
                     .collect(Collectors.toUnmodifiableList());
 
-            return new BlockAnimationModel(animationId, animationFrames, blockTile.getProperties());
+            return new BlockAnimationModel(animationId, animationFrames, propertyTransformer.getProperties(blockTile));
         }
-    }
-
-    @Override
-    public int getCollisionFieldSize()
-    {
-        return collisionTileset.getTileWidth();
-    }
-
-    @Override
-    public URL getCollisionImageSource()
-    {
-        return blockCollisionImageSource;
-    }
-
-    @Override
-    public CollisionMetaData getCollisionMetaData(int collisionId)
-    {
-        TiledTile collisionTile = collisionTileset.getTile(collisionId);
-        if (collisionTile == null)
-        {
-            return CollisionMetaData.empty();
-        }
-
-        Float collisionAngle = (Float) collisionTile.getProperty(COLLISION_ANGLE_PROPERTY_NAME);
-        if (collisionAngle == null)
-        {
-            return CollisionMetaData.empty();
-        }
-
-        return new CollisionMetaData(collisionAngle);
     }
 }
