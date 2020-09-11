@@ -1,9 +1,9 @@
 package com.ultradrive.mapconvert.export.expression;
 
 import com.ultradrive.mapconvert.common.Packable;
-import com.ultradrive.mapconvert.common.collection.iterables.FormattingIterable;
 import com.ultradrive.mapconvert.common.collection.iterables.TransformingIterable;
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
 
 public final class FormattingExpressions
@@ -67,6 +67,7 @@ public final class FormattingExpressions
         }
 
         @Override
+        @Nonnull
         public Iterator<String> iterator()
         {
             return new ArrayFormattingIterator<>(delegate.iterator(), linePrefix, separator, columns);
@@ -75,17 +76,16 @@ public final class FormattingExpressions
 
     public <T> Iterable<String> format(String format, Iterable<T> iterable)
     {
-        return new FormattingIterable<>(
-                new TransformingIterable<>(iterable,
-                                           value ->
-                                           {
-                                               if (value instanceof Packable)
-                                               {
-                                                   return ((Packable) value).pack().numberValue();
-                                               }
-                                               return value;
-                                           }),
-                format);
+        return new TransformingIterable<>(iterable, value -> format(format, unpack(value)));
+    }
+
+    private Object unpack(Object value)
+    {
+        if (value instanceof Packable)
+        {
+            return ((Packable) value).pack().numberValue();
+        }
+        return value;
     }
 
     public String format(String format, Object... values)
@@ -100,7 +100,7 @@ public final class FormattingExpressions
 
     public <T> Iterable<String> formatArray(String separator, int columns, Iterable<T> iterable)
     {
-        return new ArrayFormattingIterable<>(iterable, "", separator, columns);
+        return formatArray( "", separator, columns, iterable);
     }
 
     public <T> Iterable<String> formatArray(String linePrefix, String separator, int columns, String elementFormat, Iterable<T> iterable)

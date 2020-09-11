@@ -2,6 +2,8 @@ package com.ultradrive.mapconvert.common.collection.iterables;
 
 import java.util.Iterator;
 import java.util.function.Function;
+import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
 
 
 public class TransformingIterable<T, R> implements Iterable<R>
@@ -15,33 +17,12 @@ public class TransformingIterable<T, R> implements Iterable<R>
         this.transform = transform;
     }
 
-    private static class TransformingIterator<T, R> implements Iterator<R>
-    {
-        private final Iterator<T> delegate;
-        private final Function<T, R> transform;
-
-        private TransformingIterator(Iterator<T> delegate, Function<T, R> transform)
-        {
-            this.delegate = delegate;
-            this.transform = transform;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-            return delegate.hasNext();
-        }
-
-        @Override
-        public R next()
-        {
-            return transform.apply(delegate.next());
-        }
-    }
-
     @Override
+    @Nonnull
     public Iterator<R> iterator()
     {
-        return new TransformingIterator<>(delegate.iterator(), transform);
+        return StreamSupport.stream(delegate.spliterator(), false)
+                .map(transform)
+                .iterator();
     }
 }

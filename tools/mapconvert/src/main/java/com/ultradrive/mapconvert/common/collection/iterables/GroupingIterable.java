@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.common.collection.iterables;
 
 import java.util.Iterator;
 import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,6 +46,7 @@ public class GroupingIterable<T> implements Iterable<Iterable<T>>
     }
 
     @Override
+    @Nonnull
     public Iterator<Iterable<T>> iterator()
     {
         return new GroupingIterator<>(delegate.iterator(), groupCount);

@@ -3,6 +3,7 @@ package com.ultradrive.mapconvert.common.collection.iterables;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
 
 
 public class ConcatenatingIterable<T> implements Iterable<T>
@@ -17,6 +18,7 @@ public class ConcatenatingIterable<T> implements Iterable<T>
     }
 
     @Override
+    @Nonnull
     public Iterator<T> iterator()
     {
         return Stream.concat(
