@@ -1,6 +1,8 @@
 package com.ultradrive.mapconvert.common.collection.iterables;
 
 import java.util.Iterator;
+import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
 
 
 public class FlatteningIterable<R, T extends Iterable<R>> implements Iterable<R>
@@ -12,40 +14,12 @@ public class FlatteningIterable<R, T extends Iterable<R>> implements Iterable<R>
         this.delegate = delegate;
     }
 
-    private static class FlatteningIterator<R, T extends Iterable<R>> implements Iterator<R>
-    {
-        private final Iterator<T> delegate;
-
-        private Iterator<R> currentSubIterator;
-
-        private FlatteningIterator(Iterator<T> delegate)
-        {
-            this.delegate = delegate;
-
-            this.currentSubIterator = null;
-        }
-
-        @Override
-        public boolean hasNext()
-        {
-            return delegate.hasNext() || (currentSubIterator != null && currentSubIterator.hasNext());
-        }
-
-        @Override
-        public R next()
-        {
-            if (currentSubIterator == null || !currentSubIterator.hasNext())
-            {
-                currentSubIterator = delegate.next().iterator();
-            }
-
-            return currentSubIterator.next();
-        }
-    }
-
     @Override
+    @Nonnull
     public Iterator<R> iterator()
     {
-        return new FlatteningIterator<>(delegate.iterator());
+        return StreamSupport.stream(delegate.spliterator(), false)
+                .flatMap(subIterable -> StreamSupport.stream(subIterable.spliterator(), false))
+                .iterator();
     }
 }
