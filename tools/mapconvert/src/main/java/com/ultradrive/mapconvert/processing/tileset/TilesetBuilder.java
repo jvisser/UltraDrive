@@ -12,6 +12,7 @@ import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkAggregator;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import com.ultradrive.mapconvert.processing.tileset.collision.CollisionFieldSet;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -21,6 +22,7 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
     private final BlockAggregator blockAggregator;
     private final ChunkAggregator chunkAggregator;
     private final CollisionFieldSet collisionFieldSet;
+    private final Map<String, Object> properties;
 
     private final String tileSetName;
 
@@ -46,7 +48,9 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
 
         CollisionFieldSet collisionFieldSet = CollisionFieldSet.parse(tilesetDataSource.getCollisionDataSource());
 
-        return new TilesetBuilder(blockAggregator, chunkAggregator, collisionFieldSet, tilesetDataSource.getName());
+        return new TilesetBuilder(blockAggregator, chunkAggregator, collisionFieldSet,
+                                  tilesetDataSource.getProperties(),
+                                  tilesetDataSource.getName());
     }
 
     private static void verifyDimensions(TilesetDataSource tilesetDataSource)
@@ -70,11 +74,13 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
 
     public TilesetBuilder(BlockAggregator blockAggregator,
                           ChunkAggregator chunkAggregator,
-                          CollisionFieldSet collisionFieldSet, String tileSetName)
+                          CollisionFieldSet collisionFieldSet,
+                          Map<String, Object> properties, String tileSetName)
     {
         this.blockAggregator = blockAggregator;
         this.chunkAggregator = chunkAggregator;
         this.collisionFieldSet = collisionFieldSet;
+        this.properties = properties;
         this.tileSetName = tileSetName;
     }
 
@@ -90,6 +96,7 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
                 chunkAggregator.compile(),
                 blockAggregator.compile(),
                 collisionFieldSet,
+                properties,
                 tileSetName);
     }
 }
