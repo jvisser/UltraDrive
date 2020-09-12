@@ -1,6 +1,9 @@
 package com.ultradrive.mapconvert.datasource;
 
-public interface TilesetDataSource
+import com.ultradrive.mapconvert.common.PropertySource;
+
+
+public interface TilesetDataSource extends PropertySource
 {
     String getName();
 

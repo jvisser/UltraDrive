@@ -5,6 +5,7 @@ import com.ultradrive.mapconvert.datasource.ChunkDataSource;
 import com.ultradrive.mapconvert.datasource.CollisionDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import java.io.File;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -66,5 +67,11 @@ class TiledTilesetDataSource implements TilesetDataSource
     public ChunkDataSource getChunkDataSource()
     {
         return chunkSet;
+    }
+
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        return getChunkDataSource().getProperties();
     }
 }
