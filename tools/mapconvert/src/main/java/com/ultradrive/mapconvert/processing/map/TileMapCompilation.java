@@ -8,7 +8,7 @@ public class TileMapCompilation
     private final List<TileMap> maps;
     private final List<Tileset> tilesets;
 
-    public TileMapCompilation(List<TileMap> maps, List<Tileset> tilesets)
+    TileMapCompilation(List<TileMap> maps, List<Tileset> tilesets)
     {
         this.maps = maps;
         this.tilesets = tilesets;
