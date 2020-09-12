@@ -81,9 +81,9 @@ public final class FormattingExpressions
 
     private Object unpack(Object value)
     {
-        if (value instanceof Packable)
+        if (value instanceof Packable packable)
         {
-            return ((Packable) value).pack().numberValue();
+            return packable.pack().numberValue();
         }
         return value;
     }
