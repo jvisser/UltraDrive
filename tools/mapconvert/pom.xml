@@ -8,6 +8,10 @@
     <artifactId>MapConvert</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
+    <properties>
+        <java.compiler.args>--enable-preview</java.compiler.args>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.tiledreader</groupId>
@@ -60,8 +64,38 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>14</release>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <compilerArgs>${java.compiler.args}</compilerArgs>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>${java.compiler.args}</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>MapConvert</finalName>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.ultradrive.mapconvert.MapConvert</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
