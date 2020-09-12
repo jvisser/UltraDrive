@@ -15,8 +15,10 @@ import javax.imageio.ImageIO;
 
 public final class MapConvert
 {
-    private static final String TILED_MAP_FILE_EXTENSION = "tmx";
-    private static final String PNG_FILE_EXTENSION = "png";
+    private static final String APP_NAME = "MapConvert";
+
+    private static final String TILED_MAP_FILE_EXTENSION = ".tmx";
+    private static final String PNG_FILE_EXTENSION = ".png";
 
     private void run(String[] commandLineArguments) throws IOException
     {
@@ -37,7 +39,7 @@ public final class MapConvert
         MapConvertConfiguration config = new MapConvertConfiguration();
         if (!config.parseCommandLine(commandLineArguments))
         {
-            config.printHelp("mapconvert");
+            config.printHelp(APP_NAME);
 
             System.exit(1);
         }
@@ -52,7 +54,7 @@ public final class MapConvert
         TileMapCompiler mapCompiler = new TileMapCompiler(config.getBasePatternId());
 
         Files.walk(Path.of(config.getMapBaseDirectory()), config.getDirectorySearchDepth())
-                .filter(path -> path.toString().endsWith("." + TILED_MAP_FILE_EXTENSION))
+                .filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))
                 .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
                 .forEach(mapCompiler::addMapDataSource);
 
@@ -74,8 +76,8 @@ public final class MapConvert
         for (TileMap map : mapCompilation.getMaps())
         {
             ImageIO.write(mapRenderer.renderMap(map),
-                          PNG_FILE_EXTENSION,
-                          new File(imageDirectory, map.getName() + "." + PNG_FILE_EXTENSION));
+                          "png",
+                          new File(imageDirectory, map.getName() + PNG_FILE_EXTENSION));
         }
     }
 
