@@ -8,7 +8,6 @@ import com.ultradrive.mapconvert.processing.tileset.block.BlockAggregator;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockReference;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockSolidity;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +55,7 @@ public class ChunkAggregator
         Chunk chunk = new Chunk(blockReferences);
 
         ChunkReference.Builder chunkReferenceBuilder = chunkPool.getReference(chunk);
+        chunkReferenceBuilder.setHasCollision(chunk.isHasCollision());
         chunkReferenceIndex.put(chunkId, chunkReferenceBuilder.build());
 
         return chunkReferenceBuilder;

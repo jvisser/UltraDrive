@@ -9,14 +9,21 @@ import java.util.List;
 
 public class Chunk extends MetaTile<Chunk, ChunkReference, BlockReference>
 {
+    private final boolean hasCollision;
+
     public Chunk(List<BlockReference> blockReferences)
     {
         super(blockReferences);
+
+        hasCollision = blockReferences.stream()
+                .reduce(false, (r, blockReference) -> r || blockReference.getSolidity().isSolid(), (a, b) -> a);
     }
 
-    private Chunk(OrientableGrid<BlockReference> blockReferences)
+    private Chunk(OrientableGrid<BlockReference> blockReferences, boolean hasCollision)
     {
         super(blockReferences);
+
+        this.hasCollision = hasCollision;
     }
 
     @Override
@@ -28,6 +35,11 @@ public class Chunk extends MetaTile<Chunk, ChunkReference, BlockReference>
     @Override
     public Chunk reorient(Orientation orientation)
     {
-        return new Chunk(tileReferences.reorient(orientation));
+        return new Chunk(tileReferences.reorient(orientation), hasCollision);
+    }
+
+    public boolean isHasCollision()
+    {
+        return hasCollision;
     }
 }
