@@ -29,6 +29,11 @@ public enum BlockSolidity implements Packable
         return new BitPacker().add(getValue(), BIT_COUNT);
     }
 
+    public boolean isSolid()
+    {
+        return this != NONE;
+    }
+
     private int getValue()
     {
         return List.of(values()).indexOf(this);
