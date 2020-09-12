@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.export.expression;
 
 import com.ultradrive.mapconvert.common.Packable;
 import com.ultradrive.mapconvert.common.collection.iterables.TransformingIterable;
+import java.util.Arrays;
 import java.util.Iterator;
 import javax.annotation.Nonnull;
 
@@ -79,6 +80,11 @@ public final class FormatExpressions
         return new TransformingIterable<>(iterable, value -> format(format, unpack(value)));
     }
 
+    public String format(String format, Object... values)
+    {
+        return String.format(format, Arrays.stream(values).map(this::unpack).toArray());
+    }
+
     private Object unpack(Object value)
     {
         if (value instanceof Packable packable)
@@ -86,11 +92,6 @@ public final class FormatExpressions
             return packable.pack().numberValue();
         }
         return value;
-    }
-
-    public String format(String format, Object... values)
-    {
-        return String.format(format, values);
     }
 
     public <T> Iterable<String> formatArray(String linePrefix, String separator, int columns, Iterable<T> iterable)
