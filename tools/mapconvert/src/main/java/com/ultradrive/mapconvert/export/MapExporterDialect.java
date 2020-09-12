@@ -5,6 +5,7 @@ import com.ultradrive.mapconvert.common.collection.iterables.ByteIterableFactory
 import com.ultradrive.mapconvert.export.compression.CompressionType;
 import com.ultradrive.mapconvert.export.expression.CollectionExpressions;
 import com.ultradrive.mapconvert.export.expression.ConvertExpressions;
+import com.ultradrive.mapconvert.export.expression.FileExpressions;
 import com.ultradrive.mapconvert.export.expression.FormatExpressions;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ class MapExporterDialect extends AbstractDialect implements IExpressionObjectDia
 {
     private final Map<String, Object> expressionObjects = Map.of("format", new FormatExpressions(),
                                                                  "convert", new ConvertExpressions(),
+                                                                 "file", new FileExpressions(),
                                                                  "collection", new CollectionExpressions(),
                                                                  "byteBE", new ByteIterableFactory(Endianess.BIG),
                                                                  "byteLE", new ByteIterableFactory(Endianess.LITTLE),
