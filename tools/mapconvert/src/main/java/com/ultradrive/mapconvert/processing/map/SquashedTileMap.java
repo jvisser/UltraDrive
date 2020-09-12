@@ -19,7 +19,7 @@ public class SquashedTileMap implements Iterable<PatternReference>
     private final TileMap map;
     private final Tileset tileset;
 
-    public SquashedTileMap(TileMap map)
+    SquashedTileMap(TileMap map)
     {
         this.map = map;
         this.tileset = map.getTileset();
