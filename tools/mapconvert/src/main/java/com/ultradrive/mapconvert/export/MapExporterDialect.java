@@ -4,7 +4,8 @@ import com.ultradrive.mapconvert.common.Endianess;
 import com.ultradrive.mapconvert.common.collection.iterables.ByteIterableFactory;
 import com.ultradrive.mapconvert.export.compression.CompressionType;
 import com.ultradrive.mapconvert.export.expression.CollectionExpressions;
-import com.ultradrive.mapconvert.export.expression.FormattingExpressions;
+import com.ultradrive.mapconvert.export.expression.FormatExpressions;
+import com.ultradrive.mapconvert.export.expression.ParseExpressions;
 import java.util.Map;
 import java.util.Set;
 import org.thymeleaf.context.IExpressionContext;
@@ -15,7 +16,8 @@ import org.thymeleaf.expression.IExpressionObjectFactory;
 
 class MapExporterDialect extends AbstractDialect implements IExpressionObjectDialect, IExpressionObjectFactory
 {
-    private final Map<String, Object> expressionObjects = Map.of("format", new FormattingExpressions(),
+    private final Map<String, Object> expressionObjects = Map.of("format", new FormatExpressions(),
+                                                                 "parse", new ParseExpressions(),
                                                                  "collection", new CollectionExpressions(),
                                                                  "byteBE", new ByteIterableFactory(Endianess.BIG),
                                                                  "byteLE", new ByteIterableFactory(Endianess.LITTLE),
