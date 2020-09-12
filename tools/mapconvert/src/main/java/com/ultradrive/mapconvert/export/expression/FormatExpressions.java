@@ -6,7 +6,7 @@ import java.util.Iterator;
 import javax.annotation.Nonnull;
 
 
-public final class FormattingExpressions
+public final class FormatExpressions
 {
     private static class ArrayFormattingIterable<T> implements Iterable<String>
     {
