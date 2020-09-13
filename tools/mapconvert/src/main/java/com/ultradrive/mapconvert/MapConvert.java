@@ -82,9 +82,13 @@ public final class MapConvert
             MapRenderer mapRenderer = new MapRenderer();
             for (TileMap map : mapCompilation.getMaps())
             {
+                String fileName = map.getName() + PNG_FILE_EXTENSION;
+
+                LOGGER.info(format("Rendering map '%s' to file '%s'", map.getName(), fileName));
+
                 ImageIO.write(mapRenderer.renderMap(map),
                               "png",
-                              new File(imageDirectory, map.getName() + PNG_FILE_EXTENSION));
+                              new File(imageDirectory, fileName));
             }
         }
         else

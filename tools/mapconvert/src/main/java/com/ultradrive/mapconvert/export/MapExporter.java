@@ -43,6 +43,8 @@ public class MapExporter
             List<String> templateFileNames = getTemplateFileNames();
             for (String templateFileName : templateFileNames)
             {
+                LOGGER.info(format("Processing template '%s'", templateFileName));
+
                 String templateResult = templateEngine.process(templateFileName, context);
 
                 writeFile(new File(outputPath, templateFileName), templateResult);
