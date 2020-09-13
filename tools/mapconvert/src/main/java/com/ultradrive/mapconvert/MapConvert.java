@@ -11,11 +11,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.imageio.ImageIO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 
 public final class MapConvert
 {
     private static final String APP_NAME = "MapConvert";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapConvert.class.getName());
 
     private static final String TILED_MAP_FILE_EXTENSION = ".tmx";
     private static final String PNG_FILE_EXTENSION = ".png";
@@ -70,14 +75,21 @@ public final class MapConvert
 
     private void exportPNG(MapConvertConfiguration config, TileMapCompilation mapCompilation) throws IOException
     {
-        File imageDirectory = new File(config.getOutputDirectory()).getAbsoluteFile();
+        File imageDirectory = new File(config.getImageOutputDirectory()).getAbsoluteFile();
 
-        MapRenderer mapRenderer = new MapRenderer();
-        for (TileMap map : mapCompilation.getMaps())
+        if (imageDirectory.exists() || imageDirectory.mkdirs())
         {
-            ImageIO.write(mapRenderer.renderMap(map),
-                          "png",
-                          new File(imageDirectory, map.getName() + PNG_FILE_EXTENSION));
+            MapRenderer mapRenderer = new MapRenderer();
+            for (TileMap map : mapCompilation.getMaps())
+            {
+                ImageIO.write(mapRenderer.renderMap(map),
+                              "png",
+                              new File(imageDirectory, map.getName() + PNG_FILE_EXTENSION));
+            }
+        }
+        else
+        {
+            LOGGER.warn(format("Unable to create image export output directory '%s'", imageDirectory.getAbsolutePath()));
         }
     }
 

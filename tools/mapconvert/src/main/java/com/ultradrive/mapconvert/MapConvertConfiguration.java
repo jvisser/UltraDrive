@@ -13,16 +13,18 @@ class MapConvertConfiguration
     private static final String OPTION_MAP_DIR = "m";
     private static final String OPTION_TEMPLATE_DIR = "t";
     private static final String OPTION_OUTPUT_DIR = "o";
+    private static final String OPTION_IMAGE_OUTPUT_DIR = "p";
+    private static final String OPTION_IMAGE = "i";
     private static final String OPTION_OBJECT_TYPES_FILE = "f";
     private static final String OPTION_BASE_PATTERN_ID = "b";
     private static final String OPTION_RECURSIVE = "r";
-    private static final String OPTION_IMAGE = "i";
 
     private final Options options;
 
     private String mapBaseDirectory;
     private String templateDirectory;
     private String outputDirectory;
+    private String imageOutputDirectory;
     private String objectTypesFile;
     private int basePatternId;
     private boolean recursive;
@@ -34,6 +36,7 @@ class MapConvertConfiguration
         options.addRequiredOption(OPTION_MAP_DIR, "map-dir", true, "Map base directory.");
         options.addRequiredOption(OPTION_TEMPLATE_DIR, "template-dir", true, "Thymeleaf template directory directory.");
         options.addRequiredOption(OPTION_OUTPUT_DIR, "output-dir", true, "Output directory.");
+        options.addOption(OPTION_IMAGE_OUTPUT_DIR, "image-output-dir", true, "Rendered map image output directory (uses output-dir if not specified).");
         options.addOption(OPTION_OBJECT_TYPES_FILE, "object-types-file", true, "Location of the tiled objecttypes.xml file.");
         options.addOption(OPTION_BASE_PATTERN_ID, "base-pattern-id", true, "Lowest possible pattern id.");
         options.addOption(OPTION_RECURSIVE, "recursive", false, "Search for maps recursively from map base directory.");
@@ -51,6 +54,11 @@ class MapConvertConfiguration
             mapBaseDirectory = cmd.getOptionValue(OPTION_MAP_DIR);
             templateDirectory = cmd.getOptionValue(OPTION_TEMPLATE_DIR);
             outputDirectory = cmd.getOptionValue(OPTION_OUTPUT_DIR);
+            imageOutputDirectory = cmd.getOptionValue(OPTION_IMAGE_OUTPUT_DIR);
+            if (imageOutputDirectory == null)
+            {
+                imageOutputDirectory = outputDirectory;
+            }
             objectTypesFile = cmd.getOptionValue(OPTION_OBJECT_TYPES_FILE);
             basePatternId = Integer.parseInt(cmd.getOptionValue(OPTION_BASE_PATTERN_ID, "0"));
             recursive = cmd.hasOption(OPTION_RECURSIVE);
@@ -83,6 +91,11 @@ class MapConvertConfiguration
     public String getOutputDirectory()
     {
         return outputDirectory;
+    }
+
+    public String getImageOutputDirectory()
+    {
+        return imageOutputDirectory;
     }
 
     public String getObjectTypesFile()
