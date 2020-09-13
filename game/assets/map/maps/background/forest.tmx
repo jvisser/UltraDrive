@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="4" height="4" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+ <properties>
+  <property name="palette" type="file" value="../../tilesets/vilage/assets/palette/night.hex"/>
+ </properties>
+ <tileset firstgid="1" source="../../tilesets/vilage/chunks.tsx"/>
+ <layer id="1" name="Chunks" width="4" height="4">
+  <data encoding="csv">
+8,2147483656,8,12,
+1073741836,3221225480,1073741832,3221225480,
+0,0,0,0,
+3,10,10,3
+</data>
+ </layer>
+</map>
