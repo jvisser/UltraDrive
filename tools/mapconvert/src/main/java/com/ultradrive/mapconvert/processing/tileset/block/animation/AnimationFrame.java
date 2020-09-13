@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 
 public class AnimationFrame implements Iterable<Pattern>
@@ -79,6 +80,7 @@ public class AnimationFrame implements Iterable<Pattern>
     }
 
     @Override
+    @Nonnull
     public Iterator<Pattern> iterator()
     {
         return patterns.iterator();

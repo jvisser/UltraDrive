@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 
 public class OrientablePool<T extends OrientablePoolable<T, R>, R extends OrientableReference<R>> implements Iterable<T>
@@ -14,6 +15,7 @@ public class OrientablePool<T extends OrientablePoolable<T, R>, R extends Orient
     private final List<T> orientableCache = new ArrayList<>();
 
     @Override
+    @Nonnull
     public Iterator<T> iterator()
     {
         return orientableCache.iterator();
