@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
+import com.google.common.collect.ImmutableList;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
@@ -56,9 +57,9 @@ public class AnimationBlockPostProcessor
         List<Block> resultBlocks = patchAnimationBlockPatternReferences(optimizedAnimations);
 
         return new AnimationBlockPostProcessingResult(
-                List.copyOf(resultBlocks),
-                List.copyOf(optimizedAnimations.getOptimizedAnimations()),
-                List.copyOf(optimizedAnimations.getAnimationFrames()));
+                ImmutableList.copyOf(resultBlocks),
+                ImmutableList.copyOf(optimizedAnimations.getOptimizedAnimations()),
+                ImmutableList.copyOf(optimizedAnimations.getAnimationFrames()));
     }
 
 
