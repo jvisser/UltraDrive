@@ -1,0 +1,1 @@
+Tilesets can contain multiple palettes. Maps can assign which palette to use from the tileset (for example to implement a day/night cycle)
