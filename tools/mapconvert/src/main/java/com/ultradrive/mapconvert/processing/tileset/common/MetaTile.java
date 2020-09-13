@@ -7,6 +7,7 @@ import com.ultradrive.mapconvert.common.orientable.OrientablePoolable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 
 public abstract class MetaTile<T extends MetaTile<T, R, S>, R extends TileReference<R>, S extends TileReference<S>> implements OrientablePoolable<T, R>, Iterable<S>
@@ -45,6 +46,7 @@ public abstract class MetaTile<T extends MetaTile<T, R, S>, R extends TileRefere
     }
 
     @Override
+    @Nonnull
     public Iterator<S> iterator()
     {
         return tileReferences.iterator();

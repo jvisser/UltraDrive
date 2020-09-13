@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.processing.tileset.block.image;
 
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 
@@ -21,6 +22,7 @@ public class TilesetImagePalette implements Iterable<TilesetImageColor>
     }
 
     @Override
+    @Nonnull
     public Iterator<TilesetImageColor> iterator()
     {
         return colors.iterator();
