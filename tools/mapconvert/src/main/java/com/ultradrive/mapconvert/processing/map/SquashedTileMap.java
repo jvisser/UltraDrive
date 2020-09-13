@@ -12,6 +12,7 @@ import com.ultradrive.mapconvert.processing.tileset.chunk.Chunk;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
 
 public class SquashedTileMap implements Iterable<PatternReference>
@@ -26,6 +27,7 @@ public class SquashedTileMap implements Iterable<PatternReference>
     }
 
     @Override
+    @Nonnull
     public Iterator<PatternReference> iterator()
     {
         return new Iterator<>()

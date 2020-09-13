@@ -8,6 +8,7 @@ import com.ultradrive.mapconvert.common.orientable.Orientation;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 import static com.ultradrive.mapconvert.common.orientable.Invariant.of;
 import static java.lang.String.format;
@@ -86,6 +87,7 @@ public class Pattern implements OrientablePoolable<Pattern, PatternReference>, I
     }
 
     @Override
+    @Nonnull
     public Iterator<PatternRow> iterator()
     {
         return new PatternRowIterator(this);

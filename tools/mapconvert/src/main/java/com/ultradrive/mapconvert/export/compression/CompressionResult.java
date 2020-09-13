@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.export.compression;
 
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 
 public class CompressionResult implements Iterable<Byte>
@@ -16,6 +17,7 @@ public class CompressionResult implements Iterable<Byte>
     }
 
     @Override
+    @Nonnull
     public Iterator<Byte> iterator()
     {
         return bytes.iterator();

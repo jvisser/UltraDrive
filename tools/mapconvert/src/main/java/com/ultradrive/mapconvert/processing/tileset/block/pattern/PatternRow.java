@@ -4,6 +4,7 @@ import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.Packable;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 
 public class PatternRow implements Iterable<Integer>, Packable
@@ -27,6 +28,7 @@ public class PatternRow implements Iterable<Integer>, Packable
     }
 
     @Override
+    @Nonnull
     public Iterator<Integer> iterator()
     {
         return lineValues.iterator();

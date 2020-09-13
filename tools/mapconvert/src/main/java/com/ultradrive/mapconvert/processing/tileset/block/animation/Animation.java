@@ -3,6 +3,7 @@ package com.ultradrive.mapconvert.processing.tileset.block.animation;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,6 +25,7 @@ public class Animation implements Iterable<AnimationFrameReference>
     }
 
     @Override
+    @Nonnull
     public Iterator<AnimationFrameReference> iterator()
     {
         return animationFrames.iterator();
