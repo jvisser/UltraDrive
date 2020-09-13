@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -15,11 +17,14 @@ import org.thymeleaf.context.IContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 
 public class MapExporter
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapExporter.class.getName());
+
     private final File templatePath;
 
     public MapExporter(String templatePath)
@@ -30,16 +35,22 @@ public class MapExporter
     public void export(TileMapCompilation mapCompilation, String outputDirectory) throws IOException
     {
         File outputPath = new File(outputDirectory);
-
-        ITemplateEngine templateEngine = createTemplateEngine();
-        IContext context = createContext(mapCompilation);
-
-        List<String> templateFileNames = getTemplateFileNames();
-        for (String templateFileName : templateFileNames)
+        if (outputPath.exists() || outputPath.mkdirs())
         {
-            String templateResult = templateEngine.process(templateFileName, context);
+            ITemplateEngine templateEngine = createTemplateEngine();
+            IContext context = createContext(mapCompilation);
 
-            writeFile(new File(outputPath, templateFileName), templateResult);
+            List<String> templateFileNames = getTemplateFileNames();
+            for (String templateFileName : templateFileNames)
+            {
+                String templateResult = templateEngine.process(templateFileName, context);
+
+                writeFile(new File(outputPath, templateFileName), templateResult);
+            }
+        }
+        else
+        {
+            LOGGER.warn(format("Unable to create export output directory '%s'", outputDirectory));
         }
     }
 
