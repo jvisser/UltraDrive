@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
+import com.google.common.collect.ImmutableList;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ class AnimationOptimizationResult
 
     public List<Animation> getOptimizedAnimations()
     {
-        return List.copyOf(optimizedAnimations.values());
+        return ImmutableList.copyOf(optimizedAnimations.values());
     }
 
     public Map<SourceAnimation, Animation> getOptimizedAnimationMapping()

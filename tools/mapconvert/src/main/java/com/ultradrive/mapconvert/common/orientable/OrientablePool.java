@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.common.orientable;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,6 +68,6 @@ public class OrientablePool<T extends OrientablePoolable<T, R>, R extends Orient
 
     public List<T> getCache()
     {
-        return List.copyOf(orientableCache);
+        return ImmutableList.copyOf(orientableCache);
     }
 }

@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.ultradrive.mapconvert.datasource.MapDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.List.copyOf;
 import static java.util.stream.Collectors.toMap;
 
 
@@ -55,7 +55,7 @@ public class TileMapCompiler
 
         List<TileMap> maps = bindAuxiliaryMaps(auxiliaryMaps, compileMaps(mapBuilders, tilesetsByTilesetDataSource));
 
-        return new TileMapCompilation(maps, copyOf(tilesetsByTilesetDataSource.values()));
+        return new TileMapCompilation(maps, ImmutableList.copyOf(tilesetsByTilesetDataSource.values()));
     }
 
     private Map<MapDataSource, Set<AuxiliaryMapSource<MapDataSource>>> collectAuxiliaryMaps()
@@ -128,6 +128,6 @@ public class TileMapCompiler
             });
         });
 
-        return List.copyOf(resultMaps.values());
+        return ImmutableList.copyOf(resultMaps.values());
     }
 }
