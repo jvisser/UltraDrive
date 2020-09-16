@@ -5,9 +5,8 @@
 ;-------------------------------------------------
 ; Main program entry point
 ; ----------------
-; Parameters: None
 Main:
     DEBUG_MSG 'UltraDrive Started!'
 
-    @mainLoop:
-        bra.s   @mainLoop
+    .mainLoop:
+        bra.s   .mainLoop
