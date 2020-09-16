@@ -2,9 +2,11 @@
 ; 68000 Vector table
 ;------------------------------------------------------------------------------------------
 
+    SECTION_START S_VECTOR_TABLE
+    
 Vector68k:
-    dc.l   0x00000000      ; Initial stack pointer value
-    dc.l   EntryPoint      ; Start of program
+    dc.l   $00000000       ; Initial stack pointer value
+    dc.l   SysInit         ; Start of program
     dc.l   Exception       ; Bus error
     dc.l   Exception       ; Address error
     dc.l   Exception       ; Illegal instruction
@@ -67,3 +69,5 @@ Vector68k:
     dc.l   Exception       ; Unused (reserved)
     dc.l   Exception       ; Unused (reserved)
     dc.l   Exception       ; Unused (reserved)
+
+    SECTION_END
