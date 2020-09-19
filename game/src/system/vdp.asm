@@ -3,12 +3,9 @@
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; VDP related 68000 memory addresses
+; VDP 68000 interface
 ; ----------------
-MEM_REG_VERSION     Equ $00a10000
-MEM_TMSS            Equ $00a14000   ; TradeMark Security System
 
-; VDP interface
 MEM_VDP_DATA        Equ $00c00000
 MEM_VDP_CTRL        Equ $00c00004
 MEM_VDP_HVCOUNTER   Equ $00c00008
@@ -28,6 +25,21 @@ VSRAM_SIZE_LONG     Equ (VSRAM_SIZE_BYTE / SIZE_LONG)
 CRAM_SIZE_BYTE      Equ 128
 CRAM_SIZE_WORD      Equ (CRAM_SIZE_BYTE / SIZE_WORD)
 CRAM_SIZE_LONG      Equ (CRAM_SIZE_BYTE / SIZE_LONG)
+
+
+;-------------------------------------------------
+; VDP Status register bits
+; ----------------
+VDP_STATUS_PAL          Equ $0001   ; PAL, 0 = NTSC
+VDP_STATUS_DMA          Equ $0002   ; DMA Busy
+VDP_STATUS_HBLANK       Equ $0004   ; HBlank active
+VDP_STATUS_VBLANK       Equ $0008   ; VBlank active
+VDP_STATUS_ODD          Equ $0010   ; Odd frame in interlace mode
+VDP_STATUS_COLLISION    Equ $0020   ; Sprite collision happened between non zero sprite pixels
+VDP_STATUS_SOVERLFLOW   Equ $0040   ; Sprite overflow happened
+VDP_STATUS_VINT         Equ $0080   ; Vertical interrup happened
+VDP_STATUS_FIFO_FULL    Equ $0100   ; Write FIFO full
+VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
 
 
 ;-------------------------------------------------
@@ -82,13 +94,12 @@ CRAM_SIZE_LONG      Equ (CRAM_SIZE_BYTE / SIZE_LONG)
 ; Initialize the VDP for first use
 ; ----------------
 VDPInit:
-        bsr VDPUnlock
+        bsr.s _VDPUnlock
+        bsr.s _VDPInitRegisters
 
-        bsr VDPInitRegisters
-
-        bsr VDPClearVRAM
-        bsr VDPClearVSRAM
-        bsr VDPClearCRAM
+        bsr.s VDPClearVRAM
+        bsr.s VDPClearVSRAM
+        bsr.s VDPClearCRAM
 
         rts
 
@@ -97,13 +108,10 @@ VDPInit:
 ; Unlock VDP by TradeMark Security System (TMSS) protocol
 ; ----------------
 ; Uses: d0
-VDPUnlock:
-        andi.b  #$0f, MEM_REG_VERSION
-        beq.s   .noTMSS
-        move.l  #'SEGA', MEM_TMSS
+_VDPUnlock:
+        jsr TMSSUnlock
 
-    .noTMSS:
-        ; Read VDP control port. If unlock failed the code will not continue (buslock by IO Controller)
+        ; Read VDP status. If TMSS unlock failed the code will not continue (buslock by IO Controller)
         move.w  MEM_VDP_CTRL, d0
         rts
 
@@ -111,8 +119,9 @@ VDPUnlock:
 ;-------------------------------------------------
 ; Write initial VDP register values
 ; ----------------
-VDPInitRegisters:
-        bsr     vdpContextInit
+; Uses: d0/a0-a1
+_VDPInitRegisters:
+        bsr.s   vdpContextInit
         
         lea     vdpContext, a0
         lea     MEM_VDP_CTRL, a1
@@ -128,7 +137,7 @@ VDPInitRegisters:
 ; Produce code that clears specified VRAM type
 ; ----------------
 ; Uses: d0-d1/a0
-VRAM_CLEAR Macro vramAddrCommand, vramSize
+_VRAM_CLEAR Macro vramAddrCommand, vramSize
             moveq   #0, d1
             move.w  #(\vramSize\ / SIZE_LONG) - 1, d0
             move.l  #\vramAddrCommand\, MEM_VDP_CTRL
@@ -145,7 +154,7 @@ VRAM_CLEAR Macro vramAddrCommand, vramSize
 ; ----------------
 ; Uses: d0-d1/a0
 VDPClearVRAM:
-        VRAM_CLEAR VDP_CMD_AS_VRAM_WRITE, VRAM_SIZE_BYTE
+        _VRAM_CLEAR VDP_CMD_AS_VRAM_WRITE, VRAM_SIZE_BYTE
         rts
 
 
@@ -154,7 +163,7 @@ VDPClearVRAM:
 ; ----------------
 ; Uses: d0-d1/a0
 VDPClearVSRAM:
-        VRAM_CLEAR VDP_CMD_AS_VSRAM_WRITE, VSRAM_SIZE_BYTE
+        _VRAM_CLEAR VDP_CMD_AS_VSRAM_WRITE, VSRAM_SIZE_BYTE
         rts
 
 
@@ -163,5 +172,62 @@ VDPClearVSRAM:
 ; ----------------
 ; Uses: d0-d1/a0
 VDPClearCRAM:
-        VRAM_CLEAR VDP_CMD_AS_CRAM_WRITE, CRAM_SIZE_BYTE
+        _VRAM_CLEAR VDP_CMD_AS_CRAM_WRITE, CRAM_SIZE_BYTE
+        rts
+
+
+;-------------------------------------------------
+; Enable a VDP flag in the specified register
+; Uses: a0
+; ----------------
+_VDP_REG_ENABLE Macro vdpReg, flag
+        lea     vdpContext + \vdpReg, a0
+        ori.w   #\flag, (a0)
+        move.w  (a0), (MEM_VDP_CTRL)
+    Endm
+
+
+;-------------------------------------------------
+; Disable a VDP flag in the specified register
+; Uses: a0
+; ----------------
+_VDP_REG_DISABLE Macro vdpReg, flag
+        lea     vdpContext + \vdpReg, a0
+        andi.w   #~\flag, (a0)
+        move.w  (a0), (MEM_VDP_CTRL)
+    Endm
+
+
+;-------------------------------------------------
+; Disable display
+; Uses: a0
+; ----------------
+VDPEnableDisplay:
+    _VDP_REG_ENABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
+    rts;
+
+
+;-------------------------------------------------
+; Disable display
+; Uses: a0
+; ----------------
+VDPDisableDisplay:
+    _VDP_REG_DISABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
+    rts;
+
+
+;-------------------------------------------------
+; Wait for the next vertical blanking period to start
+; Uses: a0
+; ----------------
+VDPVSyncWait:
+        lea     MEM_VDP_CTRL + 1, a0
+
+    .waitVBLankEndLoop:
+        btst    #3, (a0)
+        bne     .waitVBLankEndLoop
+
+    .waitVBlankStart:
+        btst    #3, (a0)
+        beq     .waitVBlankStart
         rts

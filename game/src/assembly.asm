@@ -10,9 +10,11 @@
     ; ----------------
     Include './system/m68k.asm'
     Include './system/debug.asm'
+    Include './system/system.asm'
     Include './system/memory.asm'
     Include './system/exception.asm'
-    Include './system/controller.asm'
+    Include './system/z80.asm'
+    Include './system/io.asm'
     Include './system/vdpcmd.asm'
     Include './system/vdp.asm'
     Include './system/init.asm'

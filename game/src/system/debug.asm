@@ -7,12 +7,12 @@
 ;-------------------------------------------------
 ; Write debug message to console (GensKMod implementation)
 ; ----------------
-; Parameters: 
+; Input:
 ; - message: String to write to console
 DEBUG_MSG Macro message
             movem.l d0/a0-a1, -(sp)
             lea     .debugMessage\@, a0
-            bsr     GensKModDebugAlert
+            jsr     GensKModDebugAlert
             movem.l (sp)+, d0/a0-a1
 
             ; Store string data in DEBUG section
@@ -24,16 +24,16 @@ DEBUG_MSG Macro message
 
 
 ;-------------------------------------------------
-; Write null terminated string to GensKMod emulator message log (using virtual VDP register $1e)
+; Write null terminated string to GensKMod emulator message log. Uses the VDP interface.
 ; ----------------
-; Parameters: 
+; Input:
 ; - a0: Address of null terminated string
 ; Uses: d0/a0-a1
 GensKModDebugAlert:
-        move.w  #0x9e00, d0
+        move.w  #VDP_CMD_RS_GENS_LOG, d0
         move.b  (a0)+, d0
         beq.s   .done
-        lea     $c00004, a1
+        lea     MEM_VDP_CTRL, a1
 
     .writeLoop:
         move.w  d0, (a1)

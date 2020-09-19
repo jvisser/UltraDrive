@@ -27,6 +27,8 @@ VDP_CMD_RS_DMA_SRC_L        Equ $9500        ; DMA source (low)
 VDP_CMD_RS_DMA_SRC_M        Equ $9600        ; DMA source (mid)
 VDP_CMD_RS_DMA_SRC_H        Equ $9700        ; DMA source (high)
 
+VDP_CMD_RS_GENS_LOG         Equ $9e00        ; Virtual register used for debug logging in the GensKMod emulator
+
 
 ;-------------------------------------------------
 ; VDP register specifics

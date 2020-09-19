@@ -12,7 +12,7 @@ DEFAULT_EXCEPTION_HANDLER Macro handler
 
     SECTION_START S_VECTOR_TABLE
 
-    DEFAULT_EXCEPTION_HANDLER ExternalInterrupt     ; Controller port 2 pin 6 (Lightgun/serial comms etc)
+    DEFAULT_EXCEPTION_HANDLER ExternalInterrupt     ; Controller port pin 6 (Lightgun/serial comms etc)
     DEFAULT_EXCEPTION_HANDLER HBlankInterrupt
     DEFAULT_EXCEPTION_HANDLER VBlankInterrupt
 
