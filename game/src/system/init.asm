@@ -6,11 +6,10 @@
 ; Start of 68000 execution (See reset vector)
 ; ----------------
 SysInit:
-        ; Clear RAM
-        bsr MemInit
+        jsr MemInit ; Must be called first (Clears all memory)
 
-        ; initialize VDP
-        bsr VDPInit
+        jsr IOInit
+        jsr VDPInit
 
         ; Start main program
         jmp Main
