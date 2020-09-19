@@ -41,7 +41,7 @@ DEFINE_STRUCT Macro name
 ; Define struct type member
 ; ----------------
 STRUCT_MEMBER Macro size, name
-\name\      Rs.\size\ 1
+\name       Rs.\size 1
 \name\_Size Equs '\size'
     Endm
 
@@ -71,18 +71,18 @@ DEFINE_VAR Macro allocationType
 ;-------------------------------------------------
 ; Allocate memory for struct
 ; ----------------
-; Parameters:
+; Input:
 ; - 1: Struct type name
 ; - 2: Variable name
 ; - 3; Optional: Number of allocations to make
 STRUCT Macro
-        If def(\2\)
+        If def(\2)
             Inform 3, 'Variable "%s" already defined', '\2'
         EndIf
         If (narg = 3)
-\2\ Rs.b (\1\_Size * \3\)
+\2 Rs.b (\1\_Size * \3)
         Else
-\2\ Rs.b \1\_Size
+\2 Rs.b \1\_Size
         EndIf
     Endm
 
@@ -90,18 +90,18 @@ STRUCT Macro
 ;-------------------------------------------------
 ; Allocate memory for variable
 ; ----------------
-; Parameters:
+; Input:
 ; - 1: datatype (b/w/l)
 ; - 2: Variable name
 ; - 3; Optional: Number of allocations to make
 VAR Macro
-        If def(\2\)
+        If def(\2)
             Inform 3, 'Variable "%s" already defined', '\2'
         EndIf
         If (narg = 3)
-\2\ Rs.\1\ \3\
+\2 Rs.\1 \3
         Else
-\2\ Rs.\1\ 1
+\2 Rs.\1 1
         EndIf
     Endm
 
@@ -139,14 +139,14 @@ INIT_STRUCT Macro structVarName
 ; Store initialization data for member and verify struct offset
 ; ----------------
 INIT_STRUCT_MEMBER Macro structMemberName, value
-        If (\structMemberName\ <> __rs)
+        If (\structMemberName <> __rs)
             Inform 3, 'Struct member data specified at incorrect offset. Expected $%h but got $%h', \structMemberName, __rs
         EndIf
         Local STRUCT_MEMBER_SIZE
 
 STRUCT_MEMBER_SIZE Equs \structMemberName\_Size
-        Rs.\STRUCT_MEMBER_SIZE\ 1
-        dc.\STRUCT_MEMBER_SIZE\ \value
+        Rs.\STRUCT_MEMBER_SIZE 1
+        dc.\STRUCT_MEMBER_SIZE \value
     Endm
 
 
@@ -161,7 +161,7 @@ INIT_STRUCT_END Macro
 
         \STRUCT_VAR_NAME\Init:
             lea \STRUCT_VAR_NAME\_InitData, a0
-            lea \STRUCT_VAR_NAME\, a1
+            lea \STRUCT_VAR_NAME, a1
             move.w #__rs, d0
             jmp MemCopy
     Endm
@@ -172,13 +172,13 @@ INIT_STRUCT_END Macro
 ; ----------------
 MEMORY_ALLOCATION_REPORT Macro
         Local SHORT_MEM_BYTES, LONG_MEM_BYTES
-SHORT_MEM_BYTES Equ __FAST_RAM_ALLOCATION_PTR - MEM_RAM_MID
-LONG_MEM_BYTES  Equ __SLOW_RAM_ALLOCATION_PTR - MEM_RAM_START
+_SHORT_MEM_BYTES Equ __FAST_RAM_ALLOCATION_PTR - MEM_RAM_MID
+_LONG_MEM_BYTES  Equ __SLOW_RAM_ALLOCATION_PTR - MEM_RAM_START
         Inform 0, '-----------------'
         Inform 0, 'Memory allocation'
         Inform 0, '-----------------'
-        Inform 0, 'Absolute short addressable allocation $%h-$%h (%d bytes)', MEM_RAM_MID, __FAST_RAM_ALLOCATION_PTR ,SHORT_MEM_BYTES
-        Inform 0, 'Absolute long addressable allocation  $%h-$%h (%d bytes)', MEM_RAM_START, __SLOW_RAM_ALLOCATION_PTR ,LONG_MEM_BYTES
+        Inform 0, 'Absolute short addressable allocation $%h-$%h (%d bytes)', MEM_RAM_MID, __FAST_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES
+        Inform 0, 'Absolute long addressable allocation  $%h-$%h (%d bytes)', MEM_RAM_START, __SLOW_RAM_ALLOCATION_PTR, _LONG_MEM_BYTES
         Inform 0, ''
     Endm
 
@@ -188,17 +188,17 @@ LONG_MEM_BYTES  Equ __SLOW_RAM_ALLOCATION_PTR - MEM_RAM_START
 ; ----------------
 ; Uses: d0-d1/a0-a1
 MemInit:
-CLR_RAM_LOOP_UNROLL Equ 8
+_CLR_RAM_LOOP_UNROLL Equ 8
 
         ; Save return address
         move.l (sp), a1
 
         moveq   #0, d1
         move.l  d1, a0
-        move.w  #(MEM_RAM_SIZE_LONG / CLR_RAM_LOOP_UNROLL) - 1, d0
+        move.w  #(MEM_RAM_SIZE_LONG / _CLR_RAM_LOOP_UNROLL) - 1, d0
 
     .clearLoop:
-        Rept CLR_RAM_LOOP_UNROLL
+        Rept _CLR_RAM_LOOP_UNROLL
             move.l  d1, -(a0)
         Endr
         dbra    d0, .clearLoop
@@ -211,10 +211,11 @@ CLR_RAM_LOOP_UNROLL Equ 8
 ;-------------------------------------------------
 ; Copy memory from source to destination
 ; ----------------
-; Parameters:
+; Input:
 ; - a0: Source address
 ; - a1: Destination address
 ; - d0; Length in bytes
+; Uses: d0/a0-a1
 MemCopy:
         subq.w  #1, d0
 
