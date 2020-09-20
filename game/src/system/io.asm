@@ -146,7 +146,7 @@ _IO_TH_HIGH Macros
 ; Input:
 ; - a1: Data port address
 ; ----------------
-_IO_TH_LOW Macros dataPort
+_IO_TH_LOW Macros
         move.b  #0, (a1)
 
 
