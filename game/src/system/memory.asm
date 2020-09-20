@@ -75,14 +75,14 @@ DEFINE_VAR Macro allocationType
 ; - 1: Struct type name
 ; - 2: Variable name
 ; - 3; Optional: Number of allocations to make
-STRUCT Macro
-        If def(\2)
-            Inform 3, 'Variable "%s" already defined', '\2'
+STRUCT Macro structName, varName
+        If def(\varName)
+            Inform 3, 'Variable "%s" already defined', '\varName'
         EndIf
         If (narg = 3)
-\2 Rs.b (\1\_Size * \3)
+\varName Rs.b (\structName\_Size * \3)
         Else
-\2 Rs.b \1\_Size
+\varName Rs.b \structName\_Size
         EndIf
     Endm
 
@@ -94,14 +94,14 @@ STRUCT Macro
 ; - 1: datatype (b/w/l)
 ; - 2: Variable name
 ; - 3; Optional: Number of allocations to make
-VAR Macro
-        If def(\2)
-            Inform 3, 'Variable "%s" already defined', '\2'
+VAR Macro dataType, varName
+        If def(\varName)
+            Inform 3, 'Variable "%s" already defined', '\varName'
         EndIf
         If (narg = 3)
-\2 Rs.\1 \3
+\varName Rs.\dataType \3
         Else
-\2 Rs.\1 1
+\varName Rs.\dataType 1
         EndIf
     Endm
 

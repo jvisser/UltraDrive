@@ -73,7 +73,7 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
     ; VDPContext initial value (sensible defaults)
     INIT_STRUCT vdpContext
         INIT_STRUCT_MEMBER vdpRegMode1,     VDP_CMD_RS_MODE1
-        INIT_STRUCT_MEMBER vdpRegMode2,     VDP_CMD_RS_MODE2
+        INIT_STRUCT_MEMBER vdpRegMode2,     VDP_CMD_RS_MODE2        | MODE2_DMA_ENABLE
         INIT_STRUCT_MEMBER vdpRegMode3,     VDP_CMD_RS_MODE3
         INIT_STRUCT_MEMBER vdpRegMode4,     VDP_CMD_RS_MODE4        | MODE4_H40_CELL
         INIT_STRUCT_MEMBER vdpRegPlaneA,    VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_c000
@@ -90,6 +90,32 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
     INIT_STRUCT_END
 
 
+;-------------------------------------------------
+; Update VDP register with cached value
+; ----------------
+VDP_SYNC_REG Macro vdpReg
+        move.w  (vdpContext + \vdpReg), (MEM_VDP_CTRL)
+    Endm
+
+
+;-------------------------------------------------
+; Enable a VDP flag in the specified register
+; ----------------
+VDP_REG_ENABLE Macro vdpReg, flag
+        ori.w   #\flag, (vdpContext + \vdpReg)
+        VDP_SYNC_REG \vdpReg
+    Endm
+
+
+;-------------------------------------------------
+; Disable a VDP flag in the specified register
+; ----------------
+VDP_REG_DISABLE Macro vdpReg, flag
+        andi.w   #~\flag, (vdpContext + \vdpReg)
+        VDP_SYNC_REG \vdpReg
+    Endm
+
+
 ;----------------------------------------------
 ; Initialize the VDP for first use
 ; ----------------
@@ -100,7 +126,6 @@ VDPInit:
         bsr.s VDPClearVRAM
         bsr.s VDPClearVSRAM
         bsr.s VDPClearCRAM
-
         rts
 
 
@@ -177,42 +202,18 @@ VDPClearCRAM:
 
 
 ;-------------------------------------------------
-; Enable a VDP flag in the specified register
-; Uses: a0
-; ----------------
-_VDP_REG_ENABLE Macro vdpReg, flag
-        lea     vdpContext + \vdpReg, a0
-        ori.w   #\flag, (a0)
-        move.w  (a0), (MEM_VDP_CTRL)
-    Endm
-
-
-;-------------------------------------------------
-; Disable a VDP flag in the specified register
-; Uses: a0
-; ----------------
-_VDP_REG_DISABLE Macro vdpReg, flag
-        lea     vdpContext + \vdpReg, a0
-        andi.w   #~\flag, (a0)
-        move.w  (a0), (MEM_VDP_CTRL)
-    Endm
-
-
-;-------------------------------------------------
 ; Disable display
-; Uses: a0
 ; ----------------
 VDPEnableDisplay:
-    _VDP_REG_ENABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
+    VDP_REG_ENABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
     rts;
 
 
 ;-------------------------------------------------
 ; Disable display
-; Uses: a0
 ; ----------------
 VDPDisableDisplay:
-    _VDP_REG_DISABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
+    VDP_REG_ENABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
     rts;
 
 
