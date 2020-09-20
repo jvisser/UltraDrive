@@ -17,6 +17,7 @@
     Include './system/io.asm'
     Include './system/vdpcmd.asm'
     Include './system/vdp.asm'
+    Include './system/vdpdma.asm'
     Include './system/init.asm'
 
 
