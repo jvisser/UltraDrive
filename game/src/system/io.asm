@@ -84,9 +84,9 @@ MD_PAD_START            Equ $80
 ; Cached device readings
 ; ----------------
     DEFINE_STRUCT IODeviceState
-        STRUCT_MEMBER l, dataPortAddress
-        STRUCT_MEMBER b, deviceType
         STRUCT_MEMBER b, deviceState
+        STRUCT_MEMBER b, deviceType
+        STRUCT_MEMBER l, dataPortAddress
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -101,10 +101,6 @@ MD_PAD_START            Equ $80
     INIT_STRUCT ioDeviceState2
         INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL2_DATA
     INIT_STRUCT_END
-
-; Direct pointers to the device state/readings for each port
-IO_DEVICE_STATE_ADDR1   Equ (ioDeviceState1 + deviceState)
-IO_DEVICE_STATE_ADDR2   Equ (ioDeviceState2 + deviceState)
 
 
 ;-------------------------------------------------
