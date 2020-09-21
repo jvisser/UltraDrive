@@ -116,6 +116,15 @@ VDP_REG_DISABLE Macro vdpReg, flag
     Endm
 
 
+;-------------------------------------------------
+; Set register value
+; ----------------
+VDP_SET_REG Macro vdpReg, value
+        move.b   #\value, (vdpContext + \vdpReg + 1)
+        VDP_SYNC_REG \vdpReg
+    Endm
+
+
 ;----------------------------------------------
 ; Initialize the VDP for first use
 ; ----------------
