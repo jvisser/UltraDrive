@@ -50,7 +50,10 @@ IO_DATA_READ_B          Equ $10         ; PD4 (TH = 0)
 IO_DATA_READ_C          Equ $20         ; PD5 (TH = 0)
 IO_DATA_READ_A          Equ $10         ; PD4 (TH = 1)
 IO_DATA_READ_START      Equ $20         ; PD5 (TH = 1)
-
+IO_DATA_READ_Z          Equ $01         ; PD0
+IO_DATA_READ_Y          Equ $02         ; PD1
+IO_DATA_READ_X          Equ $04         ; PD2
+IO_DATA_READ_MODE       Equ $08         ; PD3
 
 ;-------------------------------------------------
 ; Device ID's
@@ -63,6 +66,7 @@ IO_DEVICE_ID_MD_PAD     Equ $0d
 ; ----------------
 IO_DEVICE_UNKNOWN                   Equ $00
 IO_DEVICE_MEGA_DRIVE_3_BUTTON       Equ $01
+IO_DEVICE_MEGA_DRIVE_6_BUTTON       Equ $02
 
 
 ;-------------------------------------------------
@@ -70,23 +74,30 @@ IO_DEVICE_MEGA_DRIVE_3_BUTTON       Equ $01
 ; ----------------
 
 ; Mega Drive 3 button controller device state bits
-MD_PAD_UP               Equ $01
-MD_PAD_DOWN             Equ $02
-MD_PAD_LEFT             Equ $04
-MD_PAD_RIGHT            Equ $08
-MD_PAD_B                Equ $10
-MD_PAD_C                Equ $20
-MD_PAD_A                Equ $40
-MD_PAD_START            Equ $80
+MD_PAD_UP               Equ $0001
+MD_PAD_DOWN             Equ $0002
+MD_PAD_LEFT             Equ $0004
+MD_PAD_RIGHT            Equ $0008
+MD_PAD_B                Equ $0010
+MD_PAD_C                Equ $0020
+MD_PAD_A                Equ $0040
+MD_PAD_START            Equ $0080
+
+; Mega Drive 6 button controller device state bits
+MD_PAD_Z                Equ $0100
+MD_PAD_Y                Equ $0200
+MD_PAD_X                Equ $0400
+MD_PAD_MODE             Equ $0800
 
 
 ;-------------------------------------------------
 ; Cached device readings
 ; ----------------
     DEFINE_STRUCT IODeviceState
-        STRUCT_MEMBER b, deviceState
-        STRUCT_MEMBER b, deviceType
+        STRUCT_MEMBER w, deviceState
+        STRUCT_MEMBER l, updateCallback
         STRUCT_MEMBER l, dataPortAddress
+        STRUCT_MEMBER b, deviceType
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -95,16 +106,18 @@ MD_PAD_START            Equ $80
     DEFINE_VAR_END
 
     INIT_STRUCT ioDeviceState1
+        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnknownDevice
         INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL1_DATA
     INIT_STRUCT_END
 
     INIT_STRUCT ioDeviceState2
+        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnknownDevice
         INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL2_DATA
     INIT_STRUCT_END
 
 
 ;-------------------------------------------------
-; Optional Z80 locking during IO access. Z80 -> 68000 access and 68000 -> IO access cannot occur simultaniously.
+; Optional automatic Z80 locking during IO access. Z80 -> 68000 access and 68000 -> IO access cannot occur simultaniously.
 ; ----------------
 _IO_Z80_LOCK Macro
         If def(io_z80_safe)
@@ -123,8 +136,8 @@ _IO_Z80_UNLOCK Macro
 ; Wait for data availability after TH mode change (~1 micro second)
 ; ----------------
 _IO_WAIT Macro
-            nop
-            nop
+        nop
+        nop
     Endm
 
 
@@ -147,6 +160,17 @@ _IO_TH_LOW Macros
 
 
 ;-------------------------------------------------
+; Wait for IO state reset. ~One display frame time.
+; Uses: d6
+; ----------------
+_IO_RESET Macro
+            move.w #$3fff, d6
+        .ioResetLoop\@:
+            dbra d6, .ioResetLoop\@
+    Endm
+
+
+;-------------------------------------------------
 ; Initialize IO hardware
 ; ----------------
 IOInit:
@@ -160,81 +184,126 @@ IOInit:
 
         _IO_WAIT
 
-        ; Initialize device state for both ports
-        bsr.s   ioDeviceState1Init
-        bsr.s   ioDeviceState2Init
+        ; Get port 1 device info
+        bsr     ioDeviceState1Init
         lea     ioDeviceState1, a0
-        moveq   #0, d0
+        bsr     IOUpdateDeviceInfo
 
-    .updateDeviceLoop:
-        bsr.s   IOUpdateDeviceInfo
-        bsr.s   IOUpdateDeviceState
+        _IO_RESET
 
-        adda.l  #IODeviceState_Size, a0
-        dbra    d0, .updateDeviceLoop
+        ; Get port 2 device info
+        bsr     ioDeviceState2Init
+        lea     ioDeviceState2, a0
+        bsr     IOUpdateDeviceInfo
         rts
 
 
 ;-------------------------------------------------
-; Update device input readings
-; Input:
-; - a0: Device state structure of device to update
-; Uses: d0-d1/a1
+; Update device states. Should be called at most once per display frame.
+; Uses: d0-d1/a0-a1
 ; ----------------
 IOUpdateDeviceState:
-        movea.l dataPortAddress(a0), a1
+_IO_UPDATE_DEVICE Macro deviceStateStruct
+            lea     \deviceStateStruct, a0
+            movea.l updateCallback(a0), a1
+            jsr     (a1)
+        Endm
 
-        _IO_Z80_LOCK
+        _IO_UPDATE_DEVICE ioDeviceState1
+        _IO_UPDATE_DEVICE ioDeviceState2
+        rts;
 
+
+;-------------------------------------------------
+; Read port
+; Input:
+; - a1: Port to read
+; Output: d0 high (TH=1), d0 low (TH = 0)
+; Uses: d0/a1
+; ----------------
+_IOReadDataPort Macro
         _IO_TH_HIGH
         _IO_WAIT
 
         move.b (a1), d0
+        swap    d0
 
         _IO_TH_LOW
         _IO_WAIT
 
-        move.b (a1), d1
-
-        _IO_Z80_UNLOCK
-
-        andi.b  #(IO_DATA_UP | IO_DATA_DOWN | IO_DATA_LEFT | IO_DATA_RIGHT | IO_DATA_READ_B | IO_DATA_READ_C), d0
-        andi.b  #(IO_DATA_READ_A | IO_DATA_READ_START), d1
-        add.b   d1, d1
-        add.b   d1, d1
-        or.b    d1, d0
-
-        move.b  d0, deviceState(a0)
-        rts
+        move.b (a1), d0
+    Endm
 
 
 ;-------------------------------------------------
-; Update device type
+; Read data port without storing the result
+; Input:
+; - a1: Port to read
+; ----------------
+_IOProbeDataPort Macro
+        _IO_TH_HIGH
+        _IO_WAIT
+
+        tst.b (a1)  ; TODO: Verify on hardware if reading is actually required.
+
+        _IO_TH_LOW
+        _IO_WAIT
+
+        tst.b (a1)
+    Endm
+
+
+;-------------------------------------------------
+; Detect connected device (Slow!)
 ; Input:
 ; - a0: Device state structure of device to update
-; Uses: d0-d3/a1
+; Uses: d0-d3,d6/a1
 ; ----------------
 IOUpdateDeviceInfo:
-        bsr.s   _IOGetDeviceId
+        movea.l dataPortAddress(a0), a1
+
+        bsr     _IOGetDeviceId
 
         cmpi.b  #IO_DEVICE_ID_MD_PAD, d0
-        bne.s   .unknownDevice
-        move.b  #IO_DEVICE_MEGA_DRIVE_3_BUTTON, deviceType(a0)
-        bra.s   .done
-
-    .unknownDevice:
+        beq     .md3button
         move.b  #IO_DEVICE_UNKNOWN, deviceType(a0)
+        move.l  #_IOUpdateUnknownDevice, updateCallback(a0)
+        bra     .done
+
+    .md3button:
+        ; Mega Drive pad detected, now detect type (3 or 6 button)
+
+        ; First reset IO (Because the device ID reading messed up the 6 button pad detection protocol)
+        _IO_RESET
+
+        _IO_Z80_LOCK
+
+        _IOProbeDataPort
+        _IOProbeDataPort
+        _IOReadDataPort
+
+        _IO_Z80_UNLOCK
+
+        andi.b   #$0f, d0
+        beq     .md6button
+        move.b  #IO_DEVICE_MEGA_DRIVE_3_BUTTON, deviceType(a0)
+        move.l  #_IOUpdate3ButtonPad, updateCallback(a0)
+        bra     .done
+
+    .md6button:
+        move.b  #IO_DEVICE_MEGA_DRIVE_6_BUTTON, deviceType(a0)
+        move.l  #_IOUpdate6ButtonPad, updateCallback(a0)
 
     .done:
         rts
 
 
 ;-------------------------------------------------
-; Determine device ID connected to the specified port
+; Determine device ID of device connected to the specified port
 ; Input:
-; - a0: Device state structure of device
+; - a1: Data port address
 ; Output: device id in d0
-; Uses: d0-d3/a1
+; Uses: d0-d3
 ; ----------------
 _IOGetDeviceId:
 _IO_GET_DEVICE_ID_BIT Macro bits
@@ -249,8 +318,6 @@ _IO_GET_DEVICE_ID_BIT Macro bits
         moveq   #0, d0      ; Device Id
         moveq   #1, d2      ; Current bit of device id being processed
 
-        movea.l dataPortAddress(a0), a1
-
         _IO_Z80_LOCK
 
         _IO_TH_LOW
@@ -270,4 +337,66 @@ _IO_GET_DEVICE_ID_BIT Macro bits
         _IO_GET_DEVICE_ID_BIT (IO_DATA_PD2 | IO_DATA_PD3)
 
         _IO_Z80_UNLOCK
+        rts
+
+
+;-------------------------------------------------
+; Mega Drive 3 button pad update callback
+; Input:
+; - a0: Device state structure of device to update
+; Uses: d0-d1/a1
+; ----------------
+_IOUpdate3ButtonPad:
+        movea.l dataPortAddress(a0), a1
+
+        _IO_Z80_LOCK
+
+        _IOReadDataPort
+
+        _IO_Z80_UNLOCK
+
+        move.b  d0, d1
+        swap    d0
+        andi.b  #(IO_DATA_UP | IO_DATA_DOWN | IO_DATA_LEFT | IO_DATA_RIGHT | IO_DATA_READ_B | IO_DATA_READ_C), d0
+        andi.b  #(IO_DATA_READ_A | IO_DATA_READ_START), d1
+        add.b   d1, d1
+        add.b   d1, d1
+        or.b    d1, d0
+
+        move.w  d0, deviceState(a0)
+        rts
+
+
+;-------------------------------------------------
+; Mega Drive 6 button pad update callback
+; Input:
+; - a0: Device state structure of device to update
+; Uses: d0-d1/a1
+; ----------------
+_IOUpdate6ButtonPad:
+        bsr _IOUpdate3ButtonPad ; We reuse a1 from _IOUpdate3ButtonPad
+
+        _IO_Z80_LOCK
+
+        _IOProbeDataPort
+        _IOProbeDataPort
+
+        _IO_TH_HIGH
+        _IO_WAIT
+
+        move.b  (a1), d0
+
+        _IO_Z80_UNLOCK
+
+        andi.b  #(IO_DATA_READ_X | IO_DATA_READ_Y | IO_DATA_READ_Z | IO_DATA_READ_MODE), d0
+        move.b  d0, deviceState(a0)
+        rts
+
+
+;-------------------------------------------------
+; Unknown device update callback
+; Input:
+; - a0: Device state structure of device to update
+; ----------------
+_IOUpdateUnknownDevice:
         rts
