@@ -59,7 +59,7 @@ IO_DEVICE_ID_MD_PAD     Equ $0d
 
 
 ;-------------------------------------------------
-; Device types. Some peripherals need specialized detection code and can not rely on Device ID alone (6 button controller for example)
+; Device types. Some peripherals need specialized detection code and so we can not rely on Device ID alone (6 button controller for example)
 ; ----------------
 IO_DEVICE_UNKNOWN                   Equ $00
 IO_DEVICE_MEGA_DRIVE_3_BUTTON       Equ $01
@@ -179,7 +179,7 @@ IOInit:
 ; Update device input readings
 ; Input:
 ; - a0: Device state structure of device to update
-; Uses: d1-d2/a1
+; Uses: d0-d1/a1
 ; ----------------
 IOUpdateDeviceState:
         movea.l dataPortAddress(a0), a1
@@ -189,23 +189,22 @@ IOUpdateDeviceState:
         _IO_TH_HIGH
         _IO_WAIT
 
-        move.b (a1), d1
+        move.b (a1), d0
 
         _IO_TH_LOW
         _IO_WAIT
 
-        move.b (a1), d2
+        move.b (a1), d1
 
         _IO_Z80_UNLOCK
 
-        andi.b  #(IO_DATA_UP | IO_DATA_DOWN | IO_DATA_LEFT | IO_DATA_RIGHT | IO_DATA_READ_B | IO_DATA_READ_C), d1
-        andi.b  #(IO_DATA_READ_A | IO_DATA_READ_START), d2
-        add.b   d2, d2
-        add.b   d2, d2
-        or.b    d2, d1
-        not.b   d1
+        andi.b  #(IO_DATA_UP | IO_DATA_DOWN | IO_DATA_LEFT | IO_DATA_RIGHT | IO_DATA_READ_B | IO_DATA_READ_C), d0
+        andi.b  #(IO_DATA_READ_A | IO_DATA_READ_START), d1
+        add.b   d1, d1
+        add.b   d1, d1
+        or.b    d1, d0
 
-        move.b  d1, deviceState(a0)
+        move.b  d0, deviceState(a0)
         rts
 
 
@@ -216,16 +215,38 @@ IOUpdateDeviceState:
 ; Uses: d0-d3/a1
 ; ----------------
 IOUpdateDeviceInfo:
+        bsr.s   _IOGetDeviceId
+
+        cmpi.b  #IO_DEVICE_ID_MD_PAD, d0
+        bne.s   .unknownDevice
+        move.b  #IO_DEVICE_MEGA_DRIVE_3_BUTTON, deviceType(a0)
+        bra.s   .done
+
+    .unknownDevice:
+        move.b  #IO_DEVICE_UNKNOWN, deviceType(a0)
+
+    .done:
+        rts
+
+
+;-------------------------------------------------
+; Determine device ID connected to the specified port
+; Input:
+; - a0: Device state structure of device
+; Output: device id in d0
+; Uses: d0-d3/a1
+; ----------------
+_IOGetDeviceId:
 _IO_GET_DEVICE_ID_BIT Macro bits
-            move.b  d0, d3
+            move.b  d1, d3
             andi.b  #(\bits), d3
             sne     d3
             and.b   d2, d3
-            or.b    d3, d1
+            or.b    d3, d0
             add.b   d2, d2
         Endm
 
-        moveq   #0, d1      ; Device Id
+        moveq   #0, d0      ; Device Id
         moveq   #1, d2      ; Current bit of device id being processed
 
         movea.l dataPortAddress(a0), a1
@@ -235,7 +256,7 @@ _IO_GET_DEVICE_ID_BIT Macro bits
         _IO_TH_LOW
         _IO_WAIT
 
-        move.b  (a1), d0
+        move.b  (a1), d1
 
         _IO_GET_DEVICE_ID_BIT (IO_DATA_PD0 | IO_DATA_PD1)
         _IO_GET_DEVICE_ID_BIT (IO_DATA_PD2 | IO_DATA_PD3)
@@ -243,20 +264,10 @@ _IO_GET_DEVICE_ID_BIT Macro bits
         _IO_TH_HIGH
         _IO_WAIT
 
-        move.b  (a1), d0
+        move.b  (a1), d1
 
         _IO_GET_DEVICE_ID_BIT (IO_DATA_PD0 | IO_DATA_PD1)
         _IO_GET_DEVICE_ID_BIT (IO_DATA_PD2 | IO_DATA_PD3)
 
         _IO_Z80_UNLOCK
-
-        cmpi.b  #IO_DEVICE_ID_MD_PAD, d1
-        bne.s   .unknownDevice
-        move.b  #IO_DEVICE_MEGA_DRIVE_3_BUTTON, deviceType(a0)
-        bra.s   .done
-
-    .unknownDevice:
-        move.b  #IO_DEVICE_UNKNOWN, deviceType(a0)
-
-    .done:
         rts
