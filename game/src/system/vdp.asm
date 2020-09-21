@@ -120,12 +120,12 @@ VDP_REG_DISABLE Macro vdpReg, flag
 ; Initialize the VDP for first use
 ; ----------------
 VDPInit:
-        bsr.s _VDPUnlock
-        bsr.s _VDPInitRegisters
+        bsr   _VDPUnlock
+        bsr   _VDPInitRegisters
 
-        bsr.s VDPClearVRAM
-        bsr.s VDPClearVSRAM
-        bsr.s VDPClearCRAM
+        bsr   VDPClearVRAM
+        bsr   VDPClearVSRAM
+        bsr   VDPClearCRAM
         rts
 
 
@@ -146,7 +146,7 @@ _VDPUnlock:
 ; ----------------
 ; Uses: d0/a0-a1
 _VDPInitRegisters:
-        bsr.s   vdpContextInit
+        bsr     vdpContextInit
         
         lea     vdpContext, a0
         lea     MEM_VDP_CTRL, a1
