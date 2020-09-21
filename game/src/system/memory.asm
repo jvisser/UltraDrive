@@ -79,6 +79,7 @@ STRUCT Macro structName, varName
         If def(\varName)
             Inform 3, 'Variable "\varName\" already defined'
         EndIf
+        Rs.w 0  ; Even __rs
         If (narg = 3)
 \varName Rs.b (\structName\_Size * \3)
         Else
@@ -111,7 +112,8 @@ VAR Macro dataType, varName
 ; ----------------
 DEFINE_VAR_END Macro
         Local ALLOCATION_TYPE
-        Popp ALLOCATION_TYPE
+        Popp  ALLOCATION_TYPE
+
 __\ALLOCATION_TYPE\_RAM_ALLOCATION_PTR = __rs
         If (__FAST_RAM_ALLOCATION_PTR > 0)
             Inform 3, 'Absolute short addressable RAM allocation overflow at $%h', __FAST_RAM_ALLOCATION_PTR
@@ -175,7 +177,7 @@ INIT_STRUCT_END Macro
         SECTION_END
 
         Local STRUCT_VAR_NAME
-        Popp STRUCT_VAR_NAME
+        Popp  STRUCT_VAR_NAME
 
         If (__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1)
             Inform 3, 'Empty struct initialization for \STRUCT_VAR_NAME'

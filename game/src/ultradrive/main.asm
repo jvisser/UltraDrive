@@ -23,8 +23,6 @@ Main:
 
     .mainLoop:
         jsr     VDPVSyncWait
-
-        lea     ioDeviceState1, a0
         jsr     IOUpdateDeviceState
 
-        bra.s   .mainLoop
+        bra     .mainLoop
