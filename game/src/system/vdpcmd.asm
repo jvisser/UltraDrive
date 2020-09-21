@@ -3,6 +3,20 @@
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
+; VDP address set commands
+; ----------------
+VDP_CMD_AS_VRAM_WRITE       Equ $40000000
+VDP_CMD_AS_CRAM_WRITE       Equ $c0000000
+VDP_CMD_AS_VSRAM_WRITE      Equ $40000010
+
+VDP_CMD_AS_VRAM_READ        Equ $00000000
+VDP_CMD_AS_CRAM_READ        Equ $00000020
+VDP_CMD_AS_VSRAM_READ       Equ $00000010
+
+VDP_CMD_AS_DMA              Equ $00000080   ; Or with a specific AS write command to mark it as the start of a DMA transfer to the specified target memory
+
+
+;-------------------------------------------------
 ; VDP register set commands (or with register value before writing to VDP control port)
 ; Fixed value bits are alread applied in accordance with official documentation
 ; ----------------
@@ -241,19 +255,3 @@ HSCROLL_ADDR_f000           Equ ($f000 >> 10)
 HSCROLL_ADDR_f400           Equ ($f400 >> 10)
 HSCROLL_ADDR_f800           Equ ($f800 >> 10)
 HSCROLL_ADDR_fc00           Equ ($fc00 >> 10)
-
-
-;-------------------------------------------------
-; VDP address set commands
-; ----------------
-VDP_CMD_AS_VRAM_WRITE       Equ $40000000
-VDP_CMD_AS_CRAM_WRITE       Equ $c0000000
-VDP_CMD_AS_VSRAM_WRITE      Equ $40000010
-
-VDP_CMD_AS_VRAM_READ        Equ $00000000
-VDP_CMD_AS_CRAM_READ        Equ $00000020
-VDP_CMD_AS_VSRAM_READ       Equ $00000010
-
-VDP_CMD_AS_DMA              Equ $00000080   ; Or with a specific AS write command to mark it as the start of a DMA transfer to the specified target memory
-
-

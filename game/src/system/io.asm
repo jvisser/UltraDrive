@@ -236,20 +236,15 @@ _IOReadDataPort Macro
 
 
 ;-------------------------------------------------
-; Read data port without storing the result
+; Probe data port without reading (Switch TH)
 ; Input:
 ; - a1: Port to read
 ; ----------------
 _IOProbeDataPort Macro
         _IO_TH_HIGH
         _IO_WAIT
-
-        tst.b (a1)  ; TODO: Verify on hardware if reading is actually required.
-
         _IO_TH_LOW
         _IO_WAIT
-
-        tst.b (a1)
     Endm
 
 
