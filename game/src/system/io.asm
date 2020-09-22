@@ -55,6 +55,7 @@ IO_DATA_READ_Y          Equ $02         ; PD1
 IO_DATA_READ_X          Equ $04         ; PD2
 IO_DATA_READ_MODE       Equ $08         ; PD3
 
+
 ;-------------------------------------------------
 ; Device ID's
 ; ----------------
@@ -174,6 +175,9 @@ _IO_RESET Macro
 ; Initialize IO hardware
 ; ----------------
 IOInit:
+        ; First wait for IO reset. Can be in partially initialized state if machine is reset.
+        _IO_RESET
+
         _IO_Z80_LOCK
 
         ; Set write mode for PD6 = TH on both ports
@@ -189,12 +193,14 @@ IOInit:
         lea     ioDeviceState1, a0
         bsr     IOUpdateDeviceInfo
 
-        _IO_RESET
-
         ; Get port 2 device info
         bsr     ioDeviceState2Init
         lea     ioDeviceState2, a0
         bsr     IOUpdateDeviceInfo
+
+        ; Wait for IO reset so device readings down the line yield correct results
+        _IO_RESET
+
         rts
 
 
@@ -221,7 +227,7 @@ _IO_UPDATE_DEVICE Macro deviceStateStruct
 ; Output: d0 high (TH=1), d0 low (TH = 0)
 ; Uses: d0/a1
 ; ----------------
-_IOReadDataPort Macro
+_IO_READ_DATA_PORT Macro
         _IO_TH_HIGH
         _IO_WAIT
 
@@ -240,9 +246,10 @@ _IOReadDataPort Macro
 ; Input:
 ; - a1: Port to read
 ; ----------------
-_IOProbeDataPort Macro
+_IO_PROBE_DATA_PORT Macro
         _IO_TH_HIGH
         _IO_WAIT
+
         _IO_TH_LOW
         _IO_WAIT
     Endm
@@ -273,9 +280,12 @@ IOUpdateDeviceInfo:
 
         _IO_Z80_LOCK
 
-        _IOProbeDataPort
-        _IOProbeDataPort
-        _IOReadDataPort
+        ; Start 6 button pad detection
+        _IO_PROBE_DATA_PORT
+        _IO_PROBE_DATA_PORT
+        _IO_READ_DATA_PORT  ; 6th port access (TH = 0) will contain the 6 button pad distinction data: PD0-3 = 0
+
+        _IO_TH_HIGH
 
         _IO_Z80_UNLOCK
 
@@ -346,7 +356,7 @@ _IOUpdate3ButtonPad:
 
         _IO_Z80_LOCK
 
-        _IOReadDataPort
+        _IO_READ_DATA_PORT
 
         _IO_Z80_UNLOCK
 
@@ -373,15 +383,15 @@ _IOUpdate6ButtonPad:
 
         _IO_Z80_LOCK
 
-        _IOProbeDataPort
-        _IOProbeDataPort
+        _IO_PROBE_DATA_PORT
+        _IO_PROBE_DATA_PORT
 
-        _IO_TH_HIGH
+        _IO_TH_HIGH     ; NB: TH must be left high at the end of the 6 button pad access sequence!
         _IO_WAIT
 
-        move.b  (a1), d0
-
         _IO_Z80_UNLOCK
+
+        move.b  (a1), d0
 
         andi.b  #(IO_DATA_READ_X | IO_DATA_READ_Y | IO_DATA_READ_Z | IO_DATA_READ_MODE), d0
         move.b  d0, deviceState(a0)
