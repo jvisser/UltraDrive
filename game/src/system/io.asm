@@ -26,7 +26,7 @@ IO_CTRL_PC5             Equ $20
 IO_CTRL_PC6             Equ $40
 IO_CTRL_INT             Equ $80         ; Enable external interrupt
 
-; Generic data port bit names
+; Data port bit names
 IO_DATA_PD0             Equ $01
 IO_DATA_PD1             Equ $02
 IO_DATA_PD2             Equ $04
@@ -36,7 +36,7 @@ IO_DATA_PD5             Equ $20
 IO_DATA_PD6             Equ $40
 IO_DATA_PD7             Equ $80
 
-; Dataport bit names corresponding to the physical port
+; Data port bit names corresponding to the physical port
 IO_DATA_UP              Equ $01         ; PD0
 IO_DATA_DOWN            Equ $02         ; PD1
 IO_DATA_LEFT            Equ $04         ; PD2
@@ -57,15 +57,19 @@ IO_DATA_READ_MODE       Equ $08         ; PD3
 
 
 ;-------------------------------------------------
-; Device ID's
+; Known device ID's (as returned by the connected device)
 ; ----------------
+IO_DEVICE_ID_MENACER    Equ $00
+IO_DEVICE_ID_JUSTIFIER  Equ $01         ; Konami light gun
+IO_DEVICE_ID_MOUSE      Equ $03
+IO_DEVICE_ID_TEAMPLAYER Equ $07
 IO_DEVICE_ID_MD_PAD     Equ $0d
 
 
 ;-------------------------------------------------
-; Device types. Some peripherals need specialized detection code and so we can not rely on Device ID alone (6 button controller for example)
+; Supported device types. Some peripherals need specialized detection code and so we can not rely on Device ID alone (6 button controller for example)
 ; ----------------
-IO_DEVICE_UNKNOWN                   Equ $00
+IO_DEVICE_UNSUPPORTED               Equ $00
 IO_DEVICE_MEGA_DRIVE_3_BUTTON       Equ $01
 IO_DEVICE_MEGA_DRIVE_6_BUTTON       Equ $02
 
@@ -98,6 +102,7 @@ MD_PAD_MODE             Equ $0800
         STRUCT_MEMBER w, deviceState
         STRUCT_MEMBER l, updateCallback
         STRUCT_MEMBER l, dataPortAddress
+        STRUCT_MEMBER b, deviceId
         STRUCT_MEMBER b, deviceType
     DEFINE_STRUCT_END
 
@@ -107,12 +112,12 @@ MD_PAD_MODE             Equ $0800
     DEFINE_VAR_END
 
     INIT_STRUCT ioDeviceState1
-        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnknownDevice
+        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnsupportedDevice
         INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL1_DATA
     INIT_STRUCT_END
 
     INIT_STRUCT ioDeviceState2
-        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnknownDevice
+        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnsupportedDevice
         INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL2_DATA
     INIT_STRUCT_END
 
@@ -175,6 +180,12 @@ _IO_RESET Macro
 ; Initialize IO hardware
 ; ----------------
 IOInit:
+_IO_UPDATE_DEVICE_INFO Macro deviceStateStruct
+            bsr     \deviceStateStruct\Init
+            lea     \deviceStateStruct, a0
+            bsr     IOUpdateDeviceInfo
+        Endm
+
         ; First wait for IO reset. Can be in partially initialized state if machine is reset.
         _IO_RESET
 
@@ -188,19 +199,13 @@ IOInit:
 
         _IO_WAIT
 
-        ; Get port 1 device info
-        bsr     ioDeviceState1Init
-        lea     ioDeviceState1, a0
-        bsr     IOUpdateDeviceInfo
-
-        ; Get port 2 device info
-        bsr     ioDeviceState2Init
-        lea     ioDeviceState2, a0
-        bsr     IOUpdateDeviceInfo
+        _IO_UPDATE_DEVICE_INFO ioDeviceState1
+        _IO_UPDATE_DEVICE_INFO ioDeviceState2
 
         ; Wait for IO reset so device readings down the line yield correct results
         _IO_RESET
 
+        Purge _IO_UPDATE_DEVICE_INFO
         rts
 
 
@@ -264,17 +269,22 @@ _IO_PROBE_DATA_PORT Macro
 ; Uses: d0-d3,d6/a1
 ; ----------------
 IOUpdateDeviceInfo:
+_IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
+            move.l  #\deviceUpdateCallback, updateCallback(a0)
+            move.b  #\deviceTypeId, deviceType(a0)
+        Endm
+
         movea.l dataPortAddress(a0), a1
 
         bsr     _IOGetDeviceId
+        move.b  d0, deviceId(a0)
 
         cmpi.b  #IO_DEVICE_ID_MD_PAD, d0
-        beq     .md3button
-        move.b  #IO_DEVICE_UNKNOWN, deviceType(a0)
-        move.l  #_IOUpdateUnknownDevice, updateCallback(a0)
+        beq     .mdpad
+        _IO_SET_DEVICE_TYPE IO_DEVICE_UNSUPPORTED, _IOUpdateUnsupportedDevice
         bra     .done
 
-    .md3button:
+    .mdpad:
         ; Mega Drive pad detected, now detect type (3 or 6 button)
 
         ; First reset IO (Because the device ID reading messed up the 6 button pad detection protocol)
@@ -292,16 +302,17 @@ IOUpdateDeviceInfo:
         _IO_Z80_UNLOCK
 
         andi.b   #$0f, d0
-        beq     .md6button
-        move.b  #IO_DEVICE_MEGA_DRIVE_3_BUTTON, deviceType(a0)
-        move.l  #_IOUpdate3ButtonPad, updateCallback(a0)
+        beq     .mdpad6
+
+        _IO_SET_DEVICE_TYPE IO_DEVICE_MEGA_DRIVE_3_BUTTON, _IOUpdate3ButtonPad
         bra     .done
 
-    .md6button:
-        move.b  #IO_DEVICE_MEGA_DRIVE_6_BUTTON, deviceType(a0)
-        move.l  #_IOUpdate6ButtonPad, updateCallback(a0)
+    .mdpad6:
+        _IO_SET_DEVICE_TYPE IO_DEVICE_MEGA_DRIVE_6_BUTTON, _IOUpdate6ButtonPad
 
     .done:
+
+        Purge _IO_SET_DEVICE_TYPE
         rts
 
 
@@ -407,5 +418,5 @@ _IOUpdate6ButtonPad:
 ; Input:
 ; - a0: Device state structure of device to update
 ; ----------------
-_IOUpdateUnknownDevice:
+_IOUpdateUnsupportedDevice:
         rts
