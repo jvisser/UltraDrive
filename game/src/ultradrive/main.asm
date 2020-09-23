@@ -18,21 +18,19 @@ PaletteDMATransfer:
 Main:
         DEBUG_MSG 'UltraDrive Started!'
 
-        VDP_DMA_TRANSFER PaletteDMATransfer
+        VDP_STATIC_DMA_TRANSFER PaletteDMATransfer
 
-        jsr     VDPEnableDisplay
+        VDP_REG_SET_BITS vdpRegMode2, MODE2_DISPLAY_ENABLE
 
-        ; Write to CRAM entry 0
-        VDP_SET_REG vdpRegIncr, 0
-        move.l #VDP_CMD_AS_CRAM_WRITE, MEM_VDP_CTRL
+        VDP_ADDR_SET WRITE, CRAM, $00, $00
 
     .mainLoop:
         jsr     VDPVSyncWait
         jsr     IOUpdateDeviceState
 
         ; Change color
-        moveq   #11, d0
-        moveq   #0, d1
+        moveq   #11, d0     ; Loop counter (12 buttons)
+        moveq   #0, d1      ; Current color index
         move.w  ioDeviceState1, d2
 
     .findButton:
@@ -41,10 +39,10 @@ Main:
         addq    #1, d1
         dbra    d0, .findButton
         bra     .mainLoop
+
     .pressFound:
-        add.w   d1, d1
         lea     Back, a0
-        lea     MEM_VDP_DATA, a1
-        move.w (a0, d1), (a1)
+        add.w   d1, d1
+        move.w (a0, d1), (MEM_VDP_DATA)
 
         bra     .mainLoop

@@ -39,10 +39,12 @@ DEFINE_STRUCT Macro name
 
 ;-------------------------------------------------
 ; Define struct type member
+; Input:
+; - 0: datatype (b/w/l)
 ; ----------------
-STRUCT_MEMBER Macro size, name
-\name       Rs.\size 1
-\name\_Size Equs '\size'
+STRUCT_MEMBER Macro name
+\name       Rs.\0 1
+\name\_Size Equs '\0'
     Endm
 
 
@@ -92,17 +94,17 @@ STRUCT Macro structName, varName
 ; Allocate memory for variable
 ; ----------------
 ; Input:
-; - 1: datatype (b/w/l)
-; - 2: Variable name
-; - 3; Optional: Number of allocations to make
-VAR Macro dataType, varName
+; - 0: datatype (b/w/l)
+; - 1: Variable name
+; - 2; Optional: Number of allocations to make
+VAR Macro varName
         If def(\varName)
             Inform 3, 'Variable "\varName\" already defined'
         EndIf
-        If (narg = 3)
-\varName Rs.\dataType \3
+        If (narg = 2)
+\varName Rs.\0 \2
         Else
-\varName Rs.\dataType 1
+\varName Rs.\0 1
         EndIf
     Endm
 

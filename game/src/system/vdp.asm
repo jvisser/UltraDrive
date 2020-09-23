@@ -48,21 +48,21 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
 
     ; VDPContext structure
     DEFINE_STRUCT VDPContext
-        STRUCT_MEMBER w, vdpRegMode1
-        STRUCT_MEMBER w, vdpRegMode2
-        STRUCT_MEMBER w, vdpRegMode3
-        STRUCT_MEMBER w, vdpRegMode4
-        STRUCT_MEMBER w, vdpRegPlaneA
-        STRUCT_MEMBER w, vdpRegPlaneB
-        STRUCT_MEMBER w, vdpRegSprite
-        STRUCT_MEMBER w, vdpRegWindow
-        STRUCT_MEMBER w, vdpRegHScroll
-        STRUCT_MEMBER w, vdpRegPlaneSize
-        STRUCT_MEMBER w, vdpRegWinX
-        STRUCT_MEMBER w, vdpRegWinY
-        STRUCT_MEMBER w, vdpRegIncr
-        STRUCT_MEMBER w, vdpRegBGCol
-        STRUCT_MEMBER w, vdpRegHRate
+        STRUCT_MEMBER.w vdpRegMode1
+        STRUCT_MEMBER.w vdpRegMode2
+        STRUCT_MEMBER.w vdpRegMode3
+        STRUCT_MEMBER.w vdpRegMode4
+        STRUCT_MEMBER.w vdpRegPlaneA
+        STRUCT_MEMBER.w vdpRegPlaneB
+        STRUCT_MEMBER.w vdpRegSprite
+        STRUCT_MEMBER.w vdpRegWindow
+        STRUCT_MEMBER.w vdpRegHScroll
+        STRUCT_MEMBER.w vdpRegPlaneSize
+        STRUCT_MEMBER.w vdpRegWinX
+        STRUCT_MEMBER.w vdpRegWinY
+        STRUCT_MEMBER.w vdpRegIncr
+        STRUCT_MEMBER.w vdpRegBGCol
+        STRUCT_MEMBER.w vdpRegHRate
     DEFINE_STRUCT_END
 
     ; Allocate VDPContext
@@ -91,37 +91,67 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
 
 
 ;-------------------------------------------------
-; Update VDP register with cached value
+; Write cached register value to VDP
 ; ----------------
-VDP_SYNC_REG Macro vdpReg
+_VDP_REG_SYNC Macro vdpReg
         move.w  (vdpContext + \vdpReg), (MEM_VDP_CTRL)
-    Endm
-
-
-;-------------------------------------------------
-; Enable a VDP flag in the specified register
-; ----------------
-VDP_REG_ENABLE Macro vdpReg, flag
-        ori.w   #\flag, (vdpContext + \vdpReg)
-        VDP_SYNC_REG \vdpReg
-    Endm
-
-
-;-------------------------------------------------
-; Disable a VDP flag in the specified register
-; ----------------
-VDP_REG_DISABLE Macro vdpReg, flag
-        andi.w   #~\flag, (vdpContext + \vdpReg)
-        VDP_SYNC_REG \vdpReg
     Endm
 
 
 ;-------------------------------------------------
 ; Set register value
 ; ----------------
-VDP_SET_REG Macro vdpReg, value
+VDP_REG_SET Macro vdpReg, value
         move.b   #\value, (vdpContext + \vdpReg + 1)
-        VDP_SYNC_REG \vdpReg
+
+        _VDP_REG_SYNC \vdpReg
+    Endm
+
+
+;-------------------------------------------------
+; Enable a VDP flag in the specified register
+; ----------------
+VDP_REG_SET_BITS Macro vdpReg, flag
+        ori.b   #\flag, (vdpContext + \vdpReg + 1)
+
+        _VDP_REG_SYNC \vdpReg
+    Endm
+
+
+;-------------------------------------------------
+; Disable a VDP flag in the specified register
+; ----------------
+VDP_REG_RESET_BITS Macro vdpReg, flag
+        andi.b   #~\flag, (vdpContext + \vdpReg + 1)
+
+        _VDP_REG_SYNC \vdpReg
+    Endm
+
+
+;-------------------------------------------------
+; Set bit field
+; ----------------
+VDP_REG_SET_BIT_FIELD Macro vdpReg, bitFieldMask, bitFieldValue
+        andi.b  #~\bitFieldMask, (vdpContext + \vdpReg + 1)
+        ori.b   #\bitFieldValue, (vdpContext + \vdpReg + 1)
+
+        _VDP_REG_SYNC \vdpReg
+    Endm
+
+
+;----------------------------------------------
+; Set vram address, access type and data stride
+; ----------------
+VDP_ADDR_SET Macro accessType, ramType, address, dataStride
+        If (narg = 4)
+            VDP_REG_SET vdpRegIncr, \dataStride
+        EndIf
+
+        If (strcmp('\ramType', 'VRAM'))
+            move.l #VDP_CMD_AS_VRAM_\accessType | ((\address & $3fff) << 16) | ((\address & $c000) >> 14), (MEM_VDP_CTRL)
+        Else
+            move.l #VDP_CMD_AS_\ramType\_\accessType | (\address << 16), (MEM_VDP_CTRL)
+        EndIf
     Endm
 
 
@@ -156,11 +186,11 @@ _VDPUnlock:
 ; Uses: d0/a0-a1
 _VDPInitRegisters:
         bsr     vdpContextInit
-        
+
         lea     vdpContext, a0
         lea     MEM_VDP_CTRL, a1
         move.w  #(VDPContext_Size / SIZE_WORD) - 1, d0
-        
+
     .vdpRegisterSetLoop:
         move.w  (a0)+, (a1)
         dbra    d0, .vdpRegisterSetLoop
@@ -171,10 +201,11 @@ _VDPInitRegisters:
 ; Produce code that clears specified VRAM type
 ; ----------------
 ; Uses: d0-d1/a0
-_VRAM_CLEAR Macro vramAddrCommand, vramSize
+_VDP_VRAM_CLEAR Macro ramType
+            VDP_ADDR_SET WRITE, \ramType, $00, $02
+
             moveq   #0, d1
-            move.w  #(\vramSize\ / SIZE_LONG) - 1, d0
-            move.l  #\vramAddrCommand\, MEM_VDP_CTRL
+            move.w  #\ramType\_SIZE_LONG - 1, d0
             lea     MEM_VDP_DATA, a0
 
         .clrVramLoop:
@@ -188,7 +219,7 @@ _VRAM_CLEAR Macro vramAddrCommand, vramSize
 ; ----------------
 ; Uses: d0-d1/a0
 VDPClearVRAM:
-        _VRAM_CLEAR VDP_CMD_AS_VRAM_WRITE, VRAM_SIZE_BYTE
+        _VDP_VRAM_CLEAR VRAM
         rts
 
 
@@ -197,7 +228,7 @@ VDPClearVRAM:
 ; ----------------
 ; Uses: d0-d1/a0
 VDPClearVSRAM:
-        _VRAM_CLEAR VDP_CMD_AS_VSRAM_WRITE, VSRAM_SIZE_BYTE
+        _VDP_VRAM_CLEAR VSRAM
         rts
 
 
@@ -206,24 +237,8 @@ VDPClearVSRAM:
 ; ----------------
 ; Uses: d0-d1/a0
 VDPClearCRAM:
-        _VRAM_CLEAR VDP_CMD_AS_CRAM_WRITE, CRAM_SIZE_BYTE
+        _VDP_VRAM_CLEAR CRAM
         rts
-
-
-;-------------------------------------------------
-; Disable display
-; ----------------
-VDPEnableDisplay:
-    VDP_REG_ENABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
-    rts;
-
-
-;-------------------------------------------------
-; Disable display
-; ----------------
-VDPDisableDisplay:
-    VDP_REG_ENABLE vdpRegMode2, MODE2_DISPLAY_ENABLE
-    rts;
 
 
 ;-------------------------------------------------
@@ -237,7 +252,7 @@ VDPVSyncWait:
         btst    #3, (a0)
         bne     .waitVBLankEndLoop
 
-    .waitVBlankStart:
+    .waitVBlankStartLoop:
         btst    #3, (a0)
-        beq     .waitVBlankStart
+        beq     .waitVBlankStartLoop
         rts
