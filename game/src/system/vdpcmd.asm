@@ -55,7 +55,7 @@ MODE1_HVCOUNTER_DISABLE     Equ $10          ; Disable HV Counter
 ; Mode 2 register
 MODE2_V30_CELL              Equ $08          ; Enable vertical 30 cell mode (PAL only)
 MODE2_DMA_ENABLE            Equ $10          ; Enable DMA
-MODE2_HBLANK_ENABLE         Equ $20          ; Enable vertical blank interrupt signal
+MODE2_VBLANK_ENABLE         Equ $20          ; Enable vertical blank interrupt signal
 MODE2_DISPLAY_ENABLE        Equ $40          ; Enable display
 
 ; Mode 3 register
