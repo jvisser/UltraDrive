@@ -217,6 +217,8 @@ _IO_UPDATE_DEVICE Macro deviceStateStruct
 
         _IO_UPDATE_DEVICE ioDeviceState1
         _IO_UPDATE_DEVICE ioDeviceState2
+
+        Purge _IO_UPDATE_DEVICE
         rts;
 
 
@@ -342,6 +344,8 @@ _IO_GET_DEVICE_ID_BIT Macro bits
         _IO_GET_DEVICE_ID_BIT (IO_DATA_PD2 | IO_DATA_PD3)
 
         _IO_Z80_UNLOCK
+
+        Purge _IO_GET_DEVICE_ID_BIT
         rts
 
 
