@@ -129,7 +129,7 @@ __\ALLOCATION_TYPE\_RAM_ALLOCATION_PTR = __rs
 ; Start structure initialization data
 ; ----------------
 INIT_STRUCT Macro structVarName
-__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1
+__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1  ; TODO: Use macro stack
         SECTION_START S_DATA
 
         \structVarName\_InitData:
