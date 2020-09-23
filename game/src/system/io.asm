@@ -99,11 +99,11 @@ MD_PAD_MODE             Equ $0800
 ; Cached device readings
 ; ----------------
     DEFINE_STRUCT IODeviceState
-        STRUCT_MEMBER w, deviceState
-        STRUCT_MEMBER l, updateCallback
-        STRUCT_MEMBER l, dataPortAddress
-        STRUCT_MEMBER b, deviceId
-        STRUCT_MEMBER b, deviceType
+        STRUCT_MEMBER.w deviceState
+        STRUCT_MEMBER.l updateCallback
+        STRUCT_MEMBER.l dataPortAddress
+        STRUCT_MEMBER.b deviceId
+        STRUCT_MEMBER.b deviceType
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
