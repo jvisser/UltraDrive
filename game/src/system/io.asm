@@ -393,9 +393,9 @@ _IOUpdate6ButtonPad:
         _IO_TH_HIGH     ; NB: TH must be left high at the end of the 6 button pad access sequence!
         _IO_WAIT
 
-        _IO_Z80_UNLOCK
-
         move.b  (a1), d0
+
+        _IO_Z80_UNLOCK
 
         andi.b  #(IO_DATA_READ_X | IO_DATA_READ_Y | IO_DATA_READ_Z | IO_DATA_READ_MODE), d0
         move.b  d0, deviceState(a0)
