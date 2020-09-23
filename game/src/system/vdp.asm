@@ -72,8 +72,8 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
 
     ; VDPContext initial value (sensible defaults)
     INIT_STRUCT vdpContext
-        INIT_STRUCT_MEMBER vdpRegMode1,     VDP_CMD_RS_MODE1
-        INIT_STRUCT_MEMBER vdpRegMode2,     VDP_CMD_RS_MODE2        | MODE2_DMA_ENABLE
+        INIT_STRUCT_MEMBER vdpRegMode1,     VDP_CMD_RS_MODE1        | MODE1_HIGH_COLOR
+        INIT_STRUCT_MEMBER vdpRegMode2,     VDP_CMD_RS_MODE2        | MODE2_MODE_5          | MODE2_DMA_ENABLE
         INIT_STRUCT_MEMBER vdpRegMode3,     VDP_CMD_RS_MODE3
         INIT_STRUCT_MEMBER vdpRegMode4,     VDP_CMD_RS_MODE4        | MODE4_H40_CELL
         INIT_STRUCT_MEMBER vdpRegPlaneA,    VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_c000
