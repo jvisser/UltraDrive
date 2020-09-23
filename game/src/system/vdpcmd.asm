@@ -18,10 +18,9 @@ VDP_CMD_AS_DMA              Equ $00000080   ; Or with a specific AS write comman
 
 ;-------------------------------------------------
 ; VDP register set commands (or with register value before writing to VDP control port)
-; Fixed value bits are alread applied in accordance with official documentation
 ; ----------------
-VDP_CMD_RS_MODE1            Equ $8004        ; Mode register #1 (Fixed to 9 bit color mode)
-VDP_CMD_RS_MODE2            Equ $8104        ; Mode register #2 (Fixed to display Mode 5)
+VDP_CMD_RS_MODE1            Equ $8000        ; Mode register #1 (Fixed to 9 bit color mode)
+VDP_CMD_RS_MODE2            Equ $8100        ; Mode register #2 (Fixed to display Mode 5)
 VDP_CMD_RS_MODE3            Equ $8b00        ; Mode register #3
 VDP_CMD_RS_MODE4            Equ $8c00        ; Mode register #4
 VDP_CMD_RS_PLANE_A          Equ $8200        ; Plane A table address
@@ -50,9 +49,11 @@ VDP_CMD_RS_GENS_LOG         Equ $9e00        ; Virtual register used for debug l
 
 ; Mode 1 register
 MODE1_HBLANK_ENABLE         Equ $02          ; Enable horizontal blank interrupt signal
+MODE1_HIGH_COLOR            Equ $04          ; Mega Drive 9 bit color mode (3 otherwise)
 MODE1_HVCOUNTER_DISABLE     Equ $10          ; Disable HV Counter
 
 ; Mode 2 register
+MODE2_MODE_5                Equ $04          ; Mega Drive display mode 5 (else Master System mode 4)
 MODE2_V30_CELL              Equ $08          ; Enable vertical 30 cell mode (PAL only)
 MODE2_DMA_ENABLE            Equ $10          ; Enable DMA
 MODE2_VBLANK_ENABLE         Equ $20          ; Enable vertical blank interrupt signal
