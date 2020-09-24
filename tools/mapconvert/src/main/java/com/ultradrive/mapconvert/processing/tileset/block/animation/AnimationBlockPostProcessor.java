@@ -1,11 +1,10 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
-import com.google.common.collect.ImmutableList;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
-import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocator;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,18 +24,18 @@ public class AnimationBlockPostProcessor
 
     private final List<Block> blocks;
     private final MetaTileMetrics blockMetrics;
+    private final PatternAllocator patternAllocator;
     private final ImageBlockPatternProducer imagePatternProducer;
-    private final ImageBlockPatternReferenceProducer patternReferenceProducer;
 
     public AnimationBlockPostProcessor(List<Block> blocks,
                                        MetaTileMetrics blockMetrics,
-                                       ImageBlockPatternProducer imagePatternProducer,
-                                       ImageBlockPatternReferenceProducer patternReferenceProducer)
+                                       PatternAllocator patternAllocator,
+                                       ImageBlockPatternProducer imagePatternProducer)
     {
         this.blocks = blocks;
         this.blockMetrics = blockMetrics;
+        this.patternAllocator = patternAllocator;
         this.imagePatternProducer = imagePatternProducer;
-        this.patternReferenceProducer = patternReferenceProducer;
     }
 
     public AnimationBlockPostProcessingResult process()
@@ -50,16 +49,16 @@ public class AnimationBlockPostProcessor
 
         AnimationOptimizer optimizer = new AnimationOptimizer(
                 createAnimations(sourceAnimations, createAnimationFrames(allSourceAnimationFrames)),
-                patternReferenceProducer);
+                patternAllocator);
 
         AnimationOptimizationResult optimizedAnimations = optimizer.optimize();
 
         List<Block> resultBlocks = patchAnimationBlockPatternReferences(optimizedAnimations);
 
         return new AnimationBlockPostProcessingResult(
-                ImmutableList.copyOf(resultBlocks),
-                ImmutableList.copyOf(optimizedAnimations.getOptimizedAnimations()),
-                ImmutableList.copyOf(optimizedAnimations.getAnimationFrames()));
+                resultBlocks,
+                optimizedAnimations.getOptimizedAnimations(),
+                optimizedAnimations.getAnimationFrames());
     }
 
 
@@ -93,18 +92,15 @@ public class AnimationBlockPostProcessor
     {
         Map<SourceAnimation, Animation> resultAnimationMapping = new HashMap<>();
 
-        int currentPatternId = patternReferenceProducer.getNextPatternId();
         for (SourceAnimation sourceAnimation : sourceAnimations)
         {
-            Animation resultAnimation = createAnimation(animationFrameMap, currentPatternId, sourceAnimation);
+            Animation resultAnimation = createAnimation(animationFrameMap, sourceAnimation);
             resultAnimationMapping.put(sourceAnimation, resultAnimation);
-
-            currentPatternId += resultAnimation.getSize();
         }
         return resultAnimationMapping;
     }
 
-    private Animation createAnimation(Map<SourceAnimationFrame, AnimationFrame> animationFrameMap, int currentPatternId, SourceAnimation sourceAnimation)
+    private Animation createAnimation(Map<SourceAnimationFrame, AnimationFrame> animationFrameMap, SourceAnimation sourceAnimation)
     {
         List<AnimationFrameReference> animationFrames = sourceAnimation.getAnimationFrameReferences().stream()
                 .map(sourceAnimationFrameReference -> new AnimationFrameReference(
@@ -112,8 +108,7 @@ public class AnimationBlockPostProcessor
                         sourceAnimationFrameReference.getFrameTime()))
                 .collect(toList());
 
-        return new Animation(sourceAnimation.getAnimationId(), animationFrames, sourceAnimation.getProperties(),
-                             currentPatternId);
+        return new Animation(sourceAnimation.getAnimationId(), animationFrames, sourceAnimation.getProperties());
     }
 
     private List<Block> patchAnimationBlockPatternReferences(AnimationOptimizationResult optimizedAnimations)

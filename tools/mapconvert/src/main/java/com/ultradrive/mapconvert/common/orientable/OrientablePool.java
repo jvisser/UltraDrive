@@ -3,16 +3,20 @@ package com.ultradrive.mapconvert.common.orientable;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nonnull;
 
 
-public class OrientablePool<T extends OrientablePoolable<T, R>, R extends OrientableReference<R>> implements Iterable<T>
+public class OrientablePool<T extends OrientablePoolable<T, R>, R extends OrientableReference<R>>
+        implements OrientableReferenceProducer<T, R>, Iterable<T>
 {
     private final Map<T, R> deduplicationIndex = new HashMap<>();
     private final List<T> orientableCache = new ArrayList<>();
+    private final Set<OrientablePoolListener<T, R>> listeners = new HashSet<>();
 
     @Override
     @Nonnull
@@ -55,7 +59,14 @@ public class OrientablePool<T extends OrientablePoolable<T, R>, R extends Orient
         deduplicationIndex.put(orientable, newReference);
         orientableCache.add(orientable);
 
+        notify(orientable, newReference);
+
         return newOrientableReferenceBuilder;
+    }
+
+    private void notify(T orientable, R newReference)
+    {
+        listeners.forEach(l -> l.onPoolInsert(newReference, orientable));
     }
 
     public T get(int referenceId)
@@ -71,5 +82,10 @@ public class OrientablePool<T extends OrientablePoolable<T, R>, R extends Orient
     public List<T> getCache()
     {
         return ImmutableList.copyOf(orientableCache);
+    }
+
+    public void addListener(OrientablePoolListener<T, R> listener)
+    {
+        listeners.add(listener);
     }
 }

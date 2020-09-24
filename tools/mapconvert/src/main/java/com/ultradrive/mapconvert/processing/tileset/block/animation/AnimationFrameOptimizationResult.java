@@ -58,4 +58,9 @@ class AnimationFrameOptimizationResult
     {
         return optimizedAnimationFrameMapping;
     }
+
+    public int getSize()
+    {
+        return getOptimizedFrames().iterator().next().getSize();
+    }
 }

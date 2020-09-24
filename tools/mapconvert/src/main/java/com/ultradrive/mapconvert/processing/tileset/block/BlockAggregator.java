@@ -6,6 +6,8 @@ import com.ultradrive.mapconvert.datasource.model.ResourceReference;
 import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlockPostProcessingResult;
 import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlockPostProcessor;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
+import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocator;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,8 +17,8 @@ public class BlockAggregator
 {
     private final BlockModelProducer blockModelProducer;
     private final ImageBlockPatternProducer imagePatternProducer;
+    private final PatternAllocator patternAllocator;
     private final MetaTileMetrics blockMetrics;
-    private final int patternBaseId;
 
     private final BlockFactory blockFactory;
     private final BlockPool blockPool;
@@ -24,15 +26,15 @@ public class BlockAggregator
 
     public BlockAggregator(BlockModelProducer blockModelProducer,
                            ImageBlockPatternProducer imagePatternProducer,
-                           MetaTileMetrics blockMetrics,
-                           int patternBaseId)
+                           PatternAllocator patternAllocator,
+                           MetaTileMetrics blockMetrics)
     {
         this.blockModelProducer = blockModelProducer;
         this.imagePatternProducer = imagePatternProducer;
         this.blockMetrics = blockMetrics;
-        this.patternBaseId = patternBaseId;
+        this.patternAllocator = patternAllocator;
 
-        this.blockFactory = new BlockFactory(blockMetrics, patternBaseId, imagePatternProducer);
+        this.blockFactory = new BlockFactory(blockMetrics, new ImageBlockPatternReferenceProducer(imagePatternProducer, patternAllocator));
         this.blockPool = new BlockPool();
         this.blockReferenceIndex = new HashMap<>();
     }
@@ -71,18 +73,17 @@ public class BlockAggregator
         AnimationBlockPostProcessor animationBlockPostProcessor =
                 new AnimationBlockPostProcessor(blockPool.getCache(),
                                                 blockMetrics,
-                                                imagePatternProducer,
-                                                blockFactory.getImagePatternReferenceProducer());
+                                                patternAllocator,
+                                                imagePatternProducer);
 
         AnimationBlockPostProcessingResult animationProcessingResult = animationBlockPostProcessor.process();
 
         return new BlockTileset(
-                imagePatternProducer.getPalette(),
-                blockFactory.getStaticPatterns(),
                 animationProcessingResult.getBlocks(),
-                animationProcessingResult.getAnimations(),
-                animationProcessingResult.getAnimationFrames(),
                 blockMetrics,
-                patternBaseId);
+                patternAllocator.compile(),
+                imagePatternProducer.getPalette(),
+                animationProcessingResult.getAnimations(),
+                animationProcessingResult.getAnimationFrames());
     }
 }

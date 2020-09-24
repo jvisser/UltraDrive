@@ -2,21 +2,20 @@ package com.ultradrive.mapconvert.processing.tileset.block.image;
 
 import com.ultradrive.mapconvert.processing.tileset.block.BlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
-import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternPool;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReferenceProducer;
 
 
-public class ImageBlockPatternReferenceProducer implements BlockPatternReferenceProducer
+public class ImageBlockPatternReferenceProducer implements BlockPatternReferenceProducer, PatternReferenceProducer
 {
     private final ImageBlockPatternProducer imagePatternProducer;
-    private final int patternBaseId;
-    private final PatternPool patternPool;
+    private final PatternReferenceProducer patternReferenceProducer;
 
-    public ImageBlockPatternReferenceProducer(ImageBlockPatternProducer imagePatternProducer, int patternBaseId)
+    public ImageBlockPatternReferenceProducer(ImageBlockPatternProducer imagePatternProducer,
+                                              PatternReferenceProducer patternReferenceProducer)
     {
         this.imagePatternProducer = imagePatternProducer;
-        this.patternBaseId = patternBaseId;
-        this.patternPool = new PatternPool();
+        this.patternReferenceProducer = patternReferenceProducer;
     }
 
     @Override
@@ -30,20 +29,9 @@ public class ImageBlockPatternReferenceProducer implements BlockPatternReference
         return patternReferenceBuilder;
     }
 
+    @Override
     public PatternReference.Builder getReference(Pattern pattern)
     {
-        PatternReference.Builder patternReferenceBuilder = patternPool.getReference(pattern);
-        patternReferenceBuilder.offsetReference(patternBaseId);
-        return patternReferenceBuilder;
-    }
-
-    public int getNextPatternId()
-    {
-        return patternPool.getSize() + patternBaseId;
-    }
-
-    public PatternPool getPatternPool()
-    {
-        return patternPool;
+        return patternReferenceProducer.getReference(pattern);
     }
 }
