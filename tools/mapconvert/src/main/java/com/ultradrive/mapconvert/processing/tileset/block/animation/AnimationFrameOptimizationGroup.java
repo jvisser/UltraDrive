@@ -1,9 +1,9 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
 import com.google.common.collect.Sets;
-import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReferenceProducer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -21,9 +21,9 @@ import static java.util.stream.Collectors.toSet;
 class AnimationFrameOptimizationGroup
 {
     private final Set<AnimationFrame> inputFrames;
-    private final ImageBlockPatternReferenceProducer patternReferenceProducer;
+    private final PatternReferenceProducer patternReferenceProducer;
 
-    AnimationFrameOptimizationGroup(Set<AnimationFrame> inputFrames, ImageBlockPatternReferenceProducer patternReferenceProducer)
+    AnimationFrameOptimizationGroup(Set<AnimationFrame> inputFrames, PatternReferenceProducer patternReferenceProducer)
     {
         this.inputFrames = inputFrames;
         this.patternReferenceProducer = patternReferenceProducer;

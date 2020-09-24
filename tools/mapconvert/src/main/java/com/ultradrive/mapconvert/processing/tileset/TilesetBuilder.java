@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset;
 
+import com.ultradrive.mapconvert.config.PatternAllocationConfiguration;
 import com.ultradrive.mapconvert.datasource.BlockDataSource;
 import com.ultradrive.mapconvert.datasource.ChunkDataSource;
 import com.ultradrive.mapconvert.datasource.CollisionDataSource;
@@ -8,6 +9,7 @@ import com.ultradrive.mapconvert.processing.tileset.block.BlockAggregator;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.image.TileSetImageFactory;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocator;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkAggregator;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import com.ultradrive.mapconvert.processing.tileset.collision.CollisionFieldSet;
@@ -26,7 +28,8 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
 
     private final String tileSetName;
 
-    public static TilesetBuilder fromTilesetSource(TilesetDataSource tilesetDataSource, int basePatternId)
+    public static TilesetBuilder fromTilesetSource(TilesetDataSource tilesetDataSource,
+                                                   PatternAllocationConfiguration patternAllocationConfiguration)
     {
         verifyDimensions(tilesetDataSource);
 
@@ -36,8 +39,8 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
                 new BlockAggregator(
                         blockDataSource,
                         new ImageBlockPatternProducer(TileSetImageFactory.fromURL(blockDataSource.getBlockImageSource()), blockMetrics),
-                        blockMetrics,
-                        basePatternId);
+                        createPatternAllocator(patternAllocationConfiguration),
+                        blockMetrics);
 
         ChunkDataSource chunkDataSource = tilesetDataSource.getChunkDataSource();
         ChunkAggregator chunkAggregator =
@@ -71,6 +74,24 @@ public class TilesetBuilder implements TilesetReferenceBuilderSource
             throw new IllegalArgumentException("Chunk and block sizes do not align");
         }
     }
+
+    private static PatternAllocator createPatternAllocator(
+            PatternAllocationConfiguration patternAllocationConfiguration)
+    {
+        PatternAllocator patternAllocator = new PatternAllocator();
+
+        patternAllocationConfiguration.getPatternRanges().forEach(patternRange -> patternAllocator
+                .addSection(patternRange.getId(),
+                            patternRange.getStartPatternId(),
+                            patternRange.getEndPatternId()));
+
+        patternAllocationConfiguration.getPreAllocatedPatterns().forEach(preAllocatedPattern -> patternAllocator
+                .addPreAllocatedPattern(preAllocatedPattern.getPatternId(),
+                                        preAllocatedPattern.getPattern()));
+
+        return patternAllocator;
+    }
+
 
     public TilesetBuilder(BlockAggregator blockAggregator,
                           ChunkAggregator chunkAggregator,

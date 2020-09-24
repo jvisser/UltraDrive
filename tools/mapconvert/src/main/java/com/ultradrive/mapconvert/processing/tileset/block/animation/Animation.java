@@ -15,7 +15,12 @@ public class Animation implements Iterable<AnimationFrameReference>
     private final Map<String, Object> properties;
     private final int patternBaseId;
 
-    public Animation(String animationId, List<AnimationFrameReference> animationFrames,
+    Animation(String animationId, List<AnimationFrameReference> animationFrames, Map<String, Object> properties)
+    {
+        this(animationId, animationFrames, properties, 0);
+    }
+
+    Animation(String animationId, List<AnimationFrameReference> animationFrames,
                      Map<String, Object> properties, int patternBaseId)
     {
         this.animationId = animationId;

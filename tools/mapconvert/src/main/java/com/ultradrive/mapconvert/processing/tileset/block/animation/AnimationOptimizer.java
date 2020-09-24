@@ -1,6 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
-import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocator;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,13 +16,12 @@ import static java.util.stream.Collectors.toSet;
 class AnimationOptimizer
 {
     private final Map<SourceAnimation, Animation> sourceAnimations;
-    private final ImageBlockPatternReferenceProducer patternReferenceProducer;
+    private final PatternAllocator patternAllocator;
 
-    AnimationOptimizer(Map<SourceAnimation, Animation> sourceAnimations,
-                       ImageBlockPatternReferenceProducer patternReferenceProducer)
+    AnimationOptimizer(Map<SourceAnimation, Animation> sourceAnimations, PatternAllocator patternAllocator)
     {
         this.sourceAnimations = sourceAnimations;
-        this.patternReferenceProducer = patternReferenceProducer;
+        this.patternAllocator = patternAllocator;
     }
 
     public AnimationOptimizationResult optimize()
@@ -35,21 +34,19 @@ class AnimationOptimizer
                 .map(AnimationFrameOptimizationGroup::optimize)
                 .collect(toList());
 
-        int currentPatternId = patternReferenceProducer.getNextPatternId();
         for (Map.Entry<SourceAnimation, Animation> sourceAnimationAnimationEntry : sourceAnimations.entrySet())
         {
-            Animation unoptimizedAnimationFrame = sourceAnimationAnimationEntry.getValue();
+            Animation unoptimizedAnimation = sourceAnimationAnimationEntry.getValue();
 
             AnimationFrameOptimizationResult optimizationResultForAnimation =
-                    findAnimationOptimizationResult(animationFrameOptimizations, unoptimizedAnimationFrame);
+                    findAnimationOptimizationResult(animationFrameOptimizations, unoptimizedAnimation);
 
-            Animation optimizedAnimation = unoptimizedAnimationFrame
-                    .remap(optimizationResultForAnimation.getOptimizedAnimationFrameMapping(), currentPatternId);
+            Animation optimizedAnimation = unoptimizedAnimation
+                    .remap(optimizationResultForAnimation.getOptimizedAnimationFrameMapping(),
+                           patternAllocator.reserve(optimizationResultForAnimation.getSize()));
 
             optimizedAnimations.put(sourceAnimationAnimationEntry.getKey(), optimizedAnimation);
             optimizationGroupsByAnimation.put(optimizedAnimation, optimizationResultForAnimation);
-
-            currentPatternId += optimizedAnimation.getSize();
         }
 
         return new AnimationOptimizationResult(
@@ -98,7 +95,7 @@ class AnimationOptimizer
 
         return frameGroupMap.values().stream()
                 .distinct()
-                .map(inputFrames -> new AnimationFrameOptimizationGroup(inputFrames, patternReferenceProducer))
+                .map(inputFrames -> new AnimationFrameOptimizationGroup(inputFrames, patternAllocator))
                 .collect(toSet());
     }
 }
