@@ -5,6 +5,7 @@ import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockTileset;
 import com.ultradrive.mapconvert.processing.tileset.block.image.TilesetImagePalette;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocation;
 import com.ultradrive.mapconvert.processing.tileset.chunk.Chunk;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkTileset;
 import com.ultradrive.mapconvert.processing.tileset.collision.CollisionFieldSet;
@@ -85,5 +86,10 @@ public class Tileset implements PropertySource
     public TilesetImagePalette getPalette()
     {
         return blockTileset.getPalette();
+    }
+
+    public PatternAllocation getPatternAllocation()
+    {
+        return blockTileset.getPatternAllocation();
     }
 }

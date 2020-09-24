@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.ultradrive.mapconvert.config.PatternAllocationConfiguration;
 import com.ultradrive.mapconvert.datasource.MapDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
@@ -18,12 +19,12 @@ import static java.util.stream.Collectors.toMap;
 public class TileMapCompiler
 {
     private final Set<MapDataSource> mapDataSources;
-    private final int basePatternId;
+    private final PatternAllocationConfiguration patternAllocationConfiguration;
 
-    public TileMapCompiler(int basePatternId)
+    public TileMapCompiler(PatternAllocationConfiguration patternAllocationConfiguration)
     {
+        this.patternAllocationConfiguration = patternAllocationConfiguration;
         this.mapDataSources = new HashSet<>();
-        this.basePatternId = basePatternId;
     }
 
     public void addMapDataSource(MapDataSource mapDataSource)
@@ -43,7 +44,7 @@ public class TileMapCompiler
             TilesetDataSource tilesetDataSource = mapDataSource.getTilesetDataSource();
             TilesetBuilder tilesetBuilder = tilesetBuildersByTilesetDataSource
                     .computeIfAbsent(tilesetDataSource,
-                                     tsd -> TilesetBuilder.fromTilesetSource(tsd, basePatternId));
+                                     tsd -> TilesetBuilder.fromTilesetSource(tsd, patternAllocationConfiguration));
 
             mapBuilders.put(mapDataSource, new TileMapBuilder(tilesetBuilder, mapDataSource));
         }

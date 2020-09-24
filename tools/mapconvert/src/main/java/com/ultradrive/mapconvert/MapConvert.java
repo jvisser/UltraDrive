@@ -31,7 +31,10 @@ public final class MapConvert
 
         TileMapCompilation mapCompilation = compileMaps(config);
 
-        export(config, mapCompilation);
+        if (config.isProcessTemplates())
+        {
+            export(config, mapCompilation);
+        }
 
         if (config.isSaveImages())
         {
@@ -56,7 +59,7 @@ public final class MapConvert
     {
         TiledObjectFactory tiledObjectFactory = new TiledObjectFactory(config.getObjectTypesFile());
 
-        TileMapCompiler mapCompiler = new TileMapCompiler(config.getBasePatternId());
+        TileMapCompiler mapCompiler = new TileMapCompiler(config.getPatternAllocationConfiguration());
 
         Files.walk(Path.of(config.getMapBaseDirectory()), config.getDirectorySearchDepth())
                 .filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))

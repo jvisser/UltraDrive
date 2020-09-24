@@ -47,11 +47,21 @@ public class PatternReference extends TileReference<PatternReference>
         {
             this.priority = priority;
         }
+
+        public Integer getReferenceId()
+        {
+            return referenceId;
+        }
     }
 
     public PatternReference(int patternId)
     {
-        this(patternId, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT);
+        this(patternId, Orientation.DEFAULT);
+    }
+
+    public PatternReference(int patternId, Orientation orientation)
+    {
+        this(patternId, PatternPaletteId.FIRST, PatternPriority.LOW, orientation);
     }
 
     public PatternReference(int patternId, PatternPaletteId paletteId, PatternPriority priority, Orientation orientation)

@@ -1,8 +1,10 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
+import com.google.common.collect.ImmutableList;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
-
 import java.util.List;
+import java.util.Set;
+
 
 public class AnimationBlockPostProcessingResult
 {
@@ -10,11 +12,11 @@ public class AnimationBlockPostProcessingResult
     private final List<Animation> animations;
     private final List<AnimationFrame> animationFrames;
 
-    public AnimationBlockPostProcessingResult(List<Block> blocks, List<Animation> animations, List<AnimationFrame> animationFrames)
+    AnimationBlockPostProcessingResult(List<Block> blocks, List<Animation> animations, Set<AnimationFrame> animationFrames)
     {
-        this.blocks = blocks;
-        this.animations = animations;
-        this.animationFrames = animationFrames;
+        this.blocks = ImmutableList.copyOf(blocks);
+        this.animations = ImmutableList.copyOf(animations);
+        this.animationFrames = ImmutableList.copyOf(animationFrames);
     }
 
     public List<Block> getBlocks()
