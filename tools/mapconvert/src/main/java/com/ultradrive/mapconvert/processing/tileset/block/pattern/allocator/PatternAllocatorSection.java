@@ -52,6 +52,7 @@ class PatternAllocatorSection
 
     public PatternAllocationArea compile()
     {
-        return new PatternAllocationArea(id, startPatternId, reservedPatterns, allocatedPatterns);
+        return new PatternAllocationArea(id, endPatternPatternId - startPatternId + 1,
+                                         startPatternId, reservedPatterns, allocatedPatterns);
     }
 }

@@ -4,8 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+
+import static java.lang.String.format;
 
 
 public class PatternAllocation implements Iterable<PatternAllocationArea>
@@ -37,6 +41,15 @@ public class PatternAllocation implements Iterable<PatternAllocationArea>
                 .filter(allocation -> allocation.hasPattern(patternReferenceId))
                 .map(allocation -> allocation.getPattern(patternReferenceId))
                 .findFirst();
+    }
+
+    public PatternAllocationArea getAllocationArea(String id)
+    {
+        return patternAllocationAreas.stream()
+                .filter(patternAllocationArea -> Objects.equals(patternAllocationArea.getId(), id))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(format("Area with id '%s' not found", id)));
+
     }
 
     public List<PatternAllocationArea> getPatternAllocationAreas()

@@ -8,13 +8,15 @@ import java.util.List;
 public class PatternAllocationArea
 {
     private final String id;
+    private final int size;
     private final int basePatternId;
     private final int reservedPatternSize;
     private final List<Pattern> patterns;
 
-    PatternAllocationArea(String id, int basePatternId, int reservedPatternSize, List<Pattern> patterns)
+    PatternAllocationArea(String id, int size, int basePatternId, int reservedPatternSize, List<Pattern> patterns)
     {
         this.id = id;
+        this.size = size;
         this.basePatternId = basePatternId;
         this.reservedPatternSize = reservedPatternSize;
         this.patterns = ImmutableList.copyOf(patterns);
@@ -33,6 +35,11 @@ public class PatternAllocationArea
     public String getId()
     {
         return id;
+    }
+
+    public int getSize()
+    {
+        return size;
     }
 
     public int getBasePatternId()
