@@ -10,7 +10,7 @@ Back:
     dc.w $0e00, $00e0, $000e, $0ee0, $00ee, $0e0e, $0e06, $060c, $00c4, $008a, $0b20, $0aa0, $0000, $0000, $0000, $0000
 
 PaletteDMATransfer:
-    VDP_DEFINE_STATIC_DMA_CRAM_TRANSFER Palette, 0, CRAM_SIZE_WORD
+    VDP_DMA_DEFINE_CRAM_TRANSFER Palette, 0, CRAM_SIZE_WORD
 
 ;-------------------------------------------------
 ; Main program entry point
@@ -18,15 +18,11 @@ PaletteDMATransfer:
 Main:
         DEBUG_MSG 'UltraDrive Started!'
 
-        VDP_STATIC_DMA_TRANSFER PaletteDMATransfer
-
-        VDP_REG_SET_BITS vdpRegMode2, MODE2_DISPLAY_ENABLE
-
-        VDP_ADDR_SET WRITE, CRAM, $00, $00
+        lea PaletteDMATransfer, a0
+        jsr VDPDMAQueueJob
 
     .mainLoop:
         jsr     VDPVSyncWait
-        jsr     IOUpdateDeviceState
 
         ; Change color
         moveq   #11, d0     ; Loop counter (12 buttons)
@@ -43,6 +39,12 @@ Main:
     .pressFound:
         lea     Back, a0
         add.w   d1, d1
+
+        M68K_DISABLE_INT
+
+        VDP_ADDR_SET WRITE, CRAM, $00, $00
         move.w (a0, d1), (MEM_VDP_DATA)
+
+        M68K_ENABLE_INT
 
         bra     .mainLoop
