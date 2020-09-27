@@ -83,10 +83,11 @@ STRUCT Macro structName, varName
         EndIf
         Rs.w 0  ; Even __rs
         If (narg = 3)
-\varName Rs.b (\structName\_Size * \3)
+\varName\_Size Equ (\structName\_Size * \3)
         Else
-\varName Rs.b \structName\_Size
+\varName\_Size Equ \structName\_Size
         EndIf
+\varName Rs.b \varName\_Size
     Endm
 
 
