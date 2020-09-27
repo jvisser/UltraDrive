@@ -28,8 +28,8 @@ VDP_DMA_QUEUE_SIZE Equ 32
 
     ; Allocate DMA queue
     DEFINE_VAR FAST
-        STRUCT  VDPDMATransferCommandList,  vdpDMAQueue, VDP_DMA_QUEUE_SIZE
-        VAR.w                               vdpDMAQueueCurrentEntry
+        VAR.VDPDMATransferCommandList   vdpDMAQueue,                VDP_DMA_QUEUE_SIZE
+        VAR.w                           vdpDMAQueueCurrentEntry
     DEFINE_VAR_END
 
 
