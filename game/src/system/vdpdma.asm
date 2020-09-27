@@ -72,8 +72,6 @@ VDP_DMA_QUEUE_JOB Macro dmaTransfer
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
             beq     .dmaQueueFull\@
 
-            M68K_DISABLE_INT    ; VInt lock
-
         If (~strcmp('\dmaTransfer', 'a0'))
             lea     \dmaTransfer, a0
         Endif
@@ -92,8 +90,6 @@ VDP_DMA_QUEUE_JOB Macro dmaTransfer
             ; Next entry
             addi.w  #VDPDMATransferCommandList_Size, a1
             move.w  a1, vdpDMAQueueCurrentEntry
-
-            M68K_ENABLE_INT
 
     If def(debug)
             bra .dmaQueueDone\@
@@ -129,6 +125,7 @@ VDPDMAQueueInit:
         move.w  #vdpDMAQueue, vdpDMAQueueCurrentEntry
         rts
 
+
 ;-------------------------------------------------
 ; Queue a job
 ; ----------------
@@ -141,7 +138,7 @@ VDPDMAQueueJob:
 
 
 ;-------------------------------------------------
-; Flush the DMA queue. Should only be called from the 68000 VInt handler.
+; Flush the DMA queue
 ; ----------------
 ; Uses: a0-a2
 VDPDMAFlushQueue:
@@ -153,6 +150,9 @@ VDPDMAFlushQueue:
         move.w  a0, vdpDMAQueueCurrentEntry
 
         lea     MEM_VDP_CTRL, a1
+
+        M68K_DISABLE_INT    ; Interrupt lock
+
         move    #VDP_CMD_RS_AUTO_INC | SIZE_WORD, (a1)
 
     .dmaTransferLoop:
@@ -162,6 +162,8 @@ VDPDMAFlushQueue:
         move.l  (a0)+, (a1)
         cmpa    a0, a2
         bne .dmaTransferLoop
+
+        M68K_ENABLE_INT
 
     .dmaTransferComplete:
         rts
