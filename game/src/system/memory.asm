@@ -71,41 +71,30 @@ DEFINE_VAR Macro allocationType
 
 
 ;-------------------------------------------------
-; Allocate memory for struct
-; ----------------
-; Input:
-; - 1: Struct type name
-; - 2: Variable name
-; - 3; Optional: Number of allocations to make
-STRUCT Macro structName, varName
-        If def(\varName)
-            Inform 3, 'Variable "\varName\" already defined'
-        EndIf
-        Rs.w 0  ; Even __rs
-        If (narg = 3)
-\varName\_Size Equ (\structName\_Size * \3)
-        Else
-\varName\_Size Equ \structName\_Size
-        EndIf
-\varName Rs.b \varName\_Size
-    Endm
-
-
-;-------------------------------------------------
 ; Allocate memory for variable
 ; ----------------
 ; Input:
-; - 0: datatype (b/w/l)
+; - 0: datatype (b/w/l) or struct name
 ; - 1: Variable name
 ; - 2; Optional: Number of allocations to make
 VAR Macro varName
         If def(\varName)
             Inform 3, 'Variable "\varName\" already defined'
         EndIf
-        If (narg = 2)
+        If (strcmp('\0', 'b') | strcmp('\0', 'w') | strcmp('\0', 'l'))
+            If (narg = 2)
 \varName Rs.\0 \2
-        Else
+            Else
 \varName Rs.\0 1
+            EndIf
+        Else
+        Rs.w 0  ; Even __rs
+        If (narg = 2)
+\varName\_Size Equ (\0\_Size * \2)
+        Else
+\varName\_Size Equ \0\_Size
+        EndIf
+\varName Rs.b \varName\_Size
         EndIf
     Endm
 
@@ -144,30 +133,33 @@ __FIRST_STRUCT_INIT_MEMBER_OFFSET = -1  ; TODO: Use macro stack
 ;-------------------------------------------------
 ; Store initialization data for member and verify struct offset
 ; ----------------
-INIT_STRUCT_MEMBER Macro structMemberName, value
+; Input:
+; - 0: Struct member name
+; - 1: Value
+INIT_STRUCT_MEMBER Macro value
         Local STRUCT_MEMBER_SIZE, PAD_BYTES
 
         ; Record first struct member offset to be initialized. This is the offset the data should be copied to.
         If (__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1)
-__FIRST_STRUCT_INIT_MEMBER_OFFSET = \structMemberName
+__FIRST_STRUCT_INIT_MEMBER_OFFSET = \0
             RsSet __FIRST_STRUCT_INIT_MEMBER_OFFSET
         EndIf
 
         ; Add padding if offsets dont align
-        If (\structMemberName > __rs)
-PAD_BYTES Equ (\structMemberName - __rs)
-            Inform 1, 'Adding %d bytes of padding for struct member \structMemberName', PAD_BYTES
+        If (\0 > __rs)
+PAD_BYTES Equ (\0 - __rs)
+            Inform 1, 'Adding %d bytes of padding for struct member \0', PAD_BYTES
 
             dcb.b PAD_BYTES, $00
             Rs.b  PAD_BYTES
         EndIf
 
         ; If offset is still not equal to the current offset indicate data alignment error
-        If (\structMemberName <> __rs)
-            Inform 3, 'Struct member data specified at incorrect offset. Expected $%h but got $%h', \structMemberName, __rs
+        If (\0 <> __rs)
+            Inform 3, 'Struct member data specified at incorrect offset. Expected $%h but got $%h', \0, __rs
         EndIf
 
-STRUCT_MEMBER_SIZE Equs \structMemberName\_Size
+STRUCT_MEMBER_SIZE Equs \0\_Size
         Rs.\STRUCT_MEMBER_SIZE 1
         dc.\STRUCT_MEMBER_SIZE \value
     Endm
