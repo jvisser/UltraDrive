@@ -1,9 +1,15 @@
 ;------------------------------------------------------------------------------------------
-; 68000 system exception handlers
+; Basic operating system control
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Generic exception handler
+; Vertical blank interupt handler
 ; ----------------
-Exception:
+VBlankInterrupt:
+        movem.l d0-d1/a0-a2, -(sp)
+
+        jsr     VDPDMAFlushQueue
+        jsr     IOUpdateDeviceState
+
+        movem.l (sp)+, d0-d1/a0-a2
         rte
