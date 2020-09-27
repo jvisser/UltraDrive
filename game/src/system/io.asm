@@ -107,18 +107,18 @@ MD_PAD_MODE             Equ $0800
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
-        STRUCT  IODeviceState, ioDeviceState1
-        STRUCT  IODeviceState, ioDeviceState2
+        VAR.IODeviceState ioDeviceState1
+        VAR.IODeviceState ioDeviceState2
     DEFINE_VAR_END
 
     INIT_STRUCT ioDeviceState1
-        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnsupportedDevice
-        INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL1_DATA
+        INIT_STRUCT_MEMBER.updateCallback   _IOUpdateUnsupportedDevice
+        INIT_STRUCT_MEMBER.dataPortAddress  MEM_IO_CTRL1_DATA
     INIT_STRUCT_END
 
     INIT_STRUCT ioDeviceState2
-        INIT_STRUCT_MEMBER updateCallback,  _IOUpdateUnsupportedDevice
-        INIT_STRUCT_MEMBER dataPortAddress, MEM_IO_CTRL2_DATA
+        INIT_STRUCT_MEMBER.updateCallback   _IOUpdateUnsupportedDevice
+        INIT_STRUCT_MEMBER.dataPortAddress  MEM_IO_CTRL2_DATA
     INIT_STRUCT_END
 
 
