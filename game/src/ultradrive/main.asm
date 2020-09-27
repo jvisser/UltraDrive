@@ -23,6 +23,8 @@ Main:
 
     .mainLoop:
         jsr     VDPVSyncWait
+        jsr     VDPDMAFlushQueue
+        jsr     IOUpdateDeviceState
 
         ; Change color
         moveq   #11, d0     ; Loop counter (12 buttons)
