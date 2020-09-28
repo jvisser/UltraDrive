@@ -1,9 +1,11 @@
 package com.ultradrive.mapconvert.processing.tileset.common;
 
+import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 
-public class MetaTileset<T extends MetaTile<T, ?, ?>>
+public class MetaTileset<T extends MetaTile<T, ?, ?>> implements Iterable<T>
 {
     private final List<T> tiles;
     private final MetaTileMetrics tileMetrics;
@@ -12,6 +14,13 @@ public class MetaTileset<T extends MetaTile<T, ?, ?>>
     {
         this.tiles = tiles;
         this.tileMetrics = tileMetrics;
+    }
+
+    @Override
+    @Nonnull
+    public Iterator<T> iterator()
+    {
+        return tiles.iterator();
     }
 
     public List<T> getTiles()
@@ -29,4 +38,8 @@ public class MetaTileset<T extends MetaTile<T, ?, ?>>
         return tileMetrics;
     }
 
+    public int getSize()
+    {
+        return tiles.size();
+    }
 }

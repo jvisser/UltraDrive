@@ -1,15 +1,12 @@
 ;------------------------------------------------------------------------------------------
-; VDP DMA macros/routines
-; TODO: Add 128k address boundary check
+; VDP DMA structures/subroutines and macros
 ;
 ; NB: Length is specified in words
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; DMA queue data
+; DMA structures
 ; ----------------
-VDP_DMA_QUEUE_SIZE Equ 32
-
     DEFINE_STRUCT VDPDMATransfer
         STRUCT_MEMBER.w dmaLength
         STRUCT_MEMBER.l dmaSource
@@ -26,11 +23,44 @@ VDP_DMA_QUEUE_SIZE Equ 32
         STRUCT_MEMBER.l vdpAddrDMADestination
     DEFINE_STRUCT_END
 
-    ; Allocate DMA queue
-    DEFINE_VAR FAST
-        VAR.VDPDMATransferCommandList   vdpDMAQueue,                VDP_DMA_QUEUE_SIZE
-        VAR.w                           vdpDMAQueueCurrentEntry
-    DEFINE_VAR_END
+
+;-------------------------------------------------
+; Store register values
+; ----------------
+_VDP_DMA_DEFINE_COMMAND_REGS Macro source, length
+        dc.w VDP_CMD_RS_DMA_LEN_H + ((\length & $ff00) >> 8)
+        dc.w VDP_CMD_RS_DMA_LEN_L + (\length & $ff)
+        dc.w VDP_CMD_RS_DMA_SRC_H + (((\source >> 1)& $7f0000) >> 16)
+        dc.w VDP_CMD_RS_DMA_SRC_M + (((\source >> 1)& $ff00) >> 8)
+        dc.w VDP_CMD_RS_DMA_SRC_L + ((\source >> 1) & $ff)
+    Endm
+
+
+;-------------------------------------------------
+; Create static VDPDMATransferCommandList data block for VRAM transfer
+; ----------------
+VDP_DMA_DEFINE_VRAM_COMMAND_LIST Macro source, target, length
+        _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
+        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
+    Endm
+
+
+;-------------------------------------------------
+; Create static VDPDMATransferCommandList data block for CRAM transfer
+; ----------------
+VDP_DMA_DEFINE_CRAM_COMMAND_LIST Macro source, target, length
+        _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
+        dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+    Endm
+
+
+;-------------------------------------------------
+; Create static VDPDMATransferCommandList data block for VSRAM transfer
+; ----------------
+VDP_DMA_DEFINE_VSRAM_COMMAND_LIST Macro source, target, length
+        _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
+        dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+    Endm
 
 
 ;-------------------------------------------------
@@ -64,106 +94,14 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length
 
 
 ;-------------------------------------------------
-; Queue DMA job by ref to static/predefined VDPDMATransfer
+; Start a DMA transfer for the specified VDPDMATransfer
+; Uses: a0-a1
 ; ----------------
-; Uses: d0/a0-a1
-VDP_DMA_QUEUE_JOB Macro dmaTransfer
-            movea.w vdpDMAQueueCurrentEntry, a1
-            cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
-            beq     .dmaQueueFull\@
-
-        If (~strcmp('\dmaTransfer', 'a0'))
-            lea     \dmaTransfer, a0
-        Endif
-
-            ; Write DMA source. Use vdpRegDMALengthLow as overflow area for high byte (will be overwritten in next step)
-            move.l  dmaSource(a0), d0
-            movep.l d0, vdpRegDMALengthLow + 1(a1)
-
-            ; Write DMA length in words
-            move.w  dmaLength(a0), d0
-            movep.w d0, vdpRegDMALengthHigh + 1(a1)
-
-            ; Write DMA target
-            move.l  dmaTarget(a0), vdpAddrDMADestination(a1)
-
-            ; Next entry
-            addi.w  #VDPDMATransferCommandList_Size, a1
-            move.w  a1, vdpDMAQueueCurrentEntry
-
-    If def(debug)
-            bra .dmaQueueDone\@
-
-        .dmaQueueFull\@:
-            DEBUG_MSG 'DMA Queue full'
-
-        .dmaQueueDone\@:
-    Else
-        .dmaQueueFull\@:
-    Endif
-    Endm
-
-
-;-------------------------------------------------
-; Initialize the DMA queue
-; ----------------
-VDPDMAQueueInit:
-        lea     vdpDMAQueue, a0
-        moveq   #VDP_DMA_QUEUE_SIZE - 1, d0
-
-    .initDMAQueueEntryLoop:
-
-        ; VDPDMATransferCommandList
-        move.w  #VDP_CMD_RS_DMA_LEN_H, (a0)+    ; vdpRegDMALengthHigh
-        move.w  #VDP_CMD_RS_DMA_LEN_L, (a0)+    ; vdpRegDMALengthLow
-        move.w  #VDP_CMD_RS_DMA_SRC_H, (a0)+    ; vdpRegDMASourceHigh
-        move.w  #VDP_CMD_RS_DMA_SRC_M, (a0)+    ; vdpRegDMASourceMid
-        move.w  #VDP_CMD_RS_DMA_SRC_L, (a0)+    ; vdpRegDMASourceLow
-        move.l  #0, (a0)+                       ; vdpAddrDMADestination
-        dbra    d0, .initDMAQueueEntryLoop
-
-        move.w  #vdpDMAQueue, vdpDMAQueueCurrentEntry
-        rts
-
-
-;-------------------------------------------------
-; Queue a job
-; ----------------
-; Input:
-; - a0: Address of the VDPDMATransfer instance to queue
-; Uses: d0/a0-a1
-VDPDMAQueueJob:
-        VDP_DMA_QUEUE_JOB a0
-        rts
-
-
-;-------------------------------------------------
-; Flush the DMA queue
-; ----------------
-; Uses: a0-a2
-VDPDMAFlushQueue:
-        lea     vdpDMAQueue, a0
-        move.w  vdpDMAQueueCurrentEntry, a2
-        cmpa    a0, a2
-        beq     .dmaTransferComplete        ; Nothing to transfer
-
-        move.w  a0, vdpDMAQueueCurrentEntry
-
+VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
+        lea     vdpDMATransferCommandList, a0
         lea     MEM_VDP_CTRL, a1
-
-        M68K_DISABLE_INT    ; Interrupt lock
-
-        move    #VDP_CMD_RS_AUTO_INC | SIZE_WORD, (a1)
-
-    .dmaTransferLoop:
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
         move.w  (a0)+, (a1)
         move.l  (a0)+, (a1)
-        cmpa    a0, a2
-        bne .dmaTransferLoop
-
-        M68K_ENABLE_INT
-
-    .dmaTransferComplete:
-        rts
+    Endm
