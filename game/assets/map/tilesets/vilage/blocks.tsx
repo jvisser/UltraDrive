@@ -12,13 +12,9 @@
  <tile id="8" type="block"/>
  <tile id="9" type="animationblock">
   <properties>
-   <property name="animation_activation">{
-	&quot;video_refresh&quot;: 
-	{
-		&quot;start_tick&quot;: 0, 
-		&quot;interval&quot;: 600
-	}
-}</property>
+   <property name="animation_activation">initialTrigger: 0
+triggerInterval: 600
+frameInterval: 6</property>
    <property name="animation_id" value="caged_ball"/>
   </properties>
   <animation>
@@ -89,13 +85,9 @@
  <tile id="26" type="block"/>
  <tile id="27" type="animationblock">
   <properties>
-   <property name="animation_activation">{
-	&quot;video_refresh&quot;: 
-	{
-		&quot;start_tick&quot;: 1, 
-		&quot;interval&quot;: 600
-	}
-}</property>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 600
+frameInterval: 6</property>
    <property name="animation_frame_offset" type="int" value="3"/>
    <property name="animation_id" value="caged_ball2"/>
   </properties>
@@ -171,9 +163,9 @@
  <tile id="44" type="block"/>
  <tile id="45" type="animationblock">
   <properties>
-   <property name="animation_activation">{
-	screen_tremor: {}
-}</property>
+   <property name="animation_activation">initialTrigger: 2
+triggerInterval: 600
+frameInterval: 6</property>
    <property name="animation_id" value="cyclops"/>
   </properties>
   <animation>
@@ -240,6 +232,9 @@
  <tile id="62" type="block"/>
  <tile id="63" type="animationblock">
   <properties>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 600
+frameInterval: 6</property>
    <property name="animation_frame_interval" type="int" value="2"/>
    <property name="animation_id" value="water"/>
    <property name="animation_scheduler" value="scroll_x"/>
@@ -256,6 +251,9 @@
  <tile id="66" type="block"/>
  <tile id="67" type="animationblock">
   <properties>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 600
+frameInterval: 6</property>
    <property name="animation_frame_interval" type="int" value="4"/>
    <property name="animation_frame_offset" type="int" value="8"/>
    <property name="animation_id" value="water_slow"/>

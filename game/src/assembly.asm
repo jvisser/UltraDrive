@@ -18,18 +18,24 @@
     Include './system/vdpcmd.asm'
     Include './system/vdp.asm'
     Include './system/vdpdma.asm'
+    Include './system/vdpdmaqueue.asm'
     Include './system/init.asm'
 
 
     ;-------------------------------------------------
     ; Engine
     ; ----------------
-    ; TODO
-    
+    Include './engine/tileset.asm'
+    Include './engine/map.asm'
+
 
     ;-------------------------------------------------
     ; Game
     ; ----------------
+    ; Assets
+    Include 'ultradrive/assets/out/tilesets.asm'
+
+    ; Code
     Include 'ultradrive/metadata.asm'
     Include 'ultradrive/main.asm'
 

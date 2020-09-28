@@ -9,27 +9,27 @@ public class PatternAllocationArea
 {
     private final String id;
     private final int size;
-    private final int basePatternId;
+    private final int patternBaseId;
     private final int reservedPatternSize;
     private final List<Pattern> patterns;
 
-    PatternAllocationArea(String id, int size, int basePatternId, int reservedPatternSize, List<Pattern> patterns)
+    PatternAllocationArea(String id, int size, int patternBaseId, int reservedPatternSize, List<Pattern> patterns)
     {
         this.id = id;
         this.size = size;
-        this.basePatternId = basePatternId;
+        this.patternBaseId = patternBaseId;
         this.reservedPatternSize = reservedPatternSize;
         this.patterns = ImmutableList.copyOf(patterns);
     }
 
     public boolean hasPattern(int patternReferenceId)
     {
-        return patternReferenceId >= basePatternId && patternReferenceId < basePatternId + patterns.size();
+        return patternReferenceId >= patternBaseId && patternReferenceId < patternBaseId + patterns.size();
     }
 
     public Pattern getPattern(int patternReferenceId)
     {
-        return patterns.get(patternReferenceId - basePatternId);
+        return patterns.get(patternReferenceId - patternBaseId);
     }
 
     public String getId()
@@ -42,9 +42,9 @@ public class PatternAllocationArea
         return size;
     }
 
-    public int getBasePatternId()
+    public int getPatternBaseId()
     {
-        return basePatternId;
+        return patternBaseId;
     }
 
     public int getReservedPatternSize()
@@ -62,7 +62,7 @@ public class PatternAllocationArea
         return patterns;
     }
 
-    public int totalPatternAllocationSize()
+    public int getTotalPatternAllocationSize()
     {
         return reservedPatternSize + patterns.size();
     }
