@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.export.expression;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.ultradrive.mapconvert.common.ByteIterableInputStream;
 import com.ultradrive.mapconvert.processing.tileset.block.image.TilesetImageColor;
 import java.io.IOException;
@@ -11,17 +12,29 @@ import java.util.HashMap;
 public class ConvertExpressions
 {
     private final ObjectMapper jsonMapper;
+    private final YAMLMapper yamlMapper;
 
     public ConvertExpressions()
     {
         jsonMapper = new ObjectMapper();
+        yamlMapper = new YAMLMapper();
     }
 
     public HashMap<?, ?> json(Iterable<Byte> byteIterable) throws IOException
     {
+        return readJsonable(jsonMapper, byteIterable);
+    }
+
+    public HashMap<?, ?> yaml(Iterable<Byte> byteIterable) throws IOException
+    {
+        return readJsonable(yamlMapper, byteIterable);
+    }
+
+    public HashMap<?, ?> readJsonable(ObjectMapper mapper, Iterable<Byte> byteIterable) throws IOException
+    {
         try
         {
-            return jsonMapper.readValue(new ByteIterableInputStream(byteIterable.iterator()), HashMap.class);
+            return mapper.readValue(new ByteIterableInputStream(byteIterable.iterator()), HashMap.class);
         }
         catch (JsonProcessingException e)
         {
@@ -31,9 +44,19 @@ public class ConvertExpressions
 
     public HashMap<?, ?> json(String json)
     {
+        return readJsonable(jsonMapper, json);
+    }
+
+    public HashMap<?, ?> yaml(String json)
+    {
+        return readJsonable(yamlMapper, json);
+    }
+
+    public HashMap<?, ?> readJsonable(ObjectMapper mapper, String json)
+    {
         try
         {
-            return jsonMapper.readValue(json, HashMap.class);
+            return mapper.readValue(json, HashMap.class);
         }
         catch (JsonProcessingException e)
         {

@@ -66,6 +66,11 @@ public class Animation implements Iterable<AnimationFrameReference>
         return animationFrames.get(0).getAnimationFrame().getSize();
     }
 
+    public int getFrameCount()
+    {
+        return animationFrames.size();
+    }
+
     Animation remap(Map<AnimationFrame, AnimationFrame> newFrames, int newPatternBaseId)
     {
         return new Animation(animationId,

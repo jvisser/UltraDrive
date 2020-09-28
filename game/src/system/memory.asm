@@ -19,7 +19,7 @@ MEM_RAM_END         Equ $ffffffff   ; Last addressable byte
 MEM_RAM_SIZE_BYTE   Equ (MEM_RAM_END - MEM_RAM_START + 1)
 MEM_RAM_SIZE_WORD   Equ (MEM_RAM_SIZE_BYTE / SIZE_WORD)
 MEM_RAM_SIZE_LONG   Equ (MEM_RAM_SIZE_BYTE / SIZE_LONG)
-                
+
 
 ;-------------------------------------------------
 ; RAM allocation pointers. Grow upward by the size of each defined variable (Auto align according to OPT ae+).
@@ -40,11 +40,28 @@ DEFINE_STRUCT Macro name
 ;-------------------------------------------------
 ; Define struct type member
 ; Input:
-; - 0: datatype (b/w/l)
+; - 0: datatype b/w/l or struct
 ; ----------------
-STRUCT_MEMBER Macro name
-\name       Rs.\0 1
+STRUCT_MEMBER Macro name, elementCount
+    If (strcmp('\0', 'b') | strcmp('\0', 'w') | strcmp('\0', 'l'))
+        If (narg=2)
+\name               Rs.\0 \elementCount
+\name\_ElementCount Equs '\elementCount'
+        Else
+\name               Rs.\0 1
+\name\_ElementCount Equs '1'
+        EndIf
 \name\_Size Equs '\0'
+    Else
+        If (narg=2)
+\name               Rs.b (\0\_Size * \elementCount)
+\name\_ElementCount Equs '\0\_Size * \elementCount'
+        Else
+\name               Rs.b \0\_Size
+\name\_ElementCount Equs '\0\_Size'
+        EndIf
+\name\_Size Equs 'b'
+    EndIf
     Endm
 
 
@@ -88,12 +105,12 @@ VAR Macro varName
 \varName Rs.\0 1
             EndIf
         Else
-        Rs.w 0  ; Even __rs
-        If (narg = 2)
+            Rs.w 0  ; Even __rs
+            If (narg = 2)
 \varName\_Size Equ (\0\_Size * \2)
-        Else
+            Else
 \varName\_Size Equ \0\_Size
-        EndIf
+            EndIf
 \varName Rs.b \varName\_Size
         EndIf
     Endm
@@ -137,7 +154,7 @@ __FIRST_STRUCT_INIT_MEMBER_OFFSET = -1  ; TODO: Use macro stack
 ; - 0: Struct member name
 ; - 1: Value
 INIT_STRUCT_MEMBER Macro value
-        Local STRUCT_MEMBER_SIZE, PAD_BYTES
+        Local STRUCT_MEMBER_SIZE, STRUCT_MEMBER_ELEMENT_COUNT, PAD_BYTES
 
         ; Record first struct member offset to be initialized. This is the offset the data should be copied to.
         If (__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1)
@@ -159,8 +176,14 @@ PAD_BYTES Equ (\0 - __rs)
             Inform 3, 'Struct member data specified at incorrect offset. Expected $%h but got $%h', \0, __rs
         EndIf
 
-STRUCT_MEMBER_SIZE Equs \0\_Size
-        Rs.\STRUCT_MEMBER_SIZE 1
+STRUCT_MEMBER_ELEMENT_COUNT Equs \0\_ElementCount
+STRUCT_MEMBER_SIZE          Equs \0\_Size
+
+        If (~strcmp('\STRUCT_MEMBER_ELEMENT_COUNT', '1'))
+            Inform 3, '\0\: Initialization of array types not supported!'
+        EndIf
+
+        Rs.\STRUCT_MEMBER_SIZE \STRUCT_MEMBER_ELEMENT_COUNT
         dc.\STRUCT_MEMBER_SIZE \value
     Endm
 

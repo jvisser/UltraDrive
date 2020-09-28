@@ -31,7 +31,7 @@ public class PatternAllocation implements Iterable<PatternAllocationArea>
     public int getSize()
     {
         return patternAllocationAreas.stream()
-                .map(PatternAllocationArea::totalPatternAllocationSize)
+                .map(PatternAllocationArea::getTotalPatternAllocationSize)
                 .reduce(0, Integer::sum);
     }
 

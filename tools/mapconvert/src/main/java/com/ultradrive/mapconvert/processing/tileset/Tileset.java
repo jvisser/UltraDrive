@@ -3,6 +3,8 @@ package com.ultradrive.mapconvert.processing.tileset;
 import com.ultradrive.mapconvert.common.PropertySource;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockTileset;
+import com.ultradrive.mapconvert.processing.tileset.block.animation.Animation;
+import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationFrame;
 import com.ultradrive.mapconvert.processing.tileset.block.image.TilesetImagePalette;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocation;
@@ -10,6 +12,7 @@ import com.ultradrive.mapconvert.processing.tileset.chunk.Chunk;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkTileset;
 import com.ultradrive.mapconvert.processing.tileset.collision.CollisionFieldSet;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
+import java.util.List;
 import java.util.Map;
 
 
@@ -91,5 +94,15 @@ public class Tileset implements PropertySource
     public PatternAllocation getPatternAllocation()
     {
         return blockTileset.getPatternAllocation();
+    }
+
+    public List<AnimationFrame> getAnimationFrames()
+    {
+        return blockTileset.getAnimationFrames();
+    }
+
+    public List<Animation> getAnimations()
+    {
+        return blockTileset.getAnimations();
     }
 }
