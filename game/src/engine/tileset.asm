@@ -87,7 +87,7 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 LoadTileset:
         cmpa.w  loadedTileset, a0
         bne     .loadTileset
-        rts                                                 ; Already loaded
+        rts                                 ; Already loaded
 
     .loadTileset:
         movea.l a0, a6
@@ -97,11 +97,7 @@ LoadTileset:
         ; for chunks/blocks will be used as the decompressesion buffer.
         movea.l tsPatternSectionsTableAddress(a6), a5
         move.w  tsPatternSectionCount(a6), d6
-        subq    #1, d6
-    .loadPatternSectionLoop:
-        movea.l (a5)+, a0
-        bsr     _LoadPatternSection
-        dbra    d6, .loadPatternSectionLoop
+        bsr     _LoadPatternSections
 
         ; Decompress chunks into RAM
         movea.l tsChunksAddress(a6), a0
@@ -113,10 +109,30 @@ LoadTileset:
         lea     blockTable, a1
         jsr     ComperDecompress
 
-        ; Load initial frames for all animations
+        ; Load animations
         movea.l tsAnimationsTableAddress(a6), a5
         move.w  tsAnimationsCount(a6), d6
+        bsr     _LoadAnimations
+
+        ; Load palette
+        movea.l tsPaletteAddress(a6), a0
+        VDP_DMA_TRANSFER_COMMAND_LIST a0
+
+        ; Success
+        move.l  a6, loadedTileset
+        rts
+
+
+;-------------------------------------------------
+; Load first animation frame of each animation into VRAM and prepare the animation scheduler
+; ----------------
+; Input:
+; - a5: Animation table address
+; - d6: Number of animations
+; Uses: d0,d6/a0-a1,a4-a5
+_LoadAnimations:
         subq    #1, d6
+
     .loadInitialAnimationFrameLoop:
         ; Animation frame transfers are stored in DMA queueable VDPDMATransfer format instead of VDPDMATransferCommandList format
         ; So we use the DMA queue to transfer the initial animation frame for all animations
@@ -125,34 +141,29 @@ LoadTileset:
         movea.l (a0), a0                                    ; a0 = VDPDMATransfer address for first animation frame
         jsr     VDPDMAQueueJob
         dbra    d6, .loadInitialAnimationFrameLoop
+
         jsr     VDPDMAQueueFlush
-
-        ; Load palette
-        movea.l tsPaletteAddress(a6), a0
-        VDP_DMA_TRANSFER_COMMAND_LIST a0
-
-        ; Success
-        move.l  a6, loadedTileset
-    rts
+        rts
 
 
 ;-------------------------------------------------
-; Load a TilesetPatternSection into VRAM
+; Load all TilesetPatternSections into VRAM
 ; ----------------
 ; Input:
-; - a0: Pattern section address
-; Uses: d0-d5,d7/a0-a3
-_LoadPatternSection:
-        move.w  tsModuleCount(a0), d7
-        bne     .nonEmpty
-        rts                                                 ; No patterns in this section
+; - a5: Pattern section table address
+; - d6: Number of pattern sections
+; Uses: d0-d7/a0-a3
+_LoadPatternSections:
+        subq    #1, d6
+    .loadPatternSectionLoop:
+        movea.l (a5)+, a0                                   ; a0 = Current pattern section address
+        move.w  tsModuleCount(a0), d7                       ; d7 = Number of compressed modules
+        beq    .nextSection                                 ; No modules in this section then proceed to the next
 
-    .nonEmpty:
-        lea     tsModules(a0), a3
+        lea     tsModules(a0), a3                           ; a3 = Current compressed module address
         subq.w  #1, d7
 
     .loadPatternModuleLoop:
-
         lea     tsPatternData(a3), a0
         lea     blockTable, a1
         jsr     ComperDecompress
@@ -163,6 +174,8 @@ _LoadPatternSection:
         move.w  tsPatternCompressedSize(a3), d0
         addi.w  #tsPatternData, d0
         adda.w  d0, a3
-
         dbra    d7, .loadPatternModuleLoop
+
+    .nextSection:
+        dbra    d6, .loadPatternSectionLoop
         rts
