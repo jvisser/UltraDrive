@@ -98,7 +98,10 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length
 ; Uses: a0-a1
 ; ----------------
 VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
-        lea     vdpDMATransferCommandList, a0
+        If (~strcmp('\vdpDMATransferCommandList', 'a0'))
+            lea     vdpDMATransferCommandList, a0
+        EndIf
+
         lea     MEM_VDP_CTRL, a1
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)

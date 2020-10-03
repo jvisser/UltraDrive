@@ -30,7 +30,7 @@ VDP_DMA_QUEUE_JOB Macro dmaTransfer
 
         If (~strcmp('\dmaTransfer', 'a0'))
             lea     \dmaTransfer, a0
-        Endif
+        EndIf
 
             ; Write DMA source. Use vdpRegDMALengthLow as overflow area for high byte (will be overwritten in next step)
             move.l  dmaSource(a0), d0
