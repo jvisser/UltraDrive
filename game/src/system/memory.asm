@@ -39,9 +39,9 @@ DEFINE_STRUCT Macro name
 
 ;-------------------------------------------------
 ; Define struct type member
+; ----------------
 ; Input:
 ; - 0: datatype b/w/l or struct
-; ----------------
 STRUCT_MEMBER Macro name, elementCount
     If (strcmp('\0', 'b') | strcmp('\0', 'w') | strcmp('\0', 'l'))
         If (narg=2)
