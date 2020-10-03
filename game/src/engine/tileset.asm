@@ -118,14 +118,14 @@ LoadTileset:
         move.w  tsAnimationsCount(a6), d6
         subq    #1, d6
     .loadInitialAnimationFrameLoop:
-        movea.l (a5)+, a4                                   ; a4 = Animation address
         ; Animation frame transfers are stored in DMA queueable VDPDMATransfer format instead of VDPDMATransferCommandList format
         ; So we use the DMA queue to transfer the initial animation frame for all animations
+        movea.l (a5)+, a4                                   ; a4 = Animation address
         movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
         movea.l (a0), a0                                    ; a0 = VDPDMATransfer address for first animation frame
         jsr     VDPDMAQueueJob
         dbra    d6, .loadInitialAnimationFrameLoop
-        jsr     VDPDMAFlushQueue
+        jsr     VDPDMAQueueFlush
 
         ; Load palette
         movea.l tsPaletteAddress(a6), a0

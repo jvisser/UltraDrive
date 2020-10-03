@@ -97,7 +97,7 @@ VDPDMAQueueJob:
 ; Flush the DMA queue
 ; ----------------
 ; Uses: a0-a2
-VDPDMAFlushQueue:
+VDPDMAQueueFlush:
         lea     vdpDMAQueue, a0
         move.w  vdpDMAQueueCurrentEntry, a2
         cmpa    a0, a2
