@@ -22,6 +22,8 @@
 ; INPUT:
 ; 	a0	Source address
 ; 	a1	Destination address
+;
+; Uses: d0-d5/a0-a2
 ; ---------------------------------------------------------------------------
 _Comp_LoopUnroll = 3
 
@@ -39,7 +41,7 @@ _Comp_ReadBit macro
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 ; ---------------------------------------------------------------------------
 ComperDecompress:
-	moveq	#(1<<_Comp_LoopUnroll)-1,d7
+	moveq	#(1<<_Comp_LoopUnroll)-1,d5
 
 .newblock:
 	move.w	(a0)+,d0		; fetch description field
@@ -61,7 +63,7 @@ ComperDecompress:
 	lea	(a1,d1.w),a2		; load start copy address
 	move.w	d2,d4
 	not.w	d4
-	and.w	d7,d4
+	and.w	d5,d4
 	add.w	d4,d4
 	lsr.w	#_Comp_LoopUnroll,d2
 	jmp	.loop(pc,d4.w)

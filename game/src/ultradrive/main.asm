@@ -2,15 +2,8 @@
 ; Main entry point
 ;------------------------------------------------------------------------------------------
 
-Palette:
-    dc.w $0000, $02c6, $08ce, $0000, $0eee, $0aa8, $0a42, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000
-    dc.w $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000
-    dc.w $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0000
 Back:
     dc.w $0e00, $00e0, $000e, $0ee0, $00ee, $0e0e, $0e06, $060c, $00c4, $008a, $0b20, $0aa0, $0000, $0000, $0000, $0000
-
-PaletteDMATransfer:
-    VDP_DMA_DEFINE_CRAM_TRANSFER Palette, 0, CRAM_SIZE_WORD
 
 ;-------------------------------------------------
 ; Main program entry point
@@ -18,8 +11,8 @@ PaletteDMATransfer:
 Main:
         DEBUG_MSG 'UltraDrive Started!'
 
-        lea PaletteDMATransfer, a0
-        jsr VDPDMAQueueJob
+        lea TilesetVilage, a0
+        jsr LoadTileset
 
     .mainLoop:
         jsr     VDPVSyncWait
