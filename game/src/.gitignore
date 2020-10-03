@@ -1,3 +1,4 @@
+ultradrive/assets/**/*
 *.bin
 *.lst
 *.sym

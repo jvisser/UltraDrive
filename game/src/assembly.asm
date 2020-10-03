@@ -34,7 +34,7 @@
     ; Game
     ; ----------------
     ; Assets
-    Include 'ultradrive/assets/out/tilesets.asm'
+    Include 'ultradrive/assets/tilesets.asm'
 
     ; Code
     Include 'ultradrive/metadata.asm'
