@@ -35,6 +35,7 @@
     ; ----------------
     ; Assets
     Include 'ultradrive/assets/tilesets.asm'
+    Include 'ultradrive/assets/maps.asm'
 
     ; Code
     Include 'ultradrive/metadata.asm'
