@@ -16,7 +16,7 @@ Main:
 
     .mainLoop:
         jsr     VDPVSyncWait
-        jsr     VDPDMAFlushQueue
+        jsr     VDPDMAQueueFlush
         jsr     IOUpdateDeviceState
 
         ; Change color
