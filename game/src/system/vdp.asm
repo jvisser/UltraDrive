@@ -243,8 +243,8 @@ VDPClearCRAM:
 
 ;-------------------------------------------------
 ; Wait for the next vertical blanking period to start
-; Uses: a0
 ; ----------------
+; Uses: a0
 VDPVSyncWait:
         lea     MEM_VDP_CTRL + 1, a0
 

@@ -149,26 +149,26 @@ _IO_WAIT Macro
 
 ;-------------------------------------------------
 ; Set TH high on the specified port
+; ----------------
 ; Input:
 ; - a1: Data port address
-; ----------------
 _IO_TH_HIGH Macros
         move.b  #IO_DATA_TH, (a1)
 
 
 ;-------------------------------------------------
 ; Set TH low on the specified port
+; ----------------
 ; Input:
 ; - a1: Data port address
-; ----------------
 _IO_TH_LOW Macros
         move.b  #0, (a1)
 
 
 ;-------------------------------------------------
 ; Wait for IO state reset. ~One display frame time.
-; Uses: d6
 ; ----------------
+; Uses: d6
 _IO_RESET Macro
             move.w #$3fff, d6
         .ioResetLoop\@:
@@ -211,8 +211,8 @@ _IO_UPDATE_DEVICE_INFO Macro deviceStateStruct
 
 ;-------------------------------------------------
 ; Update device states. Should be called at most once per display frame.
-; Uses: d0-d1/a0-a1
 ; ----------------
+; Uses: d0-d1/a0-a1
 IOUpdateDeviceState:
 _IO_UPDATE_DEVICE Macro deviceStateStruct
             lea     \deviceStateStruct, a0
@@ -229,11 +229,11 @@ _IO_UPDATE_DEVICE Macro deviceStateStruct
 
 ;-------------------------------------------------
 ; Read port
+; ----------------
 ; Input:
 ; - a1: Port to read
 ; Output: d0 high (TH=1), d0 low (TH = 0)
 ; Uses: d0/a1
-; ----------------
 _IO_READ_DATA_PORT Macro
         _IO_TH_HIGH
         _IO_WAIT
@@ -250,9 +250,9 @@ _IO_READ_DATA_PORT Macro
 
 ;-------------------------------------------------
 ; Probe data port without reading (Switch TH)
+; ----------------
 ; Input:
 ; - a1: Port to read
-; ----------------
 _IO_PROBE_DATA_PORT Macro
         _IO_TH_HIGH
         _IO_WAIT
@@ -264,10 +264,10 @@ _IO_PROBE_DATA_PORT Macro
 
 ;-------------------------------------------------
 ; Detect connected device (Slow!)
+; ----------------
 ; Input:
 ; - a0: Device state structure of device to update
 ; Uses: d0-d3,d6/a1
-; ----------------
 IOUpdateDeviceInfo:
 _IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
             move.l  #\deviceUpdateCallback, updateCallback(a0)
@@ -318,11 +318,11 @@ _IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
 
 ;-------------------------------------------------
 ; Determine device ID of device connected to the specified port
+; ----------------
 ; Input:
 ; - a1: Data port address
 ; Output: device id in d0
 ; Uses: d0-d3
-; ----------------
 _IOGetDeviceId:
 _IO_GET_DEVICE_ID_BIT Macro bits
             move.b  d1, d3
@@ -362,10 +362,10 @@ _IO_GET_DEVICE_ID_BIT Macro bits
 
 ;-------------------------------------------------
 ; Mega Drive 3 button pad update callback
+; ----------------
 ; Input:
 ; - a0: Device state structure of device to update
 ; Uses: d0-d1/a1
-; ----------------
 _IOUpdate3ButtonPad:
         movea.l dataPortAddress(a0), a1
 
@@ -389,10 +389,10 @@ _IOUpdate3ButtonPad:
 
 ;-------------------------------------------------
 ; Mega Drive 6 button pad update callback
+; ----------------
 ; Input:
 ; - a0: Device state structure of device to update
 ; Uses: d0-d1/a1
-; ----------------
 _IOUpdate6ButtonPad:
         bsr _IOUpdate3ButtonPad ; We reuse a1 from _IOUpdate3ButtonPad
 
@@ -415,8 +415,8 @@ _IOUpdate6ButtonPad:
 
 ;-------------------------------------------------
 ; Unknown device update callback
+; ----------------
 ; Input:
 ; - a0: Device state structure of device to update
-; ----------------
 _IOUpdateUnsupportedDevice:
         rts
