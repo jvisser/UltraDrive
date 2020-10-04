@@ -20,6 +20,23 @@ VDP_DMA_QUEUE_SIZE Equ 32
 
 
 ;-------------------------------------------------
+; Optional automatic interrupt locking during DMA transfer. Prevent VDP state being corrupted by h/vint handler during DMA setup.
+; It is most likely more efficient to handle this manually at a higher level (or not at all if this is not an issue).
+; ----------------
+_VDP_DMA_68K_INT_LOCK Macro
+        If def(vdp_dma_safe)
+            M68K_DISABLE_INT
+        EndIf
+    Endm
+
+_VDP_DMA_68K_INT_UNLOCK Macro
+        If def(vdp_dma_safe)
+            M68K_ENABLE_INT
+        EndIf
+    Endm
+
+
+;-------------------------------------------------
 ; Queue DMA job by ref to static/predefined VDPDMATransfer
 ; ----------------
 ; Uses: d0/a0-a1
@@ -107,7 +124,7 @@ VDPDMAQueueFlush:
 
         lea     MEM_VDP_CTRL, a1
 
-        M68K_DISABLE_INT    ; Interrupt lock
+        _VDP_DMA_68K_INT_LOCK
 
         move    #VDP_CMD_RS_AUTO_INC | SIZE_WORD, (a1)
 
@@ -119,7 +136,7 @@ VDPDMAQueueFlush:
         cmpa    a0, a2
         bne .dmaTransferLoop
 
-        M68K_ENABLE_INT
+        _VDP_DMA_68K_INT_UNLOCK
 
     .dmaTransferComplete:
         rts
