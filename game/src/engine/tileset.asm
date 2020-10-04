@@ -84,7 +84,7 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 ; Input:
 ; - a0: Tileset address
 ; Uses: d0-d7/a0-a6
-LoadTileset:
+TilesetLoad:
         cmpa.w  loadedTileset, a0
         bne     .loadTileset
         rts                                 ; Already loaded
@@ -97,7 +97,7 @@ LoadTileset:
         ; for chunks/blocks will be used as the decompressesion buffer.
         movea.l tsPatternSectionsTableAddress(a6), a5
         move.w  tsPatternSectionCount(a6), d6
-        bsr     _LoadPatternSections
+        bsr     _TilesetLoadPatternSections
 
         ; Decompress chunks into RAM
         movea.l tsChunksAddress(a6), a0
@@ -112,7 +112,7 @@ LoadTileset:
         ; Load animations
         movea.l tsAnimationsTableAddress(a6), a5
         move.w  tsAnimationsCount(a6), d6
-        bsr     _LoadAnimations
+        bsr     _TilesetLoadAnimations
 
         ; Load palette
         movea.l tsPaletteAddress(a6), a0
@@ -130,7 +130,7 @@ LoadTileset:
 ; - a5: Animation table address
 ; - d6: Number of animations
 ; Uses: d0,d6/a0-a1,a4-a5
-_LoadAnimations:
+_TilesetLoadAnimations:
         subq    #1, d6
 
     .loadInitialAnimationFrameLoop:
@@ -153,7 +153,7 @@ _LoadAnimations:
 ; - a5: Pattern section table address
 ; - d6: Number of pattern sections
 ; Uses: d0-d7/a0-a3
-_LoadPatternSections:
+_TilesetLoadPatternSections:
         subq    #1, d6
     .loadPatternSectionLoop:
         movea.l (a5)+, a0                                   ; a0 = Current pattern section address
