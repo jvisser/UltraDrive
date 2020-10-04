@@ -11,8 +11,8 @@ Back:
 Main:
         DEBUG_MSG 'UltraDrive Started!'
 
-        lea TilesetVilage, a0
-        jsr TilesetLoad
+        lea MapVilage_map1, a0
+        jsr MapLoad
 
     .mainLoop:
         jsr     VDPVSyncWait
