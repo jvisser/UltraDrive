@@ -11,6 +11,10 @@ Back:
 Main:
         DEBUG_MSG 'UltraDrive Started!'
 
+        move.w  #PLANE_SIZE_H64_V64, d0
+        jsr VDPSetPlaneSize
+        jsr VDPSetH32CellMode
+
         lea MapVilage_map1, a0
         jsr MapLoad
 
