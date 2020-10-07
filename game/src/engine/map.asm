@@ -36,3 +36,15 @@ MapLoad:
         movea.l tilesetAddress(a0), a0
         jsr     TilesetLoad
         rts
+
+
+;-------------------------------------------------
+; Render the map to the specified VDP background plane VRAM address.
+; ----------------
+; Input:
+; - d0: left 8 pixel column
+; - d1: top 8 pixel row
+; - d2: Plane id
+; Uses:
+MapRender:
+        rts

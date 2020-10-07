@@ -26,6 +26,10 @@ CRAM_SIZE_BYTE      Equ 128
 CRAM_SIZE_WORD      Equ (CRAM_SIZE_BYTE / SIZE_WORD)
 CRAM_SIZE_LONG      Equ (CRAM_SIZE_BYTE / SIZE_LONG)
 
+PLANE_WINDOW        Equ (VDP_CMD_AS_VRAM_WRITE | $30000002)
+PLANE_A             Equ (VDP_CMD_AS_VRAM_WRITE | $00000003)
+PLANE_B             Equ (VDP_CMD_AS_VRAM_WRITE | $20000003)
+
 
 ;-------------------------------------------------
 ; VDP Status register bits
@@ -65,30 +69,49 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
         STRUCT_MEMBER.w vdpRegHRate
     DEFINE_STRUCT_END
 
+    ; VDP metrics structure
+    DEFINE_STRUCT VDPMetrics
+        STRUCT_MEMBER.w vdpScreenWidth
+        STRUCT_MEMBER.w vdpScreenHeight
+        STRUCT_MEMBER.w vdpPlaneWidthCells
+        STRUCT_MEMBER.w vdpPlaneWidthShift
+        STRUCT_MEMBER.w vdpPlaneHeightCells
+        STRUCT_MEMBER.w vdpPlaneHeightShift
+    DEFINE_STRUCT_END
+
     ; Allocate VDPContext
     DEFINE_VAR FAST
-        VAR.VDPContext vdpContext
+        VAR.VDPContext  vdpContext
+        VAR.VDPMetrics  vdpMetrics
     DEFINE_VAR_END
 
-    ; VDPContext initial value (sensible defaults)
+    ; VDPContext initial values
     INIT_STRUCT vdpContext
-        INIT_STRUCT_MEMBER.vdpRegMode1      VDP_CMD_RS_MODE1        | MODE1_HIGH_COLOR
-        INIT_STRUCT_MEMBER.vdpRegMode2      VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE | MODE2_DISPLAY_ENABLE | MODE2_VBLANK_ENABLE
-        INIT_STRUCT_MEMBER.vdpRegMode3      VDP_CMD_RS_MODE3
-        INIT_STRUCT_MEMBER.vdpRegMode4      VDP_CMD_RS_MODE4        | MODE4_H40_CELL
-        INIT_STRUCT_MEMBER.vdpRegPlaneA     VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_c000
-        INIT_STRUCT_MEMBER.vdpRegPlaneB     VDP_CMD_RS_PLANE_B      | PLANE_B_ADDR_e000
-        INIT_STRUCT_MEMBER.vdpRegSprite     VDP_CMD_RS_SPRITE       | SPRITE_ADDR_fc00
-        INIT_STRUCT_MEMBER.vdpRegWindow     VDP_CMD_RS_WINDOW
-        INIT_STRUCT_MEMBER.vdpRegHScroll    VDP_CMD_RS_HSCROLL      | HSCROLL_ADDR_f800
-        INIT_STRUCT_MEMBER.vdpRegPlaneSize  VDP_CMD_RS_PLANE_SIZE   | PLANE_SIZE_H64_V32
-        INIT_STRUCT_MEMBER.vdpRegWinX       VDP_CMD_RS_WIN_X
-        INIT_STRUCT_MEMBER.vdpRegWinY       VDP_CMD_RS_WIN_Y
-        INIT_STRUCT_MEMBER.vdpRegIncr       VDP_CMD_RS_AUTO_INC     | $02
-        INIT_STRUCT_MEMBER.vdpRegBGCol      VDP_CMD_RS_BG_COLOR
-        INIT_STRUCT_MEMBER.vdpRegHRate      VDP_CMD_RS_HINT_RATE    | $ff
+        INIT_STRUCT_MEMBER.vdpRegMode1          VDP_CMD_RS_MODE1        | MODE1_HIGH_COLOR
+        INIT_STRUCT_MEMBER.vdpRegMode2          VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE | MODE2_DISPLAY_ENABLE | MODE2_VBLANK_ENABLE
+        INIT_STRUCT_MEMBER.vdpRegMode3          VDP_CMD_RS_MODE3
+        INIT_STRUCT_MEMBER.vdpRegMode4          VDP_CMD_RS_MODE4        | MODE4_H40_CELL
+        INIT_STRUCT_MEMBER.vdpRegPlaneA         VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_c000
+        INIT_STRUCT_MEMBER.vdpRegPlaneB         VDP_CMD_RS_PLANE_B      | PLANE_B_ADDR_e000
+        INIT_STRUCT_MEMBER.vdpRegSprite         VDP_CMD_RS_SPRITE       | SPRITE_ADDR_bc00
+        INIT_STRUCT_MEMBER.vdpRegWindow         VDP_CMD_RS_WINDOW       | WINDOW_ADDR_b000
+        INIT_STRUCT_MEMBER.vdpRegHScroll        VDP_CMD_RS_HSCROLL      | HSCROLL_ADDR_b800
+        INIT_STRUCT_MEMBER.vdpRegPlaneSize      VDP_CMD_RS_PLANE_SIZE   | PLANE_SIZE_H64_V32
+        INIT_STRUCT_MEMBER.vdpRegWinX           VDP_CMD_RS_WIN_X
+        INIT_STRUCT_MEMBER.vdpRegWinY           VDP_CMD_RS_WIN_Y
+        INIT_STRUCT_MEMBER.vdpRegIncr           VDP_CMD_RS_AUTO_INC     | $02
+        INIT_STRUCT_MEMBER.vdpRegBGCol          VDP_CMD_RS_BG_COLOR
+        INIT_STRUCT_MEMBER.vdpRegHRate          VDP_CMD_RS_HINT_RATE    | $ff
     INIT_STRUCT_END
 
+    INIT_STRUCT vdpMetrics
+        INIT_STRUCT_MEMBER.vdpScreenWidth          320
+        INIT_STRUCT_MEMBER.vdpScreenHeight         228
+        INIT_STRUCT_MEMBER.vdpPlaneWidthCells      64
+        INIT_STRUCT_MEMBER.vdpPlaneWidthShift      6
+        INIT_STRUCT_MEMBER.vdpPlaneHeightCells     32
+        INIT_STRUCT_MEMBER.vdpPlaneHeightShift     5
+    INIT_STRUCT_END
 
 ;-------------------------------------------------
 ; Write cached register value to VDP
@@ -122,7 +145,7 @@ VDP_REG_SET_BITS Macro vdpReg, flag
 ; Disable a VDP flag in the specified register
 ; ----------------
 VDP_REG_RESET_BITS Macro vdpReg, flag
-        andi.b   #~\flag, (vdpContext + \vdpReg + 1)
+        andi.b   #~\flag & $ff, (vdpContext + \vdpReg + 1)
 
         _VDP_REG_SYNC \vdpReg
     Endm
@@ -159,12 +182,13 @@ VDP_ADDR_SET Macro accessType, ramType, address, dataStride
 ; Initialize the VDP for first use
 ; ----------------
 VDPInit:
-        bsr   _VDPUnlock
-        bsr   _VDPInitRegisters
+        bsr _VDPUnlock
+        bsr _VDPInitRegisters
+        bsr vdpMetricsInit
 
-        bsr   VDPClearVRAM
-        bsr   VDPClearVSRAM
-        bsr   VDPClearCRAM
+        bsr VDPClearVRAM
+        bsr VDPClearVSRAM
+        bsr VDPClearCRAM
         rts
 
 
@@ -255,4 +279,67 @@ VDPVSyncWait:
     .waitVBlankStartLoop:
         btst    #3, (a0)
         beq     .waitVBlankStartLoop
+        rts
+
+
+;-------------------------------------------------
+; Set the plane size and update VDP metrics
+; ----------------
+; Input:
+; - d0: plane size register value (word size)
+; Uses: d0-d1/a0
+VDPSetPlaneSize
+        move.w  #VDP_CMD_RS_PLANE_SIZE, d1
+        move.b  d0, d1
+        move.w  d1, MEM_VDP_CTRL
+        lsr.b   #2, d1
+        andi.b  #3, d0
+        add.b   d0, d0
+        add.b   d0, d0
+        lea     vdpMetrics, a0
+        move.l  .planeSizes(pc, d0), vdpPlaneWidthCells(a0)
+        move.b  d1, d0
+        move.l  .planeSizes(pc, d0), vdpPlaneHeightCells(a0)
+        rts
+
+    .planeSizes:
+        dc.w 32, 5
+        dc.w 64, 6
+        dc.w 0, 0       ; Invalid
+        dc.w 128, 7
+
+
+;-------------------------------------------------
+; Set V30/240p (PAL) display mode
+; ----------------
+VDPSetV30CellMode:
+        VDP_REG_SET_BITS vdpRegMode2, MODE2_V30_CELL
+        move.w #240, (vdpMetrics + vdpScreenHeight)
+        rts
+
+
+;-------------------------------------------------
+; Set V28/228p display mode
+; ----------------
+VDPSetV28CellMode:
+        VDP_REG_SET_BITS vdpRegMode2, MODE2_V30_CELL
+        move.w #228, (vdpMetrics + vdpScreenHeight)
+        rts
+
+
+;-------------------------------------------------
+; Set H40/320px display mode
+; ----------------
+VDPSetH40CellMode:
+        VDP_REG_SET_BITS vdpRegMode4, MODE4_H40_CELL
+        move.w #320, (vdpMetrics + vdpScreenWidth)
+        rts
+
+
+;-------------------------------------------------
+; Set H32/256px display mode
+; ----------------
+VDPSetH32CellMode:
+        VDP_REG_RESET_BITS vdpRegMode4, MODE4_H40_CELL
+        move.w #256, (vdpMetrics + vdpScreenWidth)
         rts
