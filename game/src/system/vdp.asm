@@ -88,7 +88,7 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
     ; VDPContext initial values
     INIT_STRUCT vdpContext
         INIT_STRUCT_MEMBER.vdpRegMode1          VDP_CMD_RS_MODE1        | MODE1_HIGH_COLOR
-        INIT_STRUCT_MEMBER.vdpRegMode2          VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE | MODE2_DISPLAY_ENABLE | MODE2_VBLANK_ENABLE
+        INIT_STRUCT_MEMBER.vdpRegMode2          VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE
         INIT_STRUCT_MEMBER.vdpRegMode3          VDP_CMD_RS_MODE3
         INIT_STRUCT_MEMBER.vdpRegMode4          VDP_CMD_RS_MODE4        | MODE4_H40_CELL
         INIT_STRUCT_MEMBER.vdpRegPlaneA         VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_c000
@@ -342,4 +342,20 @@ VDPSetH40CellMode:
 VDPSetH32CellMode:
         VDP_REG_RESET_BITS vdpRegMode4, MODE4_H40_CELL
         move.w #256, (vdpMetrics + vdpScreenWidth)
+        rts
+
+
+;-------------------------------------------------
+; Enable display
+; ----------------
+VDPEnableDisplay:
+        VDP_REG_SET_BITS vdpRegMode2, MODE2_DISPLAY_ENABLE
+        rts
+
+
+;-------------------------------------------------
+; Disable display
+; ----------------
+VDPDisableDisplay:
+        VDP_REG_RESET_BITS vdpRegMode2, MODE2_DISPLAY_ENABLE
         rts
