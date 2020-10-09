@@ -13,10 +13,16 @@ Main:
 
         move.w  #PLANE_SIZE_H64_V64, d0
         jsr VDPSetPlaneSize
-        jsr VDPSetH32CellMode
 
         lea MapVilage_map1, a0
         jsr MapLoad
+
+        moveq   #0, d0
+        moveq   #0, d1
+        move.l  #PLANE_A, d2
+        jsr MapRender
+
+        jsr VDPEnableDisplay
 
     .mainLoop:
         jsr     VDPVSyncWait

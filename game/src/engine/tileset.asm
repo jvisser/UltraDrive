@@ -85,7 +85,7 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 ; - a0: Tileset address
 ; Uses: d0-d7/a0-a6
 TilesetLoad:
-        cmpa.w  loadedTileset, a0
+        cmpa.l  loadedTileset, a0
         bne     .loadTileset
         rts                                 ; Already loaded
 
