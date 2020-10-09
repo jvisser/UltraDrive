@@ -15,7 +15,9 @@
         ; .tilesetAddress
         dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
         ; .rowOffsetTable
-        dc.l [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width})][# th:if="${!iter.last}"], [/][/]
+        dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
+
+    Even
 
     Map[(${mapName})]Data:
     [# th:each="chunkReferences : ${#format.formatArray('dc.w ', ', ', map.width, '$%04x', map)}"]
