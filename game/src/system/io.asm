@@ -78,21 +78,21 @@ IO_DEVICE_MEGA_DRIVE_6_BUTTON       Equ $02
 ; Device specific state bits
 ; ----------------
 
-; Mega Drive 3 button controller device state bits
-MD_PAD_UP               Equ $0001
-MD_PAD_DOWN             Equ $0002
-MD_PAD_LEFT             Equ $0004
-MD_PAD_RIGHT            Equ $0008
-MD_PAD_B                Equ $0010
-MD_PAD_C                Equ $0020
-MD_PAD_A                Equ $0040
-MD_PAD_START            Equ $0080
+    ; Mega Drive 3 button controller device state bits
+    BIT_CONST.MD_PAD_UP     0
+    BIT_CONST.MD_PAD_DOWN   1
+    BIT_CONST.MD_PAD_LEFT   2
+    BIT_CONST.MD_PAD_RIGHT  3
+    BIT_CONST.MD_PAD_B      4
+    BIT_CONST.MD_PAD_C      5
+    BIT_CONST.MD_PAD_A      6
+    BIT_CONST.MD_PAD_START  7
 
-; Mega Drive 6 button controller device state bits
-MD_PAD_Z                Equ $0100
-MD_PAD_Y                Equ $0200
-MD_PAD_X                Equ $0400
-MD_PAD_MODE             Equ $0800
+    ; Mega Drive 6 button controller device state bits
+    BIT_CONST.MD_PAD_Z      8
+    BIT_CONST.MD_PAD_Y      9
+    BIT_CONST.MD_PAD_X      10
+    BIT_CONST.MD_PAD_MODE   11
 
 
 ;-------------------------------------------------

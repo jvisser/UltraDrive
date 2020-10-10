@@ -47,8 +47,8 @@ Main:
 
         move.w  ioDeviceState1, d2
 
-        _SCROLL_IF 0, 1, d4
-        _SCROLL_IF 3, 2, d5
+        _SCROLL_IF MD_PAD_UP,    MD_PAD_DOWN,   d4
+        _SCROLL_IF MD_PAD_RIGHT, MD_PAD_LEFT,   d5
 
         VDP_ADDR_SET WRITE, VSRAM, $00, $00
         move.w d4, (MEM_VDP_DATA)

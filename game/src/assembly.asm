@@ -8,6 +8,7 @@
     ;-------------------------------------------------
     ; System
     ; ----------------
+    Include './system/constants.asm'
     Include './system/m68k.asm'
     Include './system/debug.asm'
     Include './system/system.asm'
