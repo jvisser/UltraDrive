@@ -2,8 +2,19 @@
 ; Main entry point
 ;------------------------------------------------------------------------------------------
 
-Back:
-    dc.w $0e00, $00e0, $000e, $0ee0, $00ee, $0e0e, $0e06, $060c, $00c4, $008a, $0b20, $0aa0, $0000, $0000, $0000, $0000
+_SCROLL_IF Macro up, down, var
+            btst    #\down, d2
+            bne     .noDown\@
+            addq    #2, \var
+            bra     .done\@
+        .noDown\@:
+
+            btst    #\up, d2
+            bne     .done\@
+            subq    #2, \var
+
+        .done\@:
+    Endm
 
 ;-------------------------------------------------
 ; Main program entry point
@@ -22,34 +33,27 @@ Main:
         move.l  #PLANE_A, d2
         jsr MapRender
 
+        VDP_ADDR_SET WRITE, CRAM, $00, $00
+        move.w #$b20, (MEM_VDP_DATA)
+
         jsr VDPEnableDisplay
 
+        moveq   #0, d4
+        moveq   #0, d5
     .mainLoop:
         jsr     VDPVSyncWait
         jsr     VDPDMAQueueFlush
         jsr     IOUpdateDeviceState
 
-        ; Change color
-        moveq   #11, d0     ; Loop counter (12 buttons)
-        moveq   #0, d1      ; Current color index
         move.w  ioDeviceState1, d2
 
-    .findButton:
-        btst.l  d1, d2
-        beq     .pressFound
-        addq    #1, d1
-        dbra    d0, .findButton
-        bra     .mainLoop
+        _SCROLL_IF 0, 1, d4
+        _SCROLL_IF 3, 2, d5
 
-    .pressFound:
-        lea     Back, a0
-        add.w   d1, d1
+        VDP_ADDR_SET WRITE, VSRAM, $00, $00
+        move.w d4, (MEM_VDP_DATA)
 
-        M68K_DISABLE_INT
-
-        VDP_ADDR_SET WRITE, CRAM, $00, $00
-        move.w (a0, d1), (MEM_VDP_DATA)
-
-        M68K_ENABLE_INT
+        VDP_ADDR_SET WRITE, VRAM, $b800, $02
+        move.w d5, (MEM_VDP_DATA)
 
         bra     .mainLoop
