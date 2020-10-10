@@ -2,3 +2,4 @@ ultradrive/assets/**/*
 *.bin
 *.lst
 *.sym
+*.srm
