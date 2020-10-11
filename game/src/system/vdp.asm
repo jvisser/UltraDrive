@@ -34,16 +34,16 @@ PLANE_B             Equ (VDP_CMD_AS_VRAM_WRITE | $20000003)
 ;-------------------------------------------------
 ; VDP Status register bits
 ; ----------------
-VDP_STATUS_PAL          Equ $0001   ; PAL, 0 = NTSC
-VDP_STATUS_DMA          Equ $0002   ; DMA Busy
-VDP_STATUS_HBLANK       Equ $0004   ; HBlank active
-VDP_STATUS_VBLANK       Equ $0008   ; VBlank active
-VDP_STATUS_ODD          Equ $0010   ; Odd frame in interlace mode
-VDP_STATUS_COLLISION    Equ $0020   ; Sprite collision happened between non zero sprite pixels
-VDP_STATUS_SOVERLFLOW   Equ $0040   ; Sprite overflow happened
-VDP_STATUS_VINT         Equ $0080   ; Vertical interrup happened
-VDP_STATUS_FIFO_FULL    Equ $0100   ; Write FIFO full
-VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
+    BIT_CONST.VDP_STATUS_PAL          0   ; PAL, 0 = NTSC
+    BIT_CONST.VDP_STATUS_DMA          1   ; DMA Busy
+    BIT_CONST.VDP_STATUS_HBLANK       2   ; HBlank active
+    BIT_CONST.VDP_STATUS_VBLANK       3   ; VBlank active
+    BIT_CONST.VDP_STATUS_ODD          4   ; Odd frame in interlace mode
+    BIT_CONST.VDP_STATUS_COLLISION    5   ; Sprite collision happened between non zero sprite pixels
+    BIT_CONST.VDP_STATUS_SOVERLFLOW   6   ; Sprite overflow happened
+    BIT_CONST.VDP_STATUS_VINT         7   ; Vertical interrup happened
+    BIT_CONST.VDP_STATUS_FIFO_FULL    8   ; Write FIFO full
+    BIT_CONST.VDP_STATUS_FIFO_EMPTY   9   ; Write FIFO empty
 
 
 ;-------------------------------------------------
@@ -72,7 +72,9 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
     ; VDP metrics structure
     DEFINE_STRUCT VDPMetrics
         STRUCT_MEMBER.w vdpScreenWidth
+        STRUCT_MEMBER.w vdpScreenWidthCells
         STRUCT_MEMBER.w vdpScreenHeight
+        STRUCT_MEMBER.w vdpScreenHeightCells
         STRUCT_MEMBER.w vdpPlaneWidthCells
         STRUCT_MEMBER.w vdpPlaneWidthShift
         STRUCT_MEMBER.w vdpPlaneHeightCells
@@ -106,7 +108,9 @@ VDP_STATUS_FIFO_EMPTY   Equ $0200   ; Write FIFO empty
 
     INIT_STRUCT vdpMetrics
         INIT_STRUCT_MEMBER.vdpScreenWidth          320
+        INIT_STRUCT_MEMBER.vdpScreenWidthCells     40
         INIT_STRUCT_MEMBER.vdpScreenHeight         228
+        INIT_STRUCT_MEMBER.vdpScreenHeightCells    28
         INIT_STRUCT_MEMBER.vdpPlaneWidthCells      64
         INIT_STRUCT_MEMBER.vdpPlaneWidthShift      6
         INIT_STRUCT_MEMBER.vdpPlaneHeightCells     32
@@ -273,11 +277,11 @@ VDPVSyncWait:
         lea     MEM_VDP_CTRL + 1, a0
 
     .waitVBLankEndLoop:
-        btst    #3, (a0)
+        btst    #VDP_STATUS_VBLANK, (a0)
         bne     .waitVBLankEndLoop
 
     .waitVBlankStartLoop:
-        btst    #3, (a0)
+        btst    #VDP_STATUS_VBLANK, (a0)
         beq     .waitVBlankStartLoop
         rts
 
@@ -315,6 +319,7 @@ VDPSetPlaneSize
 VDPSetV30CellMode:
         VDP_REG_SET_BITS vdpRegMode2, MODE2_V30_CELL
         move.w #240, (vdpMetrics + vdpScreenHeight)
+        move.w #30, (vdpMetrics + vdpScreenHeightCells)
         rts
 
 
@@ -324,6 +329,7 @@ VDPSetV30CellMode:
 VDPSetV28CellMode:
         VDP_REG_SET_BITS vdpRegMode2, MODE2_V30_CELL
         move.w #228, (vdpMetrics + vdpScreenHeight)
+        move.w #28, (vdpMetrics + vdpScreenHeightCells)
         rts
 
 
@@ -333,6 +339,7 @@ VDPSetV28CellMode:
 VDPSetH40CellMode:
         VDP_REG_SET_BITS vdpRegMode4, MODE4_H40_CELL
         move.w #320, (vdpMetrics + vdpScreenWidth)
+        move.w #40, (vdpMetrics + vdpScreenWidthCells)
         rts
 
 
@@ -342,6 +349,7 @@ VDPSetH40CellMode:
 VDPSetH32CellMode:
         VDP_REG_RESET_BITS vdpRegMode4, MODE4_H40_CELL
         move.w #256, (vdpMetrics + vdpScreenWidth)
+        move.w #32, (vdpMetrics + vdpScreenWidthCells)
         rts
 
 
