@@ -47,6 +47,17 @@ PLANE_B             Equ (VDP_CMD_AS_VRAM_WRITE | $20000003)
 
 
 ;-------------------------------------------------
+; VDP plane pattern reference structure (16 bit)
+; ----------------
+    BIT_MASK.PATTERN_REF_INDEX        0,    11
+    BIT_MASK.PATTERN_REF_ORIENTATION  11,   2
+    BIT_CONST.PATTERN_REF_HFLIP       11
+    BIT_CONST.PATTERN_REF_VFLIP       12
+    BIT_MASK.PATTERN_REF_PALETTE      13,   2
+    BIT_CONST.PATTERN_REF_PRIORITY    15
+
+
+;-------------------------------------------------
 ; VDP register shadow variables
 ; ----------------
 
@@ -116,6 +127,7 @@ PLANE_B             Equ (VDP_CMD_AS_VRAM_WRITE | $20000003)
         INIT_STRUCT_MEMBER.vdpPlaneHeightCells     32
         INIT_STRUCT_MEMBER.vdpPlaneHeightShift     5
     INIT_STRUCT_END
+
 
 ;-------------------------------------------------
 ; Write cached register value to VDP

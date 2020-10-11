@@ -15,6 +15,24 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 
 
 ;-------------------------------------------------
+; Tile reference structure (16 bit)
+; ----------------
+
+    ; Chunk reference structure
+    BIT_MASK.CHUNK_REF_INDEX        0,  8
+    BIT_CONST.CHUNK_REF_HFLIP       10
+    BIT_CONST.CHUNK_REF_VFLIP       11
+    BIT_CONST.CHUNK_REF_COLLISION   12
+
+    ; Block reference structure
+    BIT_MASK.BLOCK_REF_INDEX        0,  10
+    BIT_CONST.BLOCK_REF_HFLIP       10
+    BIT_CONST.BLOCK_REF_VFLIP       11
+    BIT_MASK.BLOCK_REF_SOLIDITY     12, 2
+    BIT_MASK.BLOCK_REF_TYPE         13, 2
+
+
+;-------------------------------------------------
 ; Tileset structures
 ; ----------------
 

@@ -95,7 +95,7 @@ MapRender:
         ; Get block reference from chunk
         swap    d6
         move.w  d6, d2
-        btst    #11, d7
+        btst    #CHUNK_REF_VFLIP, d7
         beq     .chunkNotVFlipped
         not.w   d2
     .chunkNotVFlipped:
@@ -104,15 +104,15 @@ MapRender:
 
         swap    d5
         move.w  d5, d3
-        btst    #10, d7
+        btst    #CHUNK_REF_HFLIP, d7
         beq     .chunkNotHFlipped
         not.w   d3
     .chunkNotHFlipped:
         andi.w  #$0e, d3
         add.w   d3, d2          ; d2 = Chunk local block reference address
 
-        move.w  d7, d3          ; Calculate block reference address in chunk table (NB: only 8 of the 10 bits of the tile index are used for chunks)
-        lsl.w   #7, d3
+        move.w  d7, d3          ; Calculate block reference address in chunk table (no mask by CHUNK_REF_INDEX_MASK required as those bits will be completely shifted out by the following shift)
+        lsl.w   #7, d3          ; 128 bytes per chunk
         add.w   d2, d3          ; d3 = offset of block reference in chunk table
 
         move.w  (a4, d3), d3    ; d3 = block reference
@@ -121,7 +121,7 @@ MapRender:
         ; Get pattern reference from block
         eor.w    d3, d7         ; d7 = Combined block and chunk orientation flags
 
-        btst    #11, d7
+        btst    #BLOCK_REF_VFLIP, d7
         beq     .blockNotVFlipped
         not.w   d6
     .blockNotVFlipped:
@@ -129,7 +129,7 @@ MapRender:
         add.w   d6, d6
         add.w   d6, d6          ; Pattern row offset
 
-        btst    #10, d7
+        btst    #BLOCK_REF_HFLIP, d7
         beq     .blockNotHFlipped
         not.w   d5
     .blockNotHFlipped:
@@ -139,7 +139,7 @@ MapRender:
         add.w   d5, d6          ; d6 = Pattern offset relative to block base address
 
         move    d3, d5
-        andi.w  #$3ff, d5
+        andi.w  #BLOCK_REF_INDEX_MASK, d5
         lsl.w   #3, d5
         add.w   d6, d5          ; d5 = Offset of pattern reference in chunk table
 
@@ -147,7 +147,7 @@ MapRender:
 
         ; Reorient pattern reference by chunk and block orientation
         add.w   d7, d7
-        andi.w  #$1800, d7
+        andi.w  #PATTERN_REF_ORIENTATION_MASK, d7
         eor.w   d7, d5
 
         ; ----------------------------
