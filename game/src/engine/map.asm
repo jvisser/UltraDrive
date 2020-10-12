@@ -6,11 +6,15 @@
 ; Map structures
 ; ----------------
     DEFINE_STRUCT Map
-        STRUCT_MEMBER.w width
-        STRUCT_MEMBER.w height
+        STRUCT_MEMBER.w mapWidth
+        STRUCT_MEMBER.w mapHeight
+        STRUCT_MEMBER.w mapWidthPatterns
+        STRUCT_MEMBER.w mapHeightPatterns
+        STRUCT_MEMBER.w mapWidthPixels
+        STRUCT_MEMBER.w mapHeightPixels
         STRUCT_MEMBER.l mapDataAddress      ; Uncompressed
-        STRUCT_MEMBER.l tilesetAddress
-        STRUCT_MEMBER.b rowOffsetTable
+        STRUCT_MEMBER.l mapTilesetAddress
+        STRUCT_MEMBER.b mapRowOffsetTable
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -33,7 +37,7 @@ MapLoad:
         move.l  a0, loadedMap
 
         ; Load associated tileset
-        movea.l tilesetAddress(a0), a0
+        movea.l mapTilesetAddress(a0), a0
         jsr     TilesetLoad
         rts
 
@@ -50,20 +54,20 @@ MapRender:
 
         movea.l loadedMap, a0
         movea.l mapDataAddress(a0), a1
-        lea     rowOffsetTable(a0), a2
+        lea     mapRowOffsetTable(a0), a2
         lea     MEM_VDP_DATA, a3
         lea     chunkTable, a4
         lea     blockTable, a5
 
         move.l  d2, (MEM_VDP_CTRL)
 
-        move.w  (vdpMetrics + vdpPlaneHeightCells), d3
+        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d3
         subq.w  #1, d3
     .rowLoop:
 
         movea.l d0, a0
         movea.l d3, a6
-        move.w  (vdpMetrics + vdpPlaneWidthCells), d4
+        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d4
         subq.w  #1, d4
     .colLoop:
         ; ----------------------------

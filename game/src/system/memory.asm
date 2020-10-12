@@ -113,6 +113,11 @@ VAR Macro varName
             EndIf
 \varName Rs.b \varName\_Size
         EndIf
+        If (def(debug))
+                Local VAR_ADDR
+VAR_ADDR Equ \varName
+                Inform 0, 'Variable \varName defined: \$VAR_ADDR'
+        EndIf
     Endm
 
 
