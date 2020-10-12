@@ -29,6 +29,7 @@
     Include './engine/comper.asm'
     Include './engine/tileset.asm'
     Include './engine/map.asm'
+    Include './engine/camera.asm'
 
 
     ;-------------------------------------------------

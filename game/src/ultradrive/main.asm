@@ -22,19 +22,23 @@ _SCROLL_IF Macro up, down, var
 Main:
         DEBUG_MSG 'UltraDrive Started!'
 
-        move.w  #PLANE_SIZE_H64_V64, d0
-        jsr VDPSetPlaneSize
+        ;move.w  #PLANE_SIZE_H64_V64, d0
+        ;jsr VDPSetPlaneSize
 
-        lea MapVilage_map1, a0
-        jsr MapLoad
+        lea     MapVilage_map1, a0
+        jsr     MapLoad
 
-        moveq   #0, d0
-        moveq   #0, d1
-        move.l  #PLANE_A, d2
-        jsr MapRender
+        ;move.w  #1024-320+50, d0
+        ;move.w  #896-228+140, d1
+        move.w  #4, d0
+        move.w  #4, d1
+        ;move.w  #-50, d0
+        ;move.w  #-104, d1
+        movea.w #0, a0
+        jsr     CameraInit
 
         VDP_ADDR_SET WRITE, CRAM, $00, $00
-        move.w #$b20, (MEM_VDP_DATA)
+        move.w  #$b20, (MEM_VDP_DATA)
 
         jsr VDPEnableDisplay
 
@@ -50,10 +54,10 @@ Main:
         _SCROLL_IF MD_PAD_UP,    MD_PAD_DOWN,   d4
         _SCROLL_IF MD_PAD_RIGHT, MD_PAD_LEFT,   d5
 
-        VDP_ADDR_SET WRITE, VSRAM, $00, $00
-        move.w d4, (MEM_VDP_DATA)
+        ;VDP_ADDR_SET WRITE, VSRAM, $00, $00
+        ;move.w d4, (MEM_VDP_DATA)
 
-        VDP_ADDR_SET WRITE, VRAM, $b800, $02
-        move.w d5, (MEM_VDP_DATA)
+        ;VDP_ADDR_SET WRITE, VRAM, $b800, $02
+        ;move.w d5, (MEM_VDP_DATA)
 
         bra     .mainLoop
