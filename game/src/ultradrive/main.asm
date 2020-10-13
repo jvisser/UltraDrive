@@ -20,44 +20,43 @@ _SCROLL_IF Macro up, down, var
 ; Main program entry point
 ; ----------------
 Main:
-        DEBUG_MSG 'UltraDrive Started!'
-
-        ;move.w  #PLANE_SIZE_H64_V64, d0
-        ;jsr VDPSetPlaneSize
-
+        jsr     MapInit
         lea     MapVilage_map1, a0
         jsr     MapLoad
 
-        ;move.w  #1024-320+50, d0
-        ;move.w  #896-228+140, d1
-        move.w  #4, d0
-        move.w  #4, d1
-        ;move.w  #-50, d0
-        ;move.w  #-104, d1
-        movea.w #0, a0
+        DEBUG_MSG 'Map loaded'
+
+        ;move    #128-9, d0
+        move    #0, d0
+        ;move    #1024-512, d0
+        move    #0, d1
+        movea   #0, a0
         jsr     CameraInit
 
-        VDP_ADDR_SET WRITE, CRAM, $00, $00
-        move.w  #$b20, (MEM_VDP_DATA)
+        DEBUG_MSG 'Camera initialized'
 
         jsr VDPEnableDisplay
 
-        moveq   #0, d4
-        moveq   #0, d5
+        DEBUG_MSG 'UltraDrive Started!'
+
     .mainLoop:
+
+        PROFILE $000e
+
+        move.w  ioDeviceState1, d2
+        moveq   #0, d0
+        moveq   #0, d1
+        _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d1
+        _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0
+
+        jsr     CameraMove
+        jsr     CameraFinalize
+
+        PROFILE_END
+
         jsr     VDPVSyncWait
         jsr     VDPDMAQueueFlush
         jsr     IOUpdateDeviceState
-
-        move.w  ioDeviceState1, d2
-
-        _SCROLL_IF MD_PAD_UP,    MD_PAD_DOWN,   d4
-        _SCROLL_IF MD_PAD_RIGHT, MD_PAD_LEFT,   d5
-
-        ;VDP_ADDR_SET WRITE, VSRAM, $00, $00
-        ;move.w d4, (MEM_VDP_DATA)
-
-        ;VDP_ADDR_SET WRITE, VRAM, $b800, $02
-        ;move.w d5, (MEM_VDP_DATA)
+        jsr     CameraPrepareNextFrame
 
         bra     .mainLoop

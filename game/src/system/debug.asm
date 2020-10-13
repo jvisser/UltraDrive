@@ -10,10 +10,12 @@
 ; Input:
 ; - message: String to write to console
 DEBUG_MSG Macro message
-            movem.l d0/a0-a1, -(sp)
+            PUSHW   sr
+            PUSHM   d0/a0-a1
             lea     .debugMessage\@, a0
             jsr     GensKModDebugAlert
-            movem.l (sp)+, d0/a0-a1
+            POPM    d0/a0-a1
+            POPW    sr
 
             ; Store string data in DEBUG section
             SECTION_START S_DEBUG
