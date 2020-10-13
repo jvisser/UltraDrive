@@ -11,6 +11,7 @@
     Include './system/constants.asm'
     Include './system/m68k.asm'
     Include './system/debug.asm'
+    Include './system/profile.asm'
     Include './system/system.asm'
     Include './system/memory.asm'
     Include './system/exception.asm'

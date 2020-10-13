@@ -28,17 +28,17 @@ CRAM_SIZE_LONG      Equ (CRAM_SIZE_BYTE / SIZE_LONG)
 
 
 ; Default VDP object addresses
-PLANE_A_ADDR        Equ $c000
-PLANE_B_ADDR        Equ $e000
-WINDOW_ADDR         Equ $b000
-SPRITE_ADDR         Equ $bc00
-HSCROLL_ADDR        Equ $b800
+VDP_PLANE_A_ADDR        Equ $c000
+VDP_PLANE_B_ADDR        Equ $e000
+VDP_WINDOW_ADDR         Equ $b000
+VDP_SPRITE_ADDR         Equ $bc00
+VDP_HSCROLL_ADDR        Equ $b800
 
 
     ; Plane identifiers (double as address set commands)
-    VDP_ADDR_SET_CONST.WINDOW   WRITE, VRAM, WINDOW_ADDR
-    VDP_ADDR_SET_CONST.PLANE_A  WRITE, VRAM, PLANE_A_ADDR
-    VDP_ADDR_SET_CONST.PLANE_B  WRITE, VRAM, PLANE_B_ADDR
+    VDP_ADDR_SET_CONST.VDP_WINDOW   WRITE, VRAM, VDP_WINDOW_ADDR
+    VDP_ADDR_SET_CONST.VDP_PLANE_A  WRITE, VRAM, VDP_PLANE_A_ADDR
+    VDP_ADDR_SET_CONST.VDP_PLANE_B  WRITE, VRAM, VDP_PLANE_B_ADDR
 
 
 ;-------------------------------------------------
@@ -102,14 +102,14 @@ PATTERN_MASK        Equ 7
     ; VDP metrics structure
     DEFINE_STRUCT VDPMetrics
         STRUCT_MEMBER.w vdpScreenWidth
-        STRUCT_MEMBER.w vdpScreenWidthPatterns
         STRUCT_MEMBER.w vdpScreenHeight
+        STRUCT_MEMBER.w vdpScreenWidthPatterns
         STRUCT_MEMBER.w vdpScreenHeightPatterns
         STRUCT_MEMBER.w vdpPlaneWidth
-        STRUCT_MEMBER.w vdpPlaneWidthPatterns
-        STRUCT_MEMBER.w vdpPlaneWidthShift
         STRUCT_MEMBER.w vdpPlaneHeight
+        STRUCT_MEMBER.w vdpPlaneWidthPatterns
         STRUCT_MEMBER.w vdpPlaneHeightPatterns
+        STRUCT_MEMBER.w vdpPlaneWidthShift
         STRUCT_MEMBER.w vdpPlaneHeightShift
     DEFINE_STRUCT_END
 
@@ -125,11 +125,11 @@ PATTERN_MASK        Equ 7
         INIT_STRUCT_MEMBER.vdpRegMode2          VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE
         INIT_STRUCT_MEMBER.vdpRegMode3          VDP_CMD_RS_MODE3
         INIT_STRUCT_MEMBER.vdpRegMode4          VDP_CMD_RS_MODE4        | MODE4_H40_CELL
-        INIT_STRUCT_MEMBER.vdpRegPlaneA         VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_\$PLANE_A_ADDR
-        INIT_STRUCT_MEMBER.vdpRegPlaneB         VDP_CMD_RS_PLANE_B      | PLANE_B_ADDR_\$PLANE_B_ADDR
-        INIT_STRUCT_MEMBER.vdpRegSprite         VDP_CMD_RS_SPRITE       | SPRITE_ADDR_\$SPRITE_ADDR
-        INIT_STRUCT_MEMBER.vdpRegWindow         VDP_CMD_RS_WINDOW       | WINDOW_ADDR_\$WINDOW_ADDR
-        INIT_STRUCT_MEMBER.vdpRegHScroll        VDP_CMD_RS_HSCROLL      | HSCROLL_ADDR_\$HSCROLL_ADDR
+        INIT_STRUCT_MEMBER.vdpRegPlaneA         VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_\$VDP_PLANE_A_ADDR
+        INIT_STRUCT_MEMBER.vdpRegPlaneB         VDP_CMD_RS_PLANE_B      | PLANE_B_ADDR_\$VDP_PLANE_B_ADDR
+        INIT_STRUCT_MEMBER.vdpRegSprite         VDP_CMD_RS_SPRITE       | SPRITE_ADDR_\$VDP_SPRITE_ADDR
+        INIT_STRUCT_MEMBER.vdpRegWindow         VDP_CMD_RS_WINDOW       | WINDOW_ADDR_\$VDP_WINDOW_ADDR
+        INIT_STRUCT_MEMBER.vdpRegHScroll        VDP_CMD_RS_HSCROLL      | HSCROLL_ADDR_\$VDP_HSCROLL_ADDR
         INIT_STRUCT_MEMBER.vdpRegPlaneSize      VDP_CMD_RS_PLANE_SIZE   | PLANE_SIZE_H64_V32
         INIT_STRUCT_MEMBER.vdpRegWinX           VDP_CMD_RS_WIN_X
         INIT_STRUCT_MEMBER.vdpRegWinY           VDP_CMD_RS_WIN_Y
@@ -140,15 +140,15 @@ PATTERN_MASK        Equ 7
 
     INIT_STRUCT vdpMetrics
         INIT_STRUCT_MEMBER.vdpScreenWidth           320
-        INIT_STRUCT_MEMBER.vdpScreenWidthPatterns   40
         INIT_STRUCT_MEMBER.vdpScreenHeight          224
+        INIT_STRUCT_MEMBER.vdpScreenWidthPatterns   40
         INIT_STRUCT_MEMBER.vdpScreenHeightPatterns  28
         INIT_STRUCT_MEMBER.vdpPlaneWidth            64 * 8
-        INIT_STRUCT_MEMBER.vdpPlaneWidthPatterns    64
-        INIT_STRUCT_MEMBER.vdpPlaneWidthShift       6
         INIT_STRUCT_MEMBER.vdpPlaneHeight           32 * 8
+        INIT_STRUCT_MEMBER.vdpPlaneWidthPatterns    64
         INIT_STRUCT_MEMBER.vdpPlaneHeightPatterns   32
-        INIT_STRUCT_MEMBER.vdpPlaneHeightShift      5
+        INIT_STRUCT_MEMBER.vdpPlaneWidthShift       7       ; Adjusted for word sized shift
+        INIT_STRUCT_MEMBER.vdpPlaneHeightShift      6
     INIT_STRUCT_END
 
 
@@ -156,7 +156,7 @@ PATTERN_MASK        Equ 7
 ; Write cached register value to VDP
 ; ----------------
 _VDP_REG_SYNC Macro vdpReg
-        move.w  (vdpContext + \vdpReg), (MEM_VDP_CTRL)
+        move.w  (vdpContext + \vdpReg), MEM_VDP_CTRL
     Endm
 
 
@@ -333,10 +333,10 @@ _WRITE_PLANE_SIZE_METRICS Macro
 
     .planeMetrics:
         ;     | sizePixels | sizePatterns | shiftPatterns |
-        dc.w     32 * 8,     32,            5
-        dc.w     64 * 8,     64,            6
+        dc.w     32 * 8,     32,            6
+        dc.w     64 * 8,     64,            7
         dc.w     0,           0,            0  ; Invalid
-        dc.w    128 * 8,    128,            7
+        dc.w    128 * 8,    128,            8
 
     Purge _WRITE_PLANE_SIZE_METRICS
 

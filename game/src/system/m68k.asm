@@ -26,12 +26,84 @@ M68k_SR_TRACE_MODE      Equ 0x8000
 
 
 ;-------------------------------------------------
+; Save word onto stack
+; ----------------
+PUSHW Macro value
+        move.w \value, -(sp)
+    Endm
+
+
+;-------------------------------------------------
+; Pop word from stack
+; ----------------
+POPW Macro value
+        If (narg = 1)
+            move.w (sp)+, \value
+        Else
+            addq.w  #SIZE_WORD, sp
+        EndIf
+    Endm
+
+
+;-------------------------------------------------
+; Read top word from stack
+; ----------------
+PEEKW Macro value
+        move.w SIZE_WORD(sp), \value
+    Endm
+
+
+;-------------------------------------------------
+; Push long onto stack
+; ----------------
+PUSHL Macro value
+        move.l \value, -(sp)
+    Endm
+
+
+;-------------------------------------------------
+; Pop word from stack
+; ----------------
+POPL Macro value
+        If (narg = 1)
+            move.l (sp)+, \value
+        Else
+            addq.l  #SIZE_LONG, sp
+        EndIf
+    Endm
+
+
+;-------------------------------------------------
+; Read top word from stack
+; ----------------
+PEEKL Macro value
+        move.w SIZE_LONG(sp), \value
+    Endm
+
+
+;-------------------------------------------------
+; Push multiple full registers onto the stack
+; ----------------
+PUSHM Macro reglist
+        movem.l \reglist, -(sp)
+    Endm
+
+
+;-------------------------------------------------
+; Pop multiple full registers from the stack
+; ----------------
+POPM Macro reglist
+        movem.l (sp)+, \reglist
+    Endm
+
+
+;-------------------------------------------------
 ; Disables interrupt processing
 ; ----------------
 ; Uses: sp|a7/sr
 M68K_DISABLE_INT Macro
-        move sr, -(sp)
-        move #M68k_SR_SUPERVISOR | M68k_SR_INTERRUPT_MASK, sr
+        PUSHW   sr
+        move    #M68k_SR_SUPERVISOR | M68k_SR_INTERRUPT_MASK, sr
     Endm
 
 
@@ -39,7 +111,7 @@ M68K_DISABLE_INT Macro
 ; Restore interrupt processing
 ; ----------------
 M68K_ENABLE_INT Macro
-        move (sp)+, sr
+        POPW   sr
     Endm
 
 

@@ -6,4 +6,5 @@
 ; Generic exception handler
 ; ----------------
 Exception:
+        stop #M68k_SR_SUPERVISOR | M68k_SR_INTERRUPT_MASK
         rte

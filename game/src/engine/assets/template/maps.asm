@@ -6,23 +6,23 @@
 
     ; struct Map
     Map[(${mapName})]:
-        ; .width
+        ; .mapWidth
         dc.w [(${map.width})]
-        ; .height
+        ; .mapHeight
         dc.w [(${map.height})]
-        ; .widthPatterns
+        ; .mapWidthPatterns
         dc.w [(${map.width * 16})]
-        ; .heightPatterns
+        ; .mapHeightPatterns
         dc.w [(${map.height * 16})]
-        ; .widthPixels
+        ; .mapWidthPixels
         dc.w [(${map.width * 16 * 8})]
-        ; .heightPixels
+        ; .mapHeightPixels
         dc.w [(${map.height * 16 * 8})]
         ; .mapDataAddress
         dc.l Map[(${mapName})]Data
-        ; .tilesetAddress
+        ; .mapTilesetAddress
         dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-        ; .rowOffsetTable
+        ; .mapRowOffsetTable
         dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
 
     Even

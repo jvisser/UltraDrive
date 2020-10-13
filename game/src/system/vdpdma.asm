@@ -8,6 +8,7 @@
 ; DMA structures
 ; ----------------
     DEFINE_STRUCT VDPDMATransfer
+        STRUCT_MEMBER.w dmaDataStride
         STRUCT_MEMBER.w dmaLength
         STRUCT_MEMBER.l dmaSource
         STRUCT_MEMBER.l dmaTarget
@@ -37,11 +38,19 @@ _VDP_DMA_DEFINE_COMMAND_REGS Macro source, length
 
 
 ;-------------------------------------------------
+; Store VRAM DMA target address set command
+; ----------------
+VDP_DMA_DEFINE_VRAM_TARGET_AS Macro target
+        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
+    Endm
+
+
+;-------------------------------------------------
 ; Create static VDPDMATransferCommandList data block for VRAM transfer
 ; ----------------
 VDP_DMA_DEFINE_VRAM_COMMAND_LIST Macro source, target, length
         _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
-        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
+        VDP_DMA_DEFINE_VRAM_TARGET_AS \target
     Endm
 
 
@@ -66,7 +75,12 @@ VDP_DMA_DEFINE_VSRAM_COMMAND_LIST Macro source, target, length
 ;-------------------------------------------------
 ; Create static VDPDMATransfer for 68000->VRAM transfer
 ; ----------------
-VDP_DMA_DEFINE_VRAM_TRANSFER Macro source, target, length
+VDP_DMA_DEFINE_VRAM_TRANSFER Macro source, target, length, dataStride
+        If (narg = 4)
+            dc.w \dataStride
+        Else
+            dc.w 2
+        EndIf
         dc.w \length
         dc.l (\source >> 1)
         dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
@@ -76,7 +90,12 @@ VDP_DMA_DEFINE_VRAM_TRANSFER Macro source, target, length
 ;-------------------------------------------------
 ; Create static VDPDMATransfer for 68000->CRAM transfer
 ; ----------------
-VDP_DMA_DEFINE_CRAM_TRANSFER Macro source, target, length
+VDP_DMA_DEFINE_CRAM_TRANSFER Macro source, target, length, dataStride
+        If (narg = 4)
+            dc.w \dataStride
+        Else
+            dc.w 2
+        EndIf
         dc.w \length
         dc.l (\source >> 1)
         dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
@@ -86,7 +105,12 @@ VDP_DMA_DEFINE_CRAM_TRANSFER Macro source, target, length
 ;-------------------------------------------------
 ; Create static VDPDMATransfer for 68000->VSRAM transfer
 ; ----------------
-VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length
+VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length, dataStride
+        If (narg = 4)
+            dc.w \dataStride
+        Else
+            dc.w 2
+        EndIf
         dc.w \length
         dc.l (\source >> 1)
         dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
