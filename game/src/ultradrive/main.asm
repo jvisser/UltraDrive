@@ -28,10 +28,15 @@ Main:
 
         move    #128-9, d0
         ;move    #0, d0
-        ;move    #1024-512, d0
-        move    #0, d1
+        move    #1024-340, d0
+        ;move    #0, d1
+        ;move    #8*10+4, d1
         movea   #0, a0
         jsr     CameraInit
+
+        move    #0, d0
+        move    #256, d1
+        jsr     CameraMove
 
         DEBUG_MSG 'Camera initialized'
 
