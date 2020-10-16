@@ -213,37 +213,39 @@ _UPDATE_MIN_MAX Macro minMax, opposingMin, planePosition, screenSize, mapRendere
 
 MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
 
-                move.l  (camera + \minMax), d3                  ; Read camMin:camMax into d3
-                cmp.w   d3, d1                                  ; Max overflow?
+                move.l  (camera + \minMax), d4                  ; d4 = camMin:camMax
+                cmp.w   d4, d1                                  ; Max overflow?
                 bge     .camMaxOverflow\@
-                swap    d3
-                cmp.w   d3, d1                                  ; Min overflow
+                swap    d4
+                cmp.w   d4, d1                                  ; Min overflow
                 bge     .camOk\@
 
              .camMinOverflow\@:
-                subi.l  #MIN_MAX_DISPLACEMENT, d3
+                subi.l  #MIN_MAX_DISPLACEMENT, d4
                 move.w  (camera + \planePosition), d0
                 subq.w  #1, d0                                  ; d0 = Plane target row/column
                 move.w  d0, (camera + \planePosition)
-                move.w  d3, d1
-                swap    d3
-                move.l  d3, (camera + \minMax)
+                move.w  d4, d1
+                swap    d4
+                move.l  d4, (camera + \minMax)
                 move.w  (camera + opposingMin), d2
                 lsr.w   #PATTERN_SHIFT, d1                      ; d1 = Map source row/column (based on camMin)
                 lsr.w   #PATTERN_SHIFT, d2                      ; d2 = Map start
+                move.l  #VDP_PLANE_A, d3                        ; d3 = Target plane
                 jsr     \mapRenderer
                 bra     .camOk\@
 
             .camMaxOverflow\@:
-                move.w  d3, d1
-                addi.l  #MIN_MAX_DISPLACEMENT, d3
+                move.w  d4, d1
+                addi.l  #MIN_MAX_DISPLACEMENT, d4
                 move.w  (camera + \planePosition), d0           ; d0 = Plane target row/column
                 addq.w  #1, (camera + \planePosition)
-                move.l  d3, (camera + \minMax)
+                move.l  d4, (camera + \minMax)
                 add.w   (vdpMetrics + \screenSize), d1
                 move.w  (camera + opposingMin), d2
                 lsr.w   #PATTERN_SHIFT, d1                      ; d1 = Map source row/column (based on camMax)
                 lsr.w   #PATTERN_SHIFT, d2                      ; d2 = Map start
+                move.l  #VDP_PLANE_A, d3                        ; d3 = Target plane
                 jsr     \mapRenderer
             .camOk\@:
         Endm
@@ -259,7 +261,7 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
 
         ; Update camera position
         move.l  (camera + camX), d1                             ; Read camX:camY into d1
-        move.l  d1, d3
+        move.l  d1, d4
 
         ; Update camera position within the bounds of the map
         _UPDATE_POSITION camAbsoluteMaxY, camYDisplacement
@@ -269,8 +271,8 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
         move.l  d1, (camera + camX)
 
         ; Update scroll position with camera position difference (camScrollX and camScrollY)
-        sub.l   d1, d3
-        sub.l   d3, (camera + camScrollX)
+        sub.l   d1, d4
+        sub.l   d4, (camera + camScrollX)
 
         ; Check if background plane should be updated
         PUSHL   d1
