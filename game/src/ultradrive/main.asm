@@ -41,7 +41,7 @@ Main:
 
     .mainLoop:
 
-        PROFILE $000e
+        PROFILE_FRAME_TIME $000e
 
         move.w  ioDeviceState1, d2
         moveq   #0, d0
@@ -52,7 +52,7 @@ Main:
         jsr     CameraMove
         jsr     CameraFinalize
 
-        PROFILE_END
+        PROFILE_FRAME_TIME_END
 
         jsr     VDPVSyncWait
         jsr     VDPDMAQueueFlush
