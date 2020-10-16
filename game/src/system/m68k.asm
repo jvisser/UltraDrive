@@ -98,6 +98,24 @@ POPM Macro reglist
 
 
 ;-------------------------------------------------
+; Push full CPU context onto the stack
+; ----------------
+PUSH_CONTEXT Macro
+        PUSHW   sr
+        PUSHM   d0-d7/a0-a7
+    Endm
+
+
+;-------------------------------------------------
+; Pop full CPU context from the stack
+; ----------------
+POP_CONTEXT Macro
+        POPM   d0-d7/a0-a7
+        POPW   sr
+    Endm
+
+
+;-------------------------------------------------
 ; Disables interrupt processing
 ; ----------------
 ; Uses: sp|a7/sr

@@ -40,7 +40,9 @@ VDP_CMD_RS_DMA_SRC_L        Equ $9500        ; DMA source (low)
 VDP_CMD_RS_DMA_SRC_M        Equ $9600        ; DMA source (mid)
 VDP_CMD_RS_DMA_SRC_H        Equ $9700        ; DMA source (high)
 
-VDP_CMD_RS_GENS_LOG         Equ $9e00        ; Virtual register used for debug logging in the GensKMod emulator
+VDP_CMD_RS_DBG_LOG          Equ $9e00        ; Virtual register used for debug logging (GensKMod/Exodus emulator)
+VDP_CMD_RS_DBG_BP           Equ $9d00        ; Virtual register used for software breakpoint  (GensKMod/Exodus emulator)
+VDP_CMD_RS_DBG_TIMER        Equ $9f00        ; Virtual register used for starting/stopping a timer  (GensKMod/Exodus emulator)
 
 
 ;----------------------------------------------
