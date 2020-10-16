@@ -30,14 +30,16 @@
 ; Should be called at least once before using the map library or any time the VDP plane size changes
 ; ----------------
 MapInit:
+        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d1
+        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
+
         move.w  #2, (mapRowBufferDMATransfer + dmaDataStride)
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), (mapRowBufferDMATransfer + dmaLength)
+        move.w  d1, (mapRowBufferDMATransfer + dmaLength)
         move.l  #((mapRowBuffer + SIZE_WORD) >> 1) & $7fffff, (mapRowBufferDMATransfer + dmaSource)
 
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
+        add.w   d1, d1
+        move.w  d1, (mapColumnBufferDMATransfer + dmaDataStride)
         move.w  d0, (mapColumnBufferDMATransfer + dmaLength)
-        add.w   d0, d0
-        move.w  d0, (mapColumnBufferDMATransfer + dmaDataStride)
         move.l  #((mapColumnBuffer + SIZE_WORD) >> 1) & $7fffff, (mapColumnBufferDMATransfer + dmaSource)
         rts
 
@@ -66,32 +68,25 @@ MapLoad:
 ; Render the map to the specified VDP background plane VRAM address.
 ; ----------------
 ; Input:
-; - d0: Left map coordinate (in 8 pixel columns)
-; - d1: Top map coorinate (in 8 pixel rows)
+; - d0: Top map coorinate (in 8 pixel rows)
+; - d1: Left map coordinate (in 8 pixel columns)
 ; - d2: Plane id
 ; Uses: d0-d7/a0-a6
 MapRender:
-        ; Setup MapRenderRow parameters
-        move.l  d2, d3                  ; d3 = Plane id
-        move.w  d0, d2                  ; d2 = Map start column
-        moveq   #0, d0                  ; d0 = Plane row
+        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d3
+        subq.w  #1, d3
 
-        ; Render rows
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
-        subq.w  #1, d4                  ; d4 = loop counter
     .rowLoop:
-
-        PUSHM   d0-d4
+        PUSHM   d0-d3
 
         bsr     MapRenderRow
         jsr     VDPDMAQueueFlush        ; TODO: Use direct DMA
 
-        POPM    d0-d4
+        POPM    d0-d3
 
         addq.w  #1, d0
-        addq.w  #1, d1
 
-        dbra    d4, .rowLoop
+        dbra    d3, .rowLoop
         rts
 
 
@@ -99,12 +94,13 @@ MapRender:
 ; Render a single row of the map at the specified plane row
 ; ----------------
 ; Input:
-; - d0: VDP plane row
-; - d1: Map row
-; - d2: Map start column
-; - d3: Plane id
+; - d0: Map row
+; - d1: Map start column
+; - d2: Plane id
 ; Uses: d0-d7/a0-a6
 MapRenderRow:
+        move.w d0, d6
+
         ; Queue DMA transfer
         move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
         subq.w  #1, d4
@@ -113,16 +109,18 @@ MapRenderRow:
         move.w  (vdpMetrics + vdpPlaneWidthShift), d5
         lsl.w   d5, d0
         move.w  d0, d5
-        andi.w  #$3fff, d0
-        rol.l   #2, d5
-        swap    d0
+        andi.w  #$3fff, d5
+        rol.l   #2, d0
         swap    d5
-        or.w    d5, d0
-        or.w    #VDP_CMD_AS_DMA, d0
-        or.l    d3, d0
-        move.l  d0, (mapRowBufferDMATransfer + dmaTarget)
+        swap    d0
+        or.w    d0, d5
+        or.w    #VDP_CMD_AS_DMA, d5
+        add.l   d2, d5
+        move.l  d5, (mapRowBufferDMATransfer + dmaTarget)
 
         VDP_DMA_QUEUE_JOB mapRowBufferDMATransfer
+
+        move.w d6, d0
 
         ; NB: Fall through to _MapRenderRowBuffer
 
@@ -131,8 +129,8 @@ MapRenderRow:
 ; Render a single row of the map to the row buffer
 ; ----------------
 ; Input:
-; - d1: Map row
-; - d2: Map start column
+; - d0: Map row
+; - d1: Map start column
 ; Uses: d0-d7/a0-a6
 _MapRenderRowBuffer:
 _START_CHUNK Macro colOffset
@@ -152,7 +150,7 @@ _START_CHUNK Macro colOffset
             If (narg = 1)
                 add.w  \colOffset, d5
             EndIf
-            move.w  #SIZE_WORD, d4
+            moveq   #SIZE_WORD, d4
             btst    #CHUNK_REF_HFLIP, d7
             beq     .fullChunkNotHFlipped\@
             neg.w   d4
@@ -182,24 +180,33 @@ _RENDER_BLOCK Macro
         .blockNotVFlipped\@:
             lea     (a3, d4), a6
             adda.w  d5, a6                                          ; a6 = block row address
-
             move.l  (a6), d4                                        ; d4 = 2 row pattern refs
             btst    #BLOCK_REF_HFLIP, d3
             bne     .blockHFlipped\@
             swap    d4                                              ; Not flipped so swap words (endianess)
 
         .blockHFlipped\@:
-            add.w   d3, d3
+            add.w   d3, d3                                          ; Allign block+chunk orientation flags with pattern orientation flags
             andi.w  #PATTERN_REF_ORIENTATION_MASK, d3
-            eor.w   d3, d4                                          ; orient pattern ref by block + chunk orientation
-            move.w  d4, (a4)+                                       ; Write pattern to row DMA buffer
-            swap    d4                                              ; Next pattern
-            eor.w   d3, d4
-            move.w  d4, (a4)+
+
+_RENDER_PATTERN Macro
+                eor.w   d3, d4                                      ; orient pattern ref by block + chunk orientation
+                and.w   d0, d1                                      ; Wrap buffer position
+                move.w  d4, (a4, d1)                                ; Write pattern to row DMA buffer
+                addq.w  #SIZE_WORD, d1
+            Endm
+
+            _RENDER_PATTERN
+
+            swap    d4
+
+            _RENDER_PATTERN
+
+            Purge _RENDER_PATTERN
         Endm
 
 _RENDER_PARTIAL_CHUNK Macro patternNumber
-            addq.w  #1, \patternNumber                              ; In case of a partial block just render the whole block (wastes 16 cycles) (space is reserved in the DMA buffer)
+            addq.w  #1, \patternNumber                              ; In case of a partial block just render the whole block (wastes 34 cycles) (space is reserved in the DMA buffer)
             lsr.w   #1, \patternNumber
             subq.w  #1, \patternNumber
 
@@ -218,9 +225,9 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
         movea.l mapDataAddress(a0), a0                              ; a0 = map data
 
         ; Store address of first chunk in a1
-        move.w  d2, d5
+        move.w  d1, d5
         lsr.w   #4, d5
-        move.w  d1, d6
+        move.w  d0, d6
         lsr.w   #4, d6
         add.w   d6, d6
         move.w  (a1, d6), d6
@@ -229,11 +236,11 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
         lea     (a0, d6), a1                                        ; a1 = address of chunk reference
 
         ; d6 = [chunk row offset]:[block row offset]
-        move.w  d1, d6
+        move.w  d0, d6
         andi.w  #$0e, d6
         lsl.w   #3, d6
         swap    d6
-        move.w  d1, d6
+        move.w  d0, d6
         andi.w  #$01, d6
         add.w   d6, d6
         add.w   d6, d6
@@ -243,15 +250,24 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
         lea     blockTable, a3
         lea     mapRowBuffer, a4
 
-        ; If first block is full adjust dma buffer offset
-        btst    #0, d2
+        ; If first block is full adjust DMA buffer offset
+        btst    #0, d1
         bne     .initialBlockPartial
         addq.l  #SIZE_WORD, a4
+
     .initialBlockPartial:
 
-        ; Render chunks (d0-d5 free at this point)
+        ; Buffer offset/rotation mask
+        move.w  d1, d2                                              ; d2 = current map column
+        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d0
+        subq.w  #1, d0
+        add.w   d0, d0                                              ; d0 = buffer mask
+        andi.w  #~1, d1
+        add.w   d1, d1                                              ; d1 = buffer offset
 
-        moveq   #0, d0
+        ; Render chunks
+
+        moveq   #0, d3
         andi.w  #$0f, d2
         beq     .fullChunks
 
@@ -265,17 +281,22 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
 
             neg.w   d2
             andi.w  #$0f, d2                                        ; d2 = number of patterns rendered
-            move    d2, d0                                          ; Store number for later use
+
+            PUSHW   d2                                              ; Store for later use
 
             _RENDER_PARTIAL_CHUNK d2
+
+            POPW    d3                                              ; d3 = number of patterns left to render
 
             ; ---------------------------------------------
             ; Render full chunks
 
         .fullChunks:
             move.w  (vdpMetrics + vdpPlaneWidthPatterns), d2
-            sub.w   d0, d2                                          ; d2 = remaining pattern columns
-            move.w  d2, d0                                          ; d0 = store remaining pattern columns for later use
+            sub.w   d3, d2                                          ; d2 = remaining pattern columns
+
+            PUSHW d2                                                ; Store for later use
+
             lsr.w   #4, d2                                          ; d2 = number of full chunks
 
             subq.w  #1, d2
@@ -297,12 +318,14 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
             ; ---------------------------------------------
             ; Render the last partial chunk
 
-            andi.w  #$0f, d0
+            POPW d2                                                 ; d2 = number of patterns left to render
+
+            andi.w  #$0f, d2
             beq     .done                                           ; Nothing left
 
             _START_CHUNK
 
-                _RENDER_PARTIAL_CHUNK d0
+                _RENDER_PARTIAL_CHUNK d2
 
     .done:
 
@@ -316,9 +339,38 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
 ; Render a single column of the map at the specified plane column for VDP plane A
 ; ----------------
 ; Input:
-; - d0: VDP plane column
-; - d1: Map column
-; - d2: Map start row
+; - d0: Map column
+; - d1: Map start row
+; - d2: VDP plane id
 ; Uses: d0-d7/a0-a6
 MapRenderColumn:
+        move.w d0, d6
+
+        ; Queue DMA transfer
+        moveq   #0, d5
+        move.w  d0, d5
+        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d4
+        subq.w  #1, d4
+        and.w   d4, d5
+        add.w   d5, d5
+        swap    d5
+        or.w    #VDP_CMD_AS_DMA, d5
+        add.l   d2, d5
+        move.l  d5, (mapColumnBufferDMATransfer + dmaTarget)
+
+        VDP_DMA_QUEUE_JOB mapColumnBufferDMATransfer
+
+        move.w d6, d0
+
+        ; NB: Fall through to _MapRenderColumnBuffer
+
+
+;-------------------------------------------------
+; Render a single row of the map to the row buffer
+; ----------------
+; Input:
+; - d0: Map column
+; - d1: Map start row
+; Uses: d0-d7/a0-a6
+_MapRenderColumnBuffer:
         rts
