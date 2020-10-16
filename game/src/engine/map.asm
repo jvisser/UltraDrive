@@ -204,7 +204,7 @@ _START_CHUNK Macro colOffset
             lsl.w   #7, d5
             lea     (a2, d5), a5
             swap    d6                                              ; d6 = chunk row offset
-            move    d6, d5
+            move.w  d6, d5
             btst    #CHUNK_REF_VFLIP, d7
             beq     .fullChunkNotVFlipped\@
             eor.w   #$0070, d5                                      ; Flip chunk row offset
@@ -263,29 +263,10 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
             addq.w  #1, \patternNumber                              ; In case of a partial block just render the whole block (wastes 16 cycles) (space is reserved in the DMA buffer)
             lsr.w   #1, \patternNumber
             subq.w  #1, \patternNumber
-            add.w   \patternNumber, \patternNumber
-            add.w   \patternNumber, \patternNumber
 
-            move.l  .blockJumpTable\@(pc, \patternNumber), a0
-            jmp     (a0)
-
-        .blockJumpTable\@:
-                dc.l .block7\@                                      ; Still need 8 entries because of partial blocks
-                dc.l .block6\@
-                dc.l .block5\@
-                dc.l .block4\@
-                dc.l .block3\@
-                dc.l .block2\@
-                dc.l .block1\@
-                dc.l .block0\@
-            .block0\@: _RENDER_BLOCK
-            .block1\@: _RENDER_BLOCK
-            .block2\@: _RENDER_BLOCK
-            .block3\@: _RENDER_BLOCK
-            .block4\@: _RENDER_BLOCK
-            .block5\@: _RENDER_BLOCK
-            .block6\@: _RENDER_BLOCK
-            .block7\@: _RENDER_BLOCK
+        .renderBlockLoop\@:
+            _RENDER_BLOCK
+            dbra \patternNumber, .renderBlockLoop\@
         Endm
 
         ; ---------------------------------------------------------------------------------------
@@ -317,9 +298,9 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
 
         ; Store address of first chunk in a1
         move.w  d2, d5
-        lsr     #4, d5
+        lsr.w   #4, d5
         move.w  d1, d6
-        lsr     #4, d6
+        lsr.w   #4, d6
         add.w   d6, d6
         move.w  (a1, d6), d6
         add.w   d5, d6
@@ -373,8 +354,8 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
         .fullChunks:
             move.w  (vdpMetrics + vdpPlaneWidthPatterns), d2
             sub.w   d0, d2                                          ; d2 = remaining pattern columns
-            move    d2, d0                                          ; d0 = store remaining pattern columns for later use
-            lsr     #4, d2                                          ; d2 = number of full chunks
+            move.w  d2, d0                                          ; d0 = store remaining pattern columns for later use
+            lsr.w   #4, d2                                          ; d2 = number of full chunks
 
             subq.w  #1, d2
         .fullChunkLoop:
