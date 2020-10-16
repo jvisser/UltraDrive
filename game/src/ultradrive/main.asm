@@ -26,8 +26,8 @@ Main:
 
         DEBUG_MSG 'Map loaded'
 
-        ;move    #128-9, d0
-        move    #0, d0
+        move    #128-9, d0
+        ;move    #0, d0
         ;move    #1024-512, d0
         move    #0, d1
         movea   #0, a0

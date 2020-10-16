@@ -63,7 +63,7 @@ MapLoad:
 
 
 ;-------------------------------------------------
-; Render the map to the specified VDP background plane VRAM address. (unoptimized)
+; Render the map to the specified VDP background plane VRAM address.
 ; ----------------
 ; Input:
 ; - d0: Left map coordinate (in 8 pixel columns)
@@ -71,131 +71,70 @@ MapLoad:
 ; - d2: Plane id
 ; Uses: d0-d7/a0-a6
 MapRender:
-        movea.l loadedMap, a0
-        movea.l mapDataAddress(a0), a1
-        lea     mapRowOffsetTable(a0), a2
-        lea     MEM_VDP_DATA, a3
-        lea     chunkTable, a4
-        lea     blockTable, a5
+        ; Setup MapRenderRow parameters
+        move.l  d2, d3                  ; d3 = Plane id
+        move.w  d0, d2                  ; d2 = Map start column
+        moveq   #0, d0                  ; d0 = Plane row
 
-        move.l  d2, MEM_VDP_CTRL
-
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d3
-        subq.w  #1, d3
+        ; Render rows
+        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
+        subq.w  #1, d4                  ; d4 = loop counter
     .rowLoop:
 
-        movea.l d0, a0
-        movea.l d3, a6
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d4
-        subq.w  #1, d4
-    .columnLoop:
-        ; ----------------------------
-        ; Get chunk reference from map
+        PUSHM   d0-d4
 
-        ; Store map column in d5(low) and chunk local pattern column in (d5)high
-        move.w  d0, d5
-        andi.w  #$0f, d5
-        swap    d5
-        move.w  d0, d5
-        lsr     #4, d5
+        bsr     MapRenderRow
+        jsr     VDPDMAQueueFlush        ; TODO: Use direct DMA
 
-        ; Store map row in d6(low) and chunk local pattern row in (d6)high
-        move.w  d1, d6
-        andi.w  #$0f, d6
-        swap    d6
-        move.w  d1, d6
-        lsr     #4, d6
-
-        ; Fetch chunk reference from map into d7
-        move.w  d6, d7
-        add.w   d6, d7
-        move.w  (a2, d7), d7
-        add.w   d5, d7
-        add.w   d5, d7
-        move.w  (a1, d7), d7
-
-        ; ----------------------------
-        ; Get block reference from chunk
-        swap    d6
-        move.w  d6, d2
-        btst    #CHUNK_REF_VFLIP, d7
-        beq     .chunkNotVFlipped
-        not.w   d2
-    .chunkNotVFlipped:
-        andi.w  #$0e, d2
-        lsl.w   #3, d2
-
-        swap    d5
-        move.w  d5, d3
-        btst    #CHUNK_REF_HFLIP, d7
-        beq     .chunkNotHFlipped
-        not.w   d3
-    .chunkNotHFlipped:
-        andi.w  #$0e, d3
-        add.w   d3, d2                                              ; d2 = Chunk local block reference address
-
-        move.w  d7, d3                                              ; Calculate block reference address in chunk table (no mask by CHUNK_REF_INDEX_MASK required as those bits will be completely shifted out by the following shift)
-        lsl.w   #7, d3                                              ; 128 bytes per chunk
-        add.w   d2, d3                                              ; d3 = offset of block reference in chunk table
-
-        move.w  (a4, d3), d3                                        ; d3 = block reference
-
-        ; ----------------------------
-        ; Get pattern reference from block
-        eor.w    d3, d7                                             ; d7 = Combined block and chunk orientation flags
-
-        btst    #BLOCK_REF_VFLIP, d7
-        beq     .blockNotVFlipped
-        not.w   d6
-    .blockNotVFlipped:
-        andi.w  #1, d6
-        add.w   d6, d6
-        add.w   d6, d6                                              ; Pattern row offset
-
-        btst    #BLOCK_REF_HFLIP, d7
-        beq     .blockNotHFlipped
-        not.w   d5
-    .blockNotHFlipped:
-        andi.w  #1, d5
-        add.w   d5, d5                                              ; Pattern column offset
-
-        add.w   d5, d6                                              ; d6 = Pattern offset relative to block base address
-
-        move    d3, d5
-        andi.w  #BLOCK_REF_INDEX_MASK, d5
-        lsl.w   #3, d5
-        add.w   d6, d5                                              ; d5 = Offset of pattern reference in chunk table
-
-        move.w  (a5, d5), d5                                        ; d5 = pattern reference
-
-        ; Reorient pattern reference by chunk and block orientation
-        add.w   d7, d7
-        andi.w  #PATTERN_REF_ORIENTATION_MASK, d7
-        eor.w   d7, d5
-
-        ; ----------------------------
-        ; Write pattern reference to VDP plane
-        move.w  d5, (a3)
+        POPM    d0-d4
 
         addq.w  #1, d0
-        dbra    d4, .columnLoop
-
-        move.w  a6, d3
-        move.w  a0, d0
         addq.w  #1, d1
-        dbra    d3, .rowLoop
+
+        dbra    d4, .rowLoop
         rts
 
 
 ;-------------------------------------------------
-; Render a single row of the map at the specified plane row for VDP plane A
+; Render a single row of the map at the specified plane row
 ; ----------------
 ; Input:
 ; - d0: VDP plane row
 ; - d1: Map row
 ; - d2: Map start column
+; - d3: Plane id
 ; Uses: d0-d7/a0-a6
 MapRenderRow:
+        ; Queue DMA transfer
+        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
+        subq.w  #1, d4
+        and.w   d4, d0
+        moveq   #0, d5
+        move.w  (vdpMetrics + vdpPlaneWidthShift), d5
+        lsl.w   d5, d0
+        move.w  d0, d5
+        andi.w  #$3fff, d0
+        rol.l   #2, d5
+        swap    d0
+        swap    d5
+        or.w    d5, d0
+        or.w    #VDP_CMD_AS_DMA, d0
+        or.l    d3, d0
+        move.l  d0, (mapRowBufferDMATransfer + dmaTarget)
+
+        VDP_DMA_QUEUE_JOB mapRowBufferDMATransfer
+
+        ; NB: Fall through to _MapRenderRowBuffer
+
+
+;-------------------------------------------------
+; Render a single row of the map to the row buffer
+; ----------------
+; Input:
+; - d1: Map row
+; - d2: Map start column
+; Uses: d0-d7/a0-a6
+_MapRenderRowBuffer:
 _START_CHUNK Macro colOffset
             ; Get chunk row address
             move.w  (a1)+, d7                                       ; Chunk ref in d7
@@ -246,10 +185,10 @@ _RENDER_BLOCK Macro
 
             move.l  (a6), d4                                        ; d4 = 2 row pattern refs
             btst    #BLOCK_REF_HFLIP, d3
-            bne     .fullBlockHFlipped\@
-            swap    d4                                              ; Not flipped to swap words (endianess)
+            bne     .blockHFlipped\@
+            swap    d4                                              ; Not flipped so swap words (endianess)
 
-        .fullBlockHFlipped\@:
+        .blockHFlipped\@:
             add.w   d3, d3
             andi.w  #PATTERN_REF_ORIENTATION_MASK, d3
             eor.w   d3, d4                                          ; orient pattern ref by block + chunk orientation
@@ -270,26 +209,8 @@ _RENDER_PARTIAL_CHUNK Macro patternNumber
         Endm
 
         ; ---------------------------------------------------------------------------------------
-        ; Start of sub routine MapRenderRow
+        ; Start of sub routine _MapRenderRowBuffer
         ; ----------------
-
-        ; Queue DMA transfer
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
-        subq.w  #1, d4
-        and.w   d4, d0
-        moveq   #0, d3
-        move.w  (vdpMetrics + vdpPlaneWidthShift), d3
-        lsl.w   d3, d0
-        move.w  d0, d3
-        andi.w  #$3fff, d0
-        rol.l   #2, d3
-        swap    d0
-        swap    d3
-        or.w    d3, d0
-        or.l    #VDP_CMD_AS_DMA | VDP_PLANE_A, d0
-        move.l  d0, (mapRowBufferDMATransfer + dmaTarget)
-
-        VDP_DMA_QUEUE_JOB mapRowBufferDMATransfer
 
         ; Load address registers
         movea.l loadedMap, a0
