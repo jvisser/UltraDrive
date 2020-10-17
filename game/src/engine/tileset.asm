@@ -5,11 +5,18 @@
 ;-------------------------------------------------
 ; Tileset constants
 ; ----------------
-CHUNK_SIZE                          Equ 8                   ; Chunk dimension in blocks
-BLOCK_SIZE                          Equ 2                   ; Block dimension in patterns
+CHUNK_DIMENSION                     Equ 8                                   ; Chunk dimension in blocks
+CHUNK_ELEMENT_COUNT                 Equ CHUNK_DIMENSION * CHUNK_DIMENSION
+CHUNK_ROW_STRIDE                    Equ CHUNK_DIMENSION * SIZE_WORD
+CHUNK_SIZE                          Equ CHUNK_DIMENSION * CHUNK_ROW_STRIDE
 
-CHUNK_TABLE_SIZE                    Equ 192                 ; Chunk RAM buffer size
-BLOCK_TABLE_SIZE                    Equ 384                 ; Block RAM buffer size
+BLOCK_DIMENSION                     Equ 2                                   ; Block dimension in patterns
+BLOCK_ELEMENT_COUNT                 Equ BLOCK_DIMENSION * BLOCK_DIMENSION
+BLOCK_ROW_STRIDE                    Equ BLOCK_DIMENSION * SIZE_WORD
+BLOCK_SIZE                          Equ BLOCK_DIMENSION * BLOCK_ROW_STRIDE
+
+CHUNK_TABLE_SIZE                    Equ 192                                 ; Chunk RAM buffer size
+BLOCK_TABLE_SIZE                    Equ 384                                 ; Block RAM buffer size
 
 tilesetPatternDecompressionBuffer   Equ blockTable
 
@@ -19,7 +26,7 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 ; ----------------
 
     ; Chunk reference structure
-    BIT_MASK.CHUNK_REF_INDEX        0,  8
+    BIT_MASK.CHUNK_REF_INDEX        0,  10                                  ; Not call can be used due to memory constraints
     BIT_CONST.CHUNK_REF_HFLIP       10
     BIT_CONST.CHUNK_REF_VFLIP       11
     BIT_CONST.CHUNK_REF_COLLISION   12
@@ -78,11 +85,11 @@ tilesetPatternDecompressionBuffer   Equ blockTable
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Chunk
-        STRUCT_MEMBER.w tsBlockReferences, CHUNK_SIZE * CHUNK_SIZE
+        STRUCT_MEMBER.w tsBlockReferences, CHUNK_ELEMENT_COUNT
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Block
-        STRUCT_MEMBER.w tsPatternReferences, BLOCK_SIZE * BLOCK_SIZE
+        STRUCT_MEMBER.w tsPatternReferences, BLOCK_ELEMENT_COUNT
     DEFINE_STRUCT_END
 
     ; Allocate chunk and block tables
