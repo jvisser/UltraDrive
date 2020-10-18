@@ -85,7 +85,7 @@ PEEKL Macro value
 ; Push multiple full registers onto the stack
 ; ----------------
 PUSHM Macro reglist
-        movem.l \reglist, -(sp)
+        movem.l \_, -(sp)
     Endm
 
 
@@ -93,7 +93,7 @@ PUSHM Macro reglist
 ; Pop multiple full registers from the stack
 ; ----------------
 POPM Macro reglist
-        movem.l (sp)+, \reglist
+        movem.l (sp)+, \_
     Endm
 
 

@@ -248,11 +248,10 @@ MapRenderRow:
         move.w  (vdpMetrics + vdpPlaneWidthShift), d5
         lsl.w   d5, d0
         move.w  d0, d5
-        andi.w  #$3fff, d5
-        rol.l   #2, d0
+        andi.w  #$3fff, d0
+        rol.l   #2, d5
+        move.w  d0, d5
         swap    d5
-        swap    d0
-        or.w    d0, d5
         or.w    #VDP_CMD_AS_DMA, d5
         add.l   d2, d5
         move.l  d5, (mapRowBufferDMATransfer + dmaTarget)
