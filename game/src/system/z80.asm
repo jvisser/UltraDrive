@@ -49,7 +49,7 @@ Z80_RESET Macro
 ;-------------------------------------------------
 ; Cancel Z80 reset
 ; ----------------
-Z80_RESET Macro
+Z80_RESET_CANCEL Macro
             ; Z80 RESET is active low
             move.b #$01, (MEM_Z80_RESET)
     Endm
