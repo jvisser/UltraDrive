@@ -3,18 +3,17 @@ package com.ultradrive.mapconvert.processing.tileset.block;
 import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileReference;
-import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 import java.util.Objects;
 
 
 public class BlockReference extends MetaTileReference<BlockReference>
 {
-    private static final int TYPE_BIT_COUNT = 2;
+    private static final int TYPE_BIT_COUNT = 1;
 
     private final BlockSolidity solidity;
     private final int type;
 
-    public static class Builder extends TileReference.Builder<BlockReference>
+    public static class Builder extends MetaTileReference.Builder<BlockReference>
     {
         private BlockSolidity solidity;
         private int type;
@@ -30,18 +29,24 @@ public class BlockReference extends MetaTileReference<BlockReference>
             super(blockReference);
 
             solidity = blockReference.solidity;
+            empty = blockReference.empty;
             type = blockReference.type;
         }
 
         @Override
         public BlockReference build()
         {
-            return new BlockReference(referenceId, orientation, solidity, type);
+            return new BlockReference(referenceId, orientation, solidity, empty, type);
         }
 
         public void setSolidity(BlockSolidity solidity)
         {
             this.solidity = solidity;
+        }
+
+        public void setEmpty(boolean empty)
+        {
+            this.empty = empty;
         }
 
         public void setType(int type)
@@ -50,9 +55,9 @@ public class BlockReference extends MetaTileReference<BlockReference>
         }
     }
 
-    public BlockReference(int referenceId, Orientation orientation, BlockSolidity solidity, int type)
+    public BlockReference(int referenceId, Orientation orientation, BlockSolidity solidity, boolean empty, int type)
     {
-        super(referenceId, orientation);
+        super(referenceId, orientation, empty);
 
         this.solidity = solidity;
         this.type = type;

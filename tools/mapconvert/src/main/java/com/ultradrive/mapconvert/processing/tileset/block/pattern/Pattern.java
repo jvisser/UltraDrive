@@ -23,6 +23,7 @@ public class Pattern implements OrientablePoolable<Pattern, PatternReference>, I
     public static final int PIXEL_VALUE_BITS = 4;
 
     private final OrientableGrid<Invariant<Integer>> pixels;
+    private final boolean transparent;
 
     public Pattern(List<Integer> pixels)
     {
@@ -32,14 +33,16 @@ public class Pattern implements OrientablePoolable<Pattern, PatternReference>, I
                     format("Invalid number of pixels. Expected %d but got %d", PIXEL_COUNT, pixels.size()));
         }
 
+        this.transparent = pixels.stream().reduce(0, Integer::sum) == 0;
         this.pixels = OrientableGrid.symmetricallyOptimized(pixels.stream()
                                                                     .map(pixel -> of(pixel & PIXEL_VALUE_MASK))
                                                                     .collect(toList()));
     }
 
-    private Pattern(OrientableGrid<Invariant<Integer>> pixels)
+    private Pattern(OrientableGrid<Invariant<Integer>> pixels, boolean transparent)
     {
         this.pixels = pixels;
+        this.transparent = transparent;
     }
 
     @Override
@@ -71,7 +74,7 @@ public class Pattern implements OrientablePoolable<Pattern, PatternReference>, I
             return this;
         }
 
-        return new Pattern(pixels.reorient(orientation));
+        return new Pattern(pixels.reorient(orientation), transparent);
     }
 
     @Override
@@ -83,7 +86,9 @@ public class Pattern implements OrientablePoolable<Pattern, PatternReference>, I
     @Override
     public PatternReference.Builder referenceBuilder()
     {
-        return new PatternReference.Builder();
+        PatternReference.Builder builder = new PatternReference.Builder();
+        builder.setEmpty(transparent);
+        return builder;
     }
 
     @Override
@@ -103,5 +108,10 @@ public class Pattern implements OrientablePoolable<Pattern, PatternReference>, I
         return new PatternRow(pixels.getRow(row).stream()
                                       .map(Invariant::getValue)
                                       .collect(toList()));
+    }
+
+    public boolean isTransparent()
+    {
+        return transparent;
     }
 }
