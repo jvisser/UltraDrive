@@ -33,10 +33,10 @@ class BlockTest
     private List<PatternReference> createPatternReferences()
     {
         return List.of(
-                new PatternReference(0, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT),
-                new PatternReference(1, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT),
-                new PatternReference(2, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT),
-                new PatternReference(3, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT)
+                new PatternReference(0, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT, false),
+                new PatternReference(1, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT, false),
+                new PatternReference(2, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT, false),
+                new PatternReference(3, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT, false)
                 );
     }
 }

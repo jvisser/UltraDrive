@@ -12,11 +12,13 @@ public class PatternReference extends TileReference<PatternReference>
 
     private final PatternPaletteId paletteId;
     private final PatternPriority priority;
+    private final boolean empty;
 
     public static class Builder extends TileReference.Builder<PatternReference>
     {
         private PatternPaletteId paletteId;
         private PatternPriority priority;
+        private boolean empty;
 
         public Builder()
         {
@@ -30,12 +32,13 @@ public class PatternReference extends TileReference<PatternReference>
 
             paletteId = patternReference.paletteId;
             priority = patternReference.priority;
+            empty = patternReference.empty;
         }
 
         @Override
         public PatternReference build()
         {
-            return new PatternReference(referenceId, paletteId, priority, orientation);
+            return new PatternReference(referenceId, paletteId, priority, orientation, empty);
         }
 
         public void setPaletteId(PatternPaletteId paletteId)
@@ -48,6 +51,11 @@ public class PatternReference extends TileReference<PatternReference>
             this.priority = priority;
         }
 
+        public void setEmpty(boolean empty)
+        {
+            this.empty = empty;
+        }
+
         public Integer getReferenceId()
         {
             return referenceId;
@@ -56,20 +64,17 @@ public class PatternReference extends TileReference<PatternReference>
 
     public PatternReference(int patternId)
     {
-        this(patternId, Orientation.DEFAULT);
+        this(patternId, PatternPaletteId.FIRST, PatternPriority.LOW, Orientation.DEFAULT, false);
     }
 
-    public PatternReference(int patternId, Orientation orientation)
-    {
-        this(patternId, PatternPaletteId.FIRST, PatternPriority.LOW, orientation);
-    }
-
-    public PatternReference(int patternId, PatternPaletteId paletteId, PatternPriority priority, Orientation orientation)
+    public PatternReference(int patternId, PatternPaletteId paletteId, PatternPriority priority,
+                            Orientation orientation, boolean empty)
     {
         super(patternId, orientation);
 
         this.paletteId = paletteId;
         this.priority = priority;
+        this.empty = empty;
     }
 
     @Override
@@ -122,5 +127,10 @@ public class PatternReference extends TileReference<PatternReference>
     public PatternPriority getPriority()
     {
         return priority;
+    }
+
+    public boolean isEmpty()
+    {
+        return empty;
     }
 }
