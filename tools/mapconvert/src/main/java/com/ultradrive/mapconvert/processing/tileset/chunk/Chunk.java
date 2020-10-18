@@ -10,36 +10,47 @@ import java.util.List;
 public class Chunk extends MetaTile<Chunk, ChunkReference, BlockReference>
 {
     private final boolean hasCollision;
+    private final boolean empty;
 
     public Chunk(List<BlockReference> blockReferences)
     {
         super(blockReferences);
 
-        hasCollision = blockReferences.stream()
-                .reduce(false, (r, blockReference) -> r || blockReference.getSolidity().isSolid(), (a, b) -> a);
+        this.empty = blockReferences.stream()
+                .reduce(true, (result, blockReference) -> result && blockReference.isEmpty(), (a, b) -> a && b);
+        this.hasCollision = blockReferences.stream()
+                .reduce(false, (result, blockReference) -> result || blockReference.getSolidity().isSolid(), (a, b) -> a || b);
     }
 
-    private Chunk(OrientableGrid<BlockReference> blockReferences, boolean hasCollision)
+    private Chunk(OrientableGrid<BlockReference> blockReferences, boolean hasCollision, boolean empty)
     {
         super(blockReferences);
 
+        this.empty = empty;
         this.hasCollision = hasCollision;
     }
 
     @Override
     public ChunkReference.Builder referenceBuilder()
     {
-        return new ChunkReference.Builder();
+        ChunkReference.Builder builder = new ChunkReference.Builder();
+        builder.setEmpty(empty);
+        return builder;
     }
 
     @Override
     public Chunk reorient(Orientation orientation)
     {
-        return new Chunk(tileReferences.reorient(orientation), hasCollision);
+        return new Chunk(tileReferences.reorient(orientation), hasCollision, empty);
     }
 
     public boolean isHasCollision()
     {
         return hasCollision;
+    }
+
+    public boolean isEmpty()
+    {
+        return empty;
     }
 }

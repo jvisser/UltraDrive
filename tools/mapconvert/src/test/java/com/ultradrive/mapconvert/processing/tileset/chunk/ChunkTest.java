@@ -30,7 +30,7 @@ class ChunkTest
     private List<BlockReference> createChunkBlockReferences(int seed)
     {
         return IntStream.range(0, 8 * 8)
-                .mapToObj(value -> new BlockReference(seed + value, Orientation.DEFAULT, BlockSolidity.ALL, 0))
+                .mapToObj(value -> new BlockReference(seed + value, Orientation.DEFAULT, BlockSolidity.ALL, false, 0))
                 .collect(Collectors.toList());
     }
 }

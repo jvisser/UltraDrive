@@ -53,7 +53,11 @@ public class PatternAllocator implements OrientablePoolListener<Pattern, Pattern
     {
         for (Orientation orientation : Orientation.values())
         {
-            preAllocatedPatterns.put(pattern.reorient(orientation), new PatternReference(patternId, orientation));
+            PatternReference.Builder referenceBuilder = pattern.referenceBuilder();
+            referenceBuilder.setOrientation(orientation);
+            referenceBuilder.setReferenceId(patternId);
+
+            preAllocatedPatterns.put(pattern.reorient(orientation), referenceBuilder.build());
         }
     }
 

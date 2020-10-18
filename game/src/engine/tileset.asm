@@ -27,16 +27,18 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 
     ; Chunk reference structure
     BIT_MASK.CHUNK_REF_INDEX        0,  10                                  ; Not call can be used due to memory constraints
-    BIT_CONST.CHUNK_REF_HFLIP       10
-    BIT_CONST.CHUNK_REF_VFLIP       11
-    BIT_CONST.CHUNK_REF_COLLISION   12
+    BIT_CONST.CHUNK_REF_EMPTY       10                                      ; Chunk contains no graphic data
+    BIT_CONST.CHUNK_REF_HFLIP       11
+    BIT_CONST.CHUNK_REF_VFLIP       12
+    BIT_CONST.CHUNK_REF_COLLISION   13
 
     ; Block reference structure
     BIT_MASK.BLOCK_REF_INDEX        0,  10
-    BIT_CONST.BLOCK_REF_HFLIP       10
-    BIT_CONST.BLOCK_REF_VFLIP       11
-    BIT_MASK.BLOCK_REF_SOLIDITY     12, 2
-    BIT_MASK.BLOCK_REF_TYPE         13, 2
+    BIT_CONST.BLOCK_REF_EMPTY       10                                      ; Block contains no graphic data
+    BIT_CONST.BLOCK_REF_HFLIP       11
+    BIT_CONST.BLOCK_REF_VFLIP       12
+    BIT_MASK.BLOCK_REF_SOLIDITY     13, 2
+    BIT_MASK.BLOCK_REF_TYPE         15, 1
 
 
 ;-------------------------------------------------

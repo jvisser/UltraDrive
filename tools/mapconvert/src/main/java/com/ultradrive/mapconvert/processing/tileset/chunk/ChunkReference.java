@@ -3,14 +3,13 @@ package com.ultradrive.mapconvert.processing.tileset.chunk;
 import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileReference;
-import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 
 
 public class ChunkReference extends MetaTileReference<ChunkReference>
 {
     private final boolean hasCollision;
 
-    public static class Builder extends TileReference.Builder<ChunkReference>
+    public static class Builder extends MetaTileReference.Builder<ChunkReference>
     {
         private boolean hasCollision;
 
@@ -33,13 +32,13 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
         @Override
         public ChunkReference build()
         {
-            return new ChunkReference(referenceId, orientation, hasCollision);
+            return new ChunkReference(referenceId, orientation, hasCollision, empty);
         }
     }
 
-    public ChunkReference(int referenceId, Orientation orientation, boolean hasCollision)
+    public ChunkReference(int referenceId, Orientation orientation, boolean hasCollision, boolean empty)
     {
-        super(referenceId, orientation);
+        super(referenceId, orientation, empty);
 
         this.hasCollision = hasCollision;
     }

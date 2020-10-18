@@ -202,14 +202,9 @@ _RENDER_BUFFER Macro buffer
 
                 _START_CHUNK
 
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
-                    _RENDER_BLOCK
+                    Rept 8
+                        _RENDER_BLOCK
+                    Endr
 
             dbra d2, .fullChunkLoop\@
 
@@ -322,7 +317,6 @@ _RENDER_BLOCK Macro position
             swap    d4                                              ; Not flipped so swap words (endianess)
 
         .blockHFlipped\@:
-            add.w   d3, d3                                          ; Allign block+chunk orientation flags with pattern orientation flags
             andi.w  #PATTERN_REF_ORIENTATION_MASK, d3
 
             If ((narg = 0) | strcmp('\position', 'START'))
@@ -481,7 +475,6 @@ _RENDER_BLOCK Macro position
             exg     d4, d5
 
         .blockVFlipped\@:
-            add.w   d3, d3                                          ; Allign block+chunk orientation flags with pattern orientation flags
             andi.w  #PATTERN_REF_ORIENTATION_MASK, d3
 
             If ((narg = 0) | strcmp('\position', 'START'))

@@ -12,21 +12,27 @@ public class Block extends MetaTile<Block, BlockReference, PatternReference>
 {
     private final int collisionId;
     private final BlockAnimationMetaData animationMetaData;
+    private final boolean empty;
 
-    public Block(int collisionId, BlockAnimationMetaData animationMetaData, List<PatternReference> patternReferences)
+    public Block(int collisionId, BlockAnimationMetaData animationMetaData,
+                 List<PatternReference> patternReferences)
     {
         super(patternReferences);
 
         this.collisionId = collisionId;
         this.animationMetaData = animationMetaData;
+        this.empty = patternReferences.stream()
+                .reduce(true, (result, patternReference) -> result && patternReference.isEmpty(), (a, b) -> a && b);
     }
 
-    private Block(int collisionId, BlockAnimationMetaData animationMetaData, OrientableGrid<PatternReference> patternReferences)
+    private Block(int collisionId, BlockAnimationMetaData animationMetaData,
+                  OrientableGrid<PatternReference> patternReferences, boolean empty)
     {
         super(patternReferences);
 
         this.collisionId = collisionId;
         this.animationMetaData = animationMetaData;
+        this.empty = empty;
     }
 
     @Override
@@ -37,13 +43,15 @@ public class Block extends MetaTile<Block, BlockReference, PatternReference>
             return this;
         }
 
-        return new Block(collisionId, animationMetaData, tileReferences.reorient(orientation));
+        return new Block(collisionId, animationMetaData, tileReferences.reorient(orientation), empty);
     }
 
     @Override
     public BlockReference.Builder referenceBuilder()
     {
-        return new BlockReference.Builder();
+        BlockReference.Builder builder = new BlockReference.Builder();
+        builder.setEmpty(empty);
+        return builder;
     }
 
     @Override
