@@ -126,7 +126,7 @@ _RENDER_PATTERN Macro
 ; ----------------
 _RENDER_PATTERN_FIXED Macro value
             and.w   d0, d1                                          ; Wrap buffer position
-            move.w  \value, (a4, d1)                                ; Write empty pattern to row DMA buffer. 
+            move.w  \value, (a4, d1)                                ; Write empty pattern to row DMA buffer.
             addq.w  #SIZE_WORD, d1
     Endm
 
@@ -140,7 +140,7 @@ _RENDER_PARTIAL_CHUNK_FIXED Macro patternNumber, value
             subq.w  #1, \patternNumber
             lsl.w   #3, \patternNumber
             jmp     .patternRenderers\@(pc, \patternNumber)
-            
+
         .patternRenderers\@:
             Rept 15
                 _RENDER_PATTERN_FIXED \value
@@ -216,23 +216,23 @@ _RENDER_BUFFER Macro buffer
 
             neg.w   d2
             andi.w  #$0f, d2                                        ; d2 = number of patterns rendered
-            
+
             _READ_CHUNK
                 btst    #CHUNK_REF_EMPTY, d7
                 bne     .startChunkEmpty\@
-                
+
                     _START_CHUNK d3
 
                     PUSHW   d2                                              ; Store for later use
                     _RENDER_PARTIAL_CHUNK START, d2
                     POPW    d3                                              ; d3 = number of patterns left to render
                     bra     .startChunkDone\@
-                    
+
             .startChunkEmpty\@:
                 move.w  d2, d3
                 moveq   #0, d4
                 _RENDER_PARTIAL_CHUNK_FIXED d2, d4
-            
+
             .startChunkDone\@:
 
             ; ---------------------------------------------
@@ -252,19 +252,19 @@ _RENDER_BUFFER Macro buffer
                 _READ_CHUNK
                     btst    #CHUNK_REF_EMPTY, d7
                     bne     .fullChunkEmpty\@
-                
+
                     _START_CHUNK
                         Rept 8
                             _RENDER_BLOCK
                         Endr
                         bra     .fullChunkDone\@
-                    
+
                 .fullChunkEmpty\@:
                     moveq   #0, d3
-                    Rept 16
+                    Rept 16                                         ; TODO: Optimization opportunity
                         _RENDER_PATTERN_FIXED d3
                     Endr
-            
+
                 .fullChunkDone\@:
 
             dbra    d2, .fullChunkLoop\@
@@ -280,7 +280,7 @@ _RENDER_BUFFER Macro buffer
             _READ_CHUNK
                 btst    #CHUNK_REF_EMPTY, d7
                 bne     .endChunkEmpty\@
-            
+
                 _START_CHUNK
                     _RENDER_PARTIAL_CHUNK END, d2
                     bra .done\@
@@ -337,7 +337,7 @@ _MapRenderRowBuffer:
 _READ_CHUNK Macro
             move.w  (a1)+, d7                                       ; Chunk ref in d7
     Endm
-    
+
 _START_CHUNK Macro colOffset
             move.w  d7, d5
             lsl.w   #7, d5
@@ -368,6 +368,8 @@ _START_CHUNK Macro colOffset
 _RENDER_BLOCK Macro position
             move.w  (a5), d3                                        ; d3 = block ref
             adda.w  d7, a5
+            btst    #BLOCK_REF_EMPTY, d3
+            bne     .blockEmpty\@
             swap    d7
             move.w  d3, d4
             eor.w   d7, d3                                          ; d3 = current orientation
@@ -398,8 +400,20 @@ _RENDER_BLOCK Macro position
                 swap    d4
                 _RENDER_PATTERN
             EndIf
-    Endm
+            bra     .blockDone\@
 
+        .blockEmpty\@:
+            moveq   #0, d4
+            If ((narg = 0) | strcmp('\position', 'START'))
+                _RENDER_PATTERN_FIXED d4
+            EndIf
+
+            If ((narg = 0) | strcmp('\position', 'END'))
+                _RENDER_PATTERN_FIXED d4
+            EndIf
+
+        .blockDone\@:
+    Endm
 
         ; ---------------------------------------------------------------------------------------
         ; Start of sub routine _MapRenderRowBuffer
@@ -497,7 +511,7 @@ _READ_CHUNK Macro
             move.w  (a1), d7                                        ; Chunk ref in d7
             adda.w  a6, a1
     Endm
-    
+
 _START_CHUNK Macro rowOffset
             move.w  d7, d5
             lsl.w   #7, d5
@@ -531,6 +545,8 @@ _START_CHUNK Macro rowOffset
 _RENDER_BLOCK Macro position
             move.w  (a5), d3                                        ; d3 = block ref
             adda.w  d7, a5
+            btst    #BLOCK_REF_EMPTY, d3
+            bne     .blockEmpty\@
             swap    d7
             move.w  d3, d4
             eor.w   d7, d3                                          ; d3 = current orientation
@@ -559,10 +575,23 @@ _RENDER_BLOCK Macro position
                 move.w  d5, d4
                 _RENDER_PATTERN
             EndIf
+            bra     .blockDone\@
+
+        .blockEmpty\@:
+            moveq   #0, d4
+            If ((narg = 0) | strcmp('\position', 'START'))
+                _RENDER_PATTERN_FIXED d4
+            EndIf
+
+            If ((narg = 0) | strcmp('\position', 'END'))
+                _RENDER_PATTERN_FIXED d4
+            EndIf
+
+        .blockDone\@:
     Endm
 
         ; ---------------------------------------------------------------------------------------
-        ; Start of sub routine _MapRenderRowBuffer
+        ; Start of sub routine _MapRenderColumnBuffer
         ; ----------------
         ; Register allocation:
         ; - d0: Buffer mask for looping
