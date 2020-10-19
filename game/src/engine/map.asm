@@ -5,6 +5,12 @@
 ;-------------------------------------------------
 ; Map structures
 ; ----------------
+    DEFINE_STRUCT MapHeader
+        STRUCT_MEMBER.l mapForegroundAddress
+        STRUCT_MEMBER.l mapBackgroundAddress
+        STRUCT_MEMBER.l mapTilesetAddress
+    DEFINE_STRUCT_END
+
     DEFINE_STRUCT Map
         STRUCT_MEMBER.w mapWidth
         STRUCT_MEMBER.w mapHeight
@@ -12,13 +18,12 @@
         STRUCT_MEMBER.w mapHeightPatterns
         STRUCT_MEMBER.w mapWidthPixels
         STRUCT_MEMBER.w mapHeightPixels
-        STRUCT_MEMBER.l mapDataAddress      ; Uncompressed
-        STRUCT_MEMBER.l mapTilesetAddress
+        STRUCT_MEMBER.l mapDataAddress                      ; Uncompressed
         STRUCT_MEMBER.b mapRowOffsetTable
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
-        VAR.l               loadedMap
+        VAR.l               loadedMap                       ; MapHeader
         VAR.w               mapRowBuffer,               64  ; NB: Assumes scrollable plane side will never be 128.
         VAR.w               mapColumnBuffer,            64
         VAR.VDPDMATransfer  mapRowBufferDMATransfer
@@ -48,7 +53,7 @@ MapInit:
 ; Load a map and its associated resources
 ; ----------------
 ; Input:
-; - a0: Map address
+; - a0: MapHeader address
 ; Uses: d0-d7/a0-a6
 MapLoad:
         cmpa.l  loadedMap, a0
@@ -68,6 +73,7 @@ MapLoad:
 ; Render the map to the specified VDP background plane VRAM address.
 ; ----------------
 ; Input:
+; - a0: Map address
 ; - d0: Top map coorinate (in 8 pixel rows)
 ; - d1: Left map coordinate (in 8 pixel columns)
 ; - d2: Plane id
@@ -82,16 +88,16 @@ MapRender:
         move.l  d2, MEM_VDP_CTRL
 
     .rowLoop:
-            PUSHM   d0-d4
+            PUSHM   d0-d4/a0
             bsr     _MapRenderRowBuffer
-            POPM    d0-d4
+            POPM    d0-d4/a0
 
-            lea mapRowBuffer, a0
-            lea MEM_VDP_DATA, a1
+            lea mapRowBuffer, a1
+            lea MEM_VDP_DATA, a2
             move.l  d4, d5
         .copyBufferLoop:
                 Rept 8
-                    move.l  (a0)+, (a1)
+                    move.l  (a1)+, (a2)
                 Endr
             dbra d5, .copyBufferLoop
 
@@ -296,12 +302,14 @@ _RENDER_BUFFER Macro buffer
 ; Render a single row of the map at the specified plane row
 ; ----------------
 ; Input:
+; - a0: Map address
 ; - d0: Map row
 ; - d1: Map start column
 ; - d2: Plane id
 ; Uses: d0-d7/a0-a6
 MapRenderRow:
         move.w d0, d6
+        movea.l a0, a6
 
         ; Queue DMA transfer
         move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
@@ -321,6 +329,7 @@ MapRenderRow:
 
         VDP_DMA_QUEUE_JOB mapRowBufferDMATransfer
 
+        movea.l a6, a0
         move.w d6, d0
 
         ; NB: Fall through to _MapRenderRowBuffer
@@ -330,6 +339,7 @@ MapRenderRow:
 ; Render a single row of the map to the row buffer
 ; ----------------
 ; Input:
+; - a0: Map address
 ; - d0: Map row
 ; - d1: Map start column
 ; Uses: d0-d7/a0-a6
@@ -429,7 +439,6 @@ _RENDER_BLOCK Macro position
         ; - a4: Base address of renderbuffer
 
         ; Load address registers
-        movea.l loadedMap, a0
         lea     mapRowOffsetTable(a0), a1                           ; a1 = row offset table
         movea.l mapDataAddress(a0), a0                              ; a0 = map data
 
@@ -473,11 +482,13 @@ _RENDER_BLOCK Macro position
 ; Render a single column of the map at the specified plane column for VDP plane A
 ; ----------------
 ; Input:
+; - a0: Map address
 ; - d0: Map column
 ; - d1: Map start row
 ; - d2: VDP plane id
 ; Uses: d0-d7/a0-a6
 MapRenderColumn:
+        movea.l a0, a6
         move.w d0, d6
 
         ; Queue DMA transfer
@@ -494,6 +505,7 @@ MapRenderColumn:
 
         VDP_DMA_QUEUE_JOB mapColumnBufferDMATransfer
 
+        movea.l a6, a0
         move.w d6, d0
 
         ; NB: Fall through to _MapRenderColumnBuffer
@@ -503,6 +515,7 @@ MapRenderColumn:
 ; Render a single row of the map to the row buffer
 ; ----------------
 ; Input:
+; - a0: Map address
 ; - d0: Map column
 ; - d1: Map start row
 ; Uses: d0-d7/a0-a6
@@ -604,7 +617,6 @@ _RENDER_BLOCK Macro position
         ; - a4: Base address of renderbuffer
 
         ; Load address registers
-        movea.l loadedMap, a0
         moveq   #0, d7
         move.w  mapWidth(a0), d7
         lea     mapRowOffsetTable(a0), a1                           ; a1 = row offset table

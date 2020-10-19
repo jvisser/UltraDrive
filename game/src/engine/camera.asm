@@ -17,6 +17,7 @@
         STRUCT_MEMBER.w camYDisplacement
         STRUCT_MEMBER.w camAbsoluteMaxX
         STRUCT_MEMBER.w camAbsoluteMaxY
+        STRUCT_MEMBER.l mapAddress
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -28,7 +29,8 @@
 ; Initialize camera to point at the specified coordinates (within the bounds of the currently loaded map)
 ; ----------------
 ; Input:
-; - a0: Address of scroll update routine. If null the default will be used (update first entry of horizontal/vertical scroll ram)
+; - a0: Map to associate with camera
+; - a1: Address of scroll update routine. If null the default will be used (update first entry of horizontal/vertical scroll ram)
 ; - d0: x
 ; - d1: y
 ; Uses: d0-d7/a0-a6
@@ -40,7 +42,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
                 bra     .clampDone\@
 
             .positive\@:
-                move.w  \mapSize(a1), d7
+                move.w  \mapSize(a0), d7
                 sub.w   (vdpMetrics + \screenSize), d7
                 cmp.w   d7, \component
                 blt     .clampDone\@
@@ -50,17 +52,18 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         Endm
 
         ; Set scroll update routine
-        cmpa.w  #0, a0
+        cmpa.w  #0, a1
         bne     .scrollHandlerSupplied
-        lea     _CameraDefaultScrollUpdate, a0
-
+        lea     _CameraDefaultScrollUpdate, a1
     .scrollHandlerSupplied:
-        move.l  a0, (camera + camScrollUpdate)
+        move.l  a1, (camera + camScrollUpdate)
+
+        ; Associate map
+        move.l  a0, (camera + mapAddress)
 
         ; Store maximum camera bounds based on the current map
-        movea.l loadedMap, a1
-        move.w  mapWidthPixels(a1), d2
-        move.w  mapHeightPixels(a1), d3
+        move.w  mapWidthPixels(a0), d2
+        move.w  mapHeightPixels(a0), d3
         sub.w   (vdpMetrics + vdpScreenWidth), d2
         sub.w   (vdpMetrics + vdpScreenHeight), d3
         subq.w  #1, d2
@@ -104,7 +107,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         ; Update scroll
         move.w  d2, d0
         move.w  d3, d1
-        jsr     (a0)
+        jsr     (a1)
 
         ; Render map at min position
         lsr.w   #PATTERN_SHIFT, d4                  ; Calculate map position in (8 pixel) columns and rows
@@ -112,6 +115,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         move.w  d4, d1
         move.w  d5, d0
         move.l  #VDP_PLANE_A, d2
+        ; a0 already set
         jsr     MapRender
 
         Purge _VIEWPORT_CLAMP
@@ -154,7 +158,7 @@ CameraMove:
 ; Processes pending camera movement updates
 ; Maximum movement speed is 8 pixels in either direction.
 ; If the current displacement exceeds 8 pixels multiple update cycles will be required to complete the camera movemement.
-; Should be called once per display frame.
+; Should be called once per application main update cycle
 ; ----------------
 ; Uses: d0-d7/a0-a6
 CameraFinalize:
@@ -221,12 +225,20 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
                 move.l  d4, (camera + \minMax)
                 ori.w   #$02, d5
                 bra     .camDone\@
-                
+
             .camOk\@:
                 swap    d4
-                
+
             .camDone\@:
                 move.l  d4, \store
+        Endm
+
+_MAP_UPDATE Macro renderer
+                lsr.w   #PATTERN_SHIFT, d0
+                lsr.w   #PATTERN_SHIFT, d1
+                move.l  #VDP_PLANE_A, d2
+                movea.l (camera + mapAddress), a0
+                jsr     \renderer
         Endm
 
         ; ---------------------------------------------------------------------------------------
@@ -259,7 +271,7 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
         add.w   d5, d5                                          ; Next render flag set
         add.w   d5, d5
         _UPDATE_MIN_MAX camMinX, d7                             ; d7 = updated min/max for x
-        
+
         ; Stream new background data if necessary
         tst.l   d5
         beq     .done
@@ -269,10 +281,8 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
                         swap    d6
                         move.w  d6, d0
                         move.w  (camera + camMinX), d1
-                        lsr.w   #PATTERN_SHIFT, d0
-                        lsr.w   #PATTERN_SHIFT, d1
-                        move.l  #VDP_PLANE_A, d2
-                        jsr     MapRenderRow
+
+                        _MAP_UPDATE MapRenderRow
                     POPM    d5/d7
                 bra     .checkBackgroundYDone
             .checkMaxY:
@@ -282,11 +292,9 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
                         move.w  d6, d0
                         add.w   (vdpMetrics + vdpScreenHeight), d0
                         move.w  (camera + camMinX), d1
-                        lsr.w   #PATTERN_SHIFT, d0
-                        lsr.w   #PATTERN_SHIFT, d1
-                        move.l  #VDP_PLANE_A, d2
-                        jsr     MapRenderRow
-                    POPM    d5/d7   
+
+                        _MAP_UPDATE MapRenderRow
+                    POPM    d5/d7
             .checkBackgroundYDone:
 
             btst    #0, d5
@@ -294,10 +302,8 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
                     swap    d7
                     move.w  d7, d0
                     move.w  (camera + camMinY), d1
-                    lsr.w   #PATTERN_SHIFT, d0
-                    lsr.w   #PATTERN_SHIFT, d1
-                    move.l  #VDP_PLANE_A, d2
-                    jsr     MapRenderColumn
+
+                    _MAP_UPDATE MapRenderColumn
                 bra     .checkBackgroundXDone
             .checkMaxX:
                 btst    #1, d5
@@ -305,16 +311,15 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
                     move.w  d7, d0
                     add.w   (vdpMetrics + vdpScreenWidth), d0
                     move.w  (camera + camMinY), d1
-                    lsr.w   #PATTERN_SHIFT, d0
-                    lsr.w   #PATTERN_SHIFT, d1
-                    move.l  #VDP_PLANE_A, d2
-                    jsr     MapRenderColumn
+
+                    _MAP_UPDATE MapRenderColumn
             .checkBackgroundXDone:
 
     .done:
         Purge _DISPLACEMENT_CLAMP
         Purge _UPDATE_POSITION
         Purge _UPDATE_MIN_MAX
+        Purge _MAP_UPDATE
         rts
 
 
