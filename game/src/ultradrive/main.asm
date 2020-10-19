@@ -21,14 +21,16 @@ _SCROLL_IF Macro up, down, var
 ; ----------------
 Main:
         jsr     MapInit
-        lea     MapVilage_map1, a0
+        lea     MapHeaderVilage_map1, a0
         jsr     MapLoad
 
         DEBUG_MSG 'Map loaded'
 
         move    #0, d0
         move    #0, d1
-        movea   #0, a0
+        movea.l loadedMap, a0
+        movea.l mapForegroundAddress(a0), a0
+        movea   #0, a1
         jsr     CameraInit
 
         DEBUG_MSG 'Camera initialized'
