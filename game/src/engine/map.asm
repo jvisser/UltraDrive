@@ -386,15 +386,13 @@ _RENDER_BLOCK Macro position
             swap    d7
             andi.w  #BLOCK_REF_INDEX_MASK, d4
             lsl.w   #3, d4
-            move.w  d6, d5
+            add.w   d6, d4
             btst    #BLOCK_REF_VFLIP, d3
             beq     .blockNotVFlipped\@
-            eor.w   #$04, d5                                        ; Flip block row offset
+            eor.w   #$04, d4                                        ; Flip block row offset
 
         .blockNotVFlipped\@:
-            lea     (a3, d4), a6
-            adda.w  d5, a6                                          ; a6 = block row address
-            move.l  (a6), d4                                        ; d4 = 2 row pattern refs
+            move.l  (a3, d4), d4                                    ; d4 = 2 row pattern refs
             btst    #BLOCK_REF_HFLIP, d3
             bne     .blockHFlipped\@
             swap    d4                                              ; Not flipped so swap words (endianess)
