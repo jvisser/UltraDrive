@@ -4,6 +4,19 @@
 
     Even
 
+    [# th:if="${map.properties['background'] != null}" th:with="backgroundMapName=${#strings.capitalize(map.properties['background'].name)}"]
+        ; struct Map
+        MapHeader[(${mapName})]:
+            ; .mapForegroundAddress
+            dc.l Map[(${mapName})]
+            ; .mapBackgroundAddress
+            dc.l Map[(${backgroundMapName})]
+            ; .mapTilesetAddress
+            dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
+
+        Even
+    [/]
+
     ; struct Map
     Map[(${mapName})]:
         ; .mapWidth
@@ -20,8 +33,6 @@
         dc.w [(${map.height * 16 * 8})]
         ; .mapDataAddress
         dc.l Map[(${mapName})]Data
-        ; .mapTilesetAddress
-        dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
         ; .mapRowOffsetTable
         dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
 
