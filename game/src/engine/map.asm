@@ -104,12 +104,18 @@ MapRender:
             addq.w  #1, d0
 
         dbra    d3, .rowLoop
+
         rts
 
 
 ;-------------------------------------------------
 ; Shared macros between row/column renderer
 ; ----------------
+
+_BUFFER_ACCESS_MODE_WRAPPED     = 0
+_BUFFER_ACCESS_MODE_CONTINUOUS  = 1
+
+_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 
 ;-------------------------------------------------
 ; Render a single pattern to the render buffer
@@ -119,11 +125,15 @@ MapRender:
 ; - d1: Buffer offset
 ; - d4: Pattern reference
 ; - d3: Orientation flags of chunk + block
-_RENDER_PATTERN Macro
+_RENDER_PATTERN Macro mode
             eor.w   d3, d4                                          ; orient pattern ref by block + chunk orientation
-            and.w   d0, d1                                          ; Wrap buffer position
-            move.w  d4, (a4, d1)                                    ; Write pattern to row DMA buffer
-            addq.w  #SIZE_WORD, d1
+            If (_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED)
+                and.w   d0, d1                                      ; Wrap buffer position
+                move.w  d4, (a4, d1)                                ; Write pattern to row DMA buffer
+                addq.w  #SIZE_WORD, d1
+            Else
+                move.w  d4, (a4)+                                   ; Write pattern to row DMA buffer
+            EndIf
     Endm
 
 
@@ -131,9 +141,13 @@ _RENDER_PATTERN Macro
 ; Render a single fixed value pattern to the render buffer
 ; ----------------
 _RENDER_PATTERN_FIXED Macro value
-            and.w   d0, d1                                          ; Wrap buffer position
-            move.w  \value, (a4, d1)                                ; Write empty pattern to row DMA buffer.
-            addq.w  #SIZE_WORD, d1
+            If (_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED)
+                and.w   d0, d1                                      ; Wrap buffer position
+                move.w  \value, (a4, d1)                            ; Write empty pattern to row DMA buffer.
+                addq.w  #SIZE_WORD, d1
+            Else
+                move.w  \value, (a4)+                              ; Write pattern to row DMA buffer
+            EndIf
     Endm
 
 
@@ -174,9 +188,11 @@ _RENDER_PARTIAL_CHUNK Macro start, patternNumber
             lsr.w   #1, \patternNumber
             beq     .fullBlocksDone\@
             subq.w  #1, \patternNumber
+
         .renderBlockLoop\@:
             _RENDER_BLOCK
             dbra \patternNumber, .renderBlockLoop\@
+
         .fullBlocksDone\@:
 
         If (strcmp('\start', 'END'))
@@ -219,7 +235,6 @@ _RENDER_BUFFER Macro buffer
 
             move.w  d2, d3
             andi.w  #$0e, d3                                        ; d3 = offset of block row/column in chunk
-
             neg.w   d2
             andi.w  #$0f, d2                                        ; d2 = number of patterns rendered
 
@@ -229,9 +244,9 @@ _RENDER_BUFFER Macro buffer
 
                     _START_CHUNK d3
 
-                    PUSHW   d2                                              ; Store for later use
+                    PUSHW   d2                                     ; Store for later use
                     _RENDER_PARTIAL_CHUNK START, d2
-                    POPW    d3                                              ; d3 = number of patterns left to render
+                    POPW    d3                                     ; d3 = number of patterns left to render
                     bra     .startChunkDone\@
 
             .startChunkEmpty\@:
@@ -255,25 +270,35 @@ _RENDER_BUFFER Macro buffer
             subq.w  #1, d2
         .fullChunkLoop\@:
 
+_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_CONTINUOUS
+
+                and.w   d0, d1
+
                 _READ_CHUNK
                     btst    #CHUNK_REF_EMPTY, d7
                     bne     .fullChunkEmpty\@
 
                     _START_CHUNK
+                        lea     (a4, d1), a4
                         Rept 8
                             _RENDER_BLOCK
                         Endr
+                        lea     \buffer, a4
                         bra     .fullChunkDone\@
 
                 .fullChunkEmpty\@:
                     moveq   #0, d3
-                    Rept 16                                         ; TODO: Optimization opportunity
-                        _RENDER_PATTERN_FIXED d3
+                    lea     (a4, d1), a5
+                    Rept 8
+                        move.l  d3, (a5)+
                     Endr
 
                 .fullChunkDone\@:
+                    addi.w  #32, d1
 
             dbra    d2, .fullChunkLoop\@
+
+_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 
             ; ---------------------------------------------
             ; Render the last partial chunk
