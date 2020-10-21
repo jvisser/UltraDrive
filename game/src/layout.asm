@@ -12,6 +12,7 @@
     ; ----------------
     Section S_VECTOR_TABLE  ; 68000 vector table
     Section S_HEADER        ; sega ROM header
+    Section S_FASTDATA      ; .fastdata (absolute short addressable)
     Section S_PROGRAM       ; .text
     Section S_RODATA        ; .rodata
     Section S_DATA          ; .data
@@ -62,6 +63,7 @@ SECTION_BASE = 0
         Inform 0, '------------------'
         SECTION_INFO S_VECTOR_TABLE,    SECTION_BASE
         SECTION_INFO S_HEADER,          SECTION_BASE
+        SECTION_INFO S_FASTDATA,        SECTION_BASE
         SECTION_INFO S_PROGRAM,         SECTION_BASE
         SECTION_INFO S_RODATA,          SECTION_BASE
         SECTION_INFO S_DATA,            SECTION_BASE
