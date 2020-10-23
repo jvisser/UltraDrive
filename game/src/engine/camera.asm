@@ -17,7 +17,7 @@
         STRUCT_MEMBER.w camYDisplacement
         STRUCT_MEMBER.w camAbsoluteMaxX
         STRUCT_MEMBER.w camAbsoluteMaxY
-        STRUCT_MEMBER.l mapAddress
+        STRUCT_MEMBER.l camMapAddress
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -59,7 +59,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         move.l  a1, (camera + camScrollUpdate)
 
         ; Associate map
-        move.l  a0, (camera + mapAddress)
+        move.l  a0, (camera + camMapAddress)
 
         ; Store maximum camera bounds based on the current map
         move.w  mapWidthPixels(a0), d2
@@ -237,7 +237,7 @@ _MAP_UPDATE Macro renderer
                 lsr.w   #PATTERN_SHIFT, d0
                 lsr.w   #PATTERN_SHIFT, d1
                 move.l  #VDP_PLANE_A, d2
-                movea.l (camera + mapAddress), a0
+                movea.l (camera + camMapAddress), a0
                 jsr     \renderer
         Endm
 
