@@ -133,7 +133,7 @@ class MapConvertConfiguration
         if (patternAllocationConfigurationFile == null)
         {
             return new PatternAllocationConfiguration(
-                    Collections.singletonList(new PatternAllocationRange("All", 0, Integer.MAX_VALUE)),
+                    Collections.singletonList(new PatternAllocationRange("Main", 0, Integer.MAX_VALUE)),
                     Collections.emptyList());
         }
         else
