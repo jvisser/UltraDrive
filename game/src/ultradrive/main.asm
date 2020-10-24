@@ -2,6 +2,8 @@
 ; Main entry point
 ;------------------------------------------------------------------------------------------
 
+
+
 _SCROLL_IF Macro up, down, var
             btst    #\down, d2
             bne     .noDown\@
@@ -29,9 +31,8 @@ Main:
         move    #0, d0
         move    #0, d1
         movea.l loadedMap, a0
-        movea.l mapForegroundAddress(a0), a0
-        movea   #0, a1
-        jsr     CameraInit
+		move	#0, a1
+        jsr     ViewportInit
 
         DEBUG_MSG 'Camera initialized'
 
@@ -49,14 +50,15 @@ Main:
         _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d1
         _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0
 
-        jsr     CameraMove
-        jsr     CameraFinalize
+        jsr     ViewportMove
+        jsr     ViewportFinalize
 
         PROFILE_FRAME_TIME_END
 
         jsr     VDPVSyncWait
         jsr     VDPDMAQueueFlush
         jsr     IOUpdateDeviceState
-        jsr     CameraPrepareNextFrame
+
+        jsr     ViewportPrepareNextFrame
 
         bra     .mainLoop

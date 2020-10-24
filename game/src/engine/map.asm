@@ -18,35 +18,17 @@
         STRUCT_MEMBER.w mapHeightPatterns
         STRUCT_MEMBER.w mapWidthPixels
         STRUCT_MEMBER.w mapHeightPixels
-        STRUCT_MEMBER.l mapDataAddress                      ; Uncompressed
+        STRUCT_MEMBER.l mapDataAddress                          ; Uncompressed
         STRUCT_MEMBER.b mapRowOffsetTable
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
-        VAR.l               loadedMap                       ; MapHeader
-        VAR.w               mapRowBuffer,               64  ; NB: Assumes scrollable plane side will never be 128.
-        VAR.w               mapColumnBuffer,            64
+        VAR.l               loadedMap                           ; MapHeader
+        VAR.w               mapRenderBuffer,            64 * 4  ; NB: Assumes scrollable plane side will never be 128.
+        VAR.w               currentRenderBuffer
         VAR.VDPDMATransfer  mapRowBufferDMATransfer
         VAR.VDPDMATransfer  mapColumnBufferDMATransfer
     DEFINE_VAR_END
-
-
-;-------------------------------------------------
-; Should be called at least once before using the map library or any time the VDP plane size changes
-; ----------------
-MapInit:
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d1
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
-
-        move.w  #2, (mapRowBufferDMATransfer + dmaDataStride)
-        move.w  d1, (mapRowBufferDMATransfer + dmaLength)
-        move.l  #(mapRowBuffer >> 1) & $7fffff, (mapRowBufferDMATransfer + dmaSource)
-
-        add.w   d1, d1
-        move.w  d1, (mapColumnBufferDMATransfer + dmaDataStride)
-        move.w  d0, (mapColumnBufferDMATransfer + dmaLength)
-        move.l  #(mapColumnBuffer >> 1) & $7fffff, (mapColumnBufferDMATransfer + dmaSource)
-        rts
 
 
 ;-------------------------------------------------
@@ -70,6 +52,40 @@ MapLoad:
 
 
 ;-------------------------------------------------
+; Should be called at least once before using the map library or any time the VDP plane size changes
+; ----------------
+MapInit:
+        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d1
+        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
+
+        move.w  #2, (mapRowBufferDMATransfer + dmaDataStride)
+        move.w  d1, (mapRowBufferDMATransfer + dmaLength)
+        move.w  #$007f, (mapRowBufferDMATransfer + dmaSource)
+
+        add.w   d1, d1
+        move.w  d1, (mapColumnBufferDMATransfer + dmaDataStride)
+        move.w  d0, (mapColumnBufferDMATransfer + dmaLength)
+        move.w  #$007f, (mapColumnBufferDMATransfer + dmaSource)
+        
+        ; NB: Fall through to MapResetRenderer
+
+
+;-------------------------------------------------
+; Reset the renderer (inline)
+; ----------------
+MAP_RESET_RENDERER Macros
+    move.w  #mapRenderBuffer, currentRenderBuffer
+
+
+;-------------------------------------------------
+; Reset the renderer
+; ----------------
+MapResetRenderer:
+        MAP_RESET_RENDERER
+        rts
+
+
+;-------------------------------------------------
 ; Render the map to the specified VDP background plane VRAM address.
 ; ----------------
 ; Input:
@@ -89,10 +105,11 @@ MapRender:
 
     .rowLoop:
             PUSHM   d0-d4/a0
+            MAP_RESET_RENDERER
             bsr     _MapRenderRowBuffer
             POPM    d0-d4/a0
 
-            lea mapRowBuffer, a1
+            lea mapRenderBuffer, a1
             lea MEM_VDP_DATA, a2
             move.l  d4, d5
         .copyBufferLoop:
@@ -220,11 +237,11 @@ _RENDER_PARTIAL_CHUNK Macro start, patternNumber
 ; - _READ_CHUNK
 ; - _START_CHUNK
 ; - _RENDER_BLOCK
-_RENDER_BUFFER Macro buffer
+_RENDER_BUFFER Macro
             ; Load address registers
             lea     chunkTable, a2
             lea     blockTable, a3
-            lea     \buffer, a4
+            movea.w currentRenderBuffer, a4
 
             moveq   #0, d3
             andi.w  #$0f, d2
@@ -283,7 +300,7 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_CONTINUOUS
                         Rept 8
                             _RENDER_BLOCK
                         Endr
-                        lea     \buffer, a4
+                        movea.w currentRenderBuffer, a4
                         bra     .fullChunkDone\@
 
                 .fullChunkEmpty\@:
@@ -319,7 +336,11 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
                 .endChunkEmpty\@:
                     moveq   #0, d4
                     _RENDER_PARTIAL_CHUNK_FIXED d2, d4
+        
         .done\@:
+            move.w  a0, d2
+            add.w   d2, d2
+            add.w   d2, currentRenderBuffer
     Endm
 
 
@@ -336,7 +357,7 @@ MapRenderRow:
         move.w d0, d6
         movea.l a0, a6
 
-        ; Queue DMA transfer
+        ; Calculate DMA target
         move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
         subq.w  #1, d4
         and.w   d4, d0
@@ -351,7 +372,13 @@ MapRenderRow:
         or.w    #VDP_CMD_AS_DMA, d5
         add.l   d2, d5
         move.l  d5, (mapRowBufferDMATransfer + dmaTarget)
+        
+        ; Calculate DMA source
+        move.w  currentRenderBuffer, d5
+        asr.w   #1, d5
+        move.w  d5, (mapRowBufferDMATransfer + dmaSource + 2)
 
+        ; Queue DMA job
         VDP_DMA_QUEUE_JOB mapRowBufferDMATransfer
 
         movea.l a6, a0
@@ -494,7 +521,7 @@ _RENDER_BLOCK Macro position
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset
 
-        _RENDER_BUFFER mapRowBuffer
+        _RENDER_BUFFER
 
         Purge _START_CHUNK
         Purge _RENDER_BLOCK
@@ -514,7 +541,7 @@ MapRenderColumn:
         movea.l a0, a6
         move.w d0, d6
 
-        ; Queue DMA transfer
+        ; Queue DMA target
         moveq   #0, d5
         move.w  d0, d5
         move.w  (vdpMetrics + vdpPlaneWidthPatterns), d4
@@ -526,6 +553,12 @@ MapRenderColumn:
         add.l   d2, d5
         move.l  d5, (mapColumnBufferDMATransfer + dmaTarget)
 
+        ; Calculate DMA source
+        move.w  currentRenderBuffer, d5
+        asr.w   #1, d5
+        move.w  d5, (mapColumnBufferDMATransfer + dmaSource + 2)        
+
+        ; Calculate DMA target
         VDP_DMA_QUEUE_JOB mapColumnBufferDMATransfer
 
         movea.l a6, a0
@@ -676,7 +709,7 @@ _RENDER_BLOCK Macro position
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset
 
-        _RENDER_BUFFER mapColumnBuffer
+        _RENDER_BUFFER
 
         Purge _START_CHUNK
         Purge _RENDER_BLOCK
