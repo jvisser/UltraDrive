@@ -27,11 +27,13 @@
     ;-------------------------------------------------
     ; Engine
     ; ----------------
+    Include './engine/engine.asm'
     Include './engine/comper.asm'
     Include './engine/tileset.asm'
     Include './engine/map.asm'
     Include './engine/camera.asm'
     Include './engine/viewport.asm'
+    Include './engine/viewporttracker.asm'
 
 
     ;-------------------------------------------------

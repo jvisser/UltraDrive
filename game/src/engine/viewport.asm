@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Viewport
+; Viewport. Manages background and foreground plane 
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
@@ -8,7 +8,9 @@
     DEFINE_STRUCT Viewport
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
-        STRUCT_MEMBER.l         viewportCommitHandler
+        STRUCT_MEMBER.l         viewportCommitHandler           ; Called to commit viewport to VDP
+        STRUCT_MEMBER.l         viewportFinalizeHandler         ; Called after viewport finalization
+        STRUCT_MEMBER.l         viewportTracker                 ; Used to update the background camera
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -17,35 +19,65 @@
 
 
 ;-------------------------------------------------
-; Initialize camera to point at the specified coordinates (within the bounds of the currently loaded map)
+; Initialize the viewport to point at the specified coordinates (within the bounds of the currently loaded map)
 ; ----------------
 ; Input:
 ; - a0: MapHeader to associate with viewport
-; - a1: Address of commit routine. If null the default will be used (update first entry of horizontal/vertical scroll ram)
+; - a1: Address of commit handler. If null the default will be used (update first entry of horizontal/vertical scroll ram)
+; - a2: Viewport finalize handler. Can be null.
+; - a3: Address of viewport tracker. If null defaultViewportTracker will be used.
 ; - d0: x
 ; - d1: y
 ; Uses: d0-d7/a0-a6
 ViewportInit:
-        ; Set scroll update routine
+        ; Set commit handler
         cmpa.w  #0, a1
-        bne     .scrollHandlerSupplied
+        bne     .commitHandlerSupplied
         lea     _ViewportDefaultCommit, a1
-    .scrollHandlerSupplied:
+    .commitHandlerSupplied:
         move.l  a1, (viewport + viewportCommitHandler)
 
-        ; Initialize background plane camera
-        PUSHM   d0-d1/a0
-        move.l  #VDP_PLANE_B, d2
-        movea.l mapBackgroundAddress(a0), a1
-        lea     (viewport + viewportBackground), a0
-        jsr     CameraInit
-        POPM    d0-d1/a0
+        ; Set viewport finalize handler
+        cmpa.w  #0, a2
+        bne     .finalizeHandlerSupplied
+        lea     _ViewportDefaultFinalize, a2
+    .finalizeHandlerSupplied:
+        move.l a2, (viewport + viewportFinalizeHandler)
+
+        ; Set viewport tracker
+        cmpa.w  #0, a3
+        bne     .viewportTrackerSupplied
+        lea     defaultViewportTracker, a3
+    .viewportTrackerSupplied:
+        move.l  a3, (viewport + viewportTracker)
 
         ; Initialize foreground plane camera
+        PUSHL   a0
         move.l  #VDP_PLANE_A, d2
         movea.l mapForegroundAddress(a0), a1
         lea     (viewport + viewportForeground), a0
         jsr     CameraInit
+        POPL    a0
+
+        ; Let viewport tracker calculate the background camera position based on the background map and foreground camera
+        PUSHL   a0
+        movea.l mapBackgroundAddress(a0), a0
+        lea     (viewport + viewportForeground), a1
+        movea.l vptStart(a3), a3
+        jsr     (a3)
+        POPL    a0
+        
+        ; Initialize background plane camera
+        move.l  #VDP_PLANE_B, d2
+        movea.l mapBackgroundAddress(a0), a1
+        lea     (viewport + viewportBackground), a0
+        jsr     CameraInit
+
+        ; Render views
+        lea     (viewport + viewportBackground), a0
+        jsr     CameraRenderView
+        lea     (viewport + viewportForeground), a0
+        jsr     CameraRenderView
         rts
 
 
@@ -73,13 +105,18 @@ _ViewportDefaultCommit:
 
 
 ;-------------------------------------------------
+; Default finalize handler (NOOP)
+; ----------------
+_ViewportDefaultFinalize:
+        rts
+
+
+;-------------------------------------------------
 ; Move the viewport by the specified amount
 ; ----------------
 ; - d0: Horizontal displacement
 ; - d1: Vertical displacement
 ViewportMove:
-        lea     (viewport + viewportBackground), a0
-        CAMERA_MOVE d0, d1
         lea     (viewport + viewportForeground), a0
         CAMERA_MOVE d0, d1
         rts
@@ -90,19 +127,35 @@ ViewportMove:
 ; ----------------
 ; Uses: d0-d7/a0-a6
 ViewportFinalize:
-        lea     (viewport + viewportBackground), a0
-        jsr     CameraFinalize
+        MAP_RESET_RENDERER
+        
+        ; Finalize foreground camera
         lea     (viewport + viewportForeground), a0
         jsr     CameraFinalize
-        MAP_RESET_RENDERER
-        rts
+
+        ; Let viewport tracker update the background camera
+        movea.l (viewport + viewportTracker), a2
+        movea.l vptSync(a2), a2
+        lea     (viewport + viewportBackground), a0
+        lea     (viewport + viewportForeground), a1
+        jsr     (a2)
+        
+        ; Finalize background camera
+        lea     (viewport + viewportBackground), a0
+        jsr     CameraFinalize
+        
+        ; Call viewport finalize handler
+        lea     viewport, a0
+        move.l  viewportFinalizeHandler(a0), a1
+        jmp     (a1)
 
 
 ;-------------------------------------------------
 ; Prepares the next display frame with the updated camera positions.
 ; Should be called during vblank only
 ; ----------------
-; Uses: a3
+; Uses: a0/a3
 ViewportPrepareNextFrame:
+        lea     viewport, a0
         movea.l (viewport + viewportCommitHandler), a3
-        jmp (a3)
+        jmp     (a3)
