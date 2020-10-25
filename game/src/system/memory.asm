@@ -31,9 +31,13 @@ __SLOW_RAM_ALLOCATION_PTR = MEM_RAM_START   ; Can not use absolute short address
 ;-------------------------------------------------
 ; Start struct type definition
 ; ----------------
-DEFINE_STRUCT Macro name
+DEFINE_STRUCT Macro name, extends, base
         Pushp '\name'
-        RsReset
+        If (narg=3)
+            RsSet \base\_Size
+        Else
+            RsReset
+        EndIf
     Endm
 
 
@@ -95,6 +99,8 @@ DEFINE_VAR Macro allocationType
 ; - 1: Variable name
 ; - 2; Optional: Number of allocations to make
 VAR Macro varName
+            Local VAR_START, VAR_ADDR, VAR_SIZE
+VAR_START = __rs
         If def(\varName)
             Inform 3, 'Variable "\varName\" already defined'
         EndIf
@@ -104,6 +110,7 @@ VAR Macro varName
             Else
 \varName Rs.\0 1
             EndIf
+\varName\_Size Equ (__rs - VAR_START)
         Else
             Rs.w 0  ; Even __rs
             If (narg = 2)
@@ -114,9 +121,9 @@ VAR Macro varName
 \varName Rs.b \varName\_Size
         EndIf
         If (def(debug))
-                Local VAR_ADDR
 VAR_ADDR Equ \varName
-                Inform 0, 'Variable \varName defined: \$VAR_ADDR'
+VAR_SIZE Equ \varName\_Size
+            Inform 0, 'Variable \varName defined: \$VAR_ADDR (size=\#VAR_SIZE)'
         EndIf
     Endm
 
