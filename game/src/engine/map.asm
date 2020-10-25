@@ -97,31 +97,16 @@ MapResetRenderer:
 MapRender:
         move.w  (vdpMetrics + vdpPlaneHeightPatterns), d3
         subq.w  #1, d3
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d4
-        lsr.w   #4, d4
-        subq.w  #1, d4
-
-        move.l  d2, MEM_VDP_CTRL
 
     .rowLoop:
-            PUSHM   d0-d4/a0
+            PUSHM   d0-d3/a0
             MAP_RESET_RENDERER
-            bsr     _MapRenderRowBuffer
-            POPM    d0-d4/a0
-
-            lea mapRenderBuffer, a1
-            lea MEM_VDP_DATA, a2
-            move.l  d4, d5
-        .copyBufferLoop:
-                Rept 8
-                    move.l  (a1)+, (a2)
-                Endr
-            dbra d5, .copyBufferLoop
+            bsr     MapRenderRow
+            jsr     VDPDMAQueueFlush        ; TODO: Use CPU/direct transfer
+            POPM    d0-d3/a0
 
             addq.w  #1, d0
-
         dbra    d3, .rowLoop
-
         rts
 
 

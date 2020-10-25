@@ -306,6 +306,19 @@ VDPVSyncWait:
 
 
 ;-------------------------------------------------
+; Wait for the vertical blanking period to end
+; ----------------
+; Uses: a0
+VDPVSyncEndWait:
+        lea     MEM_VDP_CTRL + 1, a0
+
+    .waitVBLankEndLoop:
+        btst    #VDP_STATUS_VBLANK, (a0)
+        bne     .waitVBLankEndLoop
+        rts
+
+
+;-------------------------------------------------
 ; Set the plane size and update VDP metrics
 ; ----------------
 ; Input:
