@@ -217,10 +217,10 @@ INIT_STRUCT_END Macro
         ; Uses: d0/a0-a1
         ; ----------------
         \STRUCT_VAR_NAME\Init:
-            lea \STRUCT_VAR_NAME\_InitData, a0
-            lea \STRUCT_VAR_NAME + __FIRST_STRUCT_INIT_MEMBER_OFFSET, a1
-            move.w #(__rs - __FIRST_STRUCT_INIT_MEMBER_OFFSET), d0
-            jmp MemCopy
+            lea     \STRUCT_VAR_NAME\_InitData, a0
+            lea     \STRUCT_VAR_NAME + __FIRST_STRUCT_INIT_MEMBER_OFFSET, a1
+            move.w  #(__rs - __FIRST_STRUCT_INIT_MEMBER_OFFSET), d0
+            jmp     MemCopy
     Endm
 
 

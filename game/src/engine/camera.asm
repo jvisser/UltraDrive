@@ -14,6 +14,8 @@
         STRUCT_MEMBER.w camMaxY
         STRUCT_MEMBER.w camXDisplacement
         STRUCT_MEMBER.w camYDisplacement
+        STRUCT_MEMBER.w camLastXDisplacement
+        STRUCT_MEMBER.w camLastYDisplacement
         STRUCT_MEMBER.w camAbsoluteMaxX
         STRUCT_MEMBER.w camAbsoluteMaxY
         STRUCT_MEMBER.l camMapAddress
@@ -74,6 +76,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         move.w  d0, camX(a0)
         move.w  d1, camY(a0)
         move.l  d4, camXDisplacement(a0)    ; Reset both camXDisplacement and camYDisplacement
+        move.l  d4, camLastXDisplacement(a0); Reset both camLastXDisplacement and camLastYDisplacement
 
         ; Clamp VPD plane to map
         _VIEWPORT_CLAMP d0, mapWidthPixels,  vdpPlaneWidth
@@ -84,8 +87,6 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         andi.w  #~PATTERN_MASK, d1
         move.w  d0, camMinX(a0)
         move.w  d1, camMinY(a0)
-        move.w  d0, d4
-        move.w  d1, d5
 
         ; Calculate camera max position
         add.w   (vdpMetrics + vdpPlaneWidth), d0
@@ -97,36 +98,26 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         move.w  d0, camMaxX(a0)
         move.w  d1, camMaxY(a0)
 
-        ; Render map at min position
-        lsr.w   #PATTERN_SHIFT, d4                  ; Calculate map position in (8 pixel) columns and rows
-        lsr.w   #PATTERN_SHIFT, d5
-        move.w  d4, d1
-        move.w  d5, d0
-        move.l  camPlaneId(a0), d2
-        exg		a0, a1
-        jsr     MapRender
-
         Purge _VIEWPORT_CLAMP
         rts
 
 
 ;-------------------------------------------------
-; Default hardware scroll camera update handler
+; Render the complete camera view
 ; ----------------
 ; Input:
-; - d0: Horizontal scroll
-; - d1: Vertical scroll
-; Uses: d0-d1
-_CameraDefaultScrollUpdate:
-        ; Update horizontal scroll
-        VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR
-        neg.w   d0
-        move.w  d0, (MEM_VDP_DATA)
-
-        ; Update vertical scroll
-        VDP_ADDR_SET WRITE, VSRAM, $00
-        move.w  d1, (MEM_VDP_DATA)
-        rts
+; - a0: Camera
+; Uses: d0-d7/a0-a6
+CameraRenderView:
+        ; Render map at min position
+        move.w  camMinY(a0), d0
+        move.w  camMinX(a0), d1
+        lsr.w   #PATTERN_SHIFT, d0
+        lsr.w   #PATTERN_SHIFT, d1
+        move.l  camPlaneId(a0), d2
+        movea.l camMapAddress(a0), a0
+        jsr     MapRender
+    rts
 
 
 ;-------------------------------------------------
@@ -249,7 +240,10 @@ _MAP_UPDATE Macro renderer
 
         move.l  camXDisplacement(a0), d0                 ; Read camXDisplacement:camYDisplacement into d0
         bne     .updatePosition
-        rts                                                     ; Nothing to update
+        ; Nothing to update, clear last displacement and return
+        moveq   #0, d4
+        move.l  d4, camLastXDisplacement(a0)
+        rts
 
     .updatePosition:
         ; Clamp displacement values to the maximum allowed for one update cycle
@@ -258,6 +252,7 @@ _MAP_UPDATE Macro renderer
 
         ; Update camera position
         move.l  camX(a0), d1                             ; Read camX:camY into d1
+        move.l  d1, d3
 
         ; Update camera position within the bounds of the map
         _UPDATE_POSITION camAbsoluteMaxY, camYDisplacement
@@ -265,6 +260,15 @@ _MAP_UPDATE Macro renderer
 
         ; Store new camera position (camX and camY)
         move.l  d1, camX(a0)
+        
+        ; Store actual movement of the camera
+        move.l  d1, d4
+        sub.w   d3, d4
+        move.w  d4, camLastYDisplacement(a0)
+        swap d3
+        swap d4
+        sub.w   d3, d4
+        move.w  d4, camLastXDisplacement(a0)
 
         ; Update min max for both dimensions
         moveq   #0, d5                                          ; d5 = render flags (0 = min, 1 = max)

@@ -22,19 +22,25 @@ _SCROLL_IF Macro up, down, var
 ; Main program entry point
 ; ----------------
 Main:
+        jsr     EngineInit
+
+        DEBUG_MSG 'Engine initialized'
+
         jsr     MapInit
         lea     MapHeaderVilage_map1, a0
         jsr     MapLoad
 
         DEBUG_MSG 'Map loaded'
 
-        move    #0, d0
-        move    #0, d1
+        move.w  #512, d0
+        move.w  #128, d1
         movea.l loadedMap, a0
-		move	#0, a1
+		movea.w	#0, a1
+        movea.w #0, a2
+        movea.w #0, a3
         jsr     ViewportInit
 
-        DEBUG_MSG 'Camera initialized'
+        DEBUG_MSG 'Viewport initialized'
 
         jsr VDPEnableDisplay
 
@@ -58,7 +64,8 @@ Main:
         jsr     VDPVSyncWait
         jsr     VDPDMAQueueFlush
         jsr     IOUpdateDeviceState
-
         jsr     ViewportPrepareNextFrame
+
+        jsr     VDPVSyncEndWait             ; To get more accurate frametime graph
 
         bra     .mainLoop
