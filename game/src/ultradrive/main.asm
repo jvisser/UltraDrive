@@ -27,13 +27,13 @@ Main:
         DEBUG_MSG 'Engine initialized'
 
         jsr     MapInit
-        lea     MapHeaderVilage_map1, a0
+        lea     MapHeaderCave_map1, a0
         jsr     MapLoad
 
         DEBUG_MSG 'Map loaded'
 
-        move.w  #512, d0
-        move.w  #128, d1
+        move.w  0, d0
+        move.w  0, d1
         movea.l loadedMap, a0
 		movea.w	#0, a1
         movea.w #0, a2

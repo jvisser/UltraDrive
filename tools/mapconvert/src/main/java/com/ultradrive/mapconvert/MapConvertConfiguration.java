@@ -2,6 +2,8 @@ package com.ultradrive.mapconvert;
 
 import com.ultradrive.mapconvert.config.PatternAllocationConfiguration;
 import com.ultradrive.mapconvert.config.PatternAllocationRange;
+import com.ultradrive.mapconvert.config.PreAllocatedPattern;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -133,8 +135,8 @@ class MapConvertConfiguration
         if (patternAllocationConfigurationFile == null)
         {
             return new PatternAllocationConfiguration(
-                    Collections.singletonList(new PatternAllocationRange("Main", 0, Integer.MAX_VALUE)),
-                    Collections.emptyList());
+                    Collections.singletonList(new PatternAllocationRange("Main", 1, Integer.MAX_VALUE)),
+                    Collections.singletonList(new PreAllocatedPattern(0, new Pattern(Collections.nCopies(64, 0)))));
         }
         else
         {

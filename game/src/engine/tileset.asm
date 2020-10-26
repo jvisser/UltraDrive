@@ -139,7 +139,9 @@ TilesetLoad:
         ; Load animations
         movea.l tsAnimationsTableAddress(a6), a5
         move.w  tsAnimationsCount(a6), d6
+        beq     .noAnimations
         bsr     _TilesetLoadAnimations
+    .noAnimations:
 
         ; Load palette
         movea.l tsPaletteAddress(a6), a0
