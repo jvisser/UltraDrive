@@ -9,7 +9,7 @@ import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileset;
 
 
-public class TiledCollisionDataSource implements CollisionDataSource, PropertySource
+class TiledCollisionDataSource implements CollisionDataSource, PropertySource
 {
     private static final String COLLISION_ANGLE_PROPERTY_NAME = "angle";
 
