@@ -13,7 +13,7 @@ import org.tiledreader.TiledTileset;
 
 import static java.lang.String.format;
 
-public class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
+class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
 {
     private static final String CHUNK_TILESET_NAME = "chunks";
 
