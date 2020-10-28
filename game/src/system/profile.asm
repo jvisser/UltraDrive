@@ -6,8 +6,10 @@
 ; Show frame time slice by changing the background color
 ; ----------------
 PROFILE_FRAME_TIME Macro color
-        VDP_ADDR_SET WRITE, CRAM, $00
-        move.w  #\color, MEM_VDP_DATA
+        If (def(debug))
+            VDP_ADDR_SET WRITE, CRAM, $00
+            move.w  #\color, MEM_VDP_DATA
+        EndIf
     Endm
 
 
@@ -15,8 +17,10 @@ PROFILE_FRAME_TIME Macro color
 ; Set the background color to black
 ; ----------------
 PROFILE_FRAME_TIME_END Macro
-        VDP_ADDR_SET WRITE, CRAM, $00
-        move.w  #0, MEM_VDP_DATA
+        If (def(debug))
+            VDP_ADDR_SET WRITE, CRAM, $00
+            move.w  #0, MEM_VDP_DATA
+        EndIf
     Endm
 
 
