@@ -87,8 +87,10 @@ public final class FormatExpressions
 
     private Object unpack(Object value)
     {
-        if (value instanceof Packable packable)
+        if (value instanceof Packable)
         {
+            Packable packable = (Packable) value;
+
             return packable.pack().numberValue();
         }
         return value;

@@ -72,8 +72,10 @@ public class TileMapCompiler
     {
         for (Map.Entry<String, Object> propertyEntry : source.getProperties().entrySet())
         {
-            if (propertyEntry.getValue() instanceof MapDataSource auxiliaryMapDataSource)
+            if (propertyEntry.getValue() instanceof MapDataSource)
             {
+                MapDataSource auxiliaryMapDataSource = (MapDataSource) propertyEntry.getValue();
+                
                 collector.computeIfAbsent(auxiliaryMapDataSource, auxMapSource -> new HashSet<>())
                         .add(new AuxiliaryMapSource<>(source, propertyEntry.getKey()));
 

@@ -64,10 +64,11 @@ public abstract class TileReference<T extends TileReference<T>> implements Orien
         {
             return true;
         }
-        if (!(o instanceof TileReference<?> that))
+        if (!(o instanceof TileReference<?>))
         {
             return false;
         }
+        TileReference<?> that = (TileReference<?>) o;
         return referenceId == that.referenceId &&
                orientation == that.orientation;
     }

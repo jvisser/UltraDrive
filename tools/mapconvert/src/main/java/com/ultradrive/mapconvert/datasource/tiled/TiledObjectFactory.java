@@ -90,8 +90,9 @@ public class TiledObjectFactory
 
         private Object transformValue(Object value)
         {
-            if (value instanceof TiledFile tiledFile)
+            if (value instanceof TiledFile)
             {
+                TiledFile tiledFile = (TiledFile) value;
                 String filePath = tiledFile.getPath();
 
                 if (isFileOfType(filePath, MAP_EXTENSION))
