@@ -64,10 +64,11 @@ public class OrientableGrid<T extends Orientable<T>> implements Orientable<Orien
         {
             return true;
         }
-        if (!(o instanceof OrientableGrid<?> that))
+        if (!(o instanceof OrientableGrid<?>))
         {
             return false;
         }
+        OrientableGrid<?> that = (OrientableGrid<?>) o;
         return dimensionSize == that.dimensionSize &&
                elements.equals(that.elements);
     }
