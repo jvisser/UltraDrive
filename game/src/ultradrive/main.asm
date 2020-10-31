@@ -7,13 +7,13 @@
 _SCROLL_IF Macro up, down, var
             btst    #\down, d2
             bne     .noDown\@
-            addq    #2, \var
+            addq    #8, \var
             bra     .done\@
         .noDown\@:
 
             btst    #\up, d2
             bne     .done\@
-            subq    #2, \var
+            subq    #8, \var
 
         .done\@:
     Endm
@@ -27,7 +27,7 @@ Main:
         DEBUG_MSG 'Engine initialized'
 
         jsr     MapInit
-        lea     MapHeaderCave_map1, a0
+        lea     MapHeaderForest_map1, a0
         jsr     MapLoad
 
         DEBUG_MSG 'Map loaded'
