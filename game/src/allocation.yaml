@@ -1,0 +1,16 @@
+patternRanges:
+    - id: "Window"              # Window unused
+      startPatternId: 1408
+      endPatternId: 1471
+    - id: "PlaneA"
+      startPatternId: 1664
+      endPatternId: 1791
+    - id: "PlaneB"
+      startPatternId: 1920
+      endPatternId: 2047
+    - id: "Main"
+      startPatternId: 1
+      endPatternId: 1535
+preAllocatedPatterns:
+    - patternId: 0
+      pattern: "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
