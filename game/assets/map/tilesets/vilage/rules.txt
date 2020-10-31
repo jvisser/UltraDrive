@@ -1,2 +1,0 @@
-# Prevent animation frames to be used as blocks in chunks
-./rules/anim_caged_ball.tmx
