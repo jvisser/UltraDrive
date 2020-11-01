@@ -67,10 +67,12 @@ VDPTaskQueueJob:
 
 
 ;-------------------------------------------------
-; Process the VDP task queue. NB: Should be called by OS only.
+; Process the VDP task queue.
 ; ----------------
 ; Uses: d0-d7/a0-a6
 VDPTaskQueueProcess:
+        OS_LOCK
+
         lea     vdpTaskQueue, a0
         move.w  vdpTaskQueueCurrentEntry, a1
         cmpa    a0, a1
@@ -89,4 +91,6 @@ VDPTaskQueueProcess:
         bne .vdpTaskLoop
 
     .vdpTaskTransferComplete:
+
+        OS_UNLOCK
         rts
