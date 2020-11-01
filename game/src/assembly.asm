@@ -30,6 +30,7 @@
     ; Engine
     ; ----------------
     Include './engine/engine.asm'
+    Include './engine/trigtable.asm'
     Include './engine/comper.asm'
     Include './engine/tileset.asm'
     Include './engine/map.asm'
