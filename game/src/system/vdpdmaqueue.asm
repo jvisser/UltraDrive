@@ -25,23 +25,6 @@ VDP_DMA_QUEUE_SIZE Equ 32
 
 
 ;-------------------------------------------------
-; Optional automatic interrupt locking during DMA transfer. Prevent VDP state being corrupted by h/vint handler during DMA setup.
-; It is most likely more efficient to handle this manually at a higher level (or not at all if this is not an issue).
-; ----------------
-_VDP_DMA_68K_INT_LOCK Macro
-        If def(vdp_dma_safe)
-            M68K_DISABLE_INT
-        EndIf
-    Endm
-
-_VDP_DMA_68K_INT_UNLOCK Macro
-        If def(vdp_dma_safe)
-            M68K_ENABLE_INT
-        EndIf
-    Endm
-
-
-;-------------------------------------------------
 ; Queue DMA job by ref to static/predefined VDPDMATransfer
 ; ----------------
 ; Uses: d0/a0-a1
@@ -50,9 +33,9 @@ VDP_DMA_QUEUE_JOB Macro dmaTransfer
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
             beq     .dmaQueueFull\@
 
-        If (~strcmp('\dmaTransfer', 'a0'))
-            lea     \dmaTransfer, a0
-        EndIf
+            If (~strcmp('\dmaTransfer', 'a0'))
+                lea     \dmaTransfer, a0
+            EndIf
 
             ; Write data stride
             move.b  dmaDataStride + 1(a0), dmaQueuedataStride + 1(a1)
@@ -72,16 +55,16 @@ VDP_DMA_QUEUE_JOB Macro dmaTransfer
             addi.w  #VDPDMAQueueEntry_Size, a1
             move.w  a1, vdpDMAQueueCurrentEntry
 
-    If def(debug)
-            bra .dmaQueueDone\@
+            If def(debug)
+                    bra .dmaQueueDone\@
 
-        .dmaQueueFull\@:
-            DEBUG_MSG 'DMA Queue full'
+                .dmaQueueFull\@:
+                    DEBUG_MSG 'DMA Queue full'
 
-        .dmaQueueDone\@:
-    Else
-        .dmaQueueFull\@:
-    Endif
+                .dmaQueueDone\@:
+            Else
+                .dmaQueueFull\@:
+            Endif
     Endm
 
 
@@ -109,7 +92,7 @@ VDPDMAQueueInit:
 
 
 ;-------------------------------------------------
-; Queue a job
+; Queue a DMA job
 ; ----------------
 ; Input:
 ; - a0: Address of the VDPDMATransfer instance to queue

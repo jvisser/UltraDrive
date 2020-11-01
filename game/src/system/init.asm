@@ -10,6 +10,7 @@ SysInit:
 
         jsr IOInit
         jsr VDPDMAQueueInit
+        jsr VDPTaskQueueInit
         jsr VDPInit
 
         ; Prepare cpu for processing once all sub systems have been initialized (ie proper handlers are setup)

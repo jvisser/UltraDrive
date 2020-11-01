@@ -2,8 +2,6 @@
 ; Main entry point
 ;------------------------------------------------------------------------------------------
 
-
-
 _SCROLL_IF Macro up, down, var
             btst    #\down, d2
             bne     .noDown\@
@@ -63,8 +61,8 @@ Main:
 
         jsr     VDPVSyncWait
         jsr     VDPDMAQueueFlush
+        jsr     VDPTaskQueueProcess
         jsr     IOUpdateDeviceState
-        jsr     ViewportPrepareNextFrame
 
         jsr     VDPVSyncEndWait             ; To get more accurate frametime graph
 

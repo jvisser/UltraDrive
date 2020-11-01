@@ -153,6 +153,23 @@ PATTERN_MASK        Equ 7
 
 
 ;-------------------------------------------------
+; Optional automatic interrupt locking macros. Prevent VDP state being corrupted by multiple processes (Main loop/Interrupt processing) doing VDP setup/state changes.
+; It is most likely more efficient to handle this manually at a higher level (or not at all if this is not an issue).
+; ----------------
+_VDP_DMA_68K_INT_LOCK Macro
+        If def(vdp_int_safe)
+            M68K_DISABLE_INT
+        EndIf
+    Endm
+
+_VDP_DMA_68K_INT_UNLOCK Macro
+        If def(vdp_int_safe)
+            M68K_ENABLE_INT
+        EndIf
+    Endm
+
+
+;-------------------------------------------------
 ; Write cached register value to VDP
 ; ----------------
 _VDP_REG_SYNC Macro vdpReg
