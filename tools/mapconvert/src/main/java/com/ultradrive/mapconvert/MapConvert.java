@@ -82,7 +82,7 @@ public final class MapConvert
 
         if (imageDirectory.exists() || imageDirectory.mkdirs())
         {
-            MapRenderer mapRenderer = new MapRenderer();
+            MapRenderer mapRenderer = new MapRenderer(mapCompilation.getExternalPatterns());
             for (TileMap map : mapCompilation.getMaps())
             {
                 String fileName = map.getName() + PNG_FILE_EXTENSION;

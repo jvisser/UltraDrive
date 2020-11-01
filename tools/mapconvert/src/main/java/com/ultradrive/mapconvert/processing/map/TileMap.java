@@ -1,6 +1,7 @@
 package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.common.PropertySource;
+import com.ultradrive.mapconvert.config.PreAllocatedPattern;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import java.util.Collections;
@@ -86,8 +87,8 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
         return chunkReferences.get(row * width + column);
     }
 
-    public SquashedTileMap squash()
+    public SquashedTileMap squash(List<PreAllocatedPattern> externalPatterns)
     {
-        return new SquashedTileMap(this);
+        return new SquashedTileMap(this, externalPatterns);
     }
 }

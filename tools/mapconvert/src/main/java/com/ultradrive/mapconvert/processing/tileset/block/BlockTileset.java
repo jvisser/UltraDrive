@@ -8,10 +8,7 @@ import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.Patt
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileset;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-
-import static java.lang.String.format;
 
 public class BlockTileset extends MetaTileset<Block>
 {
@@ -56,9 +53,9 @@ public class BlockTileset extends MetaTileset<Block>
         return animationFrames;
     }
 
-    public Pattern getPattern(int referenceId)
+    public Optional<Pattern> getPattern(int referenceId)
     {
-        return patternAllocation.getPattern(referenceId).orElseGet(() -> {
+        return patternAllocation.getPattern(referenceId).or(() -> {
             Optional<Animation> animationOptional = animations.stream()
                     .filter(a -> referenceId >= a.getPatternBaseId() && referenceId < a.getPatternBaseId() + a.getSize())
                     .findAny();
@@ -68,10 +65,10 @@ public class BlockTileset extends MetaTileset<Block>
                 Animation animation = animationOptional.get();
                 AnimationFrame firstAnimationFrame = animation.getAnimationFrameReference(0).getAnimationFrame();
 
-                return firstAnimationFrame.getPattern(referenceId - animation.getPatternBaseId());
+                return Optional.of(firstAnimationFrame.getPattern(referenceId - animation.getPatternBaseId()));
             }
 
-            throw new NoSuchElementException(format("No pattern found in static or animation patterns for pattern id %d", referenceId));
+            return Optional.empty();
         });
     }
 }

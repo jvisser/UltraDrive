@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.common.Point;
 import com.ultradrive.mapconvert.common.orientable.Orientation;
+import com.ultradrive.mapconvert.config.PreAllocatedPattern;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockReference;
@@ -12,18 +13,27 @@ import com.ultradrive.mapconvert.processing.tileset.chunk.Chunk;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import javax.annotation.Nonnull;
 
+import static java.lang.String.format;
 
+
+/**
+ * For testing/debugging purposes only
+ */
 public class SquashedTileMap implements Iterable<PatternReference>
 {
     private final TileMap map;
     private final Tileset tileset;
+    private final List<PreAllocatedPattern> externalPatterns;
 
-    SquashedTileMap(TileMap map)
+    SquashedTileMap(TileMap map, List<PreAllocatedPattern> externalPatterns)
     {
         this.map = map;
         this.tileset = map.getTileset();
+        this.externalPatterns = externalPatterns;
     }
 
     @Override
@@ -110,7 +120,13 @@ public class SquashedTileMap implements Iterable<PatternReference>
     {
         PatternReference patternReference = getPatternReference(row, column);
 
-        Pattern pattern = tileset.getPattern(patternReference.getReferenceId())
+        int referenceId = patternReference.getReferenceId();
+        Pattern pattern = tileset.getPattern(referenceId)
+                .or(() -> externalPatterns.stream()
+                        .filter(preAllocatedPattern -> preAllocatedPattern.getPatternId() == referenceId)
+                        .map(PreAllocatedPattern::getPattern)
+                        .findAny())
+                .orElseThrow(() -> new NoSuchElementException(format("No pattern found in pre-allocated, static or animation patterns for pattern id %d", referenceId)))
                 .reorient(patternReference.getOrientation());
 
         return new TilesetImagePattern(pattern, patternReference.getPaletteId());
