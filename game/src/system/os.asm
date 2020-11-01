@@ -86,11 +86,16 @@ OSResetStatistics:
 ; ----------------
 ; Uses: d0
 OSNextFrameReadyWait:
+        OS_LOCK
+
         ; Mark frame as ready for processing
         move.w   #1, (osContext + frameReady)
 
         ; Wait until processed
         move.l  (osContext + framesProcessed), d0
+
+        OS_UNLOCK
+
     .waitNextFrameLoop:
         cmp.l  (osContext + framesProcessed), d0
         beq     .waitNextFrameLoop
