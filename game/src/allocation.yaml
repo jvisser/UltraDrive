@@ -10,7 +10,7 @@ patternRanges:
       endPatternId: 2047
     - id: "Main"                # Remaining patterns go here
       startPatternId: 1
-      endPatternId: 1535
+      endPatternId: 1407
 preAllocatedPatterns:
     - patternId: 0
       pattern: "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
