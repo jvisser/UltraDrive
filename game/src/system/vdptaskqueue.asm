@@ -31,6 +31,8 @@ VDPTaskQueueInit:
 ; ----------------
 ; Uses: a1
 VDP_TASK_QUEUE_JOB Macro jobAddress
+            OS_LOCK
+
             movea.w vdpTaskQueueCurrentEntry, a1
             cmpa.w  #vdpTaskQueue + vdpTaskQueue_Size, a1
             beq     .vdpTaskQueueFull\@
@@ -48,6 +50,8 @@ VDP_TASK_QUEUE_JOB Macro jobAddress
             Else
                 .vdpTaskQueueFull\@:
             Endif
+
+            OS_UNLOCK
     Endm
 
 
@@ -63,7 +67,7 @@ VDPTaskQueueJob:
 
 
 ;-------------------------------------------------
-; Process the VDP task queue
+; Process the VDP task queue. NB: Should be called by OS only.
 ; ----------------
 ; Uses: d0-d7/a0-a6
 VDPTaskQueueProcess:
@@ -74,8 +78,6 @@ VDPTaskQueueProcess:
 
         move.w  a0, vdpTaskQueueCurrentEntry
 
-        _VDP_DMA_68K_INT_LOCK
-
     .vdpTaskLoop:
         move.l  (a0)+, a3
 
@@ -85,8 +87,6 @@ VDPTaskQueueProcess:
 
         cmpa    a0, a1
         bne .vdpTaskLoop
-
-        _VDP_DMA_68K_INT_UNLOCK
 
     .vdpTaskTransferComplete:
         rts

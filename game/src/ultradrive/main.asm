@@ -33,7 +33,7 @@ Main:
         move.w  0, d0
         move.w  0, d1
         movea.l loadedMap, a0
-		movea.w	#0, a1
+        movea.w #0, a1
         movea.w #0, a2
         movea.w #0, a3
         jsr     ViewportInit
@@ -59,11 +59,6 @@ Main:
 
         PROFILE_FRAME_TIME_END
 
-        jsr     VDPVSyncWait
-        jsr     VDPDMAQueueFlush
-        jsr     VDPTaskQueueProcess
-        jsr     IOUpdateDeviceState
-
-        jsr     VDPVSyncEndWait             ; To get more accurate frametime graph
+        jsr     OSNextFrameReadyWait
 
         bra     .mainLoop
