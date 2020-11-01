@@ -14,6 +14,7 @@ import com.ultradrive.mapconvert.processing.tileset.collision.CollisionFieldSet;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class Tileset implements PropertySource
@@ -81,7 +82,7 @@ public class Tileset implements PropertySource
         return blockTileset.getTile(blockId);
     }
 
-    public Pattern getPattern(int patternId)
+    public Optional<Pattern> getPattern(int patternId)
     {
         return blockTileset.getPattern(patternId);
     }

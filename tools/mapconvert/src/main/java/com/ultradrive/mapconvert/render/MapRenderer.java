@@ -1,6 +1,7 @@
 package com.ultradrive.mapconvert.render;
 
 import com.ultradrive.mapconvert.common.Point;
+import com.ultradrive.mapconvert.config.PreAllocatedPattern;
 import com.ultradrive.mapconvert.processing.map.SquashedTileMap;
 import com.ultradrive.mapconvert.processing.map.TileMap;
 import com.ultradrive.mapconvert.processing.tileset.block.image.TilesetImagePalette;
@@ -9,25 +10,30 @@ import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
+import java.util.List;
 
 
 public class MapRenderer
 {
+    private final List<PreAllocatedPattern> externalPatterns;
     private final Color backgroundColor;
 
-    public MapRenderer()
+    public MapRenderer(List<PreAllocatedPattern> externalPatterns)
     {
-        this.backgroundColor = Color.GRAY;
+        this.externalPatterns = externalPatterns;
+        this.backgroundColor = new Color(0, true);
     }
 
-    public MapRenderer(Color backgroundColor)
+    public MapRenderer(List<PreAllocatedPattern> externalPatterns,
+                       Color backgroundColor)
     {
+        this.externalPatterns = externalPatterns;
         this.backgroundColor = backgroundColor;
     }
 
     public BufferedImage renderMap(TileMap map)
     {
-        SquashedTileMap squashedTileMap = map.squash();
+        SquashedTileMap squashedTileMap = map.squash(externalPatterns);
 
         int mapWidth = squashedTileMap.getWidth();
         int mapHeight = squashedTileMap.getHeight();

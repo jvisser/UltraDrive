@@ -56,7 +56,8 @@ public class TileMapCompiler
 
         List<TileMap> maps = bindAuxiliaryMaps(auxiliaryMaps, compileMaps(mapBuilders, tilesetsByTilesetDataSource));
 
-        return new TileMapCompilation(maps, ImmutableList.copyOf(tilesetsByTilesetDataSource.values()));
+        return new TileMapCompilation(maps, ImmutableList.copyOf(tilesetsByTilesetDataSource.values()),
+                                      patternAllocationConfiguration.getPreAllocatedPatterns());
     }
 
     private Map<MapDataSource, Set<AuxiliaryMapSource<MapDataSource>>> collectAuxiliaryMaps()
