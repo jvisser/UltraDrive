@@ -28,9 +28,9 @@
         dc.l Tileset[(${tilesetName})]AnimationsTable
         [# th:with="mainAllocation=${tileset.patternAllocation.getAllocationArea('Main')}"]
         ; .tsVramFreeAreaMin
-        dc.w [(${mainAllocation.patternBaseId * 32})]
+        dc.w [(${#format.format('$%04X', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
         ; .tsVramFreeAreaMax
-        dc.w [(${(mainAllocation.patternBaseId + mainAllocation.TotalPatternAllocationSize) * 32 })]
+        dc.w [(${#format.format('$%04X', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
         [/]
 
     Even
