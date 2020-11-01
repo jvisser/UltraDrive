@@ -10,7 +10,9 @@ OSInit          Equ osContextInit
 ; OS Context
 ; ----------------
     DEFINE_STRUCT OSContext
-        STRUCT_MEMBER.l frameCounter
+        STRUCT_MEMBER.w frameReady
+        STRUCT_MEMBER.l framesProcessed
+        STRUCT_MEMBER.l framesSkipped
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -18,7 +20,9 @@ OSInit          Equ osContextInit
     DEFINE_VAR_END
 
     INIT_STRUCT osContext
-        INIT_STRUCT_MEMBER.frameCounter 0
+        INIT_STRUCT_MEMBER.frameReady      0
+        INIT_STRUCT_MEMBER.framesProcessed 0
+        INIT_STRUCT_MEMBER.framesSkipped   0
     INIT_STRUCT_END
 
 
@@ -28,11 +32,21 @@ OSInit          Equ osContextInit
 OSPrepareNextFrame:
         PUSH_CONTEXT
 
-        addq.l  #1, (osContext + frameCounter)
+        tst.w   (osContext + frameReady)
+        beq     .notReady
+
+        clr.w   (osContext + frameReady)
+        addq.l  #1, (osContext + framesProcessed)
 
         jsr     VDPDMAQueueFlush
         jsr     VDPTaskQueueProcess
         jsr     IOUpdateDeviceState
+
+        bra     .done
+    .notReady:
+        addq.l  #1, (osContext + framesSkipped)
+
+    .done:
 
         POP_CONTEXT
         rte
@@ -53,13 +67,31 @@ OS_UNLOCK Macros
 
 
 ;-------------------------------------------------
+; Reset frame processing statistics
+; ----------------
+; Uses: d0
+OSResetStatistics:
+        OS_LOCK
+
+        moveq   #0, d0
+        move.l  d0, (osContext + framesProcessed)
+        move.l  d0, (osContext + framesSkipped)
+
+        OS_UNLOCK
+        rts
+
+
+;-------------------------------------------------
 ; Wait until next frame is ready to be processed
 ; ----------------
 ; Uses: d0
 OSNextFrameReadyWait:
-        move.l  (osContext + frameCounter), d0
+        ; Mark frame as ready for processing
+        move.w   #1, (osContext + frameReady)
 
+        ; Wait until processed
+        move.l  (osContext + framesProcessed), d0
     .waitNextFrameLoop:
-        cmp.l  (osContext + frameCounter), d0
+        cmp.l  (osContext + framesProcessed), d0
         beq     .waitNextFrameLoop
         rts

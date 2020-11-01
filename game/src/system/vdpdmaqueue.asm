@@ -107,10 +107,12 @@ VDPDMAQueueJob:
 
 
 ;-------------------------------------------------
-; Flush the DMA queue. NB: Should be called by OS only.
+; Flush the DMA queue.
 ; ----------------
 ; Uses: a0-a2
 VDPDMAQueueFlush:
+        OS_LOCK
+
         lea     vdpDMAQueue, a0
         move.w  vdpDMAQueueCurrentEntry, a2
         cmpa    a0, a2
@@ -129,4 +131,6 @@ VDPDMAQueueFlush:
         bne .dmaTransferLoop
 
     .dmaTransferComplete:
+
+        OS_UNLOCK
         rts

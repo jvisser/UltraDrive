@@ -44,6 +44,8 @@ Main:
 
         DEBUG_MSG 'UltraDrive Started!'
 
+        jsr OSResetStatistics
+
     .mainLoop:
 
         PROFILE_FRAME_TIME $000e
