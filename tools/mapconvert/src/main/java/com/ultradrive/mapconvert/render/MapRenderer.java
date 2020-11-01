@@ -73,7 +73,7 @@ public class MapRenderer
                 int pixelValue = pattern.getValue(new Point(x, y));
                 if (pixelValue != 0)
                 {
-                    color = new Color(palette.getColor(imagePattern.getPaletteId().toGlobalColorIndex(pixelValue)).getRGB(), false);
+                    color = new Color(palette.getColor(imagePattern.getPaletteId().toGlobalColorIndex(pixelValue)).getClampedRGB(), false);
                 }
 
                 int[] rgba = new int[] { color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() };
