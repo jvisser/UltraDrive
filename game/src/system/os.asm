@@ -43,7 +43,10 @@ OSPrepareNextFrame:
         jsr     IOUpdateDeviceState
 
         bra     .done
+
     .notReady:
+        DEBUG_MSG 'Frame skipped!'
+
         addq.l  #1, (osContext + framesSkipped)
 
     .done:
