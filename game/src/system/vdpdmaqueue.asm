@@ -29,6 +29,8 @@ VDP_DMA_QUEUE_SIZE Equ 32
 ; ----------------
 ; Uses: d0/a0-a1
 VDP_DMA_QUEUE_JOB Macro dmaTransfer
+            OS_LOCK
+
             movea.w vdpDMAQueueCurrentEntry, a1
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
             beq     .dmaQueueFull\@
@@ -65,6 +67,8 @@ VDP_DMA_QUEUE_JOB Macro dmaTransfer
             Else
                 .dmaQueueFull\@:
             Endif
+
+            OS_UNLOCK
     Endm
 
 
@@ -103,7 +107,7 @@ VDPDMAQueueJob:
 
 
 ;-------------------------------------------------
-; Flush the DMA queue
+; Flush the DMA queue. NB: Should be called by OS only.
 ; ----------------
 ; Uses: a0-a2
 VDPDMAQueueFlush:
@@ -116,8 +120,6 @@ VDPDMAQueueFlush:
 
         lea     MEM_VDP_CTRL, a1
 
-        _VDP_DMA_68K_INT_LOCK
-
     .dmaTransferLoop:
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
@@ -125,8 +127,6 @@ VDPDMAQueueFlush:
         move.l  (a0)+, (a1)
         cmpa    a0, a2
         bne .dmaTransferLoop
-
-        _VDP_DMA_68K_INT_UNLOCK
 
     .dmaTransferComplete:
         rts

@@ -122,7 +122,7 @@ PATTERN_MASK        Equ 7
     ; VDPContext initial values
     INIT_STRUCT vdpContext
         INIT_STRUCT_MEMBER.vdpRegMode1          VDP_CMD_RS_MODE1        | MODE1_HIGH_COLOR
-        INIT_STRUCT_MEMBER.vdpRegMode2          VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE
+        INIT_STRUCT_MEMBER.vdpRegMode2          VDP_CMD_RS_MODE2        | MODE2_MODE_5 | MODE2_DMA_ENABLE | MODE2_VBLANK_ENABLE
         INIT_STRUCT_MEMBER.vdpRegMode3          VDP_CMD_RS_MODE3
         INIT_STRUCT_MEMBER.vdpRegMode4          VDP_CMD_RS_MODE4        | MODE4_H40_CELL
         INIT_STRUCT_MEMBER.vdpRegPlaneA         VDP_CMD_RS_PLANE_A      | PLANE_A_ADDR_\$VDP_PLANE_A_ADDR
@@ -150,23 +150,6 @@ PATTERN_MASK        Equ 7
         INIT_STRUCT_MEMBER.vdpPlaneWidthShift       7       ; Adjusted for word sized shift
         INIT_STRUCT_MEMBER.vdpPlaneHeightShift      6
     INIT_STRUCT_END
-
-
-;-------------------------------------------------
-; Optional automatic interrupt locking macros. Prevent VDP state being corrupted by multiple processes (Main loop/Interrupt processing) doing VDP setup/state changes.
-; It is most likely more efficient to handle this manually at a higher level (or not at all if this is not an issue).
-; ----------------
-_VDP_DMA_68K_INT_LOCK Macro
-        If def(vdp_int_safe)
-            M68K_DISABLE_INT
-        EndIf
-    Endm
-
-_VDP_DMA_68K_INT_UNLOCK Macro
-        If def(vdp_int_safe)
-            M68K_ENABLE_INT
-        EndIf
-    Endm
 
 
 ;-------------------------------------------------

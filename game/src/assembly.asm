@@ -17,6 +17,7 @@
     Include './system/exception.asm'
     Include './system/z80.asm'
     Include './system/io.asm'
+    Include './system/os.asm'
     Include './system/vdpcmd.asm'
     Include './system/vdp.asm'
     Include './system/vdpdma.asm'
