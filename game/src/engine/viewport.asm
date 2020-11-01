@@ -9,7 +9,7 @@
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
         STRUCT_MEMBER.l         viewportCommitHandler           ; Called to commit viewport to VDP
-        STRUCT_MEMBER.l         viewportFinalizeHandler         ; Called after viewport finalization
+        STRUCT_MEMBER.l         viewportFinalizeHandler         ; Called after viewport finalization (can be used to update data required by the commit handler)
         STRUCT_MEMBER.l         viewportTracker                 ; Used to update the background camera
     DEFINE_STRUCT_END
 
@@ -33,7 +33,7 @@ ViewportInit:
         ; Set commit handler
         cmpa.w  #0, a1
         bne     .commitHandlerSupplied
-        lea     _ViewportDefaultCommit, a1
+        lea     ViewportCommitPlaneScroll, a1
     .commitHandlerSupplied:
         move.l  a1, (viewport + viewportCommitHandler)
 
@@ -82,10 +82,10 @@ ViewportInit:
 
 
 ;-------------------------------------------------
-; Default hardware scroll camera update handler
+; Default commit handler. Assumes plane based scolling and updates scroll values accordingly.
 ; ----------------
 ; Uses: d0-d1
-_ViewportDefaultCommit:
+ViewportCommitPlaneScroll:
         ; Update horizontal scroll
         VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR, $02
         move.w  (viewport + viewportForeground + camX), d0
@@ -144,18 +144,9 @@ ViewportFinalize:
         lea     (viewport + viewportBackground), a0
         jsr     CameraFinalize
         
+        ; Add viewport commit handler to VDP task queue
+        VDP_TASK_QUEUE_JOB (viewport + viewportCommitHandler)
+
         ; Call viewport finalize handler
-        lea     viewport, a0
         move.l  viewportFinalizeHandler(a0), a1
         jmp     (a1)
-
-
-;-------------------------------------------------
-; Prepares the next display frame with the updated camera positions.
-; Should be called during vblank only
-; ----------------
-; Uses: a0/a3
-ViewportPrepareNextFrame:
-        lea     viewport, a0
-        movea.l (viewport + viewportCommitHandler), a3
-        jmp     (a3)

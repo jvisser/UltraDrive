@@ -165,7 +165,7 @@ _DISPLACEMENT_CLAMP Macro displacement
                 move.w  #-PATTERN_DIMENSION, d0
 
             .clampOk\@:
-                sub.w   d0, \displacement(a0)            ; Update remaining displacement
+                sub.w   d0, \displacement(a0)                   ; Update remaining displacement
                 swap    d0
         Endm
 
@@ -197,7 +197,7 @@ _UPDATE_MIN_MAX Macro minMax, store
                 Local MIN_MAX_DISPLACEMENT
 MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
 
-                move.l  \minMax(a0), d4                  ; d4 = camMin:camMax
+                move.l  \minMax(a0), d4                         ; d4 = camMin:camMax
                 cmp.w   d4, d1                                  ; Max overflow?
                 bgt     .camMaxOverflow\@
                 swap    d4
@@ -238,7 +238,7 @@ _MAP_UPDATE Macro renderer
         ; Start of sub routine CameraFinalize
         ; ----------------
 
-        move.l  camXDisplacement(a0), d0                 ; Read camXDisplacement:camYDisplacement into d0
+        move.l  camXDisplacement(a0), d0                        ; Read camXDisplacement:camYDisplacement into d0
         bne     .updatePosition
         ; Nothing to update, clear last displacement and return
         moveq   #0, d4
@@ -251,7 +251,7 @@ _MAP_UPDATE Macro renderer
         _DISPLACEMENT_CLAMP camXDisplacement
 
         ; Update camera position
-        move.l  camX(a0), d1                             ; Read camX:camY into d1
+        move.l  camX(a0), d1                                    ; Read camX:camY into d1
         move.l  d1, d3
 
         ; Update camera position within the bounds of the map

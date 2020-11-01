@@ -2,7 +2,7 @@
 
 set -e
 
-# Compile assets top source
+# Compile assets to source
 java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
         -m '../assets/map/maps/playfield'                   \
         -t './engine/assets/template'                       \

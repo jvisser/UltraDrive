@@ -1,14 +1,14 @@
 patternRanges:
-    - id: "Window"              # Window unused
+    - id: "Window"              # Use complete window area for pattern data
       startPatternId: 1408
       endPatternId: 1471
-    - id: "PlaneA"
+    - id: "PlaneA"              # Use the top half of the Plane A allocation for pattern data
       startPatternId: 1664
       endPatternId: 1791
-    - id: "PlaneB"
+    - id: "PlaneB"              # Use the top half of the Plane B allocation for pattern data
       startPatternId: 1920
       endPatternId: 2047
-    - id: "Main"
+    - id: "Main"                # Remaining patterns go here
       startPatternId: 1
       endPatternId: 1535
 preAllocatedPatterns:
