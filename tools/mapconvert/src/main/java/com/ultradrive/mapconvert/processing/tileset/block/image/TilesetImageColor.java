@@ -18,12 +18,17 @@ public class TilesetImageColor implements Packable
                     206, 6,
                     255, 7));
 
-    private static int get3BitComponentValue(int component)
+    private static int get8BitComponentValue(int component)
     {
         Integer floorKey = componentColorRamp.floorKey(component);
         Integer ceilKey = componentColorRamp.ceilingKey(component);
 
-        return componentColorRamp.get(component - floorKey > ceilKey - component ? ceilKey : floorKey);
+        return component - floorKey > ceilKey - component ? ceilKey : floorKey;
+    }
+
+    private static int get3BitComponentValue(int component)
+    {
+        return componentColorRamp.get(get8BitComponentValue(component));
     }
 
     private final int rgb;
@@ -36,6 +41,15 @@ public class TilesetImageColor implements Packable
     public int getRGB()
     {
         return rgb;
+    }
+
+    public int getClampedRGB()
+    {
+        int r = get8BitComponentValue((rgb >> 16) & 0xff);
+        int g = get8BitComponentValue((rgb >> 8) & 0xff);
+        int b = get8BitComponentValue(rgb & 0xff);
+
+        return r << 16 | g << 8 | b;
     }
 
     @Override
