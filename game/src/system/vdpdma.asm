@@ -82,7 +82,7 @@ VDP_DMA_DEFINE_VRAM_TRANSFER Macro source, target, length, dataStride
             dc.w 2
         EndIf
         dc.w \length
-        dc.l (\source >> 1)
+        dc.l (\source >> 1) & $7fffff
         dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
     Endm
 
@@ -97,7 +97,7 @@ VDP_DMA_DEFINE_CRAM_TRANSFER Macro source, target, length, dataStride
             dc.w 2
         EndIf
         dc.w \length
-        dc.l (\source >> 1)
+        dc.l (\source >> 1) & $7fffff
         dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
     Endm
 
@@ -112,7 +112,7 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length, dataStride
             dc.w 2
         EndIf
         dc.w \length
-        dc.l (\source >> 1)
+        dc.l (\source >> 1) & $7fffff
         dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
     Endm
 

@@ -23,6 +23,7 @@
     Include './system/vdpdma.asm'
     Include './system/vdptaskqueue.asm'
     Include './system/vdpdmaqueue.asm'
+    Include './system/vdpsprite.asm'
     Include './system/init.asm'
 
 

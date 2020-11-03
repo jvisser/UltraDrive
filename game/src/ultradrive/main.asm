@@ -16,6 +16,26 @@ _SCROLL_IF Macro up, down, var
         .done\@:
     Endm
 
+
+CreateSprites:
+SPRITE_COUNT Equ 8
+        move.w  d3, d0
+        jsr     VDPSpriteAlloc
+
+        move.w  #128, d1
+
+        subq    #1, d3
+    .initSpriteLoop:
+        move.w  d4, vdpSpriteVerticalPosition(a0)
+        move.w  d4, vdpSpriteHorizontalPosition(a0)
+        move.b  #VDP_SPRITE_SIZE_V2 | VDP_SPRITE_SIZE_H2, vdpSpriteSize(a0)
+        move.w  #1408, vdpSpriteAttr3(a0)
+        addi.w  #16, d4
+        addq.w  #VDPSprite_Size, a0
+        dbra    d3, .initSpriteLoop
+        rts
+
+
 ;-------------------------------------------------
 ; Main program entry point
 ; ----------------
@@ -40,11 +60,22 @@ Main:
 
         DEBUG_MSG 'Viewport initialized'
 
-        jsr VDPEnableDisplay
+        move.w  #4, d3
+        move.w  #128, d4
+        bsr     CreateSprites
+        move.w  #5, d3
+        move.w  #128 + 114, d4
+        bsr     CreateSprites
+        ;jsr     VDPSpriteClear
+        jsr     VDPSpriteCommit
+
+        DEBUG_MSG 'Sprites created'
+
+        jsr     VDPEnableDisplay
 
         DEBUG_MSG 'UltraDrive Started!'
 
-        jsr OSResetStatistics
+        jsr     OSResetStatistics
 
     .mainLoop:
 
