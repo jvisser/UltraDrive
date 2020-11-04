@@ -433,8 +433,57 @@
  <tile id="429" type="block"/>
  <tile id="430" type="block"/>
  <tile id="431" type="block"/>
- <tile id="432" type="block"/>
- <tile id="433" type="block"/>
+ <tile id="432" type="animationblock">
+  <properties>
+   <property name="animation_activation">initialTrigger: 0
+triggerInterval: 0
+frameInterval: 6</property>
+   <property name="animation_id" value="lava"/>
+  </properties>
+  <animation>
+   <frame tileid="432" duration="100"/>
+   <frame tileid="434" duration="100"/>
+   <frame tileid="436" duration="100"/>
+   <frame tileid="438" duration="100"/>
+   <frame tileid="440" duration="100"/>
+   <frame tileid="442" duration="100"/>
+   <frame tileid="444" duration="100"/>
+   <frame tileid="446" duration="100"/>
+   <frame tileid="448" duration="100"/>
+   <frame tileid="450" duration="100"/>
+   <frame tileid="452" duration="100"/>
+   <frame tileid="454" duration="100"/>
+   <frame tileid="456" duration="100"/>
+   <frame tileid="458" duration="100"/>
+   <frame tileid="460" duration="100"/>
+   <frame tileid="462" duration="100"/>
+   <frame tileid="464" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="433" type="animationblock">
+  <properties>
+   <property name="animation_id" value="lava"/>
+  </properties>
+  <animation>
+   <frame tileid="433" duration="100"/>
+   <frame tileid="435" duration="100"/>
+   <frame tileid="437" duration="100"/>
+   <frame tileid="439" duration="100"/>
+   <frame tileid="441" duration="100"/>
+   <frame tileid="443" duration="100"/>
+   <frame tileid="445" duration="100"/>
+   <frame tileid="447" duration="100"/>
+   <frame tileid="449" duration="100"/>
+   <frame tileid="451" duration="100"/>
+   <frame tileid="453" duration="100"/>
+   <frame tileid="455" duration="100"/>
+   <frame tileid="457" duration="100"/>
+   <frame tileid="459" duration="100"/>
+   <frame tileid="461" duration="100"/>
+   <frame tileid="463" duration="100"/>
+   <frame tileid="465" duration="100"/>
+  </animation>
+ </tile>
  <tile id="434" type="block"/>
  <tile id="435" type="block"/>
  <tile id="436" type="block"/>
@@ -481,8 +530,58 @@
  <tile id="477" type="block"/>
  <tile id="478" type="block"/>
  <tile id="479" type="block"/>
- <tile id="480" type="block"/>
- <tile id="481" type="block"/>
+ <tile id="480" type="animationblock">
+  <properties>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 0
+frameInterval: 10</property>
+   <property name="animation_id" value="lava_slow"/>
+  </properties>
+  <animation>
+   <frame tileid="480" duration="100"/>
+   <frame tileid="482" duration="100"/>
+   <frame tileid="484" duration="100"/>
+   <frame tileid="486" duration="100"/>
+   <frame tileid="488" duration="100"/>
+   <frame tileid="490" duration="100"/>
+   <frame tileid="492" duration="100"/>
+   <frame tileid="494" duration="100"/>
+   <frame tileid="496" duration="100"/>
+   <frame tileid="498" duration="100"/>
+   <frame tileid="500" duration="100"/>
+   <frame tileid="502" duration="100"/>
+   <frame tileid="504" duration="100"/>
+   <frame tileid="506" duration="100"/>
+   <frame tileid="508" duration="100"/>
+   <frame tileid="510" duration="100"/>
+   <frame tileid="512" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="481" type="animationblock">
+  <properties>
+   <property name="animation_activation" value=""/>
+   <property name="animation_id" value="lava_slow"/>
+  </properties>
+  <animation>
+   <frame tileid="481" duration="100"/>
+   <frame tileid="483" duration="100"/>
+   <frame tileid="485" duration="100"/>
+   <frame tileid="487" duration="100"/>
+   <frame tileid="489" duration="100"/>
+   <frame tileid="491" duration="100"/>
+   <frame tileid="493" duration="100"/>
+   <frame tileid="495" duration="100"/>
+   <frame tileid="497" duration="100"/>
+   <frame tileid="499" duration="100"/>
+   <frame tileid="501" duration="100"/>
+   <frame tileid="503" duration="100"/>
+   <frame tileid="505" duration="100"/>
+   <frame tileid="507" duration="100"/>
+   <frame tileid="509" duration="100"/>
+   <frame tileid="511" duration="100"/>
+   <frame tileid="513" duration="100"/>
+  </animation>
+ </tile>
  <tile id="482" type="block"/>
  <tile id="483" type="block"/>
  <tile id="484" type="block"/>
