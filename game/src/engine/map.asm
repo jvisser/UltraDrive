@@ -131,10 +131,10 @@ _RENDER_PATTERN Macro mode
             eor.w   d3, d4                                          ; orient pattern ref by block + chunk orientation
             If (_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED)
                 and.w   d0, d1                                      ; Wrap buffer position
-                move.w  d4, (a4, d1)                                ; Write pattern to row DMA buffer
+                move.w  d4, (a4, d1)                                ; Write pattern to DMA buffer
                 addq.w  #SIZE_WORD, d1
             Else
-                move.w  d4, (a4)+                                   ; Write pattern to row DMA buffer
+                move.w  d4, (a4)+                                   ; Write pattern to DMA buffer
             EndIf
     Endm
 
@@ -145,10 +145,10 @@ _RENDER_PATTERN Macro mode
 _RENDER_PATTERN_FIXED Macro value
             If (_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED)
                 and.w   d0, d1                                      ; Wrap buffer position
-                move.w  \value, (a4, d1)                            ; Write empty pattern to row DMA buffer.
+                move.w  \value, (a4, d1)                            ; Write empty pattern to DMA buffer.
                 addq.w  #SIZE_WORD, d1
             Else
-                move.w  \value, (a4)+                              ; Write pattern to row DMA buffer
+                move.w  \value, (a4)+                              ; Write pattern to DMA buffer
             EndIf
     Endm
 
