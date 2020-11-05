@@ -52,6 +52,16 @@ MapLoad:
 
 
 ;-------------------------------------------------
+; Unload the map and its associated resources
+; ----------------
+MapUnload:
+        jsr TilesetUnload
+
+        move.l #0, loadedMap
+        rts
+
+
+;-------------------------------------------------
 ; Should be called at least once before using the map library or any time the VDP plane size changes
 ; ----------------
 MapInit:
@@ -66,7 +76,7 @@ MapInit:
         move.w  d1, (mapColumnBufferDMATransfer + dmaDataStride)
         move.w  d0, (mapColumnBufferDMATransfer + dmaLength)
         move.w  #$007f, (mapColumnBufferDMATransfer + dmaSource)
-        
+
         ; NB: Fall through to MapResetRenderer
 
 
@@ -321,7 +331,7 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
                 .endChunkEmpty\@:
                     moveq   #0, d4
                     _RENDER_PARTIAL_CHUNK_FIXED d2, d4
-        
+
         .done\@:
             move.w  a0, d2
             add.w   d2, d2
@@ -357,7 +367,7 @@ MapRenderRow:
         or.w    #VDP_CMD_AS_DMA, d5
         add.l   d2, d5
         move.l  d5, (mapRowBufferDMATransfer + dmaTarget)
-        
+
         ; Calculate DMA source
         move.w  currentRenderBuffer, d5
         asr.w   #1, d5
@@ -541,7 +551,7 @@ MapRenderColumn:
         ; Calculate DMA source
         move.w  currentRenderBuffer, d5
         asr.w   #1, d5
-        move.w  d5, (mapColumnBufferDMATransfer + dmaSource + 2)        
+        move.w  d5, (mapColumnBufferDMATransfer + dmaSource + 2)
 
         ; Calculate DMA target
         VDP_DMA_QUEUE_JOB mapColumnBufferDMATransfer
