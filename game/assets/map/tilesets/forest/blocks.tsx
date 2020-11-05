@@ -435,9 +435,9 @@
  <tile id="431" type="block"/>
  <tile id="432" type="animationblock">
   <properties>
-   <property name="animation_activation">initialTrigger: 0
-triggerInterval: 0
-frameInterval: 6</property>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 1
+frameInterval: 1</property>
    <property name="animation_id" value="lava"/>
   </properties>
   <animation>
@@ -457,7 +457,6 @@ frameInterval: 6</property>
    <frame tileid="458" duration="100"/>
    <frame tileid="460" duration="100"/>
    <frame tileid="462" duration="100"/>
-   <frame tileid="464" duration="100"/>
   </animation>
  </tile>
  <tile id="433" type="animationblock">
@@ -481,7 +480,6 @@ frameInterval: 6</property>
    <frame tileid="459" duration="100"/>
    <frame tileid="461" duration="100"/>
    <frame tileid="463" duration="100"/>
-   <frame tileid="465" duration="100"/>
   </animation>
  </tile>
  <tile id="434" type="block"/>
@@ -532,9 +530,9 @@ frameInterval: 6</property>
  <tile id="479" type="block"/>
  <tile id="480" type="animationblock">
   <properties>
-   <property name="animation_activation">initialTrigger: 1
-triggerInterval: 0
-frameInterval: 10</property>
+   <property name="animation_activation">initialTrigger: 7
+triggerInterval: 1
+frameInterval: 2</property>
    <property name="animation_id" value="lava_slow"/>
   </properties>
   <animation>
@@ -554,7 +552,6 @@ frameInterval: 10</property>
    <frame tileid="506" duration="100"/>
    <frame tileid="508" duration="100"/>
    <frame tileid="510" duration="100"/>
-   <frame tileid="512" duration="100"/>
   </animation>
  </tile>
  <tile id="481" type="animationblock">
@@ -579,7 +576,6 @@ frameInterval: 10</property>
    <frame tileid="507" duration="100"/>
    <frame tileid="509" duration="100"/>
    <frame tileid="511" duration="100"/>
-   <frame tileid="513" duration="100"/>
   </animation>
  </tile>
  <tile id="482" type="block"/>

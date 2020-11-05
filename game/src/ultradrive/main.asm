@@ -77,6 +77,8 @@ Main:
 
         jsr     OSResetStatistics
 
+        ;ENGINE_TICKER_MASK TICKER_TILESET
+
     .mainLoop:
 
         PROFILE_FRAME_TIME $000e

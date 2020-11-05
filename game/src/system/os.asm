@@ -2,17 +2,18 @@
 ; Basic OS. Handles all mandatory tasks (updating VDP state and reading IO state for use by the main program loop)
 ;------------------------------------------------------------------------------------------
 
-VBlankInterrupt Equ OSPrepareNextFrame
-OSInit          Equ osContextInit
+VBlankInterruptHandler  Equ OSPrepareNextFrame
+OSInit                  Equ osContextInit
 
 
 ;-------------------------------------------------
 ; OS Context
 ; ----------------
     DEFINE_STRUCT OSContext
-        STRUCT_MEMBER.w frameReady
-        STRUCT_MEMBER.l framesProcessed
-        STRUCT_MEMBER.l framesSkipped
+        STRUCT_MEMBER.w osFrameReady
+        STRUCT_MEMBER.l osFramesProcessed
+        STRUCT_MEMBER.l osFramesSkipped
+        STRUCT_MEMBER.l osFrameProcessedCallback
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -20,9 +21,10 @@ OSInit          Equ osContextInit
     DEFINE_VAR_END
 
     INIT_STRUCT osContext
-        INIT_STRUCT_MEMBER.frameReady      0
-        INIT_STRUCT_MEMBER.framesProcessed 0
-        INIT_STRUCT_MEMBER.framesSkipped   0
+        INIT_STRUCT_MEMBER.osFrameReady               0
+        INIT_STRUCT_MEMBER.osFramesProcessed          0
+        INIT_STRUCT_MEMBER.osFramesSkipped            0
+        INIT_STRUCT_MEMBER.osFrameProcessedCallback   _OSFrameProcessedCallback
     INIT_STRUCT_END
 
 
@@ -32,22 +34,25 @@ OSInit          Equ osContextInit
 OSPrepareNextFrame:
         PUSH_CONTEXT
 
-        tst.w   (osContext + frameReady)
+        tst.w   (osContext + osFrameReady)
         beq     .notReady
 
-        clr.w   (osContext + frameReady)
-        addq.l  #1, (osContext + framesProcessed)
+        clr.w   (osContext + osFrameReady)
+        addq.l  #1, (osContext + osFramesProcessed)
 
         jsr     VDPDMAQueueFlush
         jsr     VDPTaskQueueProcess
         jsr     IOUpdateDeviceState
+
+        movea.l  (osContext + osFrameProcessedCallback), a0
+        jsr     (a0)
 
         bra     .done
 
     .notReady:
         DEBUG_MSG 'Frame skipped!'
 
-        addq.l  #1, (osContext + framesSkipped)
+        addq.l  #1, (osContext + osFramesSkipped)
 
     .done:
 
@@ -77,10 +82,27 @@ OSResetStatistics:
         OS_LOCK
 
         moveq   #0, d0
-        move.l  d0, (osContext + framesProcessed)
-        move.l  d0, (osContext + framesSkipped)
+        move.l  d0, (osContext + osFramesProcessed)
+        move.l  d0, (osContext + osFramesSkipped)
 
         OS_UNLOCK
+        rts
+
+
+;-------------------------------------------------
+; Set frame processed callback
+; ----------------
+; Input:
+; - a0: Callback address
+OSSetFrameProcessedCallback:
+        move.l  a0, (osContext + osFrameProcessedCallback)
+        rts
+
+
+;-------------------------------------------------
+; Default frame ready callback (NOOP)
+; ----------------
+_OSFrameProcessedCallback:
         rts
 
 
@@ -92,14 +114,14 @@ OSNextFrameReadyWait:
         OS_LOCK
 
         ; Mark frame as ready for processing
-        move.w   #1, (osContext + frameReady)
+        move.w   #1, (osContext + osFrameReady)
 
         ; Wait until processed
-        move.l  (osContext + framesProcessed), d0
+        move.l  (osContext + osFramesProcessed), d0
 
         OS_UNLOCK
 
     .waitNextFrameLoop:
-        cmp.l  (osContext + framesProcessed), d0
+        cmp.l  (osContext + osFramesProcessed), d0
         beq     .waitNextFrameLoop
         rts

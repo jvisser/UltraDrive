@@ -5,6 +5,8 @@
 ;-------------------------------------------------
 ; Tileset constants
 ; ----------------
+TILESET_MAX_ANIMATIONS              Equ 8
+
 CHUNK_DIMENSION                     Equ 8                                   ; Chunk dimension in blocks
 CHUNK_ELEMENT_COUNT                 Equ CHUNK_DIMENSION * CHUNK_DIMENSION
 CHUNK_ROW_STRIDE                    Equ CHUNK_DIMENSION * SIZE_WORD
@@ -94,6 +96,13 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.w tsPatternReferences, BLOCK_ELEMENT_COUNT
     DEFINE_STRUCT_END
 
+    DEFINE_STRUCT AnimationSchedule
+        STRUCT_MEMBER.w     tsAnimationTrigger
+        STRUCT_MEMBER.w     tsAnimationCurrentFrame
+        STRUCT_MEMBER.l     tsAnimationTriggerCallback
+        STRUCT_MEMBER.l     tsAnimation
+    DEFINE_STRUCT_END
+
     ; Allocate chunk and block tables
     DEFINE_VAR SLOW
         VAR.Block   blockTable,     BLOCK_TABLE_SIZE
@@ -101,7 +110,8 @@ tilesetPatternDecompressionBuffer   Equ blockTable
     DEFINE_VAR_END
 
     DEFINE_VAR FAST
-        VAR.l       loadedTileset
+        VAR.l                   loadedTileset
+        VAR.AnimationSchedule   tilesetAnimationSchedules, TILESET_MAX_ANIMATIONS
     DEFINE_VAR_END
 
 
@@ -153,25 +163,12 @@ TilesetLoad:
 
 
 ;-------------------------------------------------
-; Load first animation frame of each animation into VRAM and prepare the animation scheduler
+; Unload the tileset
 ; ----------------
-; Input:
-; - a5: Animation table address
-; - d6: Number of animations
-; Uses: d0,d6/a0-a1,a4-a5
-_TilesetLoadAnimations:
-        subq    #1, d6
+TilesetUnload:
+        ENGINE_TICKER_DISABLE TICKER_TILESET
 
-    .loadInitialAnimationFrameLoop:
-        ; Animation frame transfers are stored in DMA queueable VDPDMATransfer format instead of VDPDMATransferCommandList format
-        ; So we use the DMA queue to transfer the initial animation frame for all animations
-        movea.l (a5)+, a4                                   ; a4 = Animation address
-        movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
-        movea.l (a0), a0                                    ; a0 = VDPDMATransfer address for first animation frame
-        jsr     VDPDMAQueueJob
-        dbra    d6, .loadInitialAnimationFrameLoop
-
-        jsr     VDPDMAQueueFlush
+        move.l  #0, loadedTileset
         rts
 
 
@@ -207,4 +204,124 @@ _TilesetLoadPatternSections:
 
     .nextSection:
         dbra    d6, .loadPatternSectionLoop
+        rts
+
+
+;-------------------------------------------------
+; Load first animation frame of each animation into VRAM and prepare the animation scheduler
+; ----------------
+; Input:
+; - a5: Animation table address
+; - d6: Number of animations
+; Uses: d0,d6/a0-a1,a3-a5
+_TilesetLoadAnimations:
+        lea     tilesetAnimationSchedules, a3
+        subq    #1, d6
+
+    .loadInitialAnimationFrameLoop:
+        movea.l (a5)+, a4                                   ; a4 = Animation address
+
+        ; Schedule animation
+        move.w  tsAnimationInitialTrigger(a4), tsAnimationTrigger(a3)
+        move.l  #_TileSetAnimationStart, tsAnimationTriggerCallback(a3)
+        move.l  a4, tsAnimation(a3)
+        adda.w  #AnimationSchedule_Size, a3
+
+        ; Animation frame transfers are stored in DMA queueable VDPDMATransfer format instead of VDPDMATransferCommandList format
+        ; So we use the DMA queue to transfer the initial animation frame for all animations
+        movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
+        movea.l (a0), a0                                    ; a0 = VDPDMATransfer address for first animation frame
+        jsr     VDPDMAQueueJob
+        dbra    d6, .loadInitialAnimationFrameLoop
+
+        ; Transfer animation frames to VRAM
+        jsr     VDPDMAQueueFlush
+
+        ; Enable animation ticker
+        ENGINE_TICKER_ENABLE TICKER_TILESET
+        rts
+
+
+;-------------------------------------------------
+; Animation scheduler
+; ----------------
+TilesetTick:
+        lea     tilesetAnimationSchedules, a0
+        move.l  loadedTileset, a1
+        move.w  tsAnimationsCount(a1), d0
+
+        subq.w  #1, d0
+    .animationLoop:
+        move.w  tsAnimationTrigger(a0), d1
+
+        ; Skip unscheduled animations
+        beq     .nextAnimationTrigger
+        subq.w  #1, d1
+        beq     .triggerAnimation
+        move.w  d1, tsAnimationTrigger(a0)
+        bra     .nextAnimationTrigger
+
+    .triggerAnimation:
+        ; Call animation trigger
+        movea.l tsAnimationTriggerCallback(a0), a1
+        PUSHM    d0/a0
+        jsr     (a1)
+        POPM    d0/a0
+
+    .nextAnimationTrigger:
+        adda.w  #AnimationSchedule_Size, a0
+        dbra    d0, .animationLoop
+        rts
+
+
+;-------------------------------------------------
+; Initiates animation sequence
+; ----------------
+; Input:
+; - a0: Animation schedule
+_TileSetAnimationStart:
+        ; Reset the current frame and register animation frame callback
+        move.w  #0, tsAnimationCurrentFrame(a0)
+        move.l  #_TileSetAnimationFrame, tsAnimationTriggerCallback(a0)
+
+        ; Run the initial frame immediately
+
+        ; NB: Fall through to _TileSetAnimationFrame
+
+
+;-------------------------------------------------
+; Update a single frame of the animation
+; ----------------
+; Input:
+; - a0: Animation schedule
+_TileSetAnimationFrame:
+        movea.l tsAnimation(a0), a1
+
+        ; Update frame counter
+        move.w  tsAnimationCurrentFrame(a0), d0
+        move.w  tsAnimationFrameCount(a1), d1
+        move.w  d0, d2
+        addq.w  #1, d0
+        cmp.w   d1, d0
+        bge .finalAnimationFrame
+
+        ; Schedule next frame
+        move.w  tsAnimationFrameInterval(a1), tsAnimationTrigger(a0)
+        move.w  d0, tsAnimationCurrentFrame(a0)
+        bra .animationFrameScheduleDone
+
+    .finalAnimationFrame:
+
+        ; Schedule next animation trigger
+        move.w  tsAnimationTriggerInterval(a1), tsAnimationTrigger(a0)
+        move.l  #_TileSetAnimationStart, tsAnimationTriggerCallback(a0)
+
+    .animationFrameScheduleDone:
+
+        ; Queue frame data for transfer to VRAM
+        movea.l tsAnimationFrameTransferListAddress(a1), a1     ; a1 = Animation frame transfer list address
+        add.w   d2, d2
+        add.w   d2, d2
+        movea.l (a1, d2), a0                                    ; a0 = VDPDMATransfer address for animation frame
+        VDP_DMA_QUEUE_JOB a0
         rts
