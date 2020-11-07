@@ -3,13 +3,13 @@
     "commands": [
         {
             "arguments": "",
-            "command": "sh C:/dev/workspace/UltraDrive/game/src/build_and_run.sh",
+            "command": "sh %projectpath/../../src/build_and_run.sh",
             "enabled": true,
             "name": "run",
             "saveBeforeExecute": true,
             "shortcut": "Alt+R",
             "showOutput": true,
-            "workingDirectory": "C:/dev/workspace/UltraDrive/game/src"
+            "workingDirectory": "%projectpath/../../src"
         }
     ],
     "extensionsPath": "extensions",
