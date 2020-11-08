@@ -624,8 +624,41 @@ frameInterval: 2</property>
  <tile id="525" type="block"/>
  <tile id="526" type="block"/>
  <tile id="527" type="block"/>
- <tile id="528" type="block"/>
- <tile id="529" type="block"/>
+ <tile id="528" type="animationblock">
+  <properties>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 54
+frameInterval: 6</property>
+   <property name="animation_id" value="newton_cradle_start"/>
+  </properties>
+  <animation>
+   <frame tileid="528" duration="100"/>
+   <frame tileid="530" duration="100"/>
+   <frame tileid="532" duration="100"/>
+   <frame tileid="534" duration="100"/>
+   <frame tileid="536" duration="100"/>
+   <frame tileid="534" duration="100"/>
+   <frame tileid="532" duration="100"/>
+   <frame tileid="530" duration="100"/>
+   <frame tileid="528" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="529" type="animationblock">
+  <properties>
+   <property name="animation_id" value="newton_cradle_start"/>
+  </properties>
+  <animation>
+   <frame tileid="529" duration="100"/>
+   <frame tileid="531" duration="100"/>
+   <frame tileid="533" duration="100"/>
+   <frame tileid="535" duration="100"/>
+   <frame tileid="537" duration="100"/>
+   <frame tileid="535" duration="100"/>
+   <frame tileid="533" duration="100"/>
+   <frame tileid="531" duration="100"/>
+   <frame tileid="529" duration="100"/>
+  </animation>
+ </tile>
  <tile id="530" type="block"/>
  <tile id="531" type="block"/>
  <tile id="532" type="block"/>
@@ -648,8 +681,38 @@ frameInterval: 2</property>
  <tile id="549" type="block"/>
  <tile id="550" type="block"/>
  <tile id="551" type="block"/>
- <tile id="552" type="block"/>
- <tile id="553" type="block"/>
+ <tile id="552" type="animationblock">
+  <properties>
+   <property name="animation_id" value="newton_cradle_start"/>
+  </properties>
+  <animation>
+   <frame tileid="552" duration="100"/>
+   <frame tileid="554" duration="100"/>
+   <frame tileid="556" duration="100"/>
+   <frame tileid="558" duration="100"/>
+   <frame tileid="560" duration="100"/>
+   <frame tileid="558" duration="100"/>
+   <frame tileid="556" duration="100"/>
+   <frame tileid="554" duration="100"/>
+   <frame tileid="552" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="553" type="animationblock">
+  <properties>
+   <property name="animation_id" value="newton_cradle_start"/>
+  </properties>
+  <animation>
+   <frame tileid="553" duration="100"/>
+   <frame tileid="555" duration="100"/>
+   <frame tileid="557" duration="100"/>
+   <frame tileid="559" duration="100"/>
+   <frame tileid="561" duration="100"/>
+   <frame tileid="559" duration="100"/>
+   <frame tileid="557" duration="100"/>
+   <frame tileid="555" duration="100"/>
+   <frame tileid="553" duration="100"/>
+  </animation>
+ </tile>
  <tile id="554" type="block"/>
  <tile id="555" type="block"/>
  <tile id="556" type="block"/>
@@ -672,8 +735,41 @@ frameInterval: 2</property>
  <tile id="573" type="block"/>
  <tile id="574" type="block"/>
  <tile id="575" type="block"/>
- <tile id="576" type="block"/>
- <tile id="577" type="block"/>
+ <tile id="576" type="animationblock">
+  <properties>
+   <property name="animation_activation">initialTrigger: 54
+triggerInterval: 54
+frameInterval: 6</property>
+   <property name="animation_id" value="newton_cradle_end"/>
+  </properties>
+  <animation>
+   <frame tileid="576" duration="100"/>
+   <frame tileid="578" duration="100"/>
+   <frame tileid="580" duration="100"/>
+   <frame tileid="582" duration="100"/>
+   <frame tileid="584" duration="100"/>
+   <frame tileid="582" duration="100"/>
+   <frame tileid="580" duration="100"/>
+   <frame tileid="578" duration="100"/>
+   <frame tileid="576" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="577" type="animationblock">
+  <properties>
+   <property name="animation_id" value="newton_cradle_end"/>
+  </properties>
+  <animation>
+   <frame tileid="577" duration="100"/>
+   <frame tileid="579" duration="100"/>
+   <frame tileid="581" duration="100"/>
+   <frame tileid="583" duration="100"/>
+   <frame tileid="585" duration="100"/>
+   <frame tileid="583" duration="100"/>
+   <frame tileid="581" duration="100"/>
+   <frame tileid="579" duration="100"/>
+   <frame tileid="577" duration="100"/>
+  </animation>
+ </tile>
  <tile id="578" type="block"/>
  <tile id="579" type="block"/>
  <tile id="580" type="block"/>
@@ -696,8 +792,38 @@ frameInterval: 2</property>
  <tile id="597" type="block"/>
  <tile id="598" type="block"/>
  <tile id="599" type="block"/>
- <tile id="600" type="block"/>
- <tile id="601" type="block"/>
+ <tile id="600" type="animationblock">
+  <properties>
+   <property name="animation_id" value="newton_cradle_end"/>
+  </properties>
+  <animation>
+   <frame tileid="600" duration="100"/>
+   <frame tileid="602" duration="100"/>
+   <frame tileid="604" duration="100"/>
+   <frame tileid="606" duration="100"/>
+   <frame tileid="608" duration="100"/>
+   <frame tileid="606" duration="100"/>
+   <frame tileid="604" duration="100"/>
+   <frame tileid="602" duration="100"/>
+   <frame tileid="600" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="601" type="animationblock">
+  <properties>
+   <property name="animation_id" value="newton_cradle_end"/>
+  </properties>
+  <animation>
+   <frame tileid="601" duration="100"/>
+   <frame tileid="603" duration="100"/>
+   <frame tileid="605" duration="100"/>
+   <frame tileid="607" duration="100"/>
+   <frame tileid="609" duration="100"/>
+   <frame tileid="607" duration="100"/>
+   <frame tileid="605" duration="100"/>
+   <frame tileid="603" duration="100"/>
+   <frame tileid="601" duration="100"/>
+  </animation>
+ </tile>
  <tile id="602" type="block"/>
  <tile id="603" type="block"/>
  <tile id="604" type="block"/>
@@ -720,8 +846,23 @@ frameInterval: 2</property>
  <tile id="621" type="block"/>
  <tile id="622" type="block"/>
  <tile id="623" type="block"/>
- <tile id="624" type="block"/>
- <tile id="625" type="block"/>
+ <tile id="624" type="animationblock">
+  <properties>
+   <property name="animation_activation">initialTrigger: 1
+triggerInterval: 60
+frameInterval: 60</property>
+   <property name="animation_id" value="water"/>
+  </properties>
+  <animation>
+   <frame tileid="624" duration="100"/>
+   <frame tileid="625" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="625" type="animationblock">
+  <properties>
+   <property name="animation_id" value="water"/>
+  </properties>
+ </tile>
  <tile id="626" type="block"/>
  <tile id="627" type="block"/>
  <tile id="628" type="block"/>

@@ -66,7 +66,7 @@ Main:
         move.w  #5, d3
         move.w  #128 + 114, d4
         bsr     CreateSprites
-        ;jsr     VDPSpriteClear
+        jsr     VDPSpriteClear
         jsr     VDPSpriteCommit
 
         DEBUG_MSG 'Sprites created'
