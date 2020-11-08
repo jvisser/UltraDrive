@@ -223,7 +223,7 @@ _TilesetLoadAnimations:
 
         ; Schedule animation
         move.w  tsAnimationInitialTrigger(a4), tsAnimationTrigger(a3)
-        move.l  #_TileSetAnimationStart, tsAnimationTriggerCallback(a3)
+        move.l  #_TilesetAnimationStart, tsAnimationTriggerCallback(a3)
         move.l  a4, tsAnimation(a3)
         adda.w  #AnimationSchedule_Size, a3
 
@@ -279,14 +279,14 @@ TilesetTick:
 ; ----------------
 ; Input:
 ; - a0: Animation schedule
-_TileSetAnimationStart:
+_TilesetAnimationStart:
         ; Reset the current frame and register animation frame callback
         move.w  #0, tsAnimationCurrentFrame(a0)
-        move.l  #_TileSetAnimationFrame, tsAnimationTriggerCallback(a0)
+        move.l  #_TilesetAnimationFrame, tsAnimationTriggerCallback(a0)
 
         ; Run the initial frame immediately
 
-        ; NB: Fall through to _TileSetAnimationFrame
+        ; NB: Fall through to _TilesetAnimationFrame
 
 
 ;-------------------------------------------------
@@ -294,7 +294,7 @@ _TileSetAnimationStart:
 ; ----------------
 ; Input:
 ; - a0: Animation schedule
-_TileSetAnimationFrame:
+_TilesetAnimationFrame:
         movea.l tsAnimation(a0), a1
 
         ; Update frame counter
@@ -314,7 +314,7 @@ _TileSetAnimationFrame:
 
         ; Schedule next animation trigger
         move.w  tsAnimationTriggerInterval(a1), tsAnimationTrigger(a0)
-        move.l  #_TileSetAnimationStart, tsAnimationTriggerCallback(a0)
+        move.l  #_TilesetAnimationStart, tsAnimationTriggerCallback(a0)
 
     .animationFrameScheduleDone:
 

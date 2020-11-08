@@ -1,16 +1,21 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
 import com.google.common.collect.Sets;
+import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReferenceProducer;
+import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
@@ -47,25 +52,45 @@ class AnimationFrameOptimizationGroup
             IntermediateAnimationFrame firstFrame = intermediateAnimationFrames.iterator().next();
             int firstPatternIndex = patternSimilarityGroup.iterator().next();
 
-            PatternReference patternReference;
             if (isSimilarityGroupContentStatic(intermediateAnimationFrames, patternSimilarityGroup))
             {
-                Pattern groupPattern = firstFrame.getPattern(firstPatternIndex);
+                Pattern groupPattern = firstFrame.getPattern(firstPatternIndex)
+                        .reorient(firstFrame.getOrientation(firstPatternIndex));
 
-                patternReference = patternReferenceProducer.getReference(groupPattern).build();
+                PatternReference patternReference = patternReferenceProducer.getReference(groupPattern).build();
+
+                patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
+                        patternReference.reorient(firstFrame.getOrientation(patternIndex)));
+            }
+            else if (isSimilarityGroupContentMultiOriented(intermediateAnimationFrames, patternSimilarityGroup))
+            {
+                for (Integer patternIndex : patternSimilarityGroup)
+                {
+                    PatternReference patternReference = new PatternReference(dynamicPatternCount++);
+
+                    animationFrameBuilders.forEach((intermediateAnimationFrame, builder) -> builder
+                            .addPattern(intermediateAnimationFrame.getPattern(patternIndex)
+                                                .reorient(firstFrame.getOrientation(patternIndex))));
+
+                    animationPatternReferences[patternIndex] = patternReference.reorient(firstFrame.getOrientation(patternIndex));
+
+                }
+                dynamicPatternIndices.addAll(patternSimilarityGroup);
             }
             else
             {
-                patternReference = new PatternReference(dynamicPatternCount++);
+                PatternReference patternReference = new PatternReference(dynamicPatternCount++);
 
                 animationFrameBuilders.forEach((intermediateAnimationFrame, builder) -> builder
-                        .addPattern(intermediateAnimationFrame.getPattern(firstPatternIndex)));
+                        .addPattern(intermediateAnimationFrame.getPattern(firstPatternIndex)
+                                            .reorient(firstFrame.getOrientation(firstPatternIndex))));
 
                 dynamicPatternIndices.addAll(patternSimilarityGroup);
+
+                patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
+                        patternReference.reorient(firstFrame.getOrientation(patternIndex)));
             }
 
-            patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
-                    patternReference.reorient(firstFrame.getOrientation(patternIndex)));
         }
 
         return new AnimationFrameOptimizationResult(
@@ -125,6 +150,26 @@ class AnimationFrameOptimizationGroup
         return true;
     }
 
+    private boolean isSimilarityGroupContentMultiOriented(Set<IntermediateAnimationFrame> intermediateAnimationFrames,
+                                                          Set<Integer> patternSimilarityGroup)
+    {
+        List<Orientation> lastOrientations = null;
+        for (Integer patternIndex : patternSimilarityGroup)
+        {
+            List<Orientation> orientations = intermediateAnimationFrames.stream()
+                    .flatMap(intermediateAnimationFrame -> intermediateAnimationFrame.getPatternReferences().stream()
+                            .map(TileReference::getOrientation))
+                    .collect(toList());
+
+            if (lastOrientations != null && !Objects.equals(lastOrientations, orientations))
+            {
+                return true;
+            }
+            lastOrientations = orientations;
+        }
+        return false;
+    }
+
     private Set<Set<Integer>> getPatternSimilarityProjection(Set<IntermediateAnimationFrame> intermediateAnimationFrames)
     {
         List<Set<Set<Integer>>> patternSimilarityGroupsPerFrame =
@@ -135,35 +180,60 @@ class AnimationFrameOptimizationGroup
                                             projectFramePatternSimilarityGroups(patternSimilarityGroupsPerFrame));
     }
 
-    private Set<Set<Integer>> projectFramePatternSimilarityGroups(List<Set<Set<Integer>>> similarityGroups)
+    private Set<Set<Integer>> projectFramePatternSimilarityGroups(List<Set<Set<Integer>>> similarityGroupsPerFrame)
     {
-        Set<Set<Integer>> similarityProjection = similarityGroups.get(0);
-        for (int i = 1; i < similarityGroups.size(); i++)
-        {
-            Set<Set<Integer>> currentSimilarityProjection = new HashSet<>();
-            Set<Set<Integer>> nextSimilarityProjection = similarityGroups.get(i);
+        Map<Integer, Set<Integer>> map = new HashMap<>();
 
-            for (Set<Integer> similarIndices : similarityProjection)
+        for (Set<Set<Integer>> currentFrameSimilarityGroup : similarityGroupsPerFrame)
+        {
+            if (map.isEmpty())
             {
-                for (Set<Integer> nextSimilarIndices : nextSimilarityProjection)
+                currentFrameSimilarityGroup
+                        .forEach(frameSimilarities -> frameSimilarities
+                                .forEach(patternIndex -> map.put(patternIndex, frameSimilarities)));
+            }
+            else
+            {
+                Stack<Set<Integer>> currentFrameSimilarities = new Stack<>();
+                currentFrameSimilarities.addAll(currentFrameSimilarityGroup);
+
+                while (!currentFrameSimilarities.isEmpty())
                 {
-                    Sets.SetView<Integer> intersection = Sets.intersection(nextSimilarIndices, similarIndices);
-                    if (!intersection.isEmpty())
+                    Set<Set<Integer>> pendingFrameSimilarities = new HashSet<>();
+                    while (!currentFrameSimilarities.isEmpty())
                     {
-                        currentSimilarityProjection.add(intersection);
-                        currentSimilarityProjection.add(Sets.difference(similarIndices, nextSimilarIndices));
-                        currentSimilarityProjection.add(Sets.difference(nextSimilarIndices, similarIndices));
+                        Set<Integer> groupSimilarity = currentFrameSimilarities.pop();
+                        Set<Set<Integer>> intersectingSimilarityProjections = groupSimilarity.stream()
+                                .map(map::get)
+                                .collect(toSet());
+
+                        for (Set<Integer> intersectingSimilarityProjection : intersectingSimilarityProjections)
+                        {
+                            Set<Integer> intersection = Sets.intersection(intersectingSimilarityProjection, groupSimilarity);
+                            if (!intersection.equals(intersectingSimilarityProjection))
+                            {
+                                intersection.forEach(patternIndex -> map.put(patternIndex, intersection));
+
+                                Sets.SetView<Integer> remainingProjection =
+                                        Sets.difference(intersectingSimilarityProjection, groupSimilarity);
+                                remainingProjection.forEach(patternIndex -> map.put(patternIndex, remainingProjection));
+
+                                pendingFrameSimilarities
+                                        .add(Sets.difference(groupSimilarity, intersectingSimilarityProjection));
+                            }
+                        }
                     }
+
+                    currentFrameSimilarities = pendingFrameSimilarities.stream()
+                            .filter(similarities -> !similarities.isEmpty())
+                            .collect(Collectors.toCollection(Stack::new));
                 }
             }
-
-            similarityProjection = currentSimilarityProjection;
         }
 
-        return similarityProjection.stream()
-                .filter(not(Set::isEmpty))
-                .collect(toSet());
+        return new HashSet<>(map.values());
     }
+
 
     private Set<Set<Integer>> splitByOrientationDifference(
             Set<IntermediateAnimationFrame> intermediateAnimationFrames,

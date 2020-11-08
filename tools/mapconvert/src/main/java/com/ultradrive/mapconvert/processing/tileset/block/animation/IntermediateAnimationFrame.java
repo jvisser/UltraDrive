@@ -103,6 +103,11 @@ class IntermediateAnimationFrame
         return patternPool.get(reference.getReferenceId())
                 .reorient(reference.getOrientation());
     }
+
+    public List<PatternReference> getPatternReferences()
+    {
+        return patternReferences;
+    }
 }
 
 
