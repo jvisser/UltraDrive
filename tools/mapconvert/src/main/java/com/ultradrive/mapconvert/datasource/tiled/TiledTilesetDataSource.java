@@ -2,7 +2,7 @@ package com.ultradrive.mapconvert.datasource.tiled;
 
 import com.ultradrive.mapconvert.datasource.BlockDataSource;
 import com.ultradrive.mapconvert.datasource.ChunkDataSource;
-import com.ultradrive.mapconvert.datasource.CollisionDataSource;
+import com.ultradrive.mapconvert.datasource.CollisionBlockDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import java.io.File;
 import java.util.Map;
@@ -13,14 +13,14 @@ class TiledTilesetDataSource implements TilesetDataSource
 {
     private final TiledChunkDataSource chunkSet;
     private final TiledBlockDataSource blockSet;
-    private final CollisionDataSource collisionDataSource;
+    private final CollisionBlockDataSource collisionBlockDataSource;
 
     TiledTilesetDataSource(TiledChunkDataSource chunkSet, TiledBlockDataSource blockSet,
-                           CollisionDataSource collisionDataSource)
+                           CollisionBlockDataSource collisionBlockDataSource)
     {
         this.chunkSet = chunkSet;
         this.blockSet = blockSet;
-        this.collisionDataSource = collisionDataSource;
+        this.collisionBlockDataSource = collisionBlockDataSource;
     }
 
     @Override
@@ -52,9 +52,9 @@ class TiledTilesetDataSource implements TilesetDataSource
     }
 
     @Override
-    public CollisionDataSource getCollisionDataSource()
+    public CollisionBlockDataSource getCollisionBlockDataSource()
     {
-        return collisionDataSource;
+        return collisionBlockDataSource;
     }
 
     @Override

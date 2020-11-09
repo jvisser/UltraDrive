@@ -1,6 +1,6 @@
     SECTION_START S_RODATA
 
-[# th:each="tileset : ${tilesets}" th:with="tilesetName=${#strings.capitalize(tileset.name)}, maxModuleSize=${0x4000}"]
+[# th:each="tileset : ${tilesets}" th:with="tilesetName=${#strings.capitalize(tileset.name)}, maxModuleSize=${0x4000}, collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)}"]
 
     Even
 
@@ -16,6 +16,10 @@
         dc.w [(${tileset.patternAllocation.patternAllocationAreas.size})]
         ; .tsAnimationsCount
         dc.w [(${tileset.animations.size})]
+        ; .tsBlockMetaDataAddress
+        dc.l BlockMetaData[(${collisionBlockListName})]
+        ; .tsBlockMetaDataMappingTableAddress
+        dc.l Tileset[(${tilesetName})]BlockMetaDataMapping
         ; .tsChunksAddress
         dc.l Tileset[(${tilesetName})]ChunkData
         ; .tsBlocksAddress
@@ -31,6 +35,13 @@
         dc.w [(${#format.format('$%04X', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
         ; .tsVramFreeAreaMax
         dc.w [(${#format.format('$%04X', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
+        [/]
+
+    Even
+
+    Tileset[(${tilesetName})]BlockMetaDataMapping:
+        [# th:each="collisionId : ${#format.formatArray('dc.w ', ', ', 16, '$%04X', tileset.blockTileset.tiles.{#this.collisionId})}"]
+            [(${collisionId})]
         [/]
 
     Even
@@ -151,6 +162,28 @@
         [/]
     [/]
 
+[/]
+
+[# th:each="collisionblocklist : ${collisionblocklists}" th:with="collisionBlockListName=${#strings.capitalize(collisionblocklist.name)}"]
+
+    Even
+
+    ; struct BlockMetaData
+    BlockMetaData[(${collisionBlockListName})]:
+        ; .tsBlockCollisionTableAddress
+        dc.l BlockMetaDataCollision[(${collisionBlockListName})]
+        ; .tsBlockAngleTableAddress
+        dc.l BlockMetaDataAngle[(${collisionBlockListName})]
+
+    BlockMetaDataCollision[(${collisionBlockListName})]:
+        [# th:each="collisionFields : ${#format.formatArray('dc.b ', ', ', 16, '%02d', #collection.flatten(collisionblocklist))}"]
+            [(${collisionFields})]
+        [/]
+
+    BlockMetaDataAngle[(${collisionBlockListName})]:
+        [# th:each="collisionblock : ${collisionblocklist}"]
+            dc.b    [(${@java.lang.Math@round((collisionblock.angle / 360) * 256)})]    ; [(${#format.format('%f', collisionblock.angle)})]
+        [/]
 [/]
 
     SECTION_END

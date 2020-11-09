@@ -1,15 +1,15 @@
 package com.ultradrive.mapconvert.datasource.model;
 
-public final class CollisionMetaData
+public final class CollisionBlockMetaData
 {
     private final double angle;
 
-    public static CollisionMetaData empty()
+    public static CollisionBlockMetaData empty()
     {
-        return new CollisionMetaData(0);
+        return new CollisionBlockMetaData(0);
     }
 
-    public CollisionMetaData(double angle)
+    public CollisionBlockMetaData(double angle)
     {
         this.angle = angle;
     }

@@ -54,6 +54,8 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.w tsPatternCount
         STRUCT_MEMBER.w tsPatternSectionCount
         STRUCT_MEMBER.w tsAnimationsCount
+        STRUCT_MEMBER.l tsBlockMetaDataAddress
+        STRUCT_MEMBER.l tsBlockMetaDataMappingTableAddress  ; Maps block id to block meta data index
         STRUCT_MEMBER.l tsChunksAddress                     ; Compressed
         STRUCT_MEMBER.l tsBlocksAddress                     ; Compressed
         STRUCT_MEMBER.l tsPatternSectionsTableAddress       ; Compressed (modular)
@@ -61,6 +63,11 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.l tsAnimationsTableAddress            ; Uncompressed
         STRUCT_MEMBER.w tsVramFreeAreaMin
         STRUCT_MEMBER.w tsVramFreeAreaMax
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT BlockMetaData
+        STRUCT_MEMBER.l tsBlockCollisionTableAddress
+        STRUCT_MEMBER.l tsBlockAngleTableAddress
     DEFINE_STRUCT_END
 
     ; Patterns can be loaded to different areas in VRAM to efficiently fill gaps between VDP objects.
@@ -218,7 +225,7 @@ _TilesetLoadAnimations:
         lea     tilesetAnimationSchedules, a3
         subq    #1, d6
 
-    .loadInitialAnimationFrameLoop:
+    .loadAnimationFrameLoop:
         movea.l (a5)+, a4                                   ; a4 = Animation address
 
         ; Schedule animation
@@ -232,7 +239,7 @@ _TilesetLoadAnimations:
         movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
         movea.l (a0), a0                                    ; a0 = VDPDMATransfer address for first animation frame
         jsr     VDPDMAQueueJob
-        dbra    d6, .loadInitialAnimationFrameLoop
+        dbra    d6, .loadAnimationFrameLoop
 
         ; Transfer animation frames to VRAM
         jsr     VDPDMAQueueFlush

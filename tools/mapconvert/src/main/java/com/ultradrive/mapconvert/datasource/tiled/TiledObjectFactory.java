@@ -65,7 +65,7 @@ public class TiledObjectFactory
             TiledChunkDataSource chunkSet =
                     TiledChunkDataSource.fromFile(tiledReader, fileName, propertyTransformer);
             TiledBlockDataSource blockSet = chunkSet.readBlockDataSource(tiledReader);
-            TiledCollisionDataSource collisionSet = blockSet.readCollisionTileset(tiledReader);
+            TiledCollisionBlockDataSource collisionSet = blockSet.readCollisionTileset(tiledReader);
 
             return new TiledTilesetDataSource(chunkSet, blockSet, collisionSet);
         });

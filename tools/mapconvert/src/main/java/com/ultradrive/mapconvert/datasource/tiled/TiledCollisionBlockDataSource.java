@@ -1,15 +1,16 @@
 package com.ultradrive.mapconvert.datasource.tiled;
 
 import com.ultradrive.mapconvert.common.PropertySource;
-import com.ultradrive.mapconvert.datasource.CollisionDataSource;
-import com.ultradrive.mapconvert.datasource.model.CollisionMetaData;
+import com.ultradrive.mapconvert.datasource.CollisionBlockDataSource;
+import com.ultradrive.mapconvert.datasource.model.CollisionBlockMetaData;
+import java.io.File;
 import java.net.URL;
 import java.util.Map;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileset;
 
 
-class TiledCollisionDataSource implements CollisionDataSource, PropertySource
+class TiledCollisionBlockDataSource implements CollisionBlockDataSource, PropertySource
 {
     private static final String COLLISION_ANGLE_PROPERTY_NAME = "angle";
 
@@ -17,8 +18,8 @@ class TiledCollisionDataSource implements CollisionDataSource, PropertySource
     private final URL blockCollisionImageSource;
     private final TiledPropertyTransformer propertyTransformer;
 
-    public TiledCollisionDataSource(TiledTileset collisionTileset, URL blockCollisionImageSource,
-                                    TiledPropertyTransformer propertyTransformer)
+    public TiledCollisionBlockDataSource(TiledTileset collisionTileset, URL blockCollisionImageSource,
+                                         TiledPropertyTransformer propertyTransformer)
     {
         this.collisionTileset = collisionTileset;
         this.blockCollisionImageSource = blockCollisionImageSource;
@@ -32,32 +33,39 @@ class TiledCollisionDataSource implements CollisionDataSource, PropertySource
     }
 
     @Override
-    public int getCollisionFieldSize()
+    public String getName()
+    {
+        File file = new File(collisionTileset.getPath());
+        return file.getParentFile().getName() + "_" + collisionTileset.getName();
+    }
+
+    @Override
+    public int getCollisionBlockFieldSize()
     {
         return collisionTileset.getTileWidth();
     }
 
     @Override
-    public URL getCollisionImageSource()
+    public URL getCollisionBlockImageSource()
     {
         return blockCollisionImageSource;
     }
 
     @Override
-    public CollisionMetaData getCollisionMetaData(int collisionId)
+    public CollisionBlockMetaData getCollisionBlockMetaData(int collisionId)
     {
         TiledTile collisionTile = collisionTileset.getTile(collisionId);
         if (collisionTile == null)
         {
-            return CollisionMetaData.empty();
+            return CollisionBlockMetaData.empty();
         }
 
         Float collisionAngle = (Float) collisionTile.getProperty(COLLISION_ANGLE_PROPERTY_NAME);
         if (collisionAngle == null)
         {
-            return CollisionMetaData.empty();
+            return CollisionBlockMetaData.empty();
         }
 
-        return new CollisionMetaData(collisionAngle);
+        return new CollisionBlockMetaData(collisionAngle);
     }
 }

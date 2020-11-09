@@ -7,7 +7,7 @@ public interface TilesetDataSource extends PropertySource
 {
     String getName();
 
-    CollisionDataSource getCollisionDataSource();
+    CollisionBlockDataSource getCollisionBlockDataSource();
 
     BlockDataSource getBlockDataSource();
 

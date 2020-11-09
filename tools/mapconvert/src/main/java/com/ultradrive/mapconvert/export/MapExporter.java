@@ -92,6 +92,7 @@ public class MapExporter
 
         context.setVariable("tilesets", compilation.getTilesets());
         context.setVariable("maps", compilation.getMaps());
+        context.setVariable("collisionblocklists", compilation.getCollisionBlockLists());
         return context;
     }
 }

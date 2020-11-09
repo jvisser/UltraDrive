@@ -37,9 +37,9 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource
         this.blockImageSource = getTilesetImageURL(BLOCK_GRAPHICS_TILESET_NAME);
     }
 
-    public TiledCollisionDataSource readCollisionTileset(TiledReader reader)
+    public TiledCollisionBlockDataSource readCollisionTileset(TiledReader reader)
     {
-        return new TiledCollisionDataSource(
+        return new TiledCollisionBlockDataSource(
                 getTileset(BLOCK_COLLISION_TILESET_NAME),
                 getTilesetImageURL(BLOCK_COLLISION_TILESET_NAME),
                 propertyTransformer);
