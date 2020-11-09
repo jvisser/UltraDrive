@@ -154,11 +154,10 @@ class AnimationFrameOptimizationGroup
                                                           Set<Integer> patternSimilarityGroup)
     {
         List<Orientation> lastOrientations = null;
-        for (Integer patternIndex : patternSimilarityGroup)
+        for (IntermediateAnimationFrame intermediateAnimationFrame : intermediateAnimationFrames)
         {
-            List<Orientation> orientations = intermediateAnimationFrames.stream()
-                    .flatMap(intermediateAnimationFrame -> intermediateAnimationFrame.getPatternReferences().stream()
-                            .map(TileReference::getOrientation))
+            List<Orientation> orientations = patternSimilarityGroup.stream()
+                    .map(intermediateAnimationFrame::getOrientation)
                     .collect(toList());
 
             if (lastOrientations != null && !Objects.equals(lastOrientations, orientations))
