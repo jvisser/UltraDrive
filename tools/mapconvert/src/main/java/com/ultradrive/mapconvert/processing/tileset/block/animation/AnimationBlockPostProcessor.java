@@ -129,9 +129,14 @@ public class AnimationBlockPostProcessor
                     AnimationBlockPatternReferenceEncoding encoding =
                             new AnimationBlockPatternReferenceEncoding(blockMetrics, reference);
 
-                    resultReferences.add(animationPatternReferences
-                                                 .get(currentAnimationPatternIndex + encoding.getBlockLocalPatternId())
-                                                 .reorient(reference.getOrientation()));
+                    PatternReference.Builder animationReferenceBuilder =
+                            animationPatternReferences
+                                    .get(currentAnimationPatternIndex + encoding.getBlockLocalPatternId())
+                                    .builder();
+                    animationReferenceBuilder.reorient(reference.getOrientation());
+                    animationReferenceBuilder.setPriority(reference.getPriority());
+
+                    resultReferences.add(animationReferenceBuilder.build());
                 }
 
                 patchedBlocks.set(
