@@ -10,7 +10,7 @@ import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocation;
 import com.ultradrive.mapconvert.processing.tileset.chunk.Chunk;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkTileset;
-import com.ultradrive.mapconvert.processing.tileset.collision.CollisionFieldSet;
+import com.ultradrive.mapconvert.processing.tileset.collision.CollisionBlockList;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.List;
 import java.util.Map;
@@ -21,17 +21,17 @@ public class Tileset implements PropertySource
 {
     private final ChunkTileset chunkTileset;
     private final BlockTileset blockTileset;
-    private final CollisionFieldSet collisionFieldSet;
+    private final CollisionBlockList collisionBlockList;
     private final Map<String, Object> properties;
 
     private final String name;
 
-    public Tileset(ChunkTileset chunkTileset, BlockTileset blockTileset, CollisionFieldSet collisionFieldSet,
+    public Tileset(ChunkTileset chunkTileset, BlockTileset blockTileset, CollisionBlockList collisionBlockList,
                    Map<String, Object> properties, String name)
     {
         this.chunkTileset = chunkTileset;
         this.blockTileset = blockTileset;
-        this.collisionFieldSet = collisionFieldSet;
+        this.collisionBlockList = collisionBlockList;
         this.properties = properties;
         this.name = name;
     }
@@ -52,9 +52,9 @@ public class Tileset implements PropertySource
         return blockTileset;
     }
 
-    public CollisionFieldSet getCollisionFieldSet()
+    public CollisionBlockList getCollisionBlockList()
     {
-        return collisionFieldSet;
+        return collisionBlockList;
     }
 
     public String getName()
