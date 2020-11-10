@@ -4,7 +4,6 @@
   <property name="animation_activation" type="string"/>
   <property name="animation_id" type="string"/>
   <property name="animation_scheduler" type="string" default="video_refresh"/>
-  <property name="animation_type" type="string" default="default"/>
  </objecttype>
  <objecttype name="block" color="#a0a0a4"/>
  <objecttype name="chunk" color="#a0a0a4"/>
