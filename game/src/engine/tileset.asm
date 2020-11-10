@@ -250,8 +250,30 @@ _TilesetLoadAnimations:
 
 
 ;-------------------------------------------------
+; Schedule all manual animations (tsAnimationTrigger = 0)
+; ----------------
+; Uses: d0-d1/a0-a1
+TilesetScheduleManualAnimations:
+        lea     tilesetAnimationSchedules, a0
+        move.l  loadedTileset, a1
+        move.w  tsAnimationsCount(a1), d0
+        subq.w  #1, d0
+
+    .animationLoop:
+        move.w  tsAnimationTrigger(a0), d1
+        bne     .scheduledAnimation
+        move.w  #1, tsAnimationTrigger(a0)
+
+    .scheduledAnimation:
+        adda.w  #TilesetAnimationSchedule_Size, a0
+        dbra    d0, .animationLoop
+        rts
+
+
+;-------------------------------------------------
 ; Animation scheduler
 ; ----------------
+; Uses: d0-d2/a0-a1
 TilesetTick:
         lea     tilesetAnimationSchedules, a0
         move.l  loadedTileset, a1
@@ -301,6 +323,7 @@ _TilesetAnimationStart:
 ; ----------------
 ; Input:
 ; - a0: Animation schedule
+; Uses: d0-d2/a0-a1
 _TilesetAnimationFrame:
         movea.l tsAnimation(a0), a1
 

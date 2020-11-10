@@ -89,6 +89,13 @@ Main:
         _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d1
         _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0
 
+        btst    #MD_PAD_A, d2
+        bne     .noPadA
+        PUSHM   d0-d1
+        jsr     TilesetScheduleManualAnimations
+        POPM    d0-d1
+    .noPadA:
+
         jsr     ViewportMove
         jsr     ViewportFinalize
 
