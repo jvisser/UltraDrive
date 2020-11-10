@@ -885,8 +885,85 @@ frameInterval: 60</property>
  <tile id="645" type="block"/>
  <tile id="646" type="block"/>
  <tile id="647" type="block"/>
- <tile id="648" type="block"/>
- <tile id="649" type="block"/>
+ <tile id="648" type="animationblock">
+  <properties>
+   <property name="animation_activation">initialTrigger: 0
+triggerInterval: 0
+frameInterval: 1</property>
+   <property name="animation_id" value="lava_manual"/>
+  </properties>
+  <animation>
+   <frame tileid="648" duration="100"/>
+   <frame tileid="650" duration="100"/>
+   <frame tileid="652" duration="100"/>
+   <frame tileid="654" duration="100"/>
+   <frame tileid="656" duration="100"/>
+   <frame tileid="658" duration="100"/>
+   <frame tileid="660" duration="100"/>
+   <frame tileid="662" duration="100"/>
+   <frame tileid="664" duration="100"/>
+   <frame tileid="666" duration="100"/>
+   <frame tileid="668" duration="100"/>
+   <frame tileid="670" duration="100"/>
+   <frame tileid="672" duration="100"/>
+   <frame tileid="674" duration="100"/>
+   <frame tileid="676" duration="100"/>
+   <frame tileid="678" duration="100"/>
+   <frame tileid="676" duration="100"/>
+   <frame tileid="674" duration="100"/>
+   <frame tileid="672" duration="100"/>
+   <frame tileid="670" duration="100"/>
+   <frame tileid="668" duration="100"/>
+   <frame tileid="666" duration="100"/>
+   <frame tileid="664" duration="100"/>
+   <frame tileid="662" duration="100"/>
+   <frame tileid="660" duration="100"/>
+   <frame tileid="658" duration="100"/>
+   <frame tileid="656" duration="100"/>
+   <frame tileid="654" duration="100"/>
+   <frame tileid="652" duration="100"/>
+   <frame tileid="650" duration="100"/>
+   <frame tileid="648" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="649" type="animationblock">
+  <properties>
+   <property name="animation_id" value="lava_manual"/>
+  </properties>
+  <animation>
+   <frame tileid="649" duration="100"/>
+   <frame tileid="651" duration="100"/>
+   <frame tileid="653" duration="100"/>
+   <frame tileid="655" duration="100"/>
+   <frame tileid="657" duration="100"/>
+   <frame tileid="659" duration="100"/>
+   <frame tileid="661" duration="100"/>
+   <frame tileid="663" duration="100"/>
+   <frame tileid="665" duration="100"/>
+   <frame tileid="667" duration="100"/>
+   <frame tileid="669" duration="100"/>
+   <frame tileid="671" duration="100"/>
+   <frame tileid="673" duration="100"/>
+   <frame tileid="675" duration="100"/>
+   <frame tileid="677" duration="100"/>
+   <frame tileid="679" duration="100"/>
+   <frame tileid="677" duration="100"/>
+   <frame tileid="675" duration="100"/>
+   <frame tileid="673" duration="100"/>
+   <frame tileid="671" duration="100"/>
+   <frame tileid="669" duration="100"/>
+   <frame tileid="667" duration="100"/>
+   <frame tileid="665" duration="100"/>
+   <frame tileid="663" duration="100"/>
+   <frame tileid="661" duration="100"/>
+   <frame tileid="659" duration="100"/>
+   <frame tileid="657" duration="100"/>
+   <frame tileid="655" duration="100"/>
+   <frame tileid="653" duration="100"/>
+   <frame tileid="651" duration="100"/>
+   <frame tileid="649" duration="100"/>
+  </animation>
+ </tile>
  <tile id="650" type="block"/>
  <tile id="651" type="block"/>
  <tile id="652" type="block"/>
