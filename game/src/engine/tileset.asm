@@ -103,7 +103,7 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.w tsPatternReferences, BLOCK_ELEMENT_COUNT
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT AnimationSchedule
+    DEFINE_STRUCT TilesetAnimationSchedule
         STRUCT_MEMBER.w     tsAnimationTrigger
         STRUCT_MEMBER.w     tsAnimationCurrentFrame
         STRUCT_MEMBER.l     tsAnimationTriggerCallback
@@ -117,8 +117,8 @@ tilesetPatternDecompressionBuffer   Equ blockTable
     DEFINE_VAR_END
 
     DEFINE_VAR FAST
-        VAR.l                   loadedTileset
-        VAR.AnimationSchedule   tilesetAnimationSchedules, TILESET_MAX_ANIMATIONS
+        VAR.l                           loadedTileset
+        VAR.TilesetAnimationSchedule    tilesetAnimationSchedules, TILESET_MAX_ANIMATIONS
     DEFINE_VAR_END
 
 
@@ -232,7 +232,7 @@ _TilesetLoadAnimations:
         move.w  tsAnimationInitialTrigger(a4), tsAnimationTrigger(a3)
         move.l  #_TilesetAnimationStart, tsAnimationTriggerCallback(a3)
         move.l  a4, tsAnimation(a3)
-        adda.w  #AnimationSchedule_Size, a3
+        adda.w  #TilesetAnimationSchedule_Size, a3
 
         ; Animation frame transfers are stored in DMA queueable VDPDMATransfer format instead of VDPDMATransferCommandList format
         ; So we use the DMA queue to transfer the initial animation frame for all animations
@@ -276,7 +276,7 @@ TilesetTick:
         POPM    d0/a0
 
     .nextAnimationTrigger:
-        adda.w  #AnimationSchedule_Size, a0
+        adda.w  #TilesetAnimationSchedule_Size, a0
         dbra    d0, .animationLoop
         rts
 
