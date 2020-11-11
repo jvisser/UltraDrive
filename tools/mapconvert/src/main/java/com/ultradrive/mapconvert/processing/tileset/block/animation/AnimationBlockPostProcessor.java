@@ -135,6 +135,7 @@ public class AnimationBlockPostProcessor
                                     .builder();
                     animationReferenceBuilder.reorient(reference.getOrientation());
                     animationReferenceBuilder.setPriority(reference.getPriority());
+                    animationReferenceBuilder.setPaletteId(reference.getPaletteId());
 
                     resultReferences.add(animationReferenceBuilder.build());
                 }
