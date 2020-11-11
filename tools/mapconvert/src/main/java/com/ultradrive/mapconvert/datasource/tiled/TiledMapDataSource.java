@@ -35,7 +35,7 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
     public TilesetDataSource getTilesetDataSource()
     {
         TiledTileset chunkTileset = map.getTilesets().stream().
-                filter(tiledTileset -> tiledTileset.getName().equals(CHUNK_TILESET_NAME))
+                filter(tiledTileset -> tiledTileset.getName().equalsIgnoreCase(CHUNK_TILESET_NAME))
                 .findAny().orElseThrow(() ->
                         new IllegalArgumentException(format("No chunk tileset found in map '%s'", map.getPath())));
 

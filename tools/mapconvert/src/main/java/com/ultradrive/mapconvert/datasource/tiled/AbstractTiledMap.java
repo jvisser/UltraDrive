@@ -41,7 +41,7 @@ abstract class AbstractTiledMap
     protected TiledTileset getTileset(String tilesetName)
     {
         return map.getTilesets().stream()
-                .filter(tiledTileset -> tiledTileset.getName().equals(tilesetName))
+                .filter(tiledTileset -> tiledTileset.getName().equalsIgnoreCase(tilesetName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("Unable to find tileset '%s' in map '%s'", tilesetName, map.getPath())));
@@ -50,7 +50,7 @@ abstract class AbstractTiledMap
     protected TiledTileLayer getLayer(String layerName)
     {
         return (TiledTileLayer) map.getTopLevelLayers().stream()
-                .filter(tiledLayer -> tiledLayer.getName().equals(layerName))
+                .filter(tiledLayer -> tiledLayer.getName().equalsIgnoreCase(layerName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Unable to find layer '%s' in map '%s'", layerName, map.getPath())));
     }
