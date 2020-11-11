@@ -1,11 +1,9 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
 import com.google.common.collect.Sets;
-import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReferenceProducer;
-import com.ultradrive.mapconvert.processing.tileset.common.TileReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,45 +50,27 @@ class AnimationFrameOptimizationGroup
             IntermediateAnimationFrame firstFrame = intermediateAnimationFrames.iterator().next();
             int firstPatternIndex = patternSimilarityGroup.iterator().next();
 
+            PatternReference patternReference;
             if (isSimilarityGroupContentStatic(intermediateAnimationFrames, patternSimilarityGroup))
             {
                 Pattern groupPattern = firstFrame.getPattern(firstPatternIndex)
                         .reorient(firstFrame.getOrientation(firstPatternIndex));
 
-                PatternReference patternReference = patternReferenceProducer.getReference(groupPattern).build();
-
-                patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
-                        patternReference.reorient(firstFrame.getOrientation(patternIndex)));
-            }
-            else if (isSimilarityGroupContentMultiOriented(intermediateAnimationFrames, patternSimilarityGroup))
-            {
-                for (Integer patternIndex : patternSimilarityGroup)
-                {
-                    PatternReference patternReference = new PatternReference(dynamicPatternCount++);
-
-                    animationFrameBuilders.forEach((intermediateAnimationFrame, builder) -> builder
-                            .addPattern(intermediateAnimationFrame.getPattern(patternIndex)
-                                                .reorient(firstFrame.getOrientation(patternIndex))));
-
-                    animationPatternReferences[patternIndex] = patternReference.reorient(firstFrame.getOrientation(patternIndex));
-
-                }
-                dynamicPatternIndices.addAll(patternSimilarityGroup);
+                patternReference = patternReferenceProducer.getReference(groupPattern).build();
             }
             else
             {
-                PatternReference patternReference = new PatternReference(dynamicPatternCount++);
+                patternReference = new PatternReference(dynamicPatternCount++);
 
                 animationFrameBuilders.forEach((intermediateAnimationFrame, builder) -> builder
                         .addPattern(intermediateAnimationFrame.getPattern(firstPatternIndex)
                                             .reorient(firstFrame.getOrientation(firstPatternIndex))));
 
                 dynamicPatternIndices.addAll(patternSimilarityGroup);
-
-                patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
-                        patternReference.reorient(firstFrame.getOrientation(patternIndex)));
             }
 
+            patternSimilarityGroup.forEach(patternIndex -> animationPatternReferences[patternIndex] =
+                    patternReference.reorient(firstFrame.getOrientation(patternIndex)));
         }
 
         return new AnimationFrameOptimizationResult(
@@ -148,25 +128,6 @@ class AnimationFrameOptimizationGroup
         }
 
         return true;
-    }
-
-    private boolean isSimilarityGroupContentMultiOriented(Set<IntermediateAnimationFrame> intermediateAnimationFrames,
-                                                          Set<Integer> patternSimilarityGroup)
-    {
-        List<Orientation> lastOrientations = null;
-        for (IntermediateAnimationFrame intermediateAnimationFrame : intermediateAnimationFrames)
-        {
-            List<Orientation> orientations = patternSimilarityGroup.stream()
-                    .map(intermediateAnimationFrame::getOrientation)
-                    .collect(toList());
-
-            if (lastOrientations != null && !Objects.equals(lastOrientations, orientations))
-            {
-                return true;
-            }
-            lastOrientations = orientations;
-        }
-        return false;
     }
 
     private Set<Set<Integer>> getPatternSimilarityProjection(Set<IntermediateAnimationFrame> intermediateAnimationFrames)
