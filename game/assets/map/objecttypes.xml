@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
- <objecttype name="animationblock" color="#a0a0a4">
+ <objecttype name="AnimationBlock" color="#a0a0a4">
   <property name="animation_activation" type="string"/>
   <property name="animation_id" type="string"/>
   <property name="animation_scheduler" type="string" default="video_refresh"/>
  </objecttype>
- <objecttype name="block" color="#a0a0a4"/>
- <objecttype name="chunk" color="#a0a0a4"/>
- <objecttype name="collisionblock" color="#a0a0a4">
+ <objecttype name="BackgroundTypeBlock" color="#a0a0a4">
+  <property name="type_id" type="int" default="0"/>
+ </objecttype>
+ <objecttype name="Block" color="#a0a0a4"/>
+ <objecttype name="Chunk" color="#a0a0a4"/>
+ <objecttype name="CollisionBlock" color="#a0a0a4">
   <property name="angle" type="float" default="0"/>
  </objecttype>
- <objecttype name="foregroundtypeblock" color="#a0a0a4">
+ <objecttype name="ForegroundTypeBlock" color="#a0a0a4">
   <property name="type_id" type="int" default="1"/>
  </objecttype>
- <objecttype name="graphicsblock" color="#a0a0a4"/>
- <objecttype name="priorityblock" color="#a0a0a4"/>
- <objecttype name="solidityblock" color="#a0a0a4"/>
+ <objecttype name="GraphicsBlock" color="#a0a0a4"/>
+ <objecttype name="PriorityBlock" color="#a0a0a4"/>
+ <objecttype name="SolidityBlock" color="#a0a0a4"/>
 </objecttypes>
