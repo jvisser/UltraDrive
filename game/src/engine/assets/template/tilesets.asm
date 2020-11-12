@@ -1,6 +1,6 @@
     SECTION_START S_RODATA
 
-[# th:each="tileset : ${tilesets}" th:with="tilesetName=${#strings.capitalize(tileset.name)}, maxModuleSize=${0x4000}, collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)}"]
+[# th:each="tileset : ${tilesets}" th:with="tilesetName=${#strings.capitalize(tileset.name)}, maxModuleSize=${0x6c00}, collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)}"]
 
     Even
 
