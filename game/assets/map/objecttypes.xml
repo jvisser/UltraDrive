@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
  <objecttype name="AnimationBlock" color="#a0a0a4">
-  <property name="animation_activation" type="string"/>
+  <property name="animation_frame_interval" type="int" default="1"/>
   <property name="animation_id" type="string"/>
+  <property name="animation_initial_trigger" type="int" default="0"/>
   <property name="animation_scheduler" type="string" default="video_refresh"/>
+  <property name="animation_trigger_interval" type="int" default="0"/>
  </objecttype>
  <objecttype name="BackgroundTypeBlock" color="#a0a0a4">
   <property name="type_id" type="int" default="0"/>
