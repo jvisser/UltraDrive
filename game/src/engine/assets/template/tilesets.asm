@@ -182,7 +182,7 @@
 
     BlockMetaDataAngle[(${collisionBlockListName})]:
         [# th:each="collisionblock : ${collisionblocklist}"]
-            dc.b    [(${@java.lang.Math@round((collisionblock.angle / 360) * 256)})]    ; [(${#format.format('%f', collisionblock.angle)})]
+            dc.b    [(${@@round((collisionblock.angle / 360) * 256)})]    ; [(${#format.format('%f', collisionblock.angle)})]
         [/]
 [/]
 
