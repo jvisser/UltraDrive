@@ -126,14 +126,12 @@
             dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList
             ; .tsAnimationFrameCount
             dc.w [(${animation.frameCount})]
-            [# th:with="animationActivation=${#convert.yaml(animation.properties['animation_activation'])}"]
-                ; .tsAnimationInitialTrigger
-                dc.w [(${animationActivation['initialTrigger']})]
-                ; .tsAnimationTriggerInterval
-                dc.w [(${animationActivation['triggerInterval']})]
-                ; .tsAnimationFrameInterval
-                dc.w [(${animationActivation['frameInterval']})]
-            [/]
+            ; .tsAnimationInitialTrigger
+            dc.w [(${animation.properties['animation_initial_trigger']})]
+            ; .tsAnimationTriggerInterval
+            dc.w [(${animation.properties['animation_trigger_interval']})]
+            ; .tsAnimationFrameInterval
+            dc.w [(${animation.properties['animation_frame_interval']})]
 
         Even
 
