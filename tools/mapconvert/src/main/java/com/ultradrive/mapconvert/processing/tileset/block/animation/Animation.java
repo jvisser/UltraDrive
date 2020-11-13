@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
+import com.ultradrive.mapconvert.common.PropertySource;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,7 @@ import javax.annotation.Nonnull;
 import static java.util.stream.Collectors.toList;
 
 
-public class Animation implements Iterable<AnimationFrameReference>
+public class Animation implements PropertySource, Iterable<AnimationFrameReference>
 {
     private final String animationId;
     private final List<AnimationFrameReference> animationFrames;
@@ -36,6 +37,12 @@ public class Animation implements Iterable<AnimationFrameReference>
         return animationFrames.iterator();
     }
 
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        return properties;
+    }
+
     public String getAnimationId()
     {
         return animationId;
@@ -49,11 +56,6 @@ public class Animation implements Iterable<AnimationFrameReference>
     public AnimationFrameReference getAnimationFrameReference(int frameId)
     {
         return animationFrames.get(frameId);
-    }
-
-    public Map<String, Object> getProperties()
-    {
-        return properties;
     }
 
     public int getPatternBaseId()

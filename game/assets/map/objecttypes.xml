@@ -21,4 +21,11 @@
  <objecttype name="GraphicsBlock" color="#a0a0a4"/>
  <objecttype name="PriorityBlock" color="#a0a0a4"/>
  <objecttype name="SolidityBlock" color="#a0a0a4"/>
+ <objecttype name="ViewportAnimationBlock" color="#a0a0a4">
+  <property name="animation_axis" type="string" default="x"/>
+  <property name="animation_camera" type="string" default="background"/>
+  <property name="animation_id" type="string"/>
+  <property name="animation_scheduler" type="string" default="viewport"/>
+  <property name="animation_shift" type="int" default="0"/>
+ </objecttype>
 </objecttypes>

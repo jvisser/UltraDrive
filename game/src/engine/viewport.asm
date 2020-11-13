@@ -19,6 +19,43 @@
 
 
 ;-------------------------------------------------
+; Install movement callback and camera data for the specified camera
+; ----------------
+VIEWPORT_INSTALL_MOVEMENT_CALLBACK Macro camera, callback, cameraData
+    move.l  #\callback, (viewport + \camera + camMoveCallback)
+    move.l  \cameraData, (viewport + \camera + camData)
+    Endm
+
+
+;-------------------------------------------------
+; Restore the default movement callback for the specified camera
+; ----------------
+VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Macro camera
+    move.l  #_ViewportDefaultMoveCallback, (viewport + \camera + camMoveCallback)
+    Endm
+    
+    
+;-------------------------------------------------
+; Force movement callback for the specified camera to be called
+; ----------------
+; Uses: d0-d7/a0-a6 (Unknown due to delegation)
+VIEWPORT_FORCE_MOVEMENT_CALLBACK Macro camera
+    lea     (viewport + \camera), a0
+    move.l  camMoveCallback(a0), a1
+    jsr     (a1)
+    Endm
+    
+    
+;-------------------------------------------------
+; Initialize the viewport library with defaults. Called on engine init.
+; ----------------
+ViewportLibraryInit:
+        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportBackground
+        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportForeground
+        rts
+        
+
+;-------------------------------------------------
 ; Initialize the viewport to point at the specified coordinates (within the bounds of the currently loaded map)
 ; ----------------
 ; Input:
@@ -150,3 +187,10 @@ ViewportFinalize:
         ; Call viewport finalize handler
         move.l  viewportFinalizeHandler(a0), a1
         jmp     (a1)
+
+
+;-------------------------------------------------
+; NOOP
+; ----------------
+_ViewportDefaultMoveCallback:
+        rts

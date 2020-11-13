@@ -11,4 +11,9 @@ public interface PropertySource
     {
         return getProperties().containsKey(name);
     }
+
+    default Object getProperty(String name)
+    {
+        return getProperties().get(name);
+    }
 }

@@ -34,11 +34,11 @@
     Include './engine/ticker.asm'
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
-    Include './engine/tileset.asm'
     Include './engine/map.asm'
     Include './engine/camera.asm'
     Include './engine/viewport.asm'
     Include './engine/viewporttracker.asm'
+    Include './engine/tileset.asm'
 
 
     ;-------------------------------------------------

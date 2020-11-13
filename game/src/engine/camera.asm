@@ -1,5 +1,7 @@
 ;------------------------------------------------------------------------------------------
-; Camera system
+; Camera system. 
+;
+; NB: Managed by Viewport. API should not be used directly
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
@@ -20,6 +22,9 @@
         STRUCT_MEMBER.w camAbsoluteMaxY
         STRUCT_MEMBER.l camMapAddress
         STRUCT_MEMBER.l camPlaneId
+        ; Externally managed
+        STRUCT_MEMBER.l camMoveCallback
+        STRUCT_MEMBER.l camData
     DEFINE_STRUCT_END
 
 
@@ -49,7 +54,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
 
             .clampDone\@:
         Endm
-
+        
         ; Associate map
         move.l  a1, camMapAddress(a0)
 
@@ -269,6 +274,15 @@ _MAP_UPDATE Macro renderer
         swap d4
         sub.w   d3, d4
         move.w  d4, camLastXDisplacement(a0)
+        
+        ; Check if there was movement. If so call movement callback
+        tst.l   d4
+        beq     .noMovement
+            PUSHM   d1/a0
+            movea.l camMoveCallback(a0), a1
+            jsr     (a1)
+            POPM    d1/a0
+        .noMovement:
 
         ; Update min max for both dimensions
         moveq   #0, d5                                          ; d5 = render flags (0 = min, 1 = max)
@@ -327,4 +341,3 @@ _MAP_UPDATE Macro renderer
         Purge _UPDATE_MIN_MAX
         Purge _MAP_UPDATE
         rts
-

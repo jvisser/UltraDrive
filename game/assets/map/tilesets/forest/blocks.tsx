@@ -1008,7 +1008,29 @@ frameInterval: 60</property>
  <tile id="693" type="Block"/>
  <tile id="694" type="Block"/>
  <tile id="695" type="Block"/>
- <tile id="696" type="Block"/>
+ <tile id="696" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="clouds_light"/>
+  </properties>
+  <animation>
+   <frame tileid="696" duration="100"/>
+   <frame tileid="697" duration="100"/>
+   <frame tileid="698" duration="100"/>
+   <frame tileid="699" duration="100"/>
+   <frame tileid="700" duration="100"/>
+   <frame tileid="701" duration="100"/>
+   <frame tileid="702" duration="100"/>
+   <frame tileid="703" duration="100"/>
+   <frame tileid="704" duration="100"/>
+   <frame tileid="705" duration="100"/>
+   <frame tileid="706" duration="100"/>
+   <frame tileid="707" duration="100"/>
+   <frame tileid="708" duration="100"/>
+   <frame tileid="709" duration="100"/>
+   <frame tileid="710" duration="100"/>
+   <frame tileid="711" duration="100"/>
+  </animation>
+ </tile>
  <tile id="697" type="Block"/>
  <tile id="698" type="Block"/>
  <tile id="699" type="Block"/>
@@ -1032,7 +1054,30 @@ frameInterval: 60</property>
  <tile id="717" type="Block"/>
  <tile id="718" type="Block"/>
  <tile id="719" type="Block"/>
- <tile id="720" type="Block"/>
+ <tile id="720" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="clouds_dark"/>
+   <property name="animation_shift" type="int" value="1"/>
+  </properties>
+  <animation>
+   <frame tileid="720" duration="100"/>
+   <frame tileid="721" duration="100"/>
+   <frame tileid="722" duration="100"/>
+   <frame tileid="723" duration="100"/>
+   <frame tileid="724" duration="100"/>
+   <frame tileid="725" duration="100"/>
+   <frame tileid="726" duration="100"/>
+   <frame tileid="727" duration="100"/>
+   <frame tileid="728" duration="100"/>
+   <frame tileid="729" duration="100"/>
+   <frame tileid="730" duration="100"/>
+   <frame tileid="731" duration="100"/>
+   <frame tileid="732" duration="100"/>
+   <frame tileid="733" duration="100"/>
+   <frame tileid="734" duration="100"/>
+   <frame tileid="735" duration="100"/>
+  </animation>
+ </tile>
  <tile id="721" type="Block"/>
  <tile id="722" type="Block"/>
  <tile id="723" type="Block"/>
