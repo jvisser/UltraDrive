@@ -5,22 +5,23 @@
 ;-------------------------------------------------
 ; Tileset constants
 ; ----------------
-TILESET_MAX_ANIMATIONS              Equ 8
+TILESET_MAX_ANIMATIONS                  Equ 8
+TILESET_MAX_VIEWPORT_ANIMATION_GROUPS   Equ 16
 
-CHUNK_DIMENSION                     Equ 8                                   ; Chunk dimension in blocks
-CHUNK_ELEMENT_COUNT                 Equ CHUNK_DIMENSION * CHUNK_DIMENSION
-CHUNK_ROW_STRIDE                    Equ CHUNK_DIMENSION * SIZE_WORD
-CHUNK_SIZE                          Equ CHUNK_DIMENSION * CHUNK_ROW_STRIDE
+CHUNK_DIMENSION                         Equ 8                                   ; Chunk dimension in blocks
+CHUNK_ELEMENT_COUNT                     Equ CHUNK_DIMENSION * CHUNK_DIMENSION
+CHUNK_ROW_STRIDE                        Equ CHUNK_DIMENSION * SIZE_WORD
+CHUNK_SIZE                              Equ CHUNK_DIMENSION * CHUNK_ROW_STRIDE
 
-BLOCK_DIMENSION                     Equ 2                                   ; Block dimension in patterns
-BLOCK_ELEMENT_COUNT                 Equ BLOCK_DIMENSION * BLOCK_DIMENSION
-BLOCK_ROW_STRIDE                    Equ BLOCK_DIMENSION * SIZE_WORD
-BLOCK_SIZE                          Equ BLOCK_DIMENSION * BLOCK_ROW_STRIDE
+BLOCK_DIMENSION                         Equ 2                                   ; Block dimension in patterns
+BLOCK_ELEMENT_COUNT                     Equ BLOCK_DIMENSION * BLOCK_DIMENSION
+BLOCK_ROW_STRIDE                        Equ BLOCK_DIMENSION * SIZE_WORD
+BLOCK_SIZE                              Equ BLOCK_DIMENSION * BLOCK_ROW_STRIDE
 
-CHUNK_TABLE_SIZE                    Equ 192                                 ; Chunk RAM buffer size
-BLOCK_TABLE_SIZE                    Equ 384                                 ; Block RAM buffer size
+CHUNK_TABLE_SIZE                        Equ 192                                 ; Chunk RAM buffer size
+BLOCK_TABLE_SIZE                        Equ 384                                 ; Block RAM buffer size
 
-tilesetPatternDecompressionBuffer   Equ blockTable
+tilesetPatternDecompressionBuffer       Equ blockTable
 
 
 ;-------------------------------------------------
@@ -28,15 +29,15 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 ; ----------------
 
     ; Chunk reference structure
-    BIT_MASK.CHUNK_REF_INDEX        0,  10                                  ; Not call can be used due to memory constraints
-    BIT_CONST.CHUNK_REF_EMPTY       10                                      ; Chunk contains no graphic data
+    BIT_MASK.CHUNK_REF_INDEX        0,  10                                      ; Not call can be used due to memory constraints
+    BIT_CONST.CHUNK_REF_EMPTY       10                                          ; Chunk contains no graphic data
     BIT_CONST.CHUNK_REF_HFLIP       11
     BIT_CONST.CHUNK_REF_VFLIP       12
     BIT_CONST.CHUNK_REF_COLLISION   13
 
     ; Block reference structure
     BIT_MASK.BLOCK_REF_INDEX        0,  10
-    BIT_CONST.BLOCK_REF_EMPTY       10                                      ; Block contains no graphic data
+    BIT_CONST.BLOCK_REF_EMPTY       10                                          ; Block contains no graphic data
     BIT_CONST.BLOCK_REF_HFLIP       11
     BIT_CONST.BLOCK_REF_VFLIP       12
     BIT_MASK.BLOCK_REF_SOLIDITY     13, 2
@@ -44,7 +45,7 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 
 
 ;-------------------------------------------------
-; Tileset structures
+; Tileset main structures
 ; ----------------
 
     ; Tileset header
@@ -55,12 +56,14 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.w tsPatternSectionCount
         STRUCT_MEMBER.w tsAnimationsCount
         STRUCT_MEMBER.l tsBlockMetaDataAddress
-        STRUCT_MEMBER.l tsBlockMetaDataMappingTableAddress  ; Maps block id to block meta data index
-        STRUCT_MEMBER.l tsChunksAddress                     ; Compressed
-        STRUCT_MEMBER.l tsBlocksAddress                     ; Compressed
-        STRUCT_MEMBER.l tsPatternSectionsTableAddress       ; Compressed (modular)
-        STRUCT_MEMBER.l tsPaletteAddress                    ; Uncompressed
-        STRUCT_MEMBER.l tsAnimationsTableAddress            ; Uncompressed
+        STRUCT_MEMBER.l tsBlockMetaDataMappingTableAddress
+        STRUCT_MEMBER.l tsChunksAddress                                         ; Compressed
+        STRUCT_MEMBER.l tsBlocksAddress                                         ; Compressed
+        STRUCT_MEMBER.l tsPatternSectionsTableAddress                           ; Compressed (modular)
+        STRUCT_MEMBER.l tsPaletteAddress                                        ; Uncompressed
+        STRUCT_MEMBER.l tsAnimationsTableAddress                                ; Uncompressed
+        STRUCT_MEMBER.l tsViewportBackgroundAnimationsAddress                   ; Uncompressed
+        STRUCT_MEMBER.l tsViewportForegroundAnimationsAddress                   ; Uncompressed
         STRUCT_MEMBER.w tsVramFreeAreaMin
         STRUCT_MEMBER.w tsVramFreeAreaMax
     DEFINE_STRUCT_END
@@ -87,14 +90,6 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.w                         tsColors
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT TilesetAnimation
-        STRUCT_MEMBER.l tsAnimationFrameTransferListAddress
-        STRUCT_MEMBER.w tsAnimationFrameCount
-        STRUCT_MEMBER.w tsAnimationInitialTrigger
-        STRUCT_MEMBER.w tsAnimationTriggerInterval
-        STRUCT_MEMBER.w tsAnimationFrameInterval
-    DEFINE_STRUCT_END
-
     DEFINE_STRUCT Chunk
         STRUCT_MEMBER.w tsBlockReferences, CHUNK_ELEMENT_COUNT
     DEFINE_STRUCT_END
@@ -103,14 +98,45 @@ tilesetPatternDecompressionBuffer   Equ blockTable
         STRUCT_MEMBER.w tsPatternReferences, BLOCK_ELEMENT_COUNT
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT TilesetAnimationSchedule
-        STRUCT_MEMBER.w     tsAnimationTrigger
-        STRUCT_MEMBER.w     tsAnimationCurrentFrame
-        STRUCT_MEMBER.l     tsAnimationTriggerCallback
-        STRUCT_MEMBER.l     tsAnimation
+
+;-------------------------------------------------
+; Tileset animation structures
+; ----------------
+    DEFINE_STRUCT TilesetAnimationBase
+        STRUCT_MEMBER.w tsAnimationFrameCount
+        STRUCT_MEMBER.l tsAnimationFrameTransferListAddress
+    DEFINE_STRUCT_END
+        
+    DEFINE_STRUCT TilesetAnimation, EXTENDS, TilesetAnimationBase
+        STRUCT_MEMBER.w tsAnimationInitialTrigger
+        STRUCT_MEMBER.w tsAnimationTriggerInterval
+        STRUCT_MEMBER.w tsAnimationFrameInterval
     DEFINE_STRUCT_END
 
-    ; Allocate chunk and block tables
+    DEFINE_STRUCT TilesetViewportAnimations
+        STRUCT_MEMBER.w tsvpAnimationsGroupCount
+        STRUCT_MEMBER.w tsvpAnimationsGroupStateAddress
+        STRUCT_MEMBER.l tsvpAnimationsGroupTable
+    DEFINE_STRUCT_END
+    
+    DEFINE_STRUCT TilesetViewportAnimationGroup
+        STRUCT_MEMBER.w tsvpAnimationGroupCameraProperty
+        STRUCT_MEMBER.w tsvpShift
+        STRUCT_MEMBER.w tsvpAnimationCount
+        STRUCT_MEMBER.w tsvpAnimationsTable
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT TilesetAnimationSchedule
+        STRUCT_MEMBER.w tsAnimationTrigger
+        STRUCT_MEMBER.w tsAnimationCurrentFrame
+        STRUCT_MEMBER.l tsAnimationTriggerCallback
+        STRUCT_MEMBER.l tsAnimation
+    DEFINE_STRUCT_END
+
+
+;-------------------------------------------------
+; Tileset variables
+; ----------------
     DEFINE_VAR SLOW
         VAR.Block   blockTable,     BLOCK_TABLE_SIZE
         VAR.Chunk   chunkTable,     CHUNK_TABLE_SIZE
@@ -118,7 +144,8 @@ tilesetPatternDecompressionBuffer   Equ blockTable
 
     DEFINE_VAR FAST
         VAR.l                           loadedTileset
-        VAR.TilesetAnimationSchedule    tilesetAnimationSchedules, TILESET_MAX_ANIMATIONS
+        VAR.w                           tilesetViewportAnimationGroupStates, TILESET_MAX_VIEWPORT_ANIMATION_GROUPS
+        VAR.TilesetAnimationSchedule    tilesetAnimationSchedules,           TILESET_MAX_ANIMATIONS
     DEFINE_VAR_END
 
 
@@ -134,6 +161,7 @@ TilesetLoad:
         rts                                 ; Already loaded
 
     .loadTileset:
+        move.l  a0, loadedTileset
         movea.l a0, a6
 
         ; Decompress and move patterns into VRAM.
@@ -163,10 +191,9 @@ TilesetLoad:
         ; Load palette
         movea.l tsPaletteAddress(a6), a0
         VDP_DMA_TRANSFER_COMMAND_LIST a0
-
-        ; Success
-        move.l  a6, loadedTileset
-        rts
+        
+        ; Install viewport movement handlers last
+        jmp _TilesetInstallViewportMovementHandlers
 
 
 ;-------------------------------------------------
@@ -175,6 +202,11 @@ TilesetLoad:
 TilesetUnload:
         ENGINE_TICKER_DISABLE TICKER_TILESET
 
+        ; Uninstall foreground/background camera handlers
+        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportBackground
+        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportForeground
+
+        ; Clear tileset address
         move.l  #0, loadedTileset
         rts
 
@@ -246,6 +278,30 @@ _TilesetLoadAnimations:
 
         ; Enable animation ticker
         ENGINE_TICKER_ENABLE TICKER_TILESET
+        rts
+
+
+;-------------------------------------------------
+; Install viewport movement handlers for camera scheduled animations
+; ----------------
+; Input:
+; - a6: Tileset address
+_TilesetInstallViewportMovementHandlers:
+        
+        ; Reset viewport animation group states
+        lea     tilesetViewportAnimationGroupStates, a0
+        move.w  #TILESET_MAX_VIEWPORT_ANIMATION_GROUPS - 1, d0 
+    .clrAnimationGroupStatesLoop:
+        move.w  #-1, (a0)+
+        dbra    d0, .clrAnimationGroupStatesLoop
+        
+        ; Install camera movement handlers
+        VIEWPORT_INSTALL_MOVEMENT_CALLBACK viewportBackground, _TilesetCameraMove, tsViewportBackgroundAnimationsAddress(a6)
+        VIEWPORT_INSTALL_MOVEMENT_CALLBACK viewportForeground, _TilesetCameraMove, tsViewportForegroundAnimationsAddress(a6)
+
+        ; Force viewport update to render the initial animation frames for the viewport animations
+        VIEWPORT_FORCE_MOVEMENT_CALLBACK viewportBackground
+        VIEWPORT_FORCE_MOVEMENT_CALLBACK viewportForeground
         rts
 
 
@@ -354,4 +410,60 @@ _TilesetAnimationFrame:
         add.w   d2, d2
         movea.l (a1, d2), a0                                    ; a0 = VDPDMATransfer address for animation frame
         VDP_DMA_QUEUE_JOB a0
+        rts
+
+
+;-------------------------------------------------
+; Called when one of the viewport cameras moves. Updates viewport scheduled animations.
+; ----------------
+; Input:
+;- a0: Camera address
+_TilesetCameraMove:
+        movea.l a0, a6                                          ; a6 = camera
+        movea.l camData(a6), a5                                 ; a5 = TilesetViewportAnimations
+        move.w  tsvpAnimationsGroupCount(a5), d7
+        beq     .noAnimations
+        
+        movea.w tsvpAnimationsGroupStateAddress(a5), a2         ; a2 = group state address
+        lea     tsvpAnimationsGroupTable(a5), a3                ; a3 = animation group table address
+        
+        subq.w  #1, d7
+    .animationGroupLoop:
+        movea.l  (a3)+, a5                                      ; a5 = current animation group address
+        move.w   (a2)+, d1                                      ; d1 = current animation group state
+        
+        move.w  tsvpAnimationGroupCameraProperty(a5), d2
+        move.w  (a6, d2), d2                                    ; d2 = camera position
+        move.w  tsvpShift(a5), d3                               ; d3 = camera position shift
+        lsr.w   d3, d2                                          ; d2 = new group state
+        cmp.w   d1, d2
+        beq     .noGroupChange
+        
+            ; Update group state
+            move.w  d2, -SIZE_WORD(a2)
+        
+            ; Queue animation frames
+            lea     tsvpAnimationsTable(a5), a4                 ; a4 = current animation
+            move.w  tsvpAnimationCount(a5), d3
+            subq.w  #1, d3
+        .animationLoop:
+        
+            ; Determine animation frame index
+            move.w  d2, d4
+            and.w   tsAnimationFrameCount(a4), d4               ; d4 = animation frame index (tsAnimationFrameCount = frame mask for viewport animation = frameCount - 1)
+            
+            ; Queue animation frame
+            movea.l tsAnimationFrameTransferListAddress(a4), a0
+            add.w   d4, d4
+            add.w   d4, d4
+            movea.l (a0, d4), a0
+            VDP_DMA_QUEUE_JOB a0
+        
+            addq.l  #TilesetAnimationBase_Size, a4
+            dbra    d3, .animationLoop
+            
+    .noGroupChange:
+        dbra    d7, .animationGroupLoop
+        
+    .noAnimations:
         rts

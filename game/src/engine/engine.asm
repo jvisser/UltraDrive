@@ -6,6 +6,7 @@
 ; Initialize engine components
 ; ----------------
 EngineInit:
-        jsr EngineTickInit
+        jsr ViewportLibraryInit
         jsr DefaultViewportTrackerInit
+        jsr EngineTickInit
         rts
