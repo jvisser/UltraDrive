@@ -1057,7 +1057,7 @@ frameInterval: 60</property>
  <tile id="720" type="ViewportAnimationBlock">
   <properties>
    <property name="animation_id" value="clouds_dark"/>
-   <property name="animation_shift" type="int" value="1"/>
+   <property name="animation_shift" type="int" value="2"/>
   </properties>
   <animation>
    <frame tileid="720" duration="100"/>
