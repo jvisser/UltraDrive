@@ -1101,7 +1101,32 @@ frameInterval: 60</property>
  <tile id="741" type="Block"/>
  <tile id="742" type="Block"/>
  <tile id="743" type="Block"/>
- <tile id="744" type="Block"/>
+ <tile id="744" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_axis" value="y"/>
+   <property name="animation_camera" value="foreground"/>
+   <property name="animation_id" value="wall_vertical"/>
+   <property name="animation_shift" type="int" value="3"/>
+  </properties>
+  <animation>
+   <frame tileid="744" duration="100"/>
+   <frame tileid="745" duration="100"/>
+   <frame tileid="746" duration="100"/>
+   <frame tileid="747" duration="100"/>
+   <frame tileid="748" duration="100"/>
+   <frame tileid="749" duration="100"/>
+   <frame tileid="750" duration="100"/>
+   <frame tileid="751" duration="100"/>
+   <frame tileid="752" duration="100"/>
+   <frame tileid="753" duration="100"/>
+   <frame tileid="754" duration="100"/>
+   <frame tileid="755" duration="100"/>
+   <frame tileid="756" duration="100"/>
+   <frame tileid="757" duration="100"/>
+   <frame tileid="758" duration="100"/>
+   <frame tileid="759" duration="100"/>
+  </animation>
+ </tile>
  <tile id="745" type="Block"/>
  <tile id="746" type="Block"/>
  <tile id="747" type="Block"/>
