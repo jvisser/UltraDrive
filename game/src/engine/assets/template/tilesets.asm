@@ -167,7 +167,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
     ; Timer based animation definitions
     [# th:each="animation : ${videoAnimations}"]
-        ; struct TilesetAnimation
+        ; struct TilesetAnimation ([(${animation.animationId})])
         Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]:
             ; .tsAnimationFrameCount
             dc.w [(${animation.frameCount})]
