@@ -55,7 +55,6 @@ Main:
         movea.l loadedMap, a0
         movea.w #0, a1
         movea.w #0, a2
-        movea.w #0, a3
         jsr     ViewportInit
 
         DEBUG_MSG 'Viewport initialized'
@@ -67,7 +66,7 @@ Main:
         move.w  #128 + 114, d4
         bsr     CreateSprites
         ;jsr     VDPSpriteClear
-        jsr     VDPSpriteCommit
+        ;jsr     VDPSpriteCommit
 
         DEBUG_MSG 'Sprites created'
 

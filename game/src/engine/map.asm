@@ -374,7 +374,7 @@ MapRenderRow:
         move.w  d5, (mapRowBufferDMATransfer + dmaSource + 2)
 
         ; Queue DMA job
-        VDP_DMA_QUEUE_JOB mapRowBufferDMATransfer
+        VDP_DMA_QUEUE_ADD mapRowBufferDMATransfer
 
         movea.l a6, a0
         move.w d6, d0
@@ -554,7 +554,7 @@ MapRenderColumn:
         move.w  d5, (mapColumnBufferDMATransfer + dmaSource + 2)
 
         ; Calculate DMA target
-        VDP_DMA_QUEUE_JOB mapColumnBufferDMATransfer
+        VDP_DMA_QUEUE_ADD mapColumnBufferDMATransfer
 
         movea.l a6, a0
         move.w d6, d0

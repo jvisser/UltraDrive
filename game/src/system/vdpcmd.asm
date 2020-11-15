@@ -50,24 +50,10 @@ VDP_CMD_RS_DBG_TIMER        Equ $9f00        ; Virtual register used for startin
 ; ----------------
 VDP_ADDR_SET_CONST Macro accessType, ramType, address
         If (strcmp('\ramType', 'VRAM'))
-\0  Equ (VDP_CMD_AS_VRAM_\accessType | ((\address & $3fff) << 16) | ((\address & $c000) >> 14))
+\0  Equ (VDP_CMD_AS_VRAM_\accessType | (((\address) & $3fff) << 16) | (((\address) & $c000) >> 14))
         Else
-\0  Equ (VDP_CMD_AS_\ramType\_\accessType | (\address << 16))
+\0  Equ (VDP_CMD_AS_\ramType\_\accessType | ((\address) << 16))
         EndIf
-    Endm
-
-
-;----------------------------------------------
-; Set vram address, access type and data stride
-; ----------------
-VDP_ADDR_SET Macro accessType, ramType, address, dataStride
-        If (narg = 4)
-            VDP_REG_SET vdpRegIncr, \dataStride
-        EndIf
-
-        Local __AS
-        VDP_ADDR_SET_CONST.__AS  \accessType, \ramType, \address
-        move.l #__AS, (MEM_VDP_CTRL)
     Endm
 
 

@@ -28,7 +28,7 @@ VDP_DMA_QUEUE_SIZE Equ 32
 ; Queue DMA job by ref to static/predefined VDPDMATransfer
 ; ----------------
 ; Uses: d0/a0-a1
-VDP_DMA_QUEUE_JOB Macro dmaTransfer
+VDP_DMA_QUEUE_ADD Macro dmaTransfer
             OS_LOCK
 
             movea.w vdpDMAQueueCurrentEntry, a1
@@ -101,8 +101,8 @@ VDPDMAQueueInit:
 ; Input:
 ; - a0: Address of the VDPDMATransfer instance to queue
 ; Uses: d0/a0-a1
-VDPDMAQueueJob:
-        VDP_DMA_QUEUE_JOB a0
+VDPDMAQueueAdd:
+        VDP_DMA_QUEUE_ADD a0
         rts
 
 
