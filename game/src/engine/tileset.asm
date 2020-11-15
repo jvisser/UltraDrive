@@ -270,7 +270,7 @@ _TilesetLoadAnimations:
         ; So we use the DMA queue to transfer the initial animation frame for all animations
         movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
         movea.l (a0), a0                                    ; a0 = VDPDMATransfer address for first animation frame
-        jsr     VDPDMAQueueJob
+        jsr     VDPDMAQueueAdd
         dbra    d6, .loadAnimationFrameLoop
 
         ; Transfer animation frames to VRAM
@@ -409,7 +409,7 @@ _TilesetAnimationFrame:
         add.w   d2, d2
         add.w   d2, d2
         movea.l (a1, d2), a0                                    ; a0 = VDPDMATransfer address for animation frame
-        VDP_DMA_QUEUE_JOB a0
+        VDP_DMA_QUEUE_ADD a0
         rts
 
 
@@ -457,7 +457,7 @@ _TilesetCameraMove:
             add.w   d4, d4
             add.w   d4, d4
             movea.l (a0, d4), a0
-            VDP_DMA_QUEUE_JOB a0
+            VDP_DMA_QUEUE_ADD a0
         
             addq.l  #TilesetAnimationBase_Size, a4
             dbra    d3, .animationLoop

@@ -9,11 +9,16 @@ VDP_TASK_QUEUE_SIZE Equ 32
 
 
 ;-------------------------------------------------
-; VDP Task queue data
+; VDP Task queue structures
 ; ----------------
+    DEFINE_STRUCT VDPTask
+        STRUCT_MEMBER.l task
+        STRUCT_MEMBER.l taskData
+    DEFINE_STRUCT_END
+
     DEFINE_VAR FAST
-        VAR.l   vdpTaskQueue,                VDP_TASK_QUEUE_SIZE
-        VAR.w   vdpTaskQueueCurrentEntry
+        VAR.VDPTask vdpTaskQueue,                VDP_TASK_QUEUE_SIZE
+        VAR.w       vdpTaskQueueCurrentEntry
     DEFINE_VAR_END
 
 
@@ -27,10 +32,10 @@ VDPTaskQueueInit:
 
 
 ;-------------------------------------------------
-; Queue VDP Task job (inline)
+; Queue VDP Task (inline)
 ; ----------------
 ; Uses: a1
-VDP_TASK_QUEUE_JOB Macro jobAddress
+VDP_TASK_QUEUE_ADD Macro jobAddress, jobData
             OS_LOCK
 
             movea.w vdpTaskQueueCurrentEntry, a1
@@ -38,6 +43,11 @@ VDP_TASK_QUEUE_JOB Macro jobAddress
             beq     .vdpTaskQueueFull\@
 
             move.l  \jobAddress, (a1)+
+            If (narg = 1)
+                addq.l  #SIZE_LONG, a1
+            Else
+                move.l  \jobData, (a1)+
+            EndIf
             move.w  a1, vdpTaskQueueCurrentEntry
 
             If def(debug)
@@ -56,38 +66,40 @@ VDP_TASK_QUEUE_JOB Macro jobAddress
 
 
 ;-------------------------------------------------
-; Queue a VDP job
+; Queue a VDP task
 ; ----------------
 ; Input:
 ; - a0: Address of the job callback
+; - a1: Data address to associate with the job
 ; Uses: a1
-VDPTaskQueueJob:
-        VDP_TASK_QUEUE_JOB a0
+VDPTaskQueueAdd:
+        VDP_TASK_QUEUE_ADD a0, a1
         rts
 
 
 ;-------------------------------------------------
 ; Process the VDP task queue.
 ; ----------------
-; Uses: d0-d7/a0-a6
+; Uses: d0-d7/a0-a6 (Unknown due to delegation)
 VDPTaskQueueProcess:
         OS_LOCK
 
-        lea     vdpTaskQueue, a0
-        move.w  vdpTaskQueueCurrentEntry, a1
-        cmpa    a0, a1
+        lea     vdpTaskQueue, a1
+        move.w  vdpTaskQueueCurrentEntry, a2
+        cmpa    a1, a2
         beq     .vdpTaskTransferComplete        ; Nothing to transfer
 
-        move.w  a0, vdpTaskQueueCurrentEntry
+        move.w  a1, vdpTaskQueueCurrentEntry
 
     .vdpTaskLoop:
-        move.l  (a0)+, a3
+        move.l  (a1)+, a3
+        move.l  (a1)+, a0
 
-        PUSHM   a0-a1
+        PUSHM   a1-a2
         jsr     (a3)
-        POPM    a0-a1
+        POPM    a1-a2
 
-        cmpa    a0, a1
+        cmpa    a1, a2
         bne .vdpTaskLoop
 
     .vdpTaskTransferComplete:

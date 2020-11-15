@@ -202,6 +202,20 @@ VDP_REG_SET_BIT_FIELD Macro vdpReg, bitFieldMask, bitFieldValue
 
 
 ;----------------------------------------------
+; Set vram address, access type and data stride
+; ----------------
+VDP_ADDR_SET Macro accessType, ramType, address, dataStride
+        If (narg = 4)
+            VDP_REG_SET vdpRegIncr, \dataStride
+        EndIf
+
+        Local __AS
+        VDP_ADDR_SET_CONST.__AS  \accessType, \ramType, \address
+        move.l #__AS, (MEM_VDP_CTRL)
+    Endm
+
+
+;----------------------------------------------
 ; Initialize the VDP for first use
 ; ----------------
 VDPInit:

@@ -10,3 +10,10 @@ EngineInit:
         jsr DefaultViewportTrackerInit
         jsr EngineTickInit
         rts
+
+
+;-------------------------------------------------
+; No operations handler
+; ----------------
+NoOperation:
+    rts

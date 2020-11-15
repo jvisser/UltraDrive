@@ -156,7 +156,7 @@ CameraMove:
 ; ----------------
 ; Input:
 ; - a0: Camera
-; Uses: d0-d7/a0-a6
+; Uses: d0-d7/a1-a6
 CameraFinalize:
 _DISPLACEMENT_CLAMP Macro displacement
                 cmpi.w  #-PATTERN_DIMENSION, d0
