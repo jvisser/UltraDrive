@@ -1010,6 +1010,7 @@ frameInterval: 60</property>
  <tile id="695" type="Block"/>
  <tile id="696" type="ViewportAnimationBlock">
   <properties>
+   <property name="animation_camera" value="background"/>
    <property name="animation_id" value="clouds_light"/>
   </properties>
   <animation>
@@ -1056,6 +1057,7 @@ frameInterval: 60</property>
  <tile id="719" type="Block"/>
  <tile id="720" type="ViewportAnimationBlock">
   <properties>
+   <property name="animation_camera" value="background"/>
    <property name="animation_id" value="clouds_dark"/>
    <property name="animation_shift" type="int" value="2"/>
   </properties>
@@ -1104,7 +1106,6 @@ frameInterval: 60</property>
  <tile id="744" type="ViewportAnimationBlock">
   <properties>
    <property name="animation_axis" value="y"/>
-   <property name="animation_camera" value="foreground"/>
    <property name="animation_id" value="wall_vertical"/>
    <property name="animation_shift" type="int" value="3"/>
   </properties>
