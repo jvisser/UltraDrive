@@ -200,7 +200,7 @@ TilesetLoad:
 ; Unload the tileset
 ; ----------------
 TilesetUnload:
-        ENGINE_TICKER_DISABLE TICKER_TILESET
+        ENGINE_SCHEDULER_DISABLE SCHEDULER_TILESET
 
         ; Uninstall foreground/background camera handlers
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportBackground
@@ -277,7 +277,7 @@ _TilesetLoadAnimations:
         jsr     VDPDMAQueueFlush
 
         ; Enable animation ticker
-        ENGINE_TICKER_ENABLE TICKER_TILESET
+        ENGINE_SCHEDULER_ENABLE SCHEDULER_TILESET
         rts
 
 
@@ -330,7 +330,7 @@ TilesetScheduleManualAnimations:
 ; Animation scheduler
 ; ----------------
 ; Uses: d0-d2/a0-a1
-TilesetTick:
+TilesetSchedule:
         lea     tilesetAnimationSchedules, a0
         move.l  loadedTileset, a1
         move.w  tsAnimationsCount(a1), d0
@@ -414,7 +414,7 @@ _TilesetAnimationFrame:
 
 
 ;-------------------------------------------------
-; Called when one of the viewport cameras moves. Updates viewport scheduled animations.
+; Called when one of the viewport cameras move. Updates viewport scheduled animations.
 ; ----------------
 ; Input:
 ;- a0: Camera address

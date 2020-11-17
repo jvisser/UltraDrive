@@ -31,7 +31,7 @@
     ; Engine
     ; ----------------
     Include './engine/engine.asm'
-    Include './engine/ticker.asm'
+    Include './engine/scheduler.asm'
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
     Include './engine/map.asm'

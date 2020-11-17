@@ -8,7 +8,7 @@
 EngineInit:
         jsr ViewportLibraryInit
         jsr DefaultViewportTrackerInit
-        jsr EngineTickInit
+        jsr EngineSchedulerInit
         rts
 
 
