@@ -40,6 +40,10 @@ class TileMapBuilder
 
     public TileMap build(Tileset tileset)
     {
-        return new TileMap(tileset, chunkReferences, mapModel.getName(), mapModel.getWidth(), mapModel.getHeight());
+        return new TileMap(tileset, chunkReferences,
+                           mapModel.getName(),
+                           mapModel.getWidth(),
+                           mapModel.getHeight(),
+                           mapModel.getProperties());
     }
 }

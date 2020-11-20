@@ -17,7 +17,8 @@
             dc.l Map[(${backgroundMapName})]
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-
+            ; .backgroundTrackerAddress
+            dc.l [(${#strings.toLowerCase(map.properties.getOrDefault('background_tracker', map.properties['background'].properties['background_tracker']))})]BackgroundTracker
         Even
     [/]
 

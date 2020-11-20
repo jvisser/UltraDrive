@@ -9,6 +9,7 @@
         STRUCT_MEMBER.l mapForegroundAddress
         STRUCT_MEMBER.l mapBackgroundAddress
         STRUCT_MEMBER.l mapTilesetAddress
+        STRUCT_MEMBER.l backgroundTrackerAddress
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Map
