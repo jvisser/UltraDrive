@@ -7,7 +7,7 @@
 ; ----------------
 EngineInit:
         jsr ViewportLibraryInit
-        jsr StreamingBackgroundTrackerInit
+        jsr BackgroundTrackerInit
         jsr EngineSchedulerInit
         rts
 

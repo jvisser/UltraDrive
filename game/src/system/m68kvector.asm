@@ -4,7 +4,7 @@
 
 DEFAULT_EXCEPTION_HANDLER Macro handler
         If ~def(\handler)
-                Inform 0, 'Exception "%s" not defined, using default handler', '\handler'
+                Inform 0, 'Exception handler "%s" not defined, using default handler', '\handler'
 \handler Equ Exception
         EndIf
     Endm
