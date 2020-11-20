@@ -37,7 +37,8 @@
     Include './engine/map.asm'
     Include './engine/camera.asm'
     Include './engine/viewport.asm'
-    Include './engine/viewporttracker.asm'
+    Include './engine/backgroundtracker.asm'
+    Include './engine/streamingbackground.asm'
     Include './engine/tileset.asm'
 
 

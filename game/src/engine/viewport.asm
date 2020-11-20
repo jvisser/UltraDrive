@@ -60,7 +60,7 @@ ViewportLibraryInit:
 ; Input:
 ; - a0: MapHeader to associate with viewport
 ; - a1: Viewport finalize handler. Can be null.
-; - a2: Address of viewport tracker. If null defaultViewportTracker will be used.
+; - a2: Address of background tracker. If null streamingBackgroundTracker will be used.
 ; - d0: x
 ; - d1: y
 ; Uses: d0-d7/a0-a6
@@ -73,10 +73,10 @@ ViewportInit:
     .finalizeHandlerSupplied:
         move.l a1, (viewport + viewportFinalizeHandler)
 
-        ; Set viewport tracker
+        ; Set background tracker
         cmpa.w  #0, a2
         bne     .viewportTrackerSupplied
-        lea     defaultViewportTracker, a2
+        lea     streamingBackgroundTracker, a2
     .viewportTrackerSupplied:
         move.l  a2, (viewport + viewportTracker)
 
@@ -88,11 +88,11 @@ ViewportInit:
         jsr     CameraInit
         POPL    a0
 
-        ; Let viewport tracker calculate the background camera position based on the background map and foreground camera
+        ; Let background tracker calculate the background camera position based on the background map and foreground camera
         PUSHL   a0
         movea.l mapBackgroundAddress(a0), a0
         lea     (viewport + viewportForeground), a1
-        movea.l vptStart(a2), a2
+        movea.l btStart(a2), a2
         jsr     (a2)
         POPL    a0
 
@@ -132,9 +132,9 @@ ViewportFinalize:
         lea     (viewport + viewportForeground), a0
         jsr     CameraFinalize
 
-        ; Let viewport tracker update the background camera
+        ; Let the background tracker update the background camera
         movea.l (viewport + viewportTracker), a2
-        movea.l vptSync(a2), a2
+        movea.l btSync(a2), a2
         lea     (viewport + viewportBackground), a0
         lea     (viewport + viewportForeground), a1
         jsr     (a2)
@@ -143,9 +143,9 @@ ViewportFinalize:
         lea     (viewport + viewportBackground), a0
         jsr     CameraFinalize
 
-        ; Finalize viewport tracker
+        ; Finalize the background tracker
         movea.l (viewport + viewportTracker), a2
-        movea.l vptFinalize(a2), a2
+        movea.l btFinalize(a2), a2
         jsr     (a2)
 
         ; Call viewport finalize handler

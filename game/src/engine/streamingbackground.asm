@@ -1,42 +1,37 @@
 ;------------------------------------------------------------------------------------------
-; Viewport background camera tracker
+; Streaming background tracker implementation. Scrolls at a rate of the ratio between the background and foreground maps. 
+; Streams in map data as required.
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Viewport tracker structures
+; Streaming background tracker structures
 ; ----------------
-    DEFINE_STRUCT ViewportTracker
-        STRUCT_MEMBER.l vptStart                ; Calculates the initial background camera position based on the background map and foreground camera
-        STRUCT_MEMBER.l vptSync                 ; Sync the background camera with the foreground camera
-        STRUCT_MEMBER.l vptFinalize             ; Finalize the tracker for the current frame
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT DefaultViewportTracker, EXTENDS, ViewportTracker
-        STRUCT_MEMBER.l dvptX                  ; Current X in (16:16 fixedpoint)
-        STRUCT_MEMBER.l dvptY                  ; Current Y in (16:16 fixedpoint)
-        STRUCT_MEMBER.l dvptXSteps, 8          ; Increments for each camera displacement (16:16 fixedpoint)
-        STRUCT_MEMBER.l dvptYSteps, 8
+    DEFINE_STRUCT StreamingBackgroundTracker, EXTENDS, BackgroundTracker
+        STRUCT_MEMBER.l sbtX                                                ; Current X in (16:16 fixedpoint)
+        STRUCT_MEMBER.l sbtY                                                ; Current Y in (16:16 fixedpoint)
+        STRUCT_MEMBER.l sbtXSteps, 8                                        ; Increments for each camera displacement (16:16 fixedpoint)
+        STRUCT_MEMBER.l sbtYSteps, 8
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
-        VAR.DefaultViewportTracker  defaultViewportTracker
+        VAR.StreamingBackgroundTracker  streamingBackgroundTracker
     DEFINE_VAR_END
 
-    INIT_STRUCT defaultViewportTracker
-        INIT_STRUCT_MEMBER.vptStart     DefaultViewportTrackerStart
-        INIT_STRUCT_MEMBER.vptSync      DefaultViewportTrackerSync
-        INIT_STRUCT_MEMBER.vptFinalize  DefaultViewportTrackerFinalize
+    INIT_STRUCT streamingBackgroundTracker
+        INIT_STRUCT_MEMBER.btStart     StreamingBackgroundTrackerStart
+        INIT_STRUCT_MEMBER.btSync      StreamingBackgroundTrackerSync
+        INIT_STRUCT_MEMBER.btFinalize  StreamingBackgroundTrackerFinalize
     INIT_STRUCT_END
 
 
 ;-------------------------------------------------
-; Initialize the default tracker. Should be called at least once before using the default tracker
+; Initialize the streaming background tracker. Should be called at least once before using.
 ; ----------------
-DefaultViewportTrackerInit Equ defaultViewportTrackerInit
+StreamingBackgroundTrackerInit Equ streamingBackgroundTrackerInit
 
 
 ;-------------------------------------------------
-; Default viewport tracker start implementation. Calculates the ratio between the back/foreground maps. And returns the background camera position
+; Streaming background tracker start implementation. Calculates the ratio between the back/foreground maps. And returns the background camera position
 ; ----------------
 ; Input:
 ; - a0: Background map address
@@ -45,7 +40,7 @@ DefaultViewportTrackerInit Equ defaultViewportTrackerInit
 ; - d0: Camera x position
 ; - d1: Camera y position
 ; Uses: d0-d5/a2-a3
-DefaultViewportTrackerStart:
+StreamingBackgroundTrackerStart:
 _FP16_MUL Macro result, multiplierfp16
             move.w  \result, d4
             mulu    \multiplierfp16, d4
@@ -83,8 +78,8 @@ _FP16_MUL Macro result, multiplierfp16
         move.w  d3, d1
         move.l  d0, d2
         move.l  d1, d3
-        lea     (defaultViewportTracker + dvptXSteps), a2
-        lea     (defaultViewportTracker + dvptYSteps), a3
+        lea     (streamingBackgroundTracker + sbtXSteps), a2
+        lea     (streamingBackgroundTracker + sbtYSteps), a3
         Rept 8
             move.l  d0, (a2)+
             move.l  d1, (a3)+
@@ -95,12 +90,12 @@ _FP16_MUL Macro result, multiplierfp16
         ; Update initial camera position
         move.w  camX(a1), d0
         _FP16_MUL d0, d2
-        move.l  d0, (defaultViewportTracker + dvptX)
+        move.l  d0, (streamingBackgroundTracker + sbtX)
         swap    d0                                              ; Expects non fixed point result
 
         move.w  camY(a1), d1
         _FP16_MUL d1, d3
-        move.l  d1, (defaultViewportTracker + dvptY)
+        move.l  d1, (streamingBackgroundTracker + sbtY)
         swap    d1                                              ; Expects non fixed point result
 
         Purge _FP16_MUL
@@ -108,12 +103,12 @@ _FP16_MUL Macro result, multiplierfp16
 
 
 ;-------------------------------------------------
-; Default viewport tracker sync implementation
+; Streaming background tracker sync implementation
 ; ----------------
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
-DefaultViewportTrackerSync:
+StreamingBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
                 move.w  \sourceDisplacement(a1), \result
                 beq     .noMovement\@
@@ -124,7 +119,7 @@ _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
                 subq    #1, \result
                 add     \result, \result
                 add     \result, \result
-                lea     defaultViewportTracker, a2
+                lea     streamingBackgroundTracker, a2
                 move.l  \stepTable(a2, \result), \result
                 tst.w   d2
                 bpl     .positive2\@
@@ -141,8 +136,8 @@ _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
             .noMovement\@:
         Endm
 
-        _MOVE_CAMERA_COMPONENT d0, camLastXDisplacement, dvptX, dvptXSteps
-        _MOVE_CAMERA_COMPONENT d1, camLastYDisplacement, dvptY, dvptYSteps
+        _MOVE_CAMERA_COMPONENT d0, camLastXDisplacement, sbtX, sbtXSteps
+        _MOVE_CAMERA_COMPONENT d1, camLastYDisplacement, sbtY, sbtYSteps
 
         CAMERA_MOVE d0, d1
 
@@ -155,12 +150,12 @@ _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
 ; ----------------
 ; Input:
 ; - a0: Background camera
-DefaultViewportTrackerFinalize:
+StreamingBackgroundTrackerFinalize:
         tst.l   camLastXDisplacement(a0)
         beq     .noMovement
 
         ; Update VDP scroll values if there was camera movement
-        VDP_TASK_QUEUE_ADD #_DefaultViewportTrackerCommit, a0
+        VDP_TASK_QUEUE_ADD #_StreamingBackgroundTrackerCommit, a0
 
     .noMovement:
         rts
@@ -171,7 +166,7 @@ DefaultViewportTrackerFinalize:
 ; ----------------
 ; Input:
 ; - a0: Background camera
-_DefaultViewportTrackerCommit:
+_StreamingBackgroundTrackerCommit:
 
         ; Update horizontal scroll
         VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR + 2
