@@ -74,10 +74,7 @@ ViewportInit:
         move.l a1, (viewport + viewportFinalizeHandler)
 
         ; Set background tracker
-        cmpa.w  #0, a2
-        bne     .viewportTrackerSupplied
-        lea     streamingBackgroundTracker, a2
-    .viewportTrackerSupplied:
+        move.l  backgroundTrackerAddress(a0), a2            ; a2 = background tracker address
         move.l  a2, (viewport + viewportTracker)
 
         ; Initialize foreground plane camera

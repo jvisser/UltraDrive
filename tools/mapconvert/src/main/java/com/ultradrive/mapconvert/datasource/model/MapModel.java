@@ -1,6 +1,9 @@
 package com.ultradrive.mapconvert.datasource.model;
 
-public interface MapModel
+import com.ultradrive.mapconvert.common.PropertySource;
+
+
+public interface MapModel extends PropertySource
 {
     String getName();
     

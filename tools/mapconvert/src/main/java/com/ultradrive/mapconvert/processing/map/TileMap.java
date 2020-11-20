@@ -4,7 +4,6 @@ import com.ultradrive.mapconvert.common.PropertySource;
 import com.ultradrive.mapconvert.config.PreAllocatedPattern;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,11 +21,12 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
     private final int width;
     private final int height;
 
-    TileMap(Tileset tileset, List<ChunkReference> chunkReferences, String name, int width, int height)
+    TileMap(Tileset tileset, List<ChunkReference> chunkReferences, String name, int width, int height,
+            Map<String, Object> properties)
     {
         this.tileset = tileset;
         this.chunkReferences = chunkReferences;
-        this.properties = Collections.emptyMap();
+        this.properties = properties;
         this.name = name;
         this.width = width;
         this.height = height;
