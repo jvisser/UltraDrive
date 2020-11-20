@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Streaming background tracker implementation. Scrolls at a rate of the ratio between the background and foreground maps. 
+; Streaming background tracker implementation. Scrolls at a rate of the ratio between the background and foreground maps.
 ; Streams in map data as required.
 ;------------------------------------------------------------------------------------------
 
@@ -18,9 +18,9 @@
     DEFINE_VAR_END
 
     INIT_STRUCT streamingBackgroundTracker
-        INIT_STRUCT_MEMBER.btStart     StreamingBackgroundTrackerStart
-        INIT_STRUCT_MEMBER.btSync      StreamingBackgroundTrackerSync
-        INIT_STRUCT_MEMBER.btFinalize  StreamingBackgroundTrackerFinalize
+        INIT_STRUCT_MEMBER.btStart     _StreamingBackgroundTrackerStart
+        INIT_STRUCT_MEMBER.btSync      _StreamingBackgroundTrackerSync
+        INIT_STRUCT_MEMBER.btFinalize  _StreamingBackgroundTrackerFinalize
     INIT_STRUCT_END
 
 
@@ -40,7 +40,7 @@ StreamingBackgroundTrackerInit Equ streamingBackgroundTrackerInit
 ; - d0: Camera x position
 ; - d1: Camera y position
 ; Uses: d0-d5/a2-a3
-StreamingBackgroundTrackerStart:
+_StreamingBackgroundTrackerStart:
 _FP16_MUL Macro result, multiplierfp16
             move.w  \result, d4
             mulu    \multiplierfp16, d4
@@ -108,7 +108,7 @@ _FP16_MUL Macro result, multiplierfp16
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
-StreamingBackgroundTrackerSync:
+_StreamingBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
                 move.w  \sourceDisplacement(a1), \result
                 beq     .noMovement\@
@@ -150,7 +150,8 @@ _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
 ; ----------------
 ; Input:
 ; - a0: Background camera
-StreamingBackgroundTrackerFinalize:
+; Uses: a2
+_StreamingBackgroundTrackerFinalize:
         tst.l   camLastXDisplacement(a0)
         beq     .noMovement
 
@@ -166,16 +167,7 @@ StreamingBackgroundTrackerFinalize:
 ; ----------------
 ; Input:
 ; - a0: Background camera
+; Uses: d0
 _StreamingBackgroundTrackerCommit:
-
-        ; Update horizontal scroll
-        VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR + 2
-        move.w  camX(a0), d0
-        neg.w   d0
-        move.w  d0, (MEM_VDP_DATA)
-
-        ; Update vertical scroll
-        VDP_ADDR_SET WRITE, VSRAM, $02
-        move.w  camY(a0), d1
-        move.w  d1, (MEM_VDP_DATA)
+        BACKGROUND_UPDATE_VDP_SCROLL camX(a0), camY(a0)
         rts

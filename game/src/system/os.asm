@@ -2,10 +2,6 @@
 ; Basic OS. Handles all mandatory tasks (updating VDP state and reading IO state for use by the main program loop)
 ;------------------------------------------------------------------------------------------
 
-VBlankInterruptHandler  Equ OSPrepareNextFrame
-OSInit                  Equ osContextInit
-
-
 ;-------------------------------------------------
 ; OS Context
 ; ----------------
@@ -26,6 +22,13 @@ OSInit                  Equ osContextInit
         INIT_STRUCT_MEMBER.osFramesSkipped            0
         INIT_STRUCT_MEMBER.osFrameProcessedCallback   _OSFrameProcessedCallback
     INIT_STRUCT_END
+
+
+;-------------------------------------------------
+; Aliases
+; ----------------
+VBlankInterruptHandler  Equ OSPrepareNextFrame
+OSInit                  Equ osContextInit
 
 
 ;-------------------------------------------------

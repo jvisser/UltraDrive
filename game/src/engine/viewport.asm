@@ -172,7 +172,7 @@ _ViewportFinalize:
 ; ----------------
 ; Input:
 ; - a0: Foreground camera
-; Uses: d0-d1
+; Uses: d0
 _ViewportCommit:
 
         ; Update horizontal scroll
@@ -183,6 +183,6 @@ _ViewportCommit:
 
         ; Update vertical scroll
         VDP_ADDR_SET WRITE, VSRAM, $00
-        move.w  camY(a0), d1
-        move.w  d1, (MEM_VDP_DATA)
+        move.w  camY(a0), d0
+        move.w  d0, (MEM_VDP_DATA)
         rts

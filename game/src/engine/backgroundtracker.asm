@@ -3,7 +3,7 @@
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Viewport tracker structures
+; Background tracker base structure
 ; ----------------
     DEFINE_STRUCT BackgroundTracker
         STRUCT_MEMBER.l btStart                ; Calculates the initial background camera position based on the background map and foreground camera
