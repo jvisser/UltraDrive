@@ -15,6 +15,8 @@ TILING_BACKGROUND_TRACKER_SHIFT Equ 2
     DEFINE_STRUCT TilingBackgroundTracker, EXTENDS, BackgroundTracker
         STRUCT_MEMBER.w tbtX                                                ; Current X
         STRUCT_MEMBER.w tbtY                                                ; Current Y
+        STRUCT_MEMBER.b tbtLockX                                            ; Lock horizontal movement
+        STRUCT_MEMBER.b tbtLockY                                            ; Lock vertical movement
         STRUCT_MEMBER.w tbtLastX                                            ; Previous X
         STRUCT_MEMBER.w tbtLastY                                            ; Previous Y
     DEFINE_STRUCT_END
@@ -47,6 +49,9 @@ TilingBackgroundTrackerInit Equ tilingBackgroundTrackerInit
 ; - d1: Camera y position
 ; Uses: d0-d5/a2-a3
 _TilingBackgroundTrackerStart:
+        move.b   mapLockHorizontal(a0), (tilingBackgroundTracker + tbtLockX)
+        move.b   mapLockVertical(a0), (tilingBackgroundTracker + tbtLockY)
+
         moveq   #0, d0
         moveq   #0, d1
         rts
@@ -59,12 +64,22 @@ _TilingBackgroundTrackerStart:
 ; - a0: Background camera
 ; - a1: Foreground camera
 _TilingBackgroundTrackerSync
-        move.l  camX(a1), d0
-        lsr.w   #TILING_BACKGROUND_TRACKER_SHIFT, d0
-        move.w  d0, (tilingBackgroundTracker + tbtY)
-        swap    d0
+
+        ; Update horizontal scroll
+        tst.b   (tilingBackgroundTracker + tbtLockX)
+        bne     .horizontallyLocked
+        move.w  camX(a1), d0
         lsr.w   #TILING_BACKGROUND_TRACKER_SHIFT, d0
         move.w  d0, (tilingBackgroundTracker + tbtX)
+    .horizontallyLocked:
+
+        ; Update vertical scroll
+        tst.b   (tilingBackgroundTracker + tbtLockY)
+        bne     .verticallyLocked
+        move.w  camY(a1), d0
+        lsr.w   #TILING_BACKGROUND_TRACKER_SHIFT, d0
+        move.w  d0, (tilingBackgroundTracker + tbtY)
+    .verticallyLocked:
         rts
 
 
