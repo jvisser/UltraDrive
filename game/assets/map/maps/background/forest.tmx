@@ -2,6 +2,8 @@
 <map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
  <properties>
   <property name="background_tracker" value="streaming"/>
+  <property name="camera_lock_horizontal" type="bool" value="true"/>
+  <property name="camera_lock_vertical" type="bool" value="false"/>
  </properties>
  <tileset firstgid="1" source="../../tilesets/forest/chunks.tsx"/>
  <layer id="1" name="Chunks" width="10" height="10">
