@@ -95,8 +95,12 @@ Main:
         POPM    d0-d1
     .noPadA:
 
+        PROFILE_CPU_START
+
         jsr     ViewportMove
         jsr     ViewportFinalize
+
+        PROFILE_CPU_END
 
         PROFILE_FRAME_TIME_END
 

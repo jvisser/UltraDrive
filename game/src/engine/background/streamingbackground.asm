@@ -9,6 +9,8 @@
     DEFINE_STRUCT StreamingBackgroundTracker, EXTENDS, BackgroundTracker
         STRUCT_MEMBER.l sbtX                                                ; Current X in (16:16 fixedpoint)
         STRUCT_MEMBER.l sbtY                                                ; Current Y in (16:16 fixedpoint)
+        STRUCT_MEMBER.b sbtLockX                                            ; Lock horizontal movement
+        STRUCT_MEMBER.b sbtLockY                                            ; Lock vertical movement
         STRUCT_MEMBER.l sbtXSteps, 8                                        ; Increments for each camera displacement (16:16 fixedpoint)
         STRUCT_MEMBER.l sbtYSteps, 8
     DEFINE_STRUCT_END
@@ -88,15 +90,23 @@ _FP16_MUL Macro result, multiplierfp16
         Endr
 
         ; Update initial camera position
+        moveq   #0, d0
+        move.b   mapLockHorizontal(a0), (streamingBackgroundTracker + sbtLockX)
+        bne     .horizontallyLocked
         move.w  camX(a1), d0
         _FP16_MUL d0, d2
         move.l  d0, (streamingBackgroundTracker + sbtX)
         swap    d0                                              ; Expects non fixed point result
+    .horizontallyLocked:
 
+        moveq   #0, d1
+        move.b   mapLockVertical(a0), (streamingBackgroundTracker + sbtLockY)
+        bne     .verticallyLocked
         move.w  camY(a1), d1
         _FP16_MUL d1, d3
         move.l  d1, (streamingBackgroundTracker + sbtY)
         swap    d1                                              ; Expects non fixed point result
+    .verticallyLocked:
 
         Purge _FP16_MUL
         rts
@@ -108,8 +118,12 @@ _FP16_MUL Macro result, multiplierfp16
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
+; Uses: d0-d3/a2
 _StreamingBackgroundTrackerSync:
-_MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
+_MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable, lock
+                moveq   #0, \result
+                tst.b   \lock(a2)
+                bne     .noMovement\@
                 move.w  \sourceDisplacement(a1), \result
                 beq     .noMovement\@
                 move.w  \result, d2
@@ -119,7 +133,6 @@ _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
                 subq    #1, \result
                 add     \result, \result
                 add     \result, \result
-                lea     streamingBackgroundTracker, a2
                 move.l  \stepTable(a2, \result), \result
                 tst.w   d2
                 bpl     .positive2\@
@@ -136,8 +149,10 @@ _MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable
             .noMovement\@:
         Endm
 
-        _MOVE_CAMERA_COMPONENT d0, camLastXDisplacement, sbtX, sbtXSteps
-        _MOVE_CAMERA_COMPONENT d1, camLastYDisplacement, sbtY, sbtYSteps
+        lea streamingBackgroundTracker, a2
+
+        _MOVE_CAMERA_COMPONENT d0, camLastXDisplacement, sbtX, sbtXSteps, sbtLockX
+        _MOVE_CAMERA_COMPONENT d1, camLastYDisplacement, sbtY, sbtYSteps, sbtLockY
 
         CAMERA_MOVE d0, d1
 
