@@ -38,6 +38,10 @@
         dc.w [(${map.height * 16 * 8})]
         ; .mapDataAddress
         dc.l Map[(${mapName})]Data
+        ; .mapLockHorizontal
+        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('camera_lock_horizontal', false))})]
+        ; .mapLockVertical
+        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('camera_lock_vertical', false))})]
         ; .mapRowOffsetTable
         dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
 
