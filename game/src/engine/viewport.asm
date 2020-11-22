@@ -8,7 +8,6 @@
     DEFINE_STRUCT Viewport
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
-        STRUCT_MEMBER.l         viewportFinalizeHandler         ; Called after viewport finalization
         STRUCT_MEMBER.l         viewportTracker                 ; Used to update the background camera
     DEFINE_STRUCT_END
 
@@ -59,19 +58,10 @@ ViewportLibraryInit:
 ; ----------------
 ; Input:
 ; - a0: MapHeader to associate with viewport
-; - a1: Viewport finalize handler. Can be null.
-; - a2: Address of background tracker. If null streamingBackgroundTracker will be used.
 ; - d0: x
 ; - d1: y
 ; Uses: d0-d7/a0-a6
 ViewportInit:
-
-        ; Set viewport finalize handler
-        cmpa.w  #0, a1
-        bne     .finalizeHandlerSupplied
-        lea     _ViewportFinalize, a1
-    .finalizeHandlerSupplied:
-        move.l a1, (viewport + viewportFinalizeHandler)
 
         ; Set background tracker
         move.l  backgroundTrackerAddress(a0), a2            ; a2 = background tracker address
@@ -129,6 +119,12 @@ ViewportFinalize:
         lea     (viewport + viewportForeground), a0
         jsr     CameraFinalize
 
+        ; If camera changed update VDP scroll
+        tst.l   camLastXDisplacement(a0)
+        beq     .noMovement
+        VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
+    .noMovement:
+
         ; Let the background tracker update the background camera
         movea.l (viewport + viewportTracker), a2
         movea.l btSync(a2), a2
@@ -143,29 +139,8 @@ ViewportFinalize:
         ; Finalize the background tracker
         movea.l (viewport + viewportTracker), a2
         movea.l btFinalize(a2), a2
-        jsr     (a2)
-
-        ; Call viewport finalize handler
-        lea     (viewport + viewportForeground), a0
-        move.l  (viewport + viewportFinalizeHandler), a1
-        jmp     (a1)
-
-
-;-------------------------------------------------
-; Default finalize handler. Updates the VDP scroll values for the foreground camera
-; ----------------
-; Input:
-; - a0: Foreground camera
-_ViewportFinalize:
-        tst.l   camLastXDisplacement(a0)
-        beq     .noMovement
-
-        ; Update VDP scroll values if there was camera movement
-        VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
-
-    .noMovement:
-        rts
-
+        jmp     (a2)
+        
 
 ;-------------------------------------------------
 ; Default commit handler. Assumes plane based scolling and updates scroll values accordingly.
