@@ -14,32 +14,33 @@
         STRUCT_MEMBER.l dmaTarget
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT VDPDMACommandList
+    DEFINE_STRUCT VDPDMACommandListBase
         STRUCT_MEMBER.w vdpRegAutoInc
         STRUCT_MEMBER.w vdpRegDMALengthHigh
         STRUCT_MEMBER.w vdpRegDMALengthLow
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT VDPDMATransferCommandList, EXTENDS, VDPDMACommandList
-        STRUCT_MEMBER.w vdpRegDMASourceHigh
+    DEFINE_STRUCT VDPDMATransferCommandListBase, EXTENDS, VDPDMACommandListBase
         STRUCT_MEMBER.w vdpRegDMASourceMid
         STRUCT_MEMBER.w vdpRegDMASourceLow
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT VDPDMATransferCommandList, EXTENDS, VDPDMATransferCommandListBase
+        STRUCT_MEMBER.w vdpRegDMASourceHigh
         STRUCT_MEMBER.l vdpAddrDMATransferDestination
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT VDPDMACopyCommandList, EXTENDS, VDPDMACommandList
-        STRUCT_MEMBER.w vdpRegDMAVRAMSourceMid
-        STRUCT_MEMBER.w vdpRegDMAVRAMSourceLow
+    DEFINE_STRUCT VDPDMACopyCommandList, EXTENDS, VDPDMATransferCommandListBase
         STRUCT_MEMBER.l vdpAddrDMACopyDestination
     DEFINE_STRUCT_END
     
-    DEFINE_STRUCT VDPDMAFillCommandList, EXTENDS, VDPDMACommandList
+    DEFINE_STRUCT VDPDMAFillCommandList, EXTENDS, VDPDMACommandListBase
         STRUCT_MEMBER.l vdpAddrDMAFillDestination        
     DEFINE_STRUCT_END
 
 
 ;-------------------------------------------------
-; Store VDPDMACommandList
+; Store VDPDMACommandListBase
 ; ----------------
 _VDP_DMA_DEFINE_COMMAND_LIST Macro length, dataStride
         If (strcmp('\dataStride', ''))
