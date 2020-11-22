@@ -13,14 +13,9 @@ VDP_DMA_QUEUE_SIZE Equ 32
 ;-------------------------------------------------
 ; DMA queue data
 ; ----------------
-    DEFINE_STRUCT VDPDMAQueueEntry
-        STRUCT_MEMBER.w                         dmaQueuedataStride          ; Auto increment
-        STRUCT_MEMBER.VDPDMATransferCommandList dmaQueueTranferCommands
-    DEFINE_STRUCT_END
-
     DEFINE_VAR FAST
-        VAR.VDPDMAQueueEntry    vdpDMAQueue,                VDP_DMA_QUEUE_SIZE
-        VAR.w                   vdpDMAQueueCurrentEntry
+        VAR.VDPDMATransferCommandList   vdpDMAQueue,                VDP_DMA_QUEUE_SIZE
+        VAR.w                           vdpDMAQueueCurrentEntry
     DEFINE_VAR_END
 
 
@@ -40,21 +35,21 @@ VDP_DMA_QUEUE_ADD Macro dmaTransfer
             EndIf
 
             ; Write data stride
-            move.b  dmaDataStride + 1(a0), dmaQueuedataStride + 1(a1)
+            move.b  dmaDataStride + 1(a0), vdpRegAutoInc + 1(a1)
 
             ; Write DMA source. Use vdpRegDMALengthLow as overflow area for high byte (will be overwritten in next step)
             move.l  dmaSource(a0), d0
-            movep.l d0, dmaQueueTranferCommands + vdpRegDMALengthLow + 1(a1)
+            movep.l d0, vdpRegDMALengthLow + 1(a1)
 
             ; Write DMA length in words
             move.w  dmaLength(a0), d0
-            movep.w d0, dmaQueueTranferCommands + vdpRegDMALengthHigh + 1(a1)
+            movep.w d0, vdpRegDMALengthHigh + 1(a1)
 
             ; Write DMA target
-            move.l  dmaTarget(a0), dmaQueueTranferCommands + vdpAddrDMADestination(a1)
+            move.l  dmaTarget(a0), vdpAddrDMATransferDestination(a1)
 
             ; Next entry
-            addi.w  #VDPDMAQueueEntry_Size, a1
+            addi.w  #VDPDMATransferCommandList_Size, a1
             move.w  a1, vdpDMAQueueCurrentEntry
 
             If def(debug)
@@ -81,7 +76,7 @@ VDPDMAQueueInit:
 
     .initDMAQueueEntryLoop:
 
-        ; VDPDMAQueueEntry
+        ; VDPDMATransferCommandList
         move.w  #VDP_CMD_RS_AUTO_INC,  (a0)+    ; vdpRegIncr
         move.w  #VDP_CMD_RS_DMA_LEN_H, (a0)+    ; vdpRegDMALengthHigh
         move.w  #VDP_CMD_RS_DMA_LEN_L, (a0)+    ; vdpRegDMALengthLow

@@ -79,7 +79,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     ; struct TilesetPalette
     Tileset[(${tilesetName})]PaletteData:
         ; .tsPaletteDMATransferCommandList
-        VDP_DMA_DEFINE_CRAM_COMMAND_LIST Tileset[(${tilesetName})]PaletteColors, 0, 64
+        VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]PaletteColors, 0, 64
         ; .tsColors
         Tileset[(${tilesetName})]PaletteColors:
             [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04X', tileset.palette)}" ]
@@ -141,7 +141,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
                     dc.w [(${compressionResult.compressedSize})]
 
                     ; .tsPatternDMATransferCommandList
-                    VDP_DMA_DEFINE_VRAM_COMMAND_LIST tilesetPatternDecompressionBuffer, [(${allocation.patternBaseId * 32 + moduleOffset})], [(${module.size / 2})]
+                    VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST tilesetPatternDecompressionBuffer, [(${allocation.patternBaseId * 32 + moduleOffset})], [(${module.size / 2})]
 
                     ; .tsPatternData
                     [# th:each="compressedPatternData : ${#format.formatArray('dc.b ', ', ', 16, '$%02x', compressionResult)}" ]
