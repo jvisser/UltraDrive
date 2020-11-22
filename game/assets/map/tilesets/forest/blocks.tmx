@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="24" height="41" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="1">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="24" height="41" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="1">
  <tileset firstgid="1" source="graphicblocks.tsx"/>
  <tileset firstgid="985" source="../meta/collisionblocks.tsx"/>
  <tileset firstgid="1017" source="../meta/priorityblocks.tsx"/>
@@ -93,7 +93,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="1" name="Collision" width="24" height="41" visible="0" opacity="0.53">
+ <layer id="1" name="Collision" width="24" height="41" opacity="0.53">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -103,7 +103,7 @@
 985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,1000,1001,1002,1003,1004,1005,1006,0,0,
 985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,1000,1001,1002,1003,1004,1005,1006,0,0,
 985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,985,0,0,
 985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,1000,1001,1002,1003,1004,1005,1006,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
