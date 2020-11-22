@@ -101,6 +101,10 @@ PLANE_SIZE_H128_V32         Equ $03          ; 1024 * 256 plane size
 WIN_X_RIGHT                 Equ $80          ; Show window on the right
 WIN_Y_DOWN                  Equ $80          ; Show window from bottom
 
+; DMA source high register values for fill/copy dma mode
+DMA_SRC_H_FILL              Equ $80
+DMA_SRC_H_COPY              Equ $c0
+
 ; Plane A address register possible values
 PLANE_A_ADDR_0000           Equ $00
 PLANE_A_ADDR_2000           Equ ($2000 >> 10)

@@ -14,23 +14,45 @@
         STRUCT_MEMBER.l dmaTarget
     DEFINE_STRUCT_END
 
-    ; DMA queue entry
-    DEFINE_STRUCT VDPDMATransferCommandList
+    DEFINE_STRUCT VDPDMACommandList
+        STRUCT_MEMBER.w vdpRegAutoInc
         STRUCT_MEMBER.w vdpRegDMALengthHigh
         STRUCT_MEMBER.w vdpRegDMALengthLow
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT VDPDMATransferCommandList, EXTENDS, VDPDMACommandList
         STRUCT_MEMBER.w vdpRegDMASourceHigh
         STRUCT_MEMBER.w vdpRegDMASourceMid
         STRUCT_MEMBER.w vdpRegDMASourceLow
-        STRUCT_MEMBER.l vdpAddrDMADestination
+        STRUCT_MEMBER.l vdpAddrDMATransferDestination
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT VDPDMAFillCommandList, EXTENDS, VDPDMACommandList
+        STRUCT_MEMBER.l vdpAddrDMAFillDestination        
+        STRUCT_MEMBER.w vpdDMAFillValue
     DEFINE_STRUCT_END
 
 
 ;-------------------------------------------------
-; Store register values
+; Store VDPDMACommandList
 ; ----------------
-_VDP_DMA_DEFINE_COMMAND_REGS Macro source, length
+_VDP_DMA_DEFINE_COMMAND_LIST Macro length, dataStride
+        If (strcmp('\dataStride', ''))
+            dc.w VDP_CMD_RS_AUTO_INC + $02
+        Else
+            dc.w VDP_CMD_RS_AUTO_INC + (\dataStride & $ff)
+        EndIf
         dc.w VDP_CMD_RS_DMA_LEN_H + ((\length & $ff00) >> 8)
         dc.w VDP_CMD_RS_DMA_LEN_L + (\length & $ff)
+    Endm
+
+
+;-------------------------------------------------
+; Store VDPDMATransferCommandList target independent register values
+; ----------------
+_VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST Macro source, length, dataStride
+        _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
+        
         dc.w VDP_CMD_RS_DMA_SRC_H + (((\source >> 1)& $7f0000) >> 16)
         dc.w VDP_CMD_RS_DMA_SRC_M + (((\source >> 1)& $ff00) >> 8)
         dc.w VDP_CMD_RS_DMA_SRC_L + ((\source >> 1) & $ff)
@@ -48,8 +70,8 @@ VDP_DMA_DEFINE_VRAM_TARGET_AS Macro target
 ;-------------------------------------------------
 ; Create static VDPDMATransferCommandList data block for VRAM transfer
 ; ----------------
-VDP_DMA_DEFINE_VRAM_COMMAND_LIST Macro source, target, length
-        _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
+VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStride
+        _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST \source, \length, \dataStride
         VDP_DMA_DEFINE_VRAM_TARGET_AS \target
     Endm
 
@@ -57,8 +79,8 @@ VDP_DMA_DEFINE_VRAM_COMMAND_LIST Macro source, target, length
 ;-------------------------------------------------
 ; Create static VDPDMATransferCommandList data block for CRAM transfer
 ; ----------------
-VDP_DMA_DEFINE_CRAM_COMMAND_LIST Macro source, target, length
-        _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
+VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStride
+        _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST \source, \length, \dataStride
         dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
     Endm
 
@@ -66,9 +88,19 @@ VDP_DMA_DEFINE_CRAM_COMMAND_LIST Macro source, target, length
 ;-------------------------------------------------
 ; Create static VDPDMATransferCommandList data block for VSRAM transfer
 ; ----------------
-VDP_DMA_DEFINE_VSRAM_COMMAND_LIST Macro source, target, length
-        _VDP_DMA_DEFINE_COMMAND_REGS \source, \length
+VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStride
+        _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST \source, \length, \dataStride
         dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+    Endm
+
+
+;-------------------------------------------------
+; Create static VDPDMAFillCommandList data block for VRAM fill
+; ----------------
+VDP_DMA_DEFINE_VRAM_FILL_COMMAND_LIST Macro target, length, value, dataStride
+        _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
+        VDP_DMA_DEFINE_VRAM_TARGET_AS \target
+        dc.w    \value
     Endm
 
 
@@ -118,7 +150,7 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length, dataStride
 
 
 ;-------------------------------------------------
-; Start a DMA transfer for the specified VDPDMATransfer
+; Start a DMA transfer for the specified VDPDMATransferCommandList
 ; Uses: a0-a1
 ; ----------------
 VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
@@ -129,6 +161,23 @@ VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
         lea     MEM_VDP_CTRL, a1
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
-        move.w  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+    Endm
+
+
+;-------------------------------------------------
+; Start a DMA fill operations for the specified VDPDMAFillCommandList
+; Uses: a0-a1
+; ----------------
+VDP_DMA_FILL_COMMAND_LIST Macro vdpDMAFillCommandList
+        If (~strcmp('\vdpDMAFillCommandList', 'a0'))
+            lea     vdpDMAFillCommandList, a0
+        EndIf
+
+        lea     MEM_VDP_CTRL, a1
+        move.w  #VDP_CMD_RS_DMA_SRC_H | DMA_SRC_H_FILL, (a1)
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
     Endm
