@@ -20,7 +20,7 @@
         INIT_STRUCT_MEMBER.osFrameReady               0
         INIT_STRUCT_MEMBER.osFramesProcessed          0
         INIT_STRUCT_MEMBER.osFramesSkipped            0
-        INIT_STRUCT_MEMBER.osFrameProcessedCallback   _OSFrameProcessedCallback
+        INIT_STRUCT_MEMBER.osFrameProcessedCallback   NoOperation
     INIT_STRUCT_END
 
 
@@ -99,13 +99,6 @@ OSResetStatistics:
 ; - a0: Callback address
 OSSetFrameProcessedCallback:
         move.l  a0, (osContext + osFrameProcessedCallback)
-        rts
-
-
-;-------------------------------------------------
-; Default frame ready callback (NOOP)
-; ----------------
-_OSFrameProcessedCallback:
         rts
 
 
