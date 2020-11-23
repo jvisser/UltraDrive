@@ -113,7 +113,7 @@ ViewportMove:
 ; ----------------
 ; Uses: d0-d7/a0-a6
 ViewportFinalize:
-        MAP_RESET_RENDERER
+        MAP_RENDER_RESET
 
         ; Finalize foreground camera
         lea     (viewport + viewportForeground), a0

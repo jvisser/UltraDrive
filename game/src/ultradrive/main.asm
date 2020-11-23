@@ -44,7 +44,7 @@ Main:
 
         DEBUG_MSG 'Engine initialized'
 
-        jsr     MapInit
+        jsr     MapRenderInit
         lea     MapHeaderForest_map1, a0
         jsr     MapLoad
 
