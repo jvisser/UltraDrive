@@ -298,10 +298,6 @@ _TilesetInstallViewportMovementHandlers:
         ; Install camera movement handlers
         VIEWPORT_INSTALL_MOVEMENT_CALLBACK viewportBackground, _TilesetCameraMove, tsViewportBackgroundAnimationsAddress(a6)
         VIEWPORT_INSTALL_MOVEMENT_CALLBACK viewportForeground, _TilesetCameraMove, tsViewportForegroundAnimationsAddress(a6)
-
-        ; Force viewport update to render the initial animation frames for the viewport animations
-        VIEWPORT_FORCE_MOVEMENT_CALLBACK viewportBackground
-        VIEWPORT_FORCE_MOVEMENT_CALLBACK viewportForeground
         rts
 
 
