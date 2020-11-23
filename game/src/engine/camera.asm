@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Camera system. 
+; Camera system.
 ;
 ; NB: Managed by Viewport. API should not be used directly
 ;------------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@
         STRUCT_MEMBER.l camMapAddress
         STRUCT_MEMBER.l camPlaneId
         ; Externally managed
-        STRUCT_MEMBER.l camMoveCallback
+        STRUCT_MEMBER.l camMoveCallback             ; Mandatory
         STRUCT_MEMBER.l camData
     DEFINE_STRUCT_END
 
@@ -54,7 +54,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
 
             .clampDone\@:
         Endm
-        
+
         ; Associate map
         move.l  a1, camMapAddress(a0)
 
@@ -102,6 +102,10 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         subq.w  #1, d1
         move.w  d0, camMaxX(a0)
         move.w  d1, camMaxY(a0)
+
+        ; Initialize movement handler
+        movea.l  camMoveCallback(a0), a1
+        jsr     (a1)
 
         Purge _VIEWPORT_CLAMP
         rts
@@ -265,7 +269,7 @@ _MAP_UPDATE Macro renderer
 
         ; Store new camera position (camX and camY)
         move.l  d1, camX(a0)
-        
+
         ; Store actual movement of the camera
         move.l  d1, d4
         sub.w   d3, d4
@@ -274,7 +278,7 @@ _MAP_UPDATE Macro renderer
         swap d4
         sub.w   d3, d4
         move.w  d4, camLastXDisplacement(a0)
-        
+
         ; Check if there was movement. If so call movement callback
         tst.l   d4
         beq     .noMovement

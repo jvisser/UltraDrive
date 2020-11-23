@@ -34,17 +34,6 @@ VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Macro camera
 
 
 ;-------------------------------------------------
-; Force movement callback for the specified camera to be called
-; ----------------
-; Uses: d0-d7/a0-a6 (Unknown due to delegation)
-VIEWPORT_FORCE_MOVEMENT_CALLBACK Macro camera
-    lea     (viewport + \camera), a0
-    move.l  camMoveCallback(a0), a1
-    jsr     (a1)
-    Endm
-
-
-;-------------------------------------------------
 ; Initialize the viewport library with defaults. Called on engine init.
 ; ----------------
 ViewportLibraryInit:
@@ -63,10 +52,6 @@ ViewportLibraryInit:
 ; Uses: d0-d7/a0-a6
 ViewportInit:
 
-        ; Set background tracker
-        move.l  backgroundTrackerAddress(a0), a2            ; a2 = background tracker address
-        move.l  a2, (viewport + viewportTracker)
-
         ; Initialize foreground plane camera
         PUSHL   a0
         move.l  #VDP_PLANE_A, d2
@@ -74,6 +59,10 @@ ViewportInit:
         lea     (viewport + viewportForeground), a0
         jsr     CameraInit
         POPL    a0
+
+        ; Set background tracker
+        move.l  backgroundTrackerAddress(a0), a2            ; a2 = background tracker address
+        move.l  a2, (viewport + viewportTracker)
 
         ; Let background tracker calculate the background camera position based on the background map and foreground camera
         PUSHL   a0
@@ -93,8 +82,7 @@ ViewportInit:
         lea     (viewport + viewportBackground), a0
         jsr     CameraRenderView
         lea     (viewport + viewportForeground), a0
-        jsr     CameraRenderView
-        rts
+        jmp     CameraRenderView
 
 
 ;-------------------------------------------------
