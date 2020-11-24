@@ -35,6 +35,7 @@
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
     Include './engine/map.asm'
+    Include './engine/mapcollision.asm'
     Include './engine/maprender.asm'
     Include './engine/camera.asm'
     Include './engine/viewport.asm'

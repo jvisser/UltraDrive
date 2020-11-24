@@ -1,16 +1,16 @@
 package com.ultradrive.mapconvert.processing.tileset.collision;
 
 import com.ultradrive.mapconvert.datasource.CollisionBlockDataSource;
-
-import java.util.Iterator;
-import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import javax.annotation.Nonnull;
+import javax.imageio.ImageIO;
 
 
 public class CollisionBlockList implements Iterable<CollisionBlock>
@@ -67,7 +67,7 @@ public class CollisionBlockList implements Iterable<CollisionBlock>
                 int rgb = collisionHeightFieldImage.getRGB(x + xx, y + collisionFieldSize - yy - 1);
                 if (new Color(rgb, true).getTransparency() == Transparency.OPAQUE)
                 {
-                    height = yy;
+                    height = yy + 1;
                 }
             }
             heightField.add(height);

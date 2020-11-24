@@ -623,6 +623,7 @@ _RENDER_BLOCK Macro position
         moveq   #0, d7
         move.w  mapWidth(a0), d7
         lea     mapRowOffsetTable(a0), a1                           ; a1 = row offset table
+        movea.w mapStride(a0), a6                                   ; a6 = map stride
         movea.l mapDataAddress(a0), a0                              ; a0 = map data
 
         ; Store address of first chunk in a1
@@ -635,10 +636,6 @@ _RENDER_BLOCK Macro position
         add.w   d5, d6
         add.w   d5, d6
         lea     (a0, d6), a1                                        ; a1 = address of chunk reference
-
-        ; Store map stride in a6
-        add.w   d7, d7
-        movea.l d7, a6
 
         ; d6 = [chunk column offset]:[block column offset]
         move.w  d0, d6
