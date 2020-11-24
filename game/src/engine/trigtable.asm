@@ -2,7 +2,7 @@
 ; Trigonometry tables (256 entries per table ranging from -127 to 127)
 ;------------------------------------------------------------------------------------------
 
-    SECTION_START FAST_DATA
+    SECTION_START S_FASTDATA
 
 SineTable:
     dc.b    0, 3, 6, 9, 12, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46

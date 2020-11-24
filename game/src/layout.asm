@@ -11,8 +11,8 @@
     ; Order of sections of the ROM image
     ; ----------------
     Section S_VECTOR_TABLE  ; 68000 vector table
-    Section S_HEADER        ; sega ROM header
-    Section S_FASTDATA      ; .fastdata (absolute short addressable)
+    Section S_HEADER        ; Sega ROM header
+    Section S_FASTDATA      ; .fastdata (absolute short addressable, NB: ow+ optimization does not seem to optimize this case!? so use absolute short addressing mode explicitly for data in this section)
     Section S_PROGRAM       ; .text
     Section S_RODATA        ; .rodata
     Section S_DATA          ; .data
