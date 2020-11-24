@@ -26,6 +26,8 @@
     Map[(${mapName})]:
         ; .mapWidth
         dc.w [(${map.width})]
+        ; .mapStride
+        dc.w [(${map.width})] * SIZE_WORD
         ; .mapHeight
         dc.w [(${map.height})]
         ; .mapWidthPatterns

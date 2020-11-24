@@ -76,6 +76,31 @@ Main:
 
         ;ENGINE_TICKER_MASK TICKER_TILESET
 
+        movea.l  loadedMap, a0
+        movea.l  mapForegroundAddress(a0), a0
+        ; No collision
+        ;move.w  #6 * 128 + 1 * 16, d0
+        ;move.w  #1 * 128 + 3 * 16, d1
+        ; Valid up collision
+        ;move.w  #8 * 128 + 6 * 16 + 8, d0
+        ;move.w  #1 * 128 + 3 * 16 + 15, d1
+        ; Valid up collision (hflip)
+        ;move.w  #12 * 128 + 1 * 16 + 7, d0
+        ;move.w  #1 * 128 + 3 * 16 + 15, d1
+        ; Solid with valid up collision
+        ;move.w  #10 * 128 + 0 * 16, d0
+        ;move.w  #1 * 128 + 2 * 16 + 7, d1
+        ; Solid with no up collision (same chunk)
+        ;move.w  #7 * 128 + 0 * 16, d0
+        ;move.w  #0 * 128 + 5 * 16, d1
+        ; Solid with no up collision (different chunk)
+        ;move.w  #8 * 128 + 0 * 16, d0
+        ;move.w  #3 * 128 + 0 * 16, d1
+        ; Solid with up collision (different chunk)
+        move.w  #7 * 128 + 0 * 16, d0
+        move.w  #1 * 128 + 0 * 16 + 7, d1
+        jsr     MapCollisionFindFloor
+
     .mainLoop:
 
         PROFILE_FRAME_TIME $000e
@@ -93,12 +118,12 @@ Main:
         POPM    d0-d1
     .noPadA:
 
-        PROFILE_CPU_START
+        ;PROFILE_CPU_START
 
         jsr     ViewportMove
         jsr     ViewportFinalize
 
-        PROFILE_CPU_END
+        ;PROFILE_CPU_END
 
         PROFILE_FRAME_TIME_END
 

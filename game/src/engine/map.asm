@@ -14,6 +14,7 @@
 
     DEFINE_STRUCT Map
         STRUCT_MEMBER.w mapWidth
+        STRUCT_MEMBER.w mapStride
         STRUCT_MEMBER.w mapHeight
         STRUCT_MEMBER.w mapWidthPatterns
         STRUCT_MEMBER.w mapHeightPatterns

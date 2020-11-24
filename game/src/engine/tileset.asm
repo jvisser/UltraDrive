@@ -29,19 +29,23 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 ; ----------------
 
     ; Chunk reference structure
-    BIT_MASK.CHUNK_REF_INDEX        0,  10                                      ; Not call can be used due to memory constraints
-    BIT_CONST.CHUNK_REF_EMPTY       10                                          ; Chunk contains no graphic data
-    BIT_CONST.CHUNK_REF_HFLIP       11
-    BIT_CONST.CHUNK_REF_VFLIP       12
-    BIT_CONST.CHUNK_REF_COLLISION   13
+    BIT_MASK.CHUNK_REF_INDEX            0,  10                                  ; Not call can be used due to memory constraints
+    BIT_CONST.CHUNK_REF_EMPTY           10                                      ; Chunk contains no graphic data
+    BIT_MASK.CHUNK_REF_ORIENTATION      11,   2
+    BIT_CONST.CHUNK_REF_HFLIP           11
+    BIT_CONST.CHUNK_REF_VFLIP           12
+    BIT_CONST.CHUNK_REF_COLLISION       13
 
     ; Block reference structure
-    BIT_MASK.BLOCK_REF_INDEX        0,  10
-    BIT_CONST.BLOCK_REF_EMPTY       10                                          ; Block contains no graphic data
-    BIT_CONST.BLOCK_REF_HFLIP       11
-    BIT_CONST.BLOCK_REF_VFLIP       12
-    BIT_MASK.BLOCK_REF_SOLIDITY     13, 2
-    BIT_MASK.BLOCK_REF_TYPE         15, 1
+    BIT_MASK.BLOCK_REF_INDEX            0,  10
+    BIT_CONST.BLOCK_REF_EMPTY           10                                      ; Block contains no graphic data
+    BIT_MASK.BLOCK_REF_ORIENTATION      11,   2
+    BIT_CONST.BLOCK_REF_HFLIP           11
+    BIT_CONST.BLOCK_REF_VFLIP           12
+    BIT_CONST.BLOCK_REF_SOLID_TOP       13
+    BIT_CONST.BLOCK_REF_SOLID_LRB       14
+    BIT_MASK.BLOCK_REF_SOLIDITY         13, 2
+    BIT_MASK.BLOCK_REF_TYPE             15, 1
 
 
 ;-------------------------------------------------
@@ -144,6 +148,9 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 
     DEFINE_VAR FAST
         VAR.l                           loadedTileset
+        VAR.l                           tilesetCollisionData
+        VAR.l                           tilesetAngleData
+        VAR.l                           tilesetMetaDataMapping
         VAR.w                           tilesetViewportAnimationGroupStates, TILESET_MAX_VIEWPORT_ANIMATION_GROUPS
         VAR.TilesetAnimationSchedule    tilesetAnimationSchedules,           TILESET_MAX_ANIMATIONS
     DEFINE_VAR_END
@@ -162,6 +169,10 @@ TilesetLoad:
 
     .loadTileset:
         move.l  a0, loadedTileset
+        move.l  tsBlockMetaDataMappingTableAddress(a0), tilesetMetaDataMapping
+        move.l  tsBlockMetaDataAddress(a0), a6
+        move.l  tsBlockCollisionTableAddress(a6), tilesetCollisionData
+        move.l  tsBlockAngleTableAddress(a6), tilesetAngleData
         movea.l a0, a6
 
         ; Decompress and move patterns into VRAM.
