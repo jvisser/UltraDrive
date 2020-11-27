@@ -52,7 +52,6 @@ Main:
 
         move.w  0, d0
         move.w  0, d1
-        movea.l loadedMap, a0
         jsr     ViewportInit
 
         DEBUG_MSG 'Viewport initialized'
