@@ -58,6 +58,9 @@
     Include 'ultradrive/main.asm'
 
 
+    ;-------------------------------------------------
+    ; ROM header
+    ; ----------------
     ; Produce ROM header once all symbols have been resolved
     Include './system/m68kvector.asm'
     Include './system/segaheader.asm'

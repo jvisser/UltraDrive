@@ -2,37 +2,56 @@
 ; Main entry point
 ;------------------------------------------------------------------------------------------
 
-_SCROLL_IF Macro up, down, var
+    DEFINE_VAR FAST
+        VAR.w   mode
+        VAR.w   x
+        VAR.w   y
+        VAR.l   spriteAddr
+    DEFINE_VAR_END
+
+
+_SCROLL_IF Macro up, down, var, speed
             btst    #\down, d2
             bne     .noDown\@
-            addq    #8, \var
+            addq    #\speed, \var
             bra     .done\@
         .noDown\@:
 
             btst    #\up, d2
             bne     .done\@
-            subq    #8, \var
+            subq    #\speed, \var
 
         .done\@:
     Endm
 
 
-CreateSprites:
+CreateCollisionSprite:
 SPRITE_COUNT Equ 8
-        move.w  d3, d0
+
+        move.w  #0, x
+        move.w  #0, y
+
+        moveq   #1, d0
         jsr     VDPSpriteAlloc
+        move.l  a0, spriteAddr
 
-        move.w  #128, d1
+        movea.l loadedTileset, a1
+        move.w  tsVramFreeAreaMin(a1), d0
+        lsr.w   #5, d0
+        move.w  d0, vdpSpriteAttr3(a0)
+        move.w  #128, vdpSpriteX(a0)
+        move.w  #128, vdpSpriteY(a0)
+        move.b  #VDP_SPRITE_SIZE_V1 | VDP_SPRITE_SIZE_H1, vdpSpriteSize(a0)
 
-        subq    #1, d3
-    .initSpriteLoop:
-        move.w  d4, vdpSpriteVerticalPosition(a0)
-        move.w  d4, vdpSpriteHorizontalPosition(a0)
-        move.b  #VDP_SPRITE_SIZE_V2 | VDP_SPRITE_SIZE_H2, vdpSpriteSize(a0)
-        move.w  #1408, vdpSpriteAttr3(a0)
-        addi.w  #16, d4
-        addq.w  #VDPSprite_Size, a0
-        dbra    d3, .initSpriteLoop
+        VDP_ADDR_SET WRITE, VRAM, $0020, $2
+        move.l  #$50000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
+        move.l  #$00000000, MEM_VDP_DATA
         rts
 
 
@@ -56,14 +75,7 @@ Main:
 
         DEBUG_MSG 'Viewport initialized'
 
-        move.w  #4, d3
-        move.w  #128, d4
-        bsr     CreateSprites
-        move.w  #5, d3
-        move.w  #128 + 114, d4
-        bsr     CreateSprites
-        ;jsr     VDPSpriteClear
-        ;jsr     VDPSpriteCommit
+        bsr     CreateCollisionSprite
 
         DEBUG_MSG 'Sprites created'
 
@@ -73,42 +85,66 @@ Main:
 
         jsr     OSResetStatistics
 
-        ;ENGINE_TICKER_MASK TICKER_TILESET
-
-        movea.l  loadedMap, a0
-        movea.l  mapForegroundAddress(a0), a0
-        ; No collision
-        ;move.w  #6 * 128 + 1 * 16, d0
-        ;move.w  #1 * 128 + 3 * 16, d1
-        ; Valid up collision
-        ;move.w  #8 * 128 + 6 * 16 + 8, d0
-        ;move.w  #1 * 128 + 3 * 16 + 15, d1
-        ; Valid up collision (hflip)
-        ;move.w  #12 * 128 + 1 * 16 + 7, d0
-        ;move.w  #1 * 128 + 3 * 16 + 15, d1
-        ; Solid with valid up collision
-        ;move.w  #10 * 128 + 0 * 16, d0
-        ;move.w  #1 * 128 + 2 * 16 + 7, d1
-        ; Solid with no up collision (same chunk)
-        ;move.w  #7 * 128 + 0 * 16, d0
-        ;move.w  #0 * 128 + 5 * 16, d1
-        ; Solid with no up collision (different chunk)
-        ;move.w  #8 * 128 + 0 * 16, d0
-        ;move.w  #3 * 128 + 0 * 16, d1
-        ; Solid with up collision (different chunk)
-        move.w  #7 * 128 + 0 * 16, d0
-        move.w  #1 * 128 + 0 * 16 + 7, d1
-        jsr     MapCollisionFindFloor
-
+        move.w  #-1, mode
     .mainLoop:
 
         PROFILE_FRAME_TIME $000e
 
+        ;PROFILE_CPU_START
+
         move.w  ioDeviceState1, d2
-        moveq   #0, d0
-        moveq   #0, d1
-        _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d1
-        _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0
+        btst    #MD_PAD_C, d2
+        bne     .noModeSwitch
+        not.w   mode
+    .noModeSwitch:
+
+        tst.w   mode
+        beq     .movementMode
+    .collisionMode:
+
+            moveq   #0, d3
+            moveq   #0, d4
+            _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d3, 1
+            _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d4, 1
+
+            move.w  x, d0
+            move.w  y, d1
+            add.w   d3, d0
+            add.w   d4, d1
+
+            add.w   (viewport + viewportForeground + camX), d0
+            add.w   (viewport + viewportForeground + camY), d1
+
+            movea.l  loadedMap, a0
+            movea.l  mapForegroundAddress(a0), a0
+            jsr     MapCollisionFindFloor
+
+            sub.w   (viewport + viewportForeground + camX), d0
+            sub.w   (viewport + viewportForeground + camY), d1
+
+            move.w  d0, x
+            move.w  d1, y
+
+            movea.l  spriteAddr, a1
+            add.w   #128, d0
+            add.w   #128, d1
+            move.w  d0, vdpSpriteX(a1)
+            move.w  d1, vdpSpriteY(a1)
+
+            jsr     VDPSpriteCommit
+
+        bra .modeUpdateDone
+
+    .movementMode:
+            moveq   #0, d0
+            moveq   #0, d1
+            _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d1, 8
+            _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0, 8
+
+            jsr     ViewportMove
+            jsr     ViewportFinalize
+
+    .modeUpdateDone:
 
         btst    #MD_PAD_A, d2
         bne     .noPadA
@@ -116,11 +152,6 @@ Main:
         jsr     TilesetScheduleManualAnimations
         POPM    d0-d1
     .noPadA:
-
-        ;PROFILE_CPU_START
-
-        jsr     ViewportMove
-        jsr     ViewportFinalize
 
         ;PROFILE_CPU_END
 
