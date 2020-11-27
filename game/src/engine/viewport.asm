@@ -46,11 +46,11 @@ ViewportLibraryInit:
 ; Initialize the viewport to point at the specified coordinates (within the bounds of the currently loaded map)
 ; ----------------
 ; Input:
-; - a0: MapHeader to associate with viewport
 ; - d0: x
 ; - d1: y
 ; Uses: d0-d7/a0-a6
 ViewportInit:
+        movea.l loadedMap, a0
 
         ; Initialize foreground plane camera
         PUSHL   a0
