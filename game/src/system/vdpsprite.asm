@@ -43,11 +43,11 @@ VDP_SPRITE_SIZE_H4 Equ                      $0c
 
     ; VDP hardware sprite attribute struct (8 bytes)
     DEFINE_STRUCT VDPSprite
-        STRUCT_MEMBER.w vdpSpriteVerticalPosition
+        STRUCT_MEMBER.w vdpSpriteY
         STRUCT_MEMBER.b vdpSpriteSize
         STRUCT_MEMBER.b vdpSpriteLink
         STRUCT_MEMBER.w vdpSpriteAttr3
-        STRUCT_MEMBER.w vdpSpriteHorizontalPosition
+        STRUCT_MEMBER.w vdpSpriteX
 
     DEFINE_STRUCT_END
 
