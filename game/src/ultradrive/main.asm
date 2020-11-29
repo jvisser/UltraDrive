@@ -118,6 +118,10 @@ Main:
             movea.l  loadedMap, a0
             movea.l  mapForegroundAddress(a0), a0
             jsr     MapCollisionFindFloor
+            tst.w   d2
+            bpl     .floorCollisionFound
+            jsr     MapCollisionFindCeiling
+        .floorCollisionFound:
 
             sub.w   (viewport + viewportForeground + camX), d0
             sub.w   (viewport + viewportForeground + camY), d1
