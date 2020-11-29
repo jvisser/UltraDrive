@@ -8,7 +8,7 @@ java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
         -t './engine/assets/template'                       \
         -o './ultradrive/assets'                            \
         -f '../assets/map/objecttypes.xml'                  \
-        -a './allocation.yaml'                              \
+        -a './ultradrive/config/allocation.yaml'            \
         -r
 
 # Compile source
