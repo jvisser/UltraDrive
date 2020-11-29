@@ -648,7 +648,7 @@ _RENDER_BLOCK Macro position
         ; Buffer offset/rotation mask
         move.w  d1, d2                                              ; d2 = current map column
         move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
-        movea.l d0, a0                                              ; a0 = Store plane width
+        movea.l d0, a0                                              ; a0 = Store plane height
         subq.w  #1, d0
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset

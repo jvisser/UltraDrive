@@ -1,6 +1,12 @@
 ;------------------------------------------------------------------------------------------
 ; Map collision routines (Work for slopes with normals between 45 and 90 degrees)
 ;------------------------------------------------------------------------------------------
+; Sub routines:
+; - MapCollisionFindFloor
+; - MapCollisionFindCeiling
+; - MapCollisionFindLeftWall
+; - MapCollisionFindRightWall
+
 
 ;-------------------------------------------------
 ; Performance measurement macros
@@ -292,6 +298,60 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
 
 
 ;-------------------------------------------------
+; Floor horizontal collision point finding algorithm
+; ----------------
+; General register allocation:
+; - a0: map address
+; - a2: map row offset table
+; - a3: map data address
+; - a4: chunk data base address
+; - a5: block offset table base address
+; - a6: chunk table address
+; - d0: x
+; - d1: y
+; - d2: block ref
+; - d3: chunk ref
+; - d4: meta data id
+; - d5: map chunk ref offset
+; - d7: chunk relative block offset
+; Required (supplied by implementor):
+; - Macro: _COLLISION_BLOCK_FOUND
+_FIND_HORIZONTAL_COLLISION Macro
+        _MAP_COLLISION_PROFILE_START
+
+        _START_CHUNK
+
+        _VERIFY_CHUNK_COLLISION_PRESENT .noSolidCollision\@
+
+            _LOAD_CHUNK d4
+
+            _VERIFY_BLOCK_SOLIDITY.LRB .noSolidCollision\@
+
+            ; Get meta data id (collision + angle index)
+            movea.l tilesetMetaDataMapping, a2
+            move.w  d2, d4
+
+            _READ_BLOCK_META_DATA_ID d4
+
+            bne .noSolidCollision\@
+
+                _COLLISION_BLOCK_FOUND
+
+                _MAP_COLLISION_PROFILE_END
+                rts
+
+        .noSolidCollision\@:
+
+            ; Set angle to -1 indicating no collision
+            moveq   #-1, d2
+
+        _MAP_COLLISION_PROFILE_END
+
+        Purge _COLLISION_BLOCK_FOUND
+    Endm
+
+
+;-------------------------------------------------
 ; Find floor collision point
 ; ----------------
 ; Input:
@@ -521,16 +581,52 @@ _COLLISION_BLOCK_FOUND Macro
 
 
 ;-------------------------------------------------
-;
+; Find left wall collision point
 ; ----------------
+; Input:
+; - a0: map
+; - d0: x position
+; - d1: y position
+; Output:
+; - d0: x position
+; - d1: y position
+; - d2: angle
 MapCollisionFindLeftWall:
+;-------------------------------------------------
+; Valid collision block has been found. Extract result to be returned from subroutine
+; ----------------
+_COLLISION_BLOCK_FOUND Macro
+        move.w  #ANGLE_180, d2
+        ori.w   #$0f, d0
+        addq.w  #1, d0
+    Endm
+
+    _FIND_HORIZONTAL_COLLISION
     rts
 
 
 ;-------------------------------------------------
-;
+; Find right wall collision point
 ; ----------------
+; Input:
+; - a0: map
+; - d0: x position
+; - d1: y position
+; Output:
+; - d0: x position
+; - d1: y position
+; - d2: angle
 MapCollisionFindRightWall:
+;-------------------------------------------------
+; Valid collision block has been found. Extract result to be returned from subroutine
+; ----------------
+_COLLISION_BLOCK_FOUND Macro
+        move.w  #ANGLE_0, d2
+        andi.w  #~$0f, d0
+        subq.w  #1, d0
+    Endm
+
+    _FIND_HORIZONTAL_COLLISION
     rts
 
 
@@ -595,3 +691,6 @@ MapCollisionFindRightWall:
     Purge _READ_BLOCK_META_DATA_ID
     Purge _READ_BLOCK_META_DATA
     Purge _FIND_VERTICAL_COLLISION
+    Purge _FIND_HORIZONTAL_COLLISION
+    Purge _MAP_COLLISION_PROFILE_START
+    Purge _MAP_COLLISION_PROFILE_END
