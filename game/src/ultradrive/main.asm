@@ -106,6 +106,9 @@ Main:
             moveq   #0, d4
             _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d3, 1
             _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d4, 1
+            move.w  d3, d5
+            or.w    d4, d5
+            beq     .modeUpdateDone
 
             move.w  x, d0
             move.w  y, d1
@@ -117,6 +120,18 @@ Main:
 
             movea.l  loadedMap, a0
             movea.l  mapForegroundAddress(a0), a0
+
+            tst.w   d3
+            bmi     .checkLeftWall
+            bgt     .checkRightWall
+            bra     .checkWallDone
+        .checkLeftWall:
+            jsr     MapCollisionFindLeftWall
+            bra     .checkWallDone
+        .checkRightWall:
+            jsr     MapCollisionFindRightWall
+        .checkWallDone:
+
             jsr     MapCollisionFindFloor
             tst.w   d2
             bpl     .floorCollisionFound
