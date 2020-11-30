@@ -39,7 +39,7 @@ _MAP_COLLISION_PROFILE_END Macro
 ; Output:
 ; - d3: chunk ref
 _READ_CHUNK_REF Macro
-        move.w  (a3, d5), d3                                ; d3 = chunk ref
+        move.w  (a3, d5), d3                                        ; d3 = chunk ref
     Endm
 
 
@@ -104,16 +104,16 @@ _LOAD_CHUNK Macro scratch
         lea     chunkTable, a6
 
         ; Get chunk address
-        move.w  d3, \scratch                                    ; Mask by CHUNK_REF_INDEX_MASK not needed as all bits are shifted out
+        move.w  d3, \scratch                                        ; Mask by CHUNK_REF_INDEX_MASK not needed as all bits are shifted out
         lsl.w   #7, \scratch
-        lea     (a6, \scratch), a4                              ; a4 = chunk base address
+        lea     (a6, \scratch), a4                                  ; a4 = chunk base address
 
         ; Get block offset table address
         move.w  d3, \scratch
         andi.w  #CHUNK_REF_ORIENTATION_MASK, \scratch
         lsr.w   #CHUNK_REF_ORIENTATION_SHIFT - 6, \scratch
         lea     ChunkBlockOffsetTable.w, a5
-        lea     (a5, \scratch), a5                              ; a5 = Block offset table base address
+        lea     (a5, \scratch), a5                                  ; a5 = Block offset table base address
 
         ; Calculate chunk relative block offset
         move.w  d1, d2
@@ -122,7 +122,7 @@ _LOAD_CHUNK Macro scratch
         move.w  d0, d7
         lsr.w   #4, d7
         andi.w  #$0007, d7
-        add.w   d2, d7                                          ; d7 = Chunk block offset table offset
+        add.w   d2, d7                                              ; d7 = Chunk block offset table offset
 
         _READ_BLOCK_REF
     Endm
@@ -160,7 +160,7 @@ _VERIFY_BLOCK_SOLIDITY Macro invalidLabel
 _READ_BLOCK_META_DATA_ID Macro blockRef
         andi.w  #BLOCK_REF_INDEX_MASK, \blockRef
         add.w   \blockRef, \blockRef
-        move.w  (a2, \blockRef), d4                                    ; d4 = block meta data id    Endm
+        move.w  (a2, \blockRef), d4                                 ; d4 = block meta data id    Endm
     Endm
 
 
@@ -183,14 +183,14 @@ _READ_BLOCK_META_DATA Macro
 
         ; Get collision field address
         lsl.w   #4, d4
-        lea     (a2, d4), a2                                ; a2 = collision field base address
+        lea     (a2, d4), a2                                        ; a2 = collision field base address
         move.w  d0, d5
-        andi.w  #$0f, d5                                    ; d5 = collision field index
+        andi.w  #$0f, d5                                            ; d5 = collision field index
     Endm
 
 
 ;-------------------------------------------------
-; Floor vertical collision point finding algorithm
+; Vertical collision point finding algorithm
 ; ----------------
 ; General register allocation:
 ; - a0: map address
@@ -272,7 +272,7 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
 
             .collisionBlockFound\@:
 
-                eor.w   d2, d3                                  ; d3 = block orientation
+                eor.w   d2, d3                                      ; d3 = block orientation
 
                 ; Check if orientation of the block is in alignment with this operation (= non v flipped)
                 _VERIFY_BLOCK_ORIENTATION .noCollision\@
@@ -298,7 +298,7 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
 
 
 ;-------------------------------------------------
-; Floor horizontal collision point finding algorithm
+; Horizontal collision point finding algorithm
 ; ----------------
 ; General register allocation:
 ; - a0: map address
@@ -362,6 +362,7 @@ _FIND_HORIZONTAL_COLLISION Macro
 ; - d0: x position
 ; - d1: y position
 ; - d2: angle
+; Uses: d1-d5/a1-a6
 MapCollisionFindFloor:
 ;-------------------------------------------------
 ; Verify that block is not vertically flipped. If not jump to the specified label.
@@ -475,6 +476,7 @@ _COLLISION_BLOCK_FOUND Macro
 ; - d0: x position
 ; - d1: y position
 ; - d2: angle
+; Uses: d1-d5/a1-a6
 MapCollisionFindCeiling:
 ;-------------------------------------------------
 ; Verify that block is vertically flipped. If not jump to the specified label.
@@ -591,6 +593,7 @@ _COLLISION_BLOCK_FOUND Macro
 ; - d0: x position
 ; - d1: y position
 ; - d2: angle
+; Uses: d0/d2-d5/a1-a6
 MapCollisionFindLeftWall:
 ;-------------------------------------------------
 ; Valid collision block has been found. Extract result to be returned from subroutine
@@ -616,6 +619,7 @@ _COLLISION_BLOCK_FOUND Macro
 ; - d0: x position
 ; - d1: y position
 ; - d2: angle
+; Uses: d0/d2-d5/a1-a6
 MapCollisionFindRightWall:
 ;-------------------------------------------------
 ; Valid collision block has been found. Extract result to be returned from subroutine
