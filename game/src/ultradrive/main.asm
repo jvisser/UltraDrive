@@ -165,6 +165,7 @@ Main:
 
     .modeUpdateDone:
 
+        move.w  ioDeviceState1, d2
         btst    #MD_PAD_A, d2
         bne     .noPadA
         PUSHM   d0-d1
