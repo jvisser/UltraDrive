@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.4" tiledversion="1.4.2" name="GraphicBlocks" tilewidth="16" tileheight="16" tilecount="984" columns="24">
- <image source="assets/tiles.png" width="384" height="656"/>
+ <image source="assets/blocks.png" width="384" height="656"/>
  <tile id="0" type="GraphicsBlock"/>
  <tile id="1" type="GraphicsBlock"/>
  <tile id="2" type="GraphicsBlock"/>

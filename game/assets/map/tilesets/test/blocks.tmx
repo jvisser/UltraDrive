@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="24" height="41" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="1">
  <tileset firstgid="1" source="graphicblocks.tsx"/>
- <tileset firstgid="985" source="../meta/collisionblocks.tsx"/>
+ <tileset firstgid="985" source="collisionblocks.tsx"/>
  <tileset firstgid="1017" source="../meta/priorityblocks.tsx"/>
  <layer id="3" name="Graphics" width="24" height="41">
   <data encoding="csv">
