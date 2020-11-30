@@ -83,82 +83,82 @@
  </tile>
  <tile id="16" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="26.565"/>
   </properties>
  </tile>
  <tile id="17" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="26.565"/>
   </properties>
  </tile>
  <tile id="18" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="14.036"/>
   </properties>
  </tile>
  <tile id="19" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="14.036"/>
   </properties>
  </tile>
  <tile id="20" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="14.036"/>
   </properties>
  </tile>
  <tile id="21" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="14.036"/>
   </properties>
  </tile>
  <tile id="22" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="23" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="24" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="25" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="26" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="27" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="28" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="29" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="7.125"/>
   </properties>
  </tile>
  <tile id="30" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="90"/>
   </properties>
  </tile>
  <tile id="31" type="CollisionBlock">
   <properties>
-   <property name="angle" type="float" value="86.424"/>
+   <property name="angle" type="float" value="0"/>
   </properties>
  </tile>
 </tileset>
