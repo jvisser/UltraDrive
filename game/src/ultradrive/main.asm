@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Main entry point
+; Main entry point.
 ;------------------------------------------------------------------------------------------
 
     DEFINE_VAR FAST
@@ -10,7 +10,10 @@
     DEFINE_VAR_END
 
 
-_SCROLL_IF Macro up, down, var, speed
+;-------------------------------------------------
+; Increase/decrease var with speed based on up/down condition
+; ----------------
+_MOVE_IF Macro up, down, var, speed
             btst    #\down, d2
             bne     .noDown\@
             addq    #\speed, \var
@@ -25,9 +28,10 @@ _SCROLL_IF Macro up, down, var, speed
     Endm
 
 
+;-------------------------------------------------
+; Create single pixel collision sensor test sprite
+; ----------------
 CreateCollisionSprite:
-SPRITE_COUNT Equ 8
-
         move.w  #0, x
         move.w  #0, y
 
@@ -52,6 +56,96 @@ SPRITE_COUNT Equ 8
         move.l  #$00000000, MEM_VDP_DATA
         move.l  #$00000000, MEM_VDP_DATA
         move.l  #$00000000, MEM_VDP_DATA
+        rts
+
+
+;-------------------------------------------------
+; Move single pixel collision detection test sprite representing collision sensor on screen
+; ----------------
+UpdateCollisionMode:
+        IO_GET_DEVICE_STATE IO_PORT_1, d2
+
+        moveq   #0, d3
+        moveq   #0, d4
+        _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d3, 1
+        _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,    d4, 1
+        move.w  d3, d5
+        or.w    d4, d5
+        beq     .noMovement
+
+        move.w  x, d0
+        move.w  y, d1
+        add.w   d3, d0
+        add.w   d4, d1
+
+        add.w   (viewport + viewportForeground + camX), d0
+        add.w   (viewport + viewportForeground + camY), d1
+
+        movea.l  loadedMap, a0
+        movea.l  mapForegroundAddress(a0), a0
+
+        tst.w   d3
+        bmi     .checkLeftWall
+        bgt     .checkRightWall
+        bra     .checkWallDone
+    .checkLeftWall:
+        jsr     MapCollisionFindLeftWall
+        bra     .checkWallDone
+    .checkRightWall:
+        jsr     MapCollisionFindRightWall
+    .checkWallDone:
+
+        jsr     MapCollisionFindFloor
+        tst.w   d2
+        bpl     .floorCollisionFound
+        jsr     MapCollisionFindCeiling
+    .floorCollisionFound:
+
+        sub.w   (viewport + viewportForeground + camX), d0
+        sub.w   (viewport + viewportForeground + camY), d1
+
+        move.w  d0, x
+        move.w  d1, y
+
+        movea.l  spriteAddr, a1
+        add.w   #128, d0
+        add.w   #128, d1
+        move.w  d0, vdpSpriteX(a1)
+        move.w  d1, vdpSpriteY(a1)
+
+        jsr     VDPSpriteCommit
+    .noMovement:
+        rts
+
+
+;-------------------------------------------------
+; Scroll the screen based on the directional pad
+; ----------------
+UpdateScrollMode:
+        IO_GET_DEVICE_STATE IO_PORT_1, d2
+
+        moveq   #0, d0
+        moveq   #0, d1
+        _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,    d1, 8
+        _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0, 8
+
+        jsr     ViewportMove
+        jsr     ViewportFinalize
+        rts
+
+
+;-------------------------------------------------
+; Run manually triggered tileset animations if the A button is pressed
+; ----------------
+UpdateManualTilesetAnimations:
+        IO_GET_DEVICE_STATE IO_PORT_1, d2
+
+        btst    #MD_PAD_A, d2
+        bne     .noPadA
+        PUSHM   d0-d1
+        jsr     TilesetScheduleManualAnimations
+        POPM    d0-d1
+    .noPadA:
         rts
 
 
@@ -85,98 +179,36 @@ Main:
 
         jsr     OSResetStatistics
 
-        move.w  #-1, mode
+        move.w  #0, mode
     .mainLoop:
 
-        PROFILE_FRAME_TIME $000e
+            PROFILE_FRAME_TIME $000e
 
-        ;PROFILE_CPU_START
+            ;PROFILE_CPU_START
 
-        move.w  ioDeviceState1, d2
-        btst    #MD_PAD_C, d2
-        bne     .noModeSwitch
-        not.w   mode
-    .noModeSwitch:
+            ; Switch mode based on C button
+            btst    #MD_PAD_C, d2
+            bne     .noModeSwitch
+            not.w   mode
+        .noModeSwitch:
 
-        tst.w   mode
-        beq     .movementMode
-    .collisionMode:
+            ; Run mode specific update routine (0 = scroll mode, collision test mode otherwise)
+            tst.w   mode
+            beq     .scrollMode
+            bsr     UpdateCollisionMode
+            bra     .modeUpdateDone
 
-            moveq   #0, d3
-            moveq   #0, d4
-            _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d3, 1
-            _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d4, 1
-            move.w  d3, d5
-            or.w    d4, d5
-            beq     .modeUpdateDone
+        .scrollMode:
+            bsr     UpdateScrollMode
 
-            move.w  x, d0
-            move.w  y, d1
-            add.w   d3, d0
-            add.w   d4, d1
+        .modeUpdateDone:
 
-            add.w   (viewport + viewportForeground + camX), d0
-            add.w   (viewport + viewportForeground + camY), d1
+            bsr     UpdateManualTilesetAnimations
 
-            movea.l  loadedMap, a0
-            movea.l  mapForegroundAddress(a0), a0
+            ;PROFILE_CPU_END
 
-            tst.w   d3
-            bmi     .checkLeftWall
-            bgt     .checkRightWall
-            bra     .checkWallDone
-        .checkLeftWall:
-            jsr     MapCollisionFindLeftWall
-            bra     .checkWallDone
-        .checkRightWall:
-            jsr     MapCollisionFindRightWall
-        .checkWallDone:
+            PROFILE_FRAME_TIME_END
 
-            jsr     MapCollisionFindFloor
-            tst.w   d2
-            bpl     .floorCollisionFound
-            jsr     MapCollisionFindCeiling
-        .floorCollisionFound:
-
-            sub.w   (viewport + viewportForeground + camX), d0
-            sub.w   (viewport + viewportForeground + camY), d1
-
-            move.w  d0, x
-            move.w  d1, y
-
-            movea.l  spriteAddr, a1
-            add.w   #128, d0
-            add.w   #128, d1
-            move.w  d0, vdpSpriteX(a1)
-            move.w  d1, vdpSpriteY(a1)
-
-            jsr     VDPSpriteCommit
-
-        bra .modeUpdateDone
-
-    .movementMode:
-            moveq   #0, d0
-            moveq   #0, d1
-            _SCROLL_IF MD_PAD_UP,   MD_PAD_DOWN,    d1, 8
-            _SCROLL_IF MD_PAD_LEFT, MD_PAD_RIGHT,   d0, 8
-
-            jsr     ViewportMove
-            jsr     ViewportFinalize
-
-    .modeUpdateDone:
-
-        move.w  ioDeviceState1, d2
-        btst    #MD_PAD_A, d2
-        bne     .noPadA
-        PUSHM   d0-d1
-        jsr     TilesetScheduleManualAnimations
-        POPM    d0-d1
-    .noPadA:
-
-        ;PROFILE_CPU_END
-
-        PROFILE_FRAME_TIME_END
-
-        jsr     OSNextFrameReadyWait
+            jsr     OSNextFrameReadyWait
 
         bra     .mainLoop
