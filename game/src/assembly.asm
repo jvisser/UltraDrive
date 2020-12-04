@@ -35,15 +35,16 @@
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
     Include './engine/map.asm'
-    Include './engine/mapcollision.asm'
-    Include './engine/maprender.asm'
     Include './engine/camera.asm'
+    Include './engine/maprender.asm'
     Include './engine/viewport.asm'
+    Include './engine/tileset.asm'
+    Include './engine/mapcollision.asm'
     Include './engine/backgroundtracker.asm'
     Include './engine/background/background.asm'
     Include './engine/background/streamingbackground.asm'
     Include './engine/background/tilingbackground.asm'
-    Include './engine/tileset.asm'
+    Include './engine/entity.asm'
 
 
     ;-------------------------------------------------
@@ -55,6 +56,7 @@
 
     ; Code
     Include 'ultradrive/metadata.asm'
+    Include 'ultradrive/player.asm'
     Include 'ultradrive/main.asm'
 
 

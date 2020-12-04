@@ -20,7 +20,7 @@
     DEFINE_VAR_END
 
     INIT_STRUCT streamingBackgroundTracker
-        INIT_STRUCT_MEMBER.btStart     _StreamingBackgroundTrackerStart
+        INIT_STRUCT_MEMBER.btInit      _StreamingBackgroundTrackerInit
         INIT_STRUCT_MEMBER.btSync      _StreamingBackgroundTrackerSync
         INIT_STRUCT_MEMBER.btFinalize  _StreamingBackgroundTrackerFinalize
     INIT_STRUCT_END
@@ -33,16 +33,15 @@ StreamingBackgroundTrackerInit Equ streamingBackgroundTrackerInit
 
 
 ;-------------------------------------------------
-; Streaming background tracker start implementation. Calculates the ratio between the back/foreground maps. And returns the background camera position
+; Streaming background tracker init implementation. Calculates the ratio between the back/foreground maps. And initializes the background camera.
 ; ----------------
 ; Input:
-; - a0: Background map address
-; - a1: Foreground camera
-; Output:
-; - d0: Camera x position
-; - d1: Camera y position
-; Uses: d0-d5/a2-a3
-_StreamingBackgroundTrackerStart:
+; - a0: Background camera to initialize
+; - a1: Background map address
+; - a2: Foreground camera
+; - d0: Background camera plane id
+; Uses: d0-d5/a3-a4
+_StreamingBackgroundTrackerInit:
 _FP16_MUL Macro result, multiplierfp16
             move.w  \result, d4
             mulu    \multiplierfp16, d4
@@ -52,6 +51,8 @@ _FP16_MUL Macro result, multiplierfp16
             add.l   d4, \result
         Endm
 
+        PUSHL   d0                                              ; Push plane id for CameraInit
+
         moveq   #0, d0
         moveq   #0, d1
         moveq   #0, d2
@@ -60,16 +61,16 @@ _FP16_MUL Macro result, multiplierfp16
         move.w   (vdpMetrics + vdpScreenWidth), d4
         move.w   (vdpMetrics + vdpScreenHeight), d5
 
-        movea.l camMapAddress(a1), a2
-        move.w  mapWidthPixels(a2), d0
+        movea.l camMapAddress(a2), a3
+        move.w  mapWidthPixels(a3), d0
         sub.w   d4, d0
-        move.w  mapHeightPixels(a2), d1
+        move.w  mapHeightPixels(a3), d1
         sub.w   d5, d1
 
-        move.w  mapWidthPixels(a0), d2
+        move.w  mapWidthPixels(a1), d2
         sub.w   d4, d2
         swap    d2
-        move.w  mapHeightPixels(a0), d3
+        move.w  mapHeightPixels(a1), d3
         sub.w   d5, d3
         swap    d3
 
@@ -80,33 +81,40 @@ _FP16_MUL Macro result, multiplierfp16
         move.w  d3, d1
         move.l  d0, d2
         move.l  d1, d3
-        lea     (streamingBackgroundTracker + sbtXSteps), a2
-        lea     (streamingBackgroundTracker + sbtYSteps), a3
+        lea     (streamingBackgroundTracker + sbtXSteps), a3
+        lea     (streamingBackgroundTracker + sbtYSteps), a4
         Rept 8
-            move.l  d0, (a2)+
-            move.l  d1, (a3)+
+            move.l  d0, (a3)+
+            move.l  d1, (a4)+
             add.l   d2, d0
             add.l   d3, d1
         Endr
 
         ; Update initial camera position
         moveq   #0, d0
-        move.b   mapLockHorizontal(a0), (streamingBackgroundTracker + sbtLockX)
+        move.b   mapLockHorizontal(a1), (streamingBackgroundTracker + sbtLockX)
         bne     .horizontallyLocked
-        move.w  camX(a1), d0
+        move.w  camX(a2), d0
         _FP16_MUL d0, d2
         move.l  d0, (streamingBackgroundTracker + sbtX)
         swap    d0                                              ; Expects non fixed point result
     .horizontallyLocked:
 
         moveq   #0, d1
-        move.b   mapLockVertical(a0), (streamingBackgroundTracker + sbtLockY)
+        move.b   mapLockVertical(a1), (streamingBackgroundTracker + sbtLockY)
         bne     .verticallyLocked
-        move.w  camY(a1), d1
+        move.w  camY(a2), d1
         _FP16_MUL d1, d3
         move.l  d1, (streamingBackgroundTracker + sbtY)
         swap    d1                                              ; Expects non fixed point result
     .verticallyLocked:
+
+        ; Force update of scroll values on next screen refresh
+        VDP_TASK_QUEUE_ADD #_StreamingBackgroundTrackerCommit, a0
+
+        ; Initialize background camera
+        POPL    d2                                              ; d2 = Camera plane id
+        jsr     CameraInit
 
         Purge _FP16_MUL
         rts

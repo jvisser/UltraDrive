@@ -29,6 +29,17 @@
 
 
 ;-------------------------------------------------
+; Add camera displacement
+; ----------------
+; Input:
+; - a0: Camera
+CAMERA_MOVE Macro xDisp, yDisp
+        add.w  \xDisp, camXDisplacement(a0)
+        add.w  \yDisp, camYDisplacement(a0)
+    Endm
+
+
+;-------------------------------------------------
 ; Initialize camera to point at the specified coordinates (within the bounds of the currently loaded map)
 ; ----------------
 ; Input:
@@ -127,29 +138,6 @@ CameraRenderView:
         movea.l camMapAddress(a0), a0
         jsr     MapRender
     rts
-
-
-;-------------------------------------------------
-; Adjust camera displacement (inline variant)
-; ----------------
-; Input:
-; - a0: Camera
-CAMERA_MOVE Macro xDisp, yDisp
-        add.w  \xDisp, camXDisplacement(a0)
-        add.w  \yDisp, camYDisplacement(a0)
-    Endm
-
-
-;-------------------------------------------------
-; Adjust camera displacement in both directions for the following update cycle
-; ----------------
-; Input:
-; - a0: Camera
-; - d0: Horizontal displacement
-; - d1: Vertical displacement
-CameraMove:
-        CAMERA_MOVE d0, d1
-        rts
 
 
 ;-------------------------------------------------

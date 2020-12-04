@@ -175,8 +175,8 @@ _READ_BLOCK_META_DATA_ID Macro blockRef
 ; - d5: collision data index
 _READ_BLOCK_META_DATA Macro
         ; Load block meta data addresses
-        movea.l tilesetCollisionData, a2
-        movea.l tilesetAngleData, a1
+        TILESET_GET_ANGLE_DATA a1
+        TILESET_GET_COLLISION_DATA a2
 
         ; Get angle
         move.b  (a1, d4), d2
@@ -223,7 +223,7 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
             _VERIFY_BLOCK_SOLIDITY.\requiredSolidity .noCollision\@
 
             ; Get meta data id (collision + angle index)
-            movea.l tilesetMetaDataMapping, a2
+            TILESET_GET_META_DATA_MAPPING a2
             move.w  d2, d4
 
             _READ_BLOCK_META_DATA_ID d4
@@ -328,7 +328,7 @@ _FIND_HORIZONTAL_COLLISION Macro
             _VERIFY_BLOCK_SOLIDITY.LRB .noSolidCollision\@
 
             ; Get meta data id (collision + angle index)
-            movea.l tilesetMetaDataMapping, a2
+            TILESET_GET_META_DATA_MAPPING a2
             move.w  d2, d4
 
             _READ_BLOCK_META_DATA_ID d4
