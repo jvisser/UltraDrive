@@ -32,6 +32,14 @@
 
 
 ;-------------------------------------------------
+; Get loaded map address in target
+; ----------------
+MAP_GET Macro target
+        movea.l loadedMap, \target
+    Endm
+
+
+;-------------------------------------------------
 ; Load a map and its associated resources
 ; ----------------
 ; Input:

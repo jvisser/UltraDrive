@@ -34,21 +34,21 @@ VDPTaskQueueInit:
 ;-------------------------------------------------
 ; Queue VDP Task (inline)
 ; ----------------
-; Uses: a2
+; Uses: a6
 VDP_TASK_QUEUE_ADD Macro jobAddress, jobData
             OS_LOCK
 
-            movea.w vdpTaskQueueCurrentEntry, a2
-            cmpa.w  #vdpTaskQueue + vdpTaskQueue_Size, a2
+            movea.w vdpTaskQueueCurrentEntry, a6
+            cmpa.w  #vdpTaskQueue + vdpTaskQueue_Size, a6
             beq     .vdpTaskQueueFull\@
 
-            move.l  \jobAddress, (a2)+
+            move.l  \jobAddress, (a6)+
             If (narg = 1)
-                addq.l  #SIZE_LONG, a2
+                addq.l  #SIZE_LONG, a6
             Else
-                move.l  \jobData, (a2)+
+                move.l  \jobData, (a6)+
             EndIf
-            move.w  a2, vdpTaskQueueCurrentEntry
+            move.w  a6, vdpTaskQueueCurrentEntry
 
             If def(debug)
                     bra .vpdTaskQueueDone\@

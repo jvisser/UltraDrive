@@ -157,6 +157,30 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 
 
 ;-------------------------------------------------
+; Get block meta data mapping for current tileset
+; ----------------
+TILESET_GET_META_DATA_MAPPING Macro target
+        movea.l tilesetMetaDataMapping, \target
+    Endm
+
+
+;-------------------------------------------------
+; Get tileset block collision data base address
+; ----------------
+TILESET_GET_COLLISION_DATA Macro target
+        movea.l tilesetCollisionData, \target
+    Endm
+
+
+;-------------------------------------------------
+; Get tileset block angle data base address
+; ----------------
+TILESET_GET_ANGLE_DATA Macro target
+        movea.l tilesetCollisionData, \target
+    Endm
+
+
+;-------------------------------------------------
 ; Load tileset into RAM/VRAM
 ; ----------------
 ; Input:

@@ -26,7 +26,7 @@ TILING_BACKGROUND_TRACKER_SHIFT Equ 2
     DEFINE_VAR_END
 
     INIT_STRUCT tilingBackgroundTracker
-        INIT_STRUCT_MEMBER.btStart     _TilingBackgroundTrackerStart
+        INIT_STRUCT_MEMBER.btInit      _TilingBackgroundTrackerInit
         INIT_STRUCT_MEMBER.btSync      _TilingBackgroundTrackerSync
         INIT_STRUCT_MEMBER.btFinalize  _TilingBackgroundTrackerFinalize
     INIT_STRUCT_END
@@ -39,30 +39,43 @@ TilingBackgroundTrackerInit Equ tilingBackgroundTrackerInit
 
 
 ;-------------------------------------------------
-; Tiling background tracker structures
+; Init background camera position based on the foreground camera position
 ; ----------------
 ; Input:
-; - a0: Background map address
-; - a1: Foreground camera
-; Output:
-; - d0: Camera x position
-; - d1: Camera y position
+; - a0: Background camera to initialize
+; - a1: Background map address
+; - a2: Foreground camera
+; - d0: Background camera plane id
 ; Uses: d0-d5/a2-a3
-_TilingBackgroundTrackerStart:
-        move.b   mapLockHorizontal(a0), (tilingBackgroundTracker + tbtLockX)
-        move.b   mapLockVertical(a0), (tilingBackgroundTracker + tbtLockY)
+_TilingBackgroundTrackerInit:
+        move.b   mapLockHorizontal(a1), (tilingBackgroundTracker + tbtLockX)
+        move.b   mapLockVertical(a1), (tilingBackgroundTracker + tbtLockY)
+        move.w  #0, (tilingBackgroundTracker + tbtX)
+        move.w  #0, (tilingBackgroundTracker + tbtY)
 
-        moveq   #0, d0
-        moveq   #0, d1
+        ; Force update of scroll values on next screen refresh
+        VDP_TASK_QUEUE_ADD #_TilingBackgroundTrackerCommit, a0
+
+        ; Calculate initial scrolling positions
+        move.l  d0, d2
+        exg     a1, a2
+        jsr     _TilingBackgroundTrackerSync
+        exg     a1, a2
+        
+        ; Initialize the camera
+        move.w  (tilingBackgroundTracker + tbtX), d0
+        move.w  (tilingBackgroundTracker + tbtY), d1
+        jsr     CameraInit
         rts
 
 
 ;-------------------------------------------------
-; Tiling background tracker structures
+; Sync scroll to the foreground map
 ; ----------------
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
+; Uses: d0
 _TilingBackgroundTrackerSync
 
         ; Update horizontal scroll
@@ -84,7 +97,7 @@ _TilingBackgroundTrackerSync
 
 
 ;-------------------------------------------------
-; Tiling background tracker structures
+; Write new scroll values to the VDP if there is a change
 ; ----------------
 ; Input:
 ; - a0: Background camera
