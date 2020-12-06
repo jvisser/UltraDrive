@@ -19,10 +19,16 @@
 PlayerInit:
         ; TODO: determine initial state (grounded/air) based on sensors at specified position
 
-        move.w  (viewport + viewportForeground + camX), (player + entityX)
-        move.w  (viewport + viewportForeground + camY), (player + entityY)
-        addi.w  #320/2, (player + entityX)
-        addi.w  #224/2, (player + entityY)
+        move.w  (viewport + viewportForeground + camX), d0
+        move.w  (viewport + viewportForeground + camY), d1
+        addi.l  #320/2, d0
+        addi.l  #224/2, d1
+        ext.l   d0
+        swap    d0
+        move.l  d0, (player + entityX)
+        ext.l   d1
+        swap    d1
+        move.l  d1, (player + entityY)
         rts
 
 
