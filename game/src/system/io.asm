@@ -119,12 +119,12 @@ IO_PORT_2                           Equ 2
     DEFINE_VAR_END
 
     INIT_STRUCT ioDeviceState1
-        INIT_STRUCT_MEMBER.updateCallback   _IOUpdateUnsupportedDevice
+        INIT_STRUCT_MEMBER.updateCallback   NoOperation
         INIT_STRUCT_MEMBER.dataPortAddress  MEM_IO_CTRL1_DATA
     INIT_STRUCT_END
 
     INIT_STRUCT ioDeviceState2
-        INIT_STRUCT_MEMBER.updateCallback   _IOUpdateUnsupportedDevice
+        INIT_STRUCT_MEMBER.updateCallback   NoOperation
         INIT_STRUCT_MEMBER.dataPortAddress  MEM_IO_CTRL2_DATA
     INIT_STRUCT_END
 
@@ -298,7 +298,7 @@ _IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
 
         cmpi.b  #IO_DEVICE_ID_MD_PAD, d0
         beq     .mdpad
-        _IO_SET_DEVICE_TYPE IO_DEVICE_UNSUPPORTED, _IOUpdateUnsupportedDevice
+        _IO_SET_DEVICE_TYPE IO_DEVICE_UNSUPPORTED, NoOperation
         bra     .done
 
     .mdpad:
@@ -427,13 +427,4 @@ _IOUpdate6ButtonPad:
 
         andi.b  #(IO_DATA_READ_X | IO_DATA_READ_Y | IO_DATA_READ_Z | IO_DATA_READ_MODE), d0
         move.b  d0, deviceState(a0)
-        rts
-
-
-;-------------------------------------------------
-; Unknown device update callback
-; ----------------
-; Input:
-; - a0: Device state structure of device to update
-_IOUpdateUnsupportedDevice:
         rts
