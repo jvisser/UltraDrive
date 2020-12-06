@@ -55,15 +55,29 @@ _MOVE_IF Macro up, down, var, speed
         movea.l mapForegroundAddress(a0), a0
         move.w  (player + entityX), d0
         move.w  (player + entityY), d1
-        
+
         _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT, d0, 1
         _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,  d1, 1
-        
-        ; Collision detection
+
+        ; Floor collision detection
+        sub.w   #7, d0
         add.w   #15, d1
         jsr MapCollisionFindFloor
-        
+        add.w   #14, d0
+        jsr MapCollisionFindFloor
+        sub.w   #7, d0
         sub.w   #15, d1
+
+        ; Ceiling collision detection
+        sub.w   #7, d0
+        sub.w   #15, d1
+        jsr MapCollisionFindCeiling
+        add.w   #14, d0
+        jsr MapCollisionFindCeiling
+        sub.w   #7, d0
+        add.w   #15, d1
+
+        ; Update player coordinates
         move.w  d0, (player + entityX)
         move.w  d1, (player + entityY)
 
