@@ -74,28 +74,27 @@ ViewportLibraryInit:
 ; - d1: y
 ; Uses: d0-d7/a0-a6
 ViewportInit:
-        MAP_GET a0
 
         VIEWPORT_TRACK_ENTITY_END
 
         ; Initialize foreground plane camera
-        PUSHL a0
-            move.l  #VDP_PLANE_A, d2
-            movea.l mapForegroundAddress(a0), a1
-            lea     (viewport + viewportForeground), a0
+        MAP_GET a1
+        lea     (viewport + viewportForeground), a0
+        movea.l mapForegroundAddress(a1), a1
+        move.l  #VDP_PLANE_A, d2
 
-            ; Force scroll update on next screen refresh
-            VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
+        ; Force scroll update on next screen refresh
+        VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
 
-            jsr     CameraInit
-        POPL a0
+        jsr     CameraInit
 
         ; Let background tracker initialize the background camera
-        move.l  backgroundTrackerAddress(a0), a3
+        MAP_GET a1
+        move.l  backgroundTrackerAddress(a1), a3
         move.l  a3, (viewport + viewportBackgroundTracker)
         movea.l btInit(a3), a3
-        movea.l mapBackgroundAddress(a0), a1
         lea     (viewport + viewportBackground), a0
+        movea.l mapBackgroundAddress(a1), a1
         lea     (viewport + viewportForeground), a2
         move.l  #VDP_PLANE_B, d0
         jsr     (a3)
