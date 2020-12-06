@@ -10,6 +10,7 @@
         STRUCT_MEMBER.l osFramesProcessed
         STRUCT_MEMBER.l osFramesSkipped
         STRUCT_MEMBER.l osFrameProcessedCallback
+        STRUCT_MEMBER.w osLockCount
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -21,6 +22,7 @@
         INIT_STRUCT_MEMBER.osFramesProcessed          0
         INIT_STRUCT_MEMBER.osFramesSkipped            0
         INIT_STRUCT_MEMBER.osFrameProcessedCallback   NoOperation
+        INIT_STRUCT_MEMBER.osLockCount                0
     INIT_STRUCT_END
 
 
@@ -66,15 +68,26 @@ OSPrepareNextFrame:
 ;-------------------------------------------------
 ; Lock OS when accessing shared resources between main program and OS
 ; ----------------
-OS_LOCK Macros
-    M68K_DISABLE_INT
+OS_LOCK Macro
+            tst.w (osContext + osLockCount)
+            bne .alreadyLocked\@
+                M68K_DISABLE_INT
+        .alreadyLocked\@:
+            addq    #1, (osContext + osLockCount)
+        Endm
 
 
 ;-------------------------------------------------
 ; Unlock OS when accessing shared resources between main program and OS
 ; ----------------
-OS_UNLOCK Macros
-    M68K_ENABLE_INT
+OS_UNLOCK Macro
+            tst.w (osContext + osLockCount)
+            beq .alreadyUnlocked\@
+                subq #1, (osContext + osLockCount)
+                bne .alreadyUnlocked\@
+                    M68K_ENABLE_INT
+        .alreadyUnlocked\@:
+        Endm
 
 
 ;-------------------------------------------------

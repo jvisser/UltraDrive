@@ -10,10 +10,3 @@ EngineInit:
         jsr BackgroundTrackerInit
         jsr EngineSchedulerInit
         rts
-
-
-;-------------------------------------------------
-; No operations handler
-; ----------------
-NoOperation:
-    rts

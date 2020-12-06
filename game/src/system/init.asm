@@ -20,3 +20,10 @@ SysInit:
 
         ; Start main program
         jmp Main
+
+
+;-------------------------------------------------
+; No operations handler
+; ----------------
+NoOperation:
+    rts
