@@ -42,15 +42,6 @@ StreamingBackgroundTrackerInit Equ streamingBackgroundTrackerInit
 ; - d0: Background camera plane id
 ; Uses: d0-d5/a3-a4
 _StreamingBackgroundTrackerInit:
-_FP16_MUL Macro result, multiplierfp16
-            move.w  \result, d4
-            mulu    \multiplierfp16, d4
-            swap    \multiplierfp16
-            mulu    \multiplierfp16, \result
-            swap    \result
-            add.l   d4, \result
-        Endm
-
         PUSHL   d0                                              ; Push plane id for CameraInit
 
         moveq   #0, d0
@@ -95,7 +86,7 @@ _FP16_MUL Macro result, multiplierfp16
         move.b   mapLockHorizontal(a1), (streamingBackgroundTracker + sbtLockX)
         bne     .horizontallyLocked
         move.w  camX(a2), d0
-        _FP16_MUL d0, d2
+        FP16_MUL_UINT d0, d2
         move.l  d0, (streamingBackgroundTracker + sbtX)
         swap    d0                                              ; Expects non fixed point result
     .horizontallyLocked:
@@ -104,7 +95,7 @@ _FP16_MUL Macro result, multiplierfp16
         move.b   mapLockVertical(a1), (streamingBackgroundTracker + sbtLockY)
         bne     .verticallyLocked
         move.w  camY(a2), d1
-        _FP16_MUL d1, d3
+        FP16_MUL_UINT d1, d3
         move.l  d1, (streamingBackgroundTracker + sbtY)
         swap    d1                                              ; Expects non fixed point result
     .verticallyLocked:
@@ -115,8 +106,6 @@ _FP16_MUL Macro result, multiplierfp16
         ; Initialize background camera
         POPL    d2                                              ; d2 = Camera plane id
         jsr     CameraInit
-
-        Purge _FP16_MUL
         rts
 
 
