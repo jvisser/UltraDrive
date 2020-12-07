@@ -8,39 +8,42 @@
     DEFINE_STRUCT Player, EXTENDS, Entity
         STRUCT_MEMBER.l playerStateChangeFrameNumber
         STRUCT_MEMBER.l playerStateHandler
-        STRUCT_MEMBER.l playerState ; TODO: Global/state specific data?
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
-        VAR.Player player
-    DEFINE_VAR_END
 
-
-PlayerInit:
-        ; TODO: determine initial state (grounded/air) based on sensors at specified position
-
-        move.w  (viewport + viewportForeground + camX), d0
-        move.w  (viewport + viewportForeground + camY), d1
-        addi.l  #320/2, d0
-        addi.l  #224/2, d1
-        ext.l   d0
-        swap    d0
-        move.l  d0, (player + entityX)
-        ext.l   d1
-        swap    d1
-        move.l  d1, (player + entityY)
-        rts
-
-
-PlayerUpdate:
-        bsr     PlayerStateEthereal
-        rts
-
-
-PlayerStateEthereal:
 ;-------------------------------------------------
-; Increase/decrease var with speed based on up/down condition
+; Initialize player
 ; ----------------
+; Input:
+; - a0: player
+; - d0: x position
+; - d1: y position
+PlayerInit:
+        ; Convert position to 16.16 fixed point
+        INT_TO_FP16 d0
+        INT_TO_FP16 d1
+        move.l  d0, entityX(a0)
+        move.l  d1, entityY(a0)
+
+        ; TODO: determine initial state (grounded/air/crouch) based on sensors at the specified position
+        move.l  #PlayerStateEthereal, playerStateHandler(a0)
+        rts
+
+
+;-------------------------------------------------
+; Update the player based on its current state
+; ----------------
+; Input:
+; - a0: player
+PlayerUpdate:
+        movea.l playerStateHandler(a0), a1
+        jmp (a1)
+
+
+;-------------------------------------------------
+; Test state. Player had no interaction.
+; ----------------
+PlayerStateEthereal:
 _MOVE_IF Macro up, down, var, speed
                 btst    #\down, d2
                 bne     .noDown\@
@@ -90,41 +93,15 @@ _MOVE_IF Macro up, down, var, speed
         Purge _MOVE_IF
         rts
 
-; TODO: State transition
-; - Setup
-; - Animation (timed/delayed but cancelable by interaction)
-; TODO: Different states have different:
-; - Dimensions
-; - Sensors
 
+;-------------------------------------------------
+; TODO: Implement
+; ----------------
+PlayerStateJump:
 PlayerStateAir:
-    ; If within jump timer and jump button still pressed from initial jump dec y
-    ; Else add gravity acceleration to ysp (if ysp < max)) and atmospheric drag to xsp
-
-    ; If not jumping and double jump available and jump button pressed
-        ; Initiate another jump
-
-    ; If going up
-        ; Check ceiling + wall sensor
-    ; Else if going down
-        ; Check floor sensors
-            ; Switch to PlayerStateGrounded if touch
-            ; Else
-                ; Check ledge ground sensor, if detects
-                    ; Check wall. If detects switch to PlayerStateWallHang
-                ; If both wall sensors detect wall
-                    ; Reset xsp
-                    ; If dpad pressed in direction switch to PlayerStateWallSlide (this resets double jump slot/counter)
-        rts
-
-
-PlayerStateGrounded:
-    ; move or jump or switch to ground slide
-    ; find floor, but how far below in case of slope?
-        rts
-
-
-PlayerStateGroundSlide:
+PlayerStateWalk:
+PlayerStateCrouch:
+PlayerStateSlide:
 PlayerStateWallSlide:
 PlayerStateWallHang:
-PlayerStateWallClimb:
+        rts

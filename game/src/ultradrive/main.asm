@@ -4,10 +4,19 @@
 
     DEFINE_VAR FAST
         VAR.l spriteAddr
+        VAR.Player player
     DEFINE_VAR_END
 
 
+;-------------------------------------------------
+; Player init and sprite creation
+; ----------------
 _InitPlayer:
+        lea     player, a0
+        move.w  (viewport + viewportForeground + camX), d0
+        move.w  (viewport + viewportForeground + camY), d1
+        addi.l  #320/2, d0
+        addi.l  #224/2, d1
         jsr     PlayerInit
 
         ; Create player placeholder sprite (Until we have sprite engine)
@@ -31,9 +40,10 @@ _InitPlayer:
 
 
 ;-------------------------------------------------
-; Player control
+; Player control and sprite update
 ; ----------------
 _UpdatePlayer:
+        lea     player, a0
         jsr     PlayerUpdate
         jsr     ViewportFinalize
 
