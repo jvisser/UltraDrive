@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.4" tiledversion="1.4.3" name="CollisionBlocks" tilewidth="16" tileheight="16" tilecount="32" columns="32">
- <image source="assets/collisionblocks.png" width="512" height="16"/>
+<tileset version="1.4" tiledversion="1.4.3" name="CollisionBlocks" tilewidth="16" tileheight="16" tilecount="33" columns="33">
+ <image source="assets/collisionblocks.png" width="528" height="16"/>
  <tile id="0" type="CollisionBlock">
   <properties>
    <property name="angle" type="float" value="90"/>
@@ -159,6 +159,11 @@
  <tile id="31" type="CollisionBlock">
   <properties>
    <property name="angle" type="float" value="0"/>
+  </properties>
+ </tile>
+ <tile id="32" type="CollisionBlock">
+  <properties>
+   <property name="angle" type="float" value="90"/>
   </properties>
  </tile>
 </tileset>

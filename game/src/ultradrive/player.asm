@@ -2,6 +2,7 @@
 ; Player state machine
 ;------------------------------------------------------------------------------------------
 
+
 ;-------------------------------------------------
 ; Player structure
 ; ----------------
@@ -26,7 +27,7 @@ PlayerInit:
         move.l  d1, entityY(a0)
 
         ; TODO: determine initial state (grounded/air/crouch) based on sensors at the specified position
-        move.l  #PlayerStateEthereal, playerStateHandler(a0)
+        move.l  #PlayerStateTestCollision, playerStateHandler(a0)
         rts
 
 
@@ -41,60 +42,6 @@ PlayerUpdate:
 
 
 ;-------------------------------------------------
-; Test state. Player had no interaction.
-; ----------------
-PlayerStateEthereal:
-_MOVE_IF Macro up, down, var, speed
-                btst    #\down, d2
-                bne     .noDown\@
-                addq    #\speed, \var
-                bra     .done\@
-            .noDown\@:
-
-                btst    #\up, d2
-                bne     .done\@
-                subq    #\speed, \var
-
-            .done\@:
-        Endm
-
-        IO_GET_DEVICE_STATE IO_PORT_1, d2
-
-        MAP_GET a0
-        movea.l mapForegroundAddress(a0), a0
-        move.w  (player + entityX), d0
-        move.w  (player + entityY), d1
-
-        _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT, d0, 1
-        _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,  d1, 1
-
-        ; Floor collision detection
-        sub.w   #7, d0
-        add.w   #15, d1
-        jsr MapCollisionFindFloor
-        add.w   #14, d0
-        jsr MapCollisionFindFloor
-        sub.w   #7, d0
-        sub.w   #15, d1
-
-        ; Ceiling collision detection
-        sub.w   #7, d0
-        sub.w   #15, d1
-        jsr MapCollisionFindCeiling
-        add.w   #14, d0
-        jsr MapCollisionFindCeiling
-        sub.w   #7, d0
-        add.w   #15, d1
-
-        ; Update player coordinates
-        move.w  d0, (player + entityX)
-        move.w  d1, (player + entityY)
-
-        Purge _MOVE_IF
-        rts
-
-
-;-------------------------------------------------
 ; TODO: Implement
 ; ----------------
 PlayerStateJump:
@@ -104,4 +51,100 @@ PlayerStateCrouch:
 PlayerStateSlide:
 PlayerStateWallSlide:
 PlayerStateWallHang:
+        rts
+
+
+;-------------------------------------------------
+; Test collision detection code
+; ----------------
+PlayerStateTestCollision:
+_MOVE_IF Macro up, down, var, disp, speed
+                moveq   #0, \disp
+                btst    #\down, d6
+                bne     .noDown\@
+                moveq   #\speed, \disp
+                bra     .done\@
+            .noDown\@:
+
+                btst    #\up, d6
+                bne     .done\@
+                moveq   #-\speed, \disp
+
+            .done\@:
+                add.w    \disp, \var
+        Endm
+
+        IO_GET_DEVICE_STATE IO_PORT_1, d6
+
+        MAP_GET a0
+        movea.l mapForegroundAddress(a0), a0
+        move.w  (player + entityX), d0
+        move.w  (player + entityY), d1
+
+        _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT, d0, d2, 1
+        _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,  d1, d3, 1
+
+        ; Right wall collision detection
+        tst.w   d2
+        bmi .skipRight
+            PUSHM   d2-d3
+            add.w   #7, d0
+            sub.w   #10, d1
+            jsr     MapCollisionFindRightWall
+            add.w   #20, d1
+            jsr     MapCollisionFindRightWall
+            sub.w   #10, d1
+            jsr     MapCollisionFindRightWall
+            sub.w   #7,  d0
+            POPM    d2-d3
+            bra     .wallDone
+    .skipRight:
+
+        ; Left wall collision detection
+        beq .skipLeft
+            PUSHM   d2-d3
+            sub.w   #7, d0
+            sub.w   #10, d1
+            jsr     MapCollisionFindLeftWall
+            add.w   #20, d1
+            jsr     MapCollisionFindLeftWall
+            sub.w   #10, d1
+            jsr     MapCollisionFindLeftWall
+            add.w   #7,  d0
+            POPM    d2-d3
+    .skipLeft:
+
+    .wallDone:
+
+        ; Floor collision detection
+        tst.w   d3
+        bmi     .skipFloor
+            PUSHW   d3
+            sub.w   #7, d0
+            add.w   #15, d1
+            jsr     MapCollisionFindFloor
+            add.w   #14, d0
+            jsr     MapCollisionFindFloor
+            sub.w   #7, d0
+            sub.w   #15, d1
+            POPW    d3
+            bra     .floorDone
+    .skipFloor:
+
+        ; Ceiling collision detection
+        sub.w   #7, d0
+        sub.w   #15, d1
+        jsr     MapCollisionFindCeiling
+        add.w   #14, d0
+        jsr     MapCollisionFindCeiling
+        sub.w   #7, d0
+        add.w   #15, d1
+
+    .floorDone:
+
+        ; Update player coordinates
+        move.w  d0, (player + entityX)
+        move.w  d1, (player + entityY)
+
+        Purge _MOVE_IF
         rts
