@@ -2,13 +2,25 @@
 ; Player state machine
 ;------------------------------------------------------------------------------------------
 
+;-------------------------------------------------
+; Player constants
+; ----------------
+PLAYER_EXTENTS_X        Equ     7
+PLAYER_EXTENTS_Y        Equ     15
+PLAYER_EXTENTS_WALL_X   Equ     7
+PLAYER_EXTENTS_WALL_Y   Equ     10
+
 
 ;-------------------------------------------------
 ; Player structure
 ; ----------------
     DEFINE_STRUCT Player, EXTENDS, Entity
-        STRUCT_MEMBER.l playerStateChangeFrameNumber
         STRUCT_MEMBER.l playerStateHandler
+        STRUCT_MEMBER.l playerStateChangeFrameNumber
+        STRUCT_MEMBER.l playerXSpeed
+        STRUCT_MEMBER.l playerYSpeed
+        STRUCT_MEMBER.l playerGroundSpeed
+        STRUCT_MEMBER.w playerAngle
     DEFINE_STRUCT_END
 
 
@@ -26,8 +38,8 @@ PlayerInit:
         move.l  d0, entityX(a0)
         move.l  d1, entityY(a0)
 
-        ; TODO: determine initial state (grounded/air/crouch) based on sensors at the specified position
-        move.l  #PlayerStateTestCollision, playerStateHandler(a0)
+        ; TODO: Check ground sensors to find floor if any: walk, else air
+        move.l  #PlayerStateWalk, playerStateHandler(a0)
         rts
 
 
@@ -45,13 +57,17 @@ PlayerUpdate:
 ; TODO: Implement
 ; ----------------
 PlayerStateJump:
+PlayerStateDoubleJump:
 PlayerStateAir:
 PlayerStateWalk:
+PlayerStateRun:
 PlayerStateCrouch:
 PlayerStateSlide:
+PlayerStateWallRun:
 PlayerStateWallSlide:
-PlayerStateWallHang:
-        rts
+PlayerStateWallJump:
+PlayerStateWallLedgeHang:
+PlayerStateWallLedgeClimb:
 
 
 ;-------------------------------------------------
@@ -88,14 +104,14 @@ _MOVE_IF Macro up, down, var, disp, speed
         tst.w   d2
         bmi .skipRight
             PUSHM   d2-d3
-            add.w   #7, d0
-            sub.w   #10, d1
+            add.w   #PLAYER_EXTENTS_WALL_X, d0
+            sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindRightWall
-            add.w   #20, d1
+            add.w   #PLAYER_EXTENTS_WALL_Y * 2, d1
             jsr     MapCollisionFindRightWall
-            sub.w   #10, d1
+            sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindRightWall
-            sub.w   #7,  d0
+            sub.w   #PLAYER_EXTENTS_WALL_X,  d0
             POPM    d2-d3
             bra     .wallDone
     .skipRight:
@@ -103,14 +119,14 @@ _MOVE_IF Macro up, down, var, disp, speed
         ; Left wall collision detection
         beq .skipLeft
             PUSHM   d2-d3
-            sub.w   #7, d0
-            sub.w   #10, d1
+            sub.w   #PLAYER_EXTENTS_WALL_X, d0
+            sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindLeftWall
-            add.w   #20, d1
+            add.w   #PLAYER_EXTENTS_WALL_Y * 2, d1
             jsr     MapCollisionFindLeftWall
-            sub.w   #10, d1
+            sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindLeftWall
-            add.w   #7,  d0
+            add.w   #PLAYER_EXTENTS_WALL_X,  d0
             POPM    d2-d3
     .skipLeft:
 
@@ -120,25 +136,25 @@ _MOVE_IF Macro up, down, var, disp, speed
         tst.w   d3
         bmi     .skipFloor
             PUSHW   d3
-            sub.w   #7, d0
-            add.w   #15, d1
+            sub.w   #PLAYER_EXTENTS_X, d0
+            add.w   #PLAYER_EXTENTS_Y, d1
             jsr     MapCollisionFindFloor
-            add.w   #14, d0
+            add.w   #PLAYER_EXTENTS_X * 2, d0
             jsr     MapCollisionFindFloor
-            sub.w   #7, d0
-            sub.w   #15, d1
+            sub.w   #PLAYER_EXTENTS_X, d0
+            sub.w   #PLAYER_EXTENTS_Y, d1
             POPW    d3
             bra     .floorDone
     .skipFloor:
 
         ; Ceiling collision detection
-        sub.w   #7, d0
-        sub.w   #15, d1
+        sub.w   #PLAYER_EXTENTS_X, d0
+        sub.w   #PLAYER_EXTENTS_Y, d1
         jsr     MapCollisionFindCeiling
-        add.w   #14, d0
+        add.w   #PLAYER_EXTENTS_X * 2, d0
         jsr     MapCollisionFindCeiling
-        sub.w   #7, d0
-        add.w   #15, d1
+        sub.w   #PLAYER_EXTENTS_X, d0
+        add.w   #PLAYER_EXTENTS_Y, d1
 
     .floorDone:
 
