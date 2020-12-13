@@ -1,8 +1,9 @@
 # UltraDrive
 
-DISCONTINUED
+_DISCONTINUED_
 
 Project to learn how and also how not to implement a game engine for the [Sega Mega Drive/Genesis](https://en.wikipedia.org/wiki/Sega_Genesis).
+The program consists of a test case for all implemented features.
 
 The following features have been implemented:
 - [Tiled](https://www.mapeditor.org/) map support
@@ -53,5 +54,16 @@ Run asm68k from the command line in the source root:
 
 This produces a ROM image `boot.bin` which can be loaded in an emulator that supports the kmod debug protocol.
 
-# Example
+## Controls
+- **dpad**: move placeholder sprite
+- **button c**: hold to move fast
+- **button a**: press to initiate manually triggered tileset animations
+
+Collision detection is performed as follows:
+- Ceiling collision detection is only performed when moving up.
+- Floor collision detection is performed when moving down or left/right. 
+- Wall collision detection is performed for the direction of movement on the horizontal axis.
+
+
+## Example
 ![UltraDrive test map running in BlastEm](ultradrive.gif)

@@ -78,13 +78,14 @@ _MOVE_IF Macro up, down, var, disp, speed
                 moveq   #0, \disp
                 btst    #\down, d6
                 bne     .noDown\@
-                moveq   #\speed, \disp
+                move.w  \speed, \disp
                 bra     .done\@
             .noDown\@:
 
                 btst    #\up, d6
                 bne     .done\@
-                moveq   #-\speed, \disp
+                move.w  \speed, \disp
+                neg.w   \disp
 
             .done\@:
                 add.w    \disp, \var
@@ -97,8 +98,17 @@ _MOVE_IF Macro up, down, var, disp, speed
         move.w  (player + entityX), d0
         move.w  (player + entityY), d1
 
-        _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT, d0, d2, 1
-        _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,  d1, d3, 1
+        ; If button C is pressed move at max speed
+        btst    #MD_PAD_C, d6
+        beq     .moveFast
+        moveq   #1, d4
+        bra     .moveSpeedDone
+    .moveFast:
+        moveq   #8, d4
+    .moveSpeedDone:
+
+        _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT, d0, d2, d4
+        _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,  d1, d3, d4
 
         ; Right wall collision detection
         tst.w   d2
