@@ -2,8 +2,8 @@
     "automappingRulesFile": "",
     "commands": [
         {
-            "arguments": "",
-            "command": "sh %projectpath/../../src/build_and_run.sh",
+            "arguments": "%mapfile",
+            "command": "sh '%projectpath/../../src/build_and_run.sh' ",
             "enabled": true,
             "name": "run",
             "saveBeforeExecute": true,

@@ -69,24 +69,32 @@ OSPrepareNextFrame:
 ; Lock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_LOCK Macro
-            tst.w (osContext + osLockCount)
-            bne .alreadyLocked\@
-                M68K_DISABLE_INT
-        .alreadyLocked\@:
-            addq    #1, (osContext + osLockCount)
-        Endm
+        tst.w (osContext + osLockCount)
+        bne .alreadyLocked\@
+            M68K_DISABLE_INT
+    .alreadyLocked\@:
+        addq    #1, (osContext + osLockCount)
+    Endm
 
 
 ;-------------------------------------------------
 ; Unlock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_UNLOCK Macro
-            tst.w (osContext + osLockCount)
-            beq .alreadyUnlocked\@
-                subq #1, (osContext + osLockCount)
-                bne .alreadyUnlocked\@
-                    M68K_ENABLE_INT
-        .alreadyUnlocked\@:
+        tst.w (osContext + osLockCount)
+        beq .alreadyUnlocked\@
+            subq #1, (osContext + osLockCount)
+            bne .alreadyUnlocked\@
+                M68K_ENABLE_INT
+    .alreadyUnlocked\@:
+    Endm
+
+
+;-------------------------------------------------
+; Kill switch
+; ----------------
+OS_KILL Macro
+        trap #0
         Endm
 
 
@@ -134,3 +142,17 @@ OSNextFrameReadyWait:
         cmp.l  (osContext + osFramesProcessed), d0
         beq     .waitNextFrameLoop
         rts
+
+
+;-------------------------------------------------
+; OS Kill handler (Trap #0)
+; ----------------
+_SIG_OSKill:
+        DEBUG_MSG 'OSKill signal received'
+
+        ; Blue screen
+        VDP_ADDR_SET WRITE, CRAM, $00
+        move.w  #$0e00, MEM_VDP_DATA
+
+        M68K_HALT
+        rte         ; Unreachable

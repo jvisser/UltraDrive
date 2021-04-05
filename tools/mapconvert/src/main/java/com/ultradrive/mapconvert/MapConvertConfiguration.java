@@ -17,7 +17,7 @@ import org.apache.commons.cli.ParseException;
 
 class MapConvertConfiguration
 {
-    private static final String OPTION_MAP_DIR = "m";
+    private static final String OPTION_MAP_FILE = "m";
     private static final String OPTION_TEMPLATE_DIR = "t";
     private static final String OPTION_OUTPUT_DIR = "o";
     private static final String OPTION_IMAGE_OUTPUT_DIR = "p";
@@ -28,7 +28,7 @@ class MapConvertConfiguration
 
     private final Options options;
 
-    private String mapBaseDirectory;
+    private String mapFile;
     private String templateDirectory;
     private String outputDirectory;
     private String imageOutputDirectory;
@@ -40,13 +40,13 @@ class MapConvertConfiguration
     MapConvertConfiguration()
     {
         options = new Options();
-        options.addRequiredOption(OPTION_MAP_DIR, "map-dir", true, "Map base directory.");
+        options.addRequiredOption(OPTION_MAP_FILE, "map", true, "Map file or directory containing the maps to compile");
         options.addRequiredOption(OPTION_OUTPUT_DIR, "output-dir", true, "Output directory.");
-        options.addOption(OPTION_TEMPLATE_DIR, "template-dir", true, "Thymeleaf template directory directory.");
+        options.addOption(OPTION_TEMPLATE_DIR, "template-dir", true, "Thymeleaf template directory.");
         options.addOption(OPTION_IMAGE_OUTPUT_DIR, "image-output-dir", true, ".png image output directory (uses output-dir if not specified).");
         options.addOption(OPTION_OBJECT_TYPES_FILE, "object-types-file", true, "Location of the tiled objecttypes.xml file.");
         options.addOption(OPTION_PATTERN_ALLOCATION_CONFIG_FILE, "pattern-alloc", true, "Location of the pattern allocation configuration file");
-        options.addOption(OPTION_RECURSIVE, "recursive", false, "Search for maps recursively from map base directory.");
+        options.addOption(OPTION_RECURSIVE, "recursive", false, "Search for maps recursively from the map base directory.");
         options.addOption(OPTION_IMAGE, "image", false, "Save .png images of the maps in the directory specified by image-output-dir.");
     }
 
@@ -58,7 +58,7 @@ class MapConvertConfiguration
         {
             CommandLine cmd = parser.parse(options, args);
 
-            mapBaseDirectory = cmd.getOptionValue(OPTION_MAP_DIR);
+            mapFile = cmd.getOptionValue(OPTION_MAP_FILE);
             templateDirectory = cmd.getOptionValue(OPTION_TEMPLATE_DIR);
             outputDirectory = cmd.getOptionValue(OPTION_OUTPUT_DIR);
             imageOutputDirectory = cmd.getOptionValue(OPTION_IMAGE_OUTPUT_DIR);
@@ -85,9 +85,9 @@ class MapConvertConfiguration
         formatter.printHelp(appName, options, true);
     }
 
-    public String getMapBaseDirectory()
+    public String getMapFile()
     {
-        return mapBaseDirectory;
+        return mapFile;
     }
 
     public String getTemplateDirectory()

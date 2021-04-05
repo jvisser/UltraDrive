@@ -5,6 +5,7 @@ import com.ultradrive.mapconvert.export.MapExporter;
 import com.ultradrive.mapconvert.processing.map.TileMap;
 import com.ultradrive.mapconvert.processing.map.TileMapCompilation;
 import com.ultradrive.mapconvert.processing.map.TileMapCompiler;
+import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.render.MapRenderer;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,8 @@ public final class MapConvert
 
         TileMapCompilation mapCompilation = compileMaps(config);
 
+        logTilesetStatistics(mapCompilation);
+
         if (config.isProcessTemplates())
         {
             export(config, mapCompilation);
@@ -39,6 +42,18 @@ public final class MapConvert
         if (config.isSaveImages())
         {
             exportPNG(config, mapCompilation);
+        }
+    }
+
+    private void logTilesetStatistics(TileMapCompilation mapCompilation)
+    {
+        for (Tileset tileset : mapCompilation.getTilesets())
+        {
+            LOGGER.info("Tileset '{}' = Chunks = {}, Blocks = {}, Patterns = {}",
+                        tileset.getName(),
+                        tileset.getChunkTileset().getSize(),
+                        tileset.getBlockTileset().getSize(),
+                        tileset.getPatternAllocation().getSize());
         }
     }
 
@@ -61,10 +76,21 @@ public final class MapConvert
 
         TileMapCompiler mapCompiler = new TileMapCompiler(config.getPatternAllocationConfiguration());
 
-        Files.walk(Path.of(config.getMapBaseDirectory()), config.getDirectorySearchDepth())
-                .filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))
-                .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
-                .forEach(mapCompiler::addMapDataSource);
+        File mapFile = new File(config.getMapFile());
+        if (mapFile.exists())
+        {
+            if (mapFile.isFile())
+            {
+                mapCompiler.addMapDataSource(tiledObjectFactory.getMapDataSource(mapFile.getAbsolutePath()));
+            }
+            else
+            {
+                Files.walk(Path.of(mapFile.getAbsolutePath()), config.getDirectorySearchDepth())
+                        .filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))
+                        .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
+                        .forEach(mapCompiler::addMapDataSource);
+            }
+        }
 
         return mapCompiler.compile();
     }
@@ -96,7 +122,8 @@ public final class MapConvert
         }
         else
         {
-            LOGGER.warn(format("Unable to create image export output directory '%s'", imageDirectory.getAbsolutePath()));
+            LOGGER.warn(
+                    format("Unable to create image export output directory '%s'", imageDirectory.getAbsolutePath()));
         }
     }
 

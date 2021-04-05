@@ -2,6 +2,8 @@
 ; Main binary assembly
 ;------------------------------------------------------------------------------------------
 
+; TODO: Move macros to separate files due to M68K expanding macros in a single pass :/ (or just switch to a better/modern assembler)
+
     Include 'asmopts.asm'
     Include 'layout.asm'
 
@@ -14,12 +16,12 @@
     Include './system/profile.asm'
     Include './system/system.asm'
     Include './system/memory.asm'
-    Include './system/exception.asm'
     Include './system/z80.asm'
     Include './system/io.asm'
-    Include './system/os.asm'
     Include './system/vdpcmd.asm'
     Include './system/vdp.asm'
+    Include './system/exception.asm'
+    Include './system/os.asm'
     Include './system/vdpdma.asm'
     Include './system/vdptaskqueue.asm'
     Include './system/vdpdmaqueue.asm'

@@ -178,7 +178,8 @@ VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
-        move.l  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+        move.w  (a0)+, (a1)
     Endm
 
 
@@ -214,5 +215,6 @@ VDP_DMA_COPY_COMMAND_LIST Macro vdpDMACopyCommandList
         move.w  (a0)+, (a1)
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
-        move.l  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+        move.w  (a0)+, (a1)
     Endm

@@ -6,5 +6,11 @@
 ; Generic exception handler
 ; ----------------
 Exception:
-        stop #M68k_SR_SUPERVISOR | M68k_SR_INTERRUPT_MASK
-        rte
+        DEBUG_MSG 'Unhandled exception!'
+
+        ; Purple screen
+        VDP_ADDR_SET WRITE, CRAM, $00
+        move.w  #$0e0e, MEM_VDP_DATA
+
+        M68K_HALT
+        rte         ; Unreachable

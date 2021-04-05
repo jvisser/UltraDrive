@@ -137,7 +137,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
             [# th:if="${allocation.allocatedPatternSize > 0}" th:each="module, iter : ${#collection.group(maxModuleSize, #byteBE.from(#collection.flatten(allocation.patterns)))}"]
                 ; Module [(${iter.index})]
                 [# th:with="compressionResult=${#comper.compress(module)}, moduleOffset=${iter.index * maxModuleSize}"]
-                    ; .tsPatternCompressedSize (uncompressedSize=[(${compressionResult.uncompressedSize})], ratio=[(${compressionResult.compressionRatio})])
+                    ; .tsPatternCompressedSize (uncompressedSize=[(${compressionResult.uncompressedSize})], compressedSize=[(${compressionResult.compressedSize})], ratio=[(${compressionResult.compressionRatio})])
                     dc.w [(${compressionResult.compressedSize})]
 
                     ; .tsPatternDMATransferCommandList
