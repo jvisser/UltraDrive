@@ -134,6 +134,14 @@ M68K_ENABLE_INT Macro
 
 
 ;-------------------------------------------------
+; Stop any further processing
+; ----------------
+M68K_HALT Macro
+        stop #M68k_SR_SUPERVISOR | M68k_SR_INTERRUPT_MASK
+    Endm
+
+
+;-------------------------------------------------
 ; Init 68000 state
 ; ----------------
 M68KInit:

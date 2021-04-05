@@ -25,6 +25,7 @@ The following features have been implemented:
 - 3 and 6 button controller support on both controller ports
 - Independent camera with map streaming support for foreground and background
     - Background behavior can be configured in the map editor (Tiled)
+- 2 working tilesets
 
 ## How to run
 ### Prerequisites
@@ -33,37 +34,33 @@ The following tools should be on your PATH
 - asm68k
 - java (>=11)
 - maven (>=3)
-- sh (to run directly from Tiled. for windows the one supplied with gcc will work)
+- sh/bash to run the provided scripts
 
 ### Build MapConvert
 To build the Tiled map conversion tool run the script `./build_tools.sh`
 
 ### Run directly from Tiled
 - Open the Tiled project workspace file in `./game/assets/map/`
-- Press `alt+r` to compile the map and run the project in BlastEm
+- Press `alt+r` to compile the run currently open/focussed map in BlastEm
+  - This runs the script `./game/src/build_and_run.sh <mapfile>`
 
 ### Run on real hardware
-Create a ROM image `boot.bin` by runnin the following command from the source root: `asm68k.exe /p .\assembly.asm,boot.bin`.
-Put `boot.bin` on a flash card like the Everdrive and run from there.
+Create a ROM image `ultradrive.bin` by running the following command from the source root: `asm68k.exe /p .\assembly.asm,ultradrive.bin`.
+Put `ultradrive.bin` on a flash card like the Mega EverDrive and run from there.
 
 ## Debug build
-This adds Gens KMod debug support (Debug message and timers) which can be used in the Gens KMod and Exodus emulators.
+This adds Gens KMod debug support (Debug message and timers) available in supported emulators.
 
 Run asm68k from the command line in the source root:
-`asm68k.exe /p /e "DEBUG='GENS'" .\assembly.asm,boot.bin`
+`asm68k.exe /p /e "DEBUG='GENS'" .\assembly.asm,ultradrive.bin`
 
-This produces a ROM image `boot.bin` which can be loaded in an emulator that supports the kmod debug protocol.
+This produces a ROM image `ultradrive.bin` which can be loaded in an emulator that supports the kmod debug protocol.
 
 ## Controls
-- **dpad**: move placeholder sprite
-- **button c**: hold to move fast
+- **dpad**: move player sprite
 - **button a**: press to initiate manually triggered tileset animations
-
-Collision detection is performed as follows:
-- Ceiling collision detection is only performed when moving up.
-- Floor collision detection is performed when moving down or left/right. 
-- Wall collision detection is performed for the direction of movement on the horizontal axis.
-
+- **button b**: hold to disable collision detection
+- **button c**: hold to move fast
 
 ## Example
 ![UltraDrive test map running in BlastEm](ultradrive.gif)

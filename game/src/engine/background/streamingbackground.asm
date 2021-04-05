@@ -65,7 +65,7 @@ _StreamingBackgroundTrackerInit:
         sub.w   d5, d3
         swap    d3
 
-        ; Calculate maps ratio and displacement steps
+        ; Calculate maps ratio and displacement steps (TODO: Fix result being 0 when ratio >= 1)
         divu    d0, d2
         divu    d1, d3
         move.w  d2, d0

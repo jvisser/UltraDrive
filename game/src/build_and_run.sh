@@ -4,7 +4,7 @@ set -e
 
 # Compile assets to source
 java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
-        -m '../assets/map/maps/playfield'                   \
+        -m "$1"                                             \
         -t './engine/assets/template'                       \
         -o './ultradrive/assets'                            \
         -f '../assets/map/objecttypes.xml'                  \

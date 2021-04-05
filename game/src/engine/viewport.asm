@@ -90,7 +90,7 @@ ViewportInit:
 
         ; Let background tracker initialize the background camera
         MAP_GET a1
-        move.l  backgroundTrackerAddress(a1), a3
+        move.l  mapBackgroundTrackerAddress(a1), a3
         move.l  a3, (viewport + viewportBackgroundTracker)
         movea.l btInit(a3), a3
         lea     (viewport + viewportBackground), a0

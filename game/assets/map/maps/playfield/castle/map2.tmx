@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="19" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+ <properties>
+  <property name="background" type="file" value="../../background/castle_abstract.tmx"/>
+ </properties>
+ <tileset firstgid="1" source="../../../tilesets/castle/chunks.tsx"/>
+ <layer id="1" name="Chunks" width="19" height="10">
+  <data encoding="csv">
+100,104,101,104,101,104,101,104,101,104,101,104,101,104,101,104,101,104,102,
+119,97,56,74,8,73,56,99,0,97,41,40,74,0,97,40,40,74,118,
+116,39,0,55,3,39,0,39,0,39,8,8,39,0,39,8,8,39,121,
+119,55,0,89,56,90,0,55,0,55,4,6,55,0,55,3,4,55,118,
+116,39,0,0,2,0,0,39,0,113,40,40,115,0,113,40,41,90,121,
+119,55,0,0,2,0,0,55,0,55,0,0,55,0,55,0,2,0,118,
+116,39,0,0,2,0,0,39,0,39,0,0,39,0,39,0,2,0,121,
+119,55,0,0,2,0,0,55,0,55,0,0,55,0,55,0,2,0,118,
+116,54,0,0,2,0,0,54,0,54,0,0,54,0,54,0,2,0,121,
+132,133,136,71,35,72,136,133,136,133,136,133,136,133,136,73,98,74,134
+</data>
+ </layer>
+</map>

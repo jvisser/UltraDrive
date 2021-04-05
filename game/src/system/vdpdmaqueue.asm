@@ -121,7 +121,8 @@ VDPDMAQueueFlush:
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
-        move.l  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+        move.w  (a0)+, (a1)
         cmpa    a0, a2
         bne .dmaTransferLoop
 

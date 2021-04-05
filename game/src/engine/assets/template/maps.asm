@@ -4,6 +4,19 @@
 
     SECTION_START S_RODATA
 
+        Even
+
+[# th:with="rootMaps=${maps.{? #this.properties['background'] != null}}"]
+    ; struct MapDirectory
+    ; .mapCount
+    MapDirectory:
+        dc.w [(${rootMaps.size})]
+        [# th:each="map : ${rootMaps}" th:with="mapName=${#strings.capitalize(map.name)}"]
+                ; .mapForegroundAddress
+                dc.l MapHeader[(${mapName})]
+        [/]
+[/]
+
 [# th:each="map : ${maps}" th:with="mapName=${#strings.capitalize(map.name)}"]
 
     Even
@@ -17,7 +30,7 @@
             dc.l Map[(${backgroundMapName})]
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-            ; .backgroundTrackerAddress
+            ; .mapBackgroundTrackerAddress
             dc.l [(${#strings.toLowerCase(map.properties.getOrDefault('background_tracker', map.properties['background'].properties['background_tracker']))})]BackgroundTracker
         Even
     [/]

@@ -20,14 +20,15 @@ _InitPlayer:
         jsr     PlayerInit
 
         ; Create player placeholder sprite (Until we have sprite engine)
+PLAYER_SPRITE_TILE Equ 1000 ; Use Tileset.tsVramFreeAreaMin
         moveq   #1, d0
         jsr     VDPSpriteAlloc
         move.l  a0, spriteAddr
-        move.w  #1, vdpSpriteAttr3(a0)
+        move.w  #PLAYER_SPRITE_TILE, vdpSpriteAttr3(a0)
         move.b  #VDP_SPRITE_SIZE_V4 | VDP_SPRITE_SIZE_H2, vdpSpriteSize(a0)
 
         ; Upload sprite patterns (15*31)
-        VDP_ADDR_SET WRITE, VRAM, $0020, $2
+        VDP_ADDR_SET WRITE, VRAM, (PLAYER_SPRITE_TILE * $20), $2
         Rept    4*8-1
             move.l  #$55555555, MEM_VDP_DATA
         Endr
@@ -87,13 +88,16 @@ Main:
         DEBUG_MSG 'Engine initialized'
 
         jsr     MapRenderInit
-        lea     MapHeaderTest_map1, a0
-        jsr     MapLoad
 
-        DEBUG_MSG 'Map loaded'
+        DEBUG_MSG 'Map renderer initialized'
 
-        move.w  #7 * 128, d0
-        move.w  #1 * 128, d1
+        moveq   #0, d0
+        jsr     MapLoadDirectoryIndex
+
+        DEBUG_MSG 'Map at index 0 loaded'
+
+        moveq   #0, d0
+        moveq   #0, d1
         jsr     ViewportInit
         VIEWPORT_TRACK_ENTITY #player
 

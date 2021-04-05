@@ -49,7 +49,7 @@ Vector68k:
     dc.l   Exception                        ; IRQ level 5
     dc.l   VBlankInterruptHandler           ; IRQ level 6 (vertical retrace interrupt)
     dc.l   Exception                        ; IRQ level 7
-    dc.l   Exception                        ; TRAP #00 exception
+    dc.l   _SIG_OSKill                      ; TRAP #00 exception
     dc.l   Exception                        ; TRAP #01 exception
     dc.l   Exception                        ; TRAP #02 exception
     dc.l   Exception                        ; TRAP #03 exception

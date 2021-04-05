@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="4" height="2" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+ <properties>
+  <property name="background_tracker" value="tiling"/>
+  <property name="camera_lock_horizontal" type="bool" value="false"/>
+  <property name="camera_lock_vertical" type="bool" value="false"/>
+ </properties>
+ <tileset firstgid="1" source="../../tilesets/castle/chunks.tsx"/>
+ <layer id="1" name="Chunks" width="4" height="2">
+  <data encoding="csv">
+45,46,45,46,
+46,45,46,45
+</data>
+ </layer>
+</map>

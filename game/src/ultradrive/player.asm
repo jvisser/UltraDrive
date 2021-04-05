@@ -8,7 +8,7 @@
 PLAYER_EXTENTS_X        Equ     7
 PLAYER_EXTENTS_Y        Equ     15
 PLAYER_EXTENTS_WALL_X   Equ     7
-PLAYER_EXTENTS_WALL_Y   Equ     10
+PLAYER_EXTENTS_WALL_Y   Equ     7
 
 
 ;-------------------------------------------------
@@ -66,8 +66,8 @@ PlayerStateSlide:
 PlayerStateWallRun:
 PlayerStateWallSlide:
 PlayerStateWallJump:
-PlayerStateWallLedgeHang:
-PlayerStateWallLedgeClimb:
+PlayerStateLedgeHang:
+PlayerStateLedgeClimb:
 
 
 ;-------------------------------------------------
@@ -110,6 +110,10 @@ _MOVE_IF Macro up, down, var, disp, speed
         _MOVE_IF MD_PAD_LEFT, MD_PAD_RIGHT, d0, d2, d4
         _MOVE_IF MD_PAD_UP,   MD_PAD_DOWN,  d1, d3, d4
 
+        ; If button B is pressed skip collision detection
+        btst    #MD_PAD_B, d6
+        beq     .collisionDone
+
         ; Right wall collision detection
         tst.w   d2
         bmi .skipRight
@@ -145,16 +149,15 @@ _MOVE_IF Macro up, down, var, disp, speed
         ; Floor collision detection
         tst.w   d3
         bmi     .skipFloor
-            PUSHW   d3
-            sub.w   #PLAYER_EXTENTS_X, d0
-            add.w   #PLAYER_EXTENTS_Y, d1
-            jsr     MapCollisionFindFloor
-            add.w   #PLAYER_EXTENTS_X * 2, d0
-            jsr     MapCollisionFindFloor
-            sub.w   #PLAYER_EXTENTS_X, d0
-            sub.w   #PLAYER_EXTENTS_Y, d1
-            POPW    d3
-            bra     .floorDone
+        PUSHW   d3
+        sub.w   #PLAYER_EXTENTS_X, d0
+        add.w   #PLAYER_EXTENTS_Y, d1
+        jsr     MapCollisionFindFloor
+        add.w   #PLAYER_EXTENTS_X * 2, d0
+        jsr     MapCollisionFindFloor
+        sub.w   #PLAYER_EXTENTS_X, d0
+        sub.w   #PLAYER_EXTENTS_Y, d1
+        POPW    d3
     .skipFloor:
 
         ; Ceiling collision detection
@@ -166,7 +169,7 @@ _MOVE_IF Macro up, down, var, disp, speed
         sub.w   #PLAYER_EXTENTS_X, d0
         add.w   #PLAYER_EXTENTS_Y, d1
 
-    .floorDone:
+    .collisionDone:
 
         ; Update player coordinates
         move.w  d0, (player + entityX)

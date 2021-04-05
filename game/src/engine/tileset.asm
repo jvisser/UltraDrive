@@ -344,6 +344,7 @@ TilesetScheduleManualAnimations:
         lea     tilesetAnimationSchedules, a0
         move.l  loadedTileset, a1
         move.w  tsAnimationsCount(a1), d0
+        beq     .noAnimations
         subq.w  #1, d0
 
     .animationLoop:
@@ -354,6 +355,8 @@ TilesetScheduleManualAnimations:
     .scheduledAnimation:
         adda.w  #TilesetAnimationSchedule_Size, a0
         dbra    d0, .animationLoop
+
+    .noAnimations:
         rts
 
 
