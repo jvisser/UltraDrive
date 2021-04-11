@@ -93,7 +93,8 @@ OS_UNLOCK Macro
 ;-------------------------------------------------
 ; Kill switch
 ; ----------------
-OS_KILL Macro
+OS_KILL Macro reason
+        DEBUG_MSG \reason
         trap #0
         Endm
 
