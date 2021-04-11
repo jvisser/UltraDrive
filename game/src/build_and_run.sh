@@ -2,6 +2,12 @@
 
 set -e
 
+if [ $# -eq 0 ]; 
+    then
+        echo 'No map filename provided. Exiting'
+        exit 1
+fi
+
 # Compile assets to source
 java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
         -m "$1"                                             \
@@ -12,7 +18,14 @@ java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
         -r
 
 # Compile source
-asm68k //p ./assembly.asm,boot.bin
+if [ $# -eq 2 ]; 
+    then
+    # Debug
+    asm68k //p //e "DEBUG='$2'" ./assembly.asm,boot.bin
+else
+    # Normal
+    asm68k //p ./assembly.asm,boot.bin
+fi
 
 # Run
 blastem -m gen boot.bin

@@ -10,6 +10,16 @@
             "shortcut": "Alt+R",
             "showOutput": true,
             "workingDirectory": "%projectpath/../../src"
+        },
+        {
+            "arguments": "%mapfile GENS",
+            "command": "sh '%projectpath/../../src/build_and_run.sh' ",
+            "enabled": true,
+            "name": "debug",
+            "saveBeforeExecute": true,
+            "shortcut": "Alt+D",
+            "showOutput": true,
+            "workingDirectory": "%projectpath/../../src"
         }
     ],
     "extensionsPath": "extensions",

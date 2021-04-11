@@ -41,8 +41,10 @@ To build the Tiled map conversion tool run the script `./build_tools.sh`
 
 ### Run directly from Tiled
 - Open the Tiled project workspace file in `./game/assets/map/`
-- Press `alt+r` to compile the run currently open/focussed map in BlastEm
+- Press `alt+r` to compile and run currently open/focussed map in BlastEm
   - This runs the script `./game/src/build_and_run.sh <mapfile>`
+- Press `alt+d` to compile with debug features enabled and run currently open/focussed map in BlastEm
+  - This runs the script `./game/src/build_and_run.sh <mapfile> GENS`
 
 ### Run on real hardware
 Create a ROM image `ultradrive.bin` by running the following command from the source root: `asm68k.exe /p .\assembly.asm,ultradrive.bin`.
