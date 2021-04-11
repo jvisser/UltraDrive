@@ -8,8 +8,8 @@
  <tileset firstgid="1" source="../../tilesets/castle/chunks.tsx"/>
  <layer id="1" name="Chunks" width="4" height="2">
   <data encoding="csv">
-44,44,44,44,
-44,44,44,44
+257,257,257,257,
+257,257,257,257
 </data>
  </layer>
 </map>

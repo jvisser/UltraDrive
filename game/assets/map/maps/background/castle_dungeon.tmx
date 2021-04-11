@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+ <properties>
+  <property name="background_tracker" value="streaming"/>
+  <property name="camera_lock_horizontal" type="bool" value="false"/>
+  <property name="camera_lock_vertical" type="bool" value="false"/>
+ </properties>
+ <tileset firstgid="1" source="../../tilesets/castle/chunks.tsx"/>
+ <layer id="1" name="Chunks" width="10" height="10">
+  <data encoding="csv">
+356,371,353,372,373,291,294,354,291,292,
+291,292,353,356,357,354,354,354,356,353,
+373,355,353,291,294,357,307,310,355,369,
+357,355,353,356,371,353,356,370,371,337,
+294,371,353,355,289,294,371,290,337,373,
+306,306,353,355,337,338,338,339,353,355,
+356,370,357,356,370,357,354,355,369,357,
+291,293,294,291,292,294,372,338,339,353,
+305,306,310,307,308,310,291,293,294,354,
+357,354,355,353,354,355,369,370,357,356
+</data>
+ </layer>
+</map>
