@@ -90,19 +90,3 @@ DEBUG_BREAK Macro
     Endm
 
     EndIf
-
-
-    If def(debug)
-
-DEBUG_KILL Macro message
-        DEBUG_MSG \message
-
-        OS_KILL
-    Endm
-
-    Else
-
-DEBUG_KILL Macro
-    Endm
-
-    EndIf

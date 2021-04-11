@@ -62,7 +62,7 @@ MapLoadDirectoryIndex:
             jmp     MapLoad
 
         .invalidMapIndex:
-            DEBUG_KILL 'Invalid map index provided to MapLoadDirectoryIndex'
+            OS_KILL 'Invalid map index provided to MapLoadDirectoryIndex'
         rts;
 
 
