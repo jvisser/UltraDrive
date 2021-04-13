@@ -128,6 +128,8 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
         Even
 
+        ; Pattern allocation: [(${allocation.id})]
+
         ; struct TilesetPatternSection
         Tileset[(${tilesetName})]PatternSection[(${allocation.id})]:
             ; .tsModuleCount
