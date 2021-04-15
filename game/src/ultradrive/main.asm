@@ -117,12 +117,12 @@ Main:
 
             PROFILE_FRAME_TIME $000e
 
-            ;PROFILE_CPU_START
+            PROFILE_CPU_START
 
             bsr     _UpdatePlayer
             bsr     _UpdateManualTilesetAnimations
 
-            ;PROFILE_CPU_END
+            PROFILE_CPU_END
 
             PROFILE_FRAME_TIME_END
 

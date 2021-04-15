@@ -7,12 +7,10 @@
 ; Streaming background tracker structures
 ; ----------------
     DEFINE_STRUCT StreamingBackgroundTracker, EXTENDS, BackgroundTracker
-        STRUCT_MEMBER.l sbtX                                                ; Current X in (16:16 fixedpoint)
-        STRUCT_MEMBER.l sbtY                                                ; Current Y in (16:16 fixedpoint)
         STRUCT_MEMBER.b sbtLockX                                            ; Lock horizontal movement
         STRUCT_MEMBER.b sbtLockY                                            ; Lock vertical movement
-        STRUCT_MEMBER.l sbtXSteps, 8                                        ; Increments for each camera displacement (16:16 fixedpoint)
-        STRUCT_MEMBER.l sbtYSteps, 8
+        STRUCT_MEMBER.w sbtXScale                                           ; Ratios fractional part (16:16 fixedpoint)
+        STRUCT_MEMBER.w sbtYScale
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -65,46 +63,44 @@ _StreamingBackgroundTrackerInit:
         sub.w   d5, d3
         swap    d3
 
-        ; Calculate maps ratio and displacement steps (TODO: Fix result being 0 when ratio >= 1)
+        ; Calculate maps ratio and displacement steps (store fractional part)
         divu    d0, d2
         divu    d1, d3
-        move.w  d2, d0
-        move.w  d3, d1
-        move.l  d0, d2
-        move.l  d1, d3
-        lea     (streamingBackgroundTracker + sbtXSteps), a3
-        lea     (streamingBackgroundTracker + sbtYSteps), a4
-        Rept 8
-            move.l  d0, (a3)+
-            move.l  d1, (a4)+
-            add.l   d2, d0
-            add.l   d3, d1
-        Endr
+        move.w  d2, (streamingBackgroundTracker + sbtXScale)
+        move.w  d3, (streamingBackgroundTracker + sbtYScale)
 
         ; Update initial camera position
         moveq   #0, d0
         move.b   mapLockHorizontal(a1), (streamingBackgroundTracker + sbtLockX)
         bne     .horizontallyLocked
         move.w  camX(a2), d0
-        FP16_MUL_UINT d0, d2
-        move.l  d0, (streamingBackgroundTracker + sbtX)
-        swap    d0                                              ; Expects non fixed point result
+        mulu    d2, d0
+        swap    d0                                              ; Camera expects non fixed point result
+        move.w  (vdpMetrics + vdpScreenWidth), d2               ; If not locked: set camera width to screen width + 1 pattern for scrolling
+        addq.w  #8, d2
+        bra     .horizontalSetupDone
     .horizontallyLocked:
+        move.w  (vdpMetrics + vdpPlaneWidth), d2                ; If locked: set camera width to plane width (= render full plane) to allow for custom scrolling (parallax)
+    .horizontalSetupDone:
 
         moveq   #0, d1
         move.b   mapLockVertical(a1), (streamingBackgroundTracker + sbtLockY)
         bne     .verticallyLocked
         move.w  camY(a2), d1
-        FP16_MUL_UINT d1, d3
-        move.l  d1, (streamingBackgroundTracker + sbtY)
-        swap    d1                                              ; Expects non fixed point result
+        mulu    d3, d1
+        swap    d1                                              ; Camera expects non fixed point result
+        move.w  (vdpMetrics + vdpScreenHeight), d3              ; If not locked: set camera height to screen height + 1 pattern for scrolling
+        addq.w  #8, d2
+        bra     .verticalSetupDone
     .verticallyLocked:
+        move.w  (vdpMetrics + vdpPlaneHeight), d3               ; If locked: set camera width to plane height (= render full plane) to allow for custom scrolling (parallax)
+    .verticalSetupDone:
 
         ; Force update of scroll values on next screen refresh
         VDP_TASK_QUEUE_ADD #_StreamingBackgroundTrackerCommit, a0
 
         ; Initialize background camera
-        POPL    d2                                              ; d2 = Camera plane id
+        POPL    d4                                              ; d4 = Camera plane id
         jsr     CameraInit
         rts
 
@@ -117,39 +113,21 @@ _StreamingBackgroundTrackerInit:
 ; - a1: Foreground camera
 ; Uses: d0-d3/a2
 _StreamingBackgroundTrackerSync:
-_MOVE_CAMERA_COMPONENT Macro result, sourceDisplacement, position, stepTable, lock
+_MOVE_CAMERA_COMPONENT Macro result, position, scale, lock
                 moveq   #0, \result
                 tst.b   \lock(a2)
                 bne     .noMovement\@
-                move.w  \sourceDisplacement(a1), \result
-                beq     .noMovement\@
-                move.w  \result, d2
-                bpl     .positive1\@
-                neg.w    \result
-            .positive1\@:
-                subq    #1, \result
-                add     \result, \result
-                add     \result, \result
-                move.l  \stepTable(a2, \result), \result
-                tst.w   d2
-                bpl     .positive2\@
-                neg.l   \result
-            .positive2\@:
-                move.l  \position(a2), d2
-                move.l  d2, d3
-                add.l   \result, d2
-                move.l  d2, \position(a2)
-                swap    d2
-                swap    d3
-                sub.l   d3, d2
-                move.w  d2, \result
+                move.w  \position(a1), \result
+                muls    \scale(a2), \result
+                swap    \result
+                sub.w   \position(a0), \result
             .noMovement\@:
         Endm
 
         lea streamingBackgroundTracker, a2
 
-        _MOVE_CAMERA_COMPONENT d0, camLastXDisplacement, sbtX, sbtXSteps, sbtLockX
-        _MOVE_CAMERA_COMPONENT d1, camLastYDisplacement, sbtY, sbtYSteps, sbtLockY
+        _MOVE_CAMERA_COMPONENT d0, camX, sbtXScale, sbtLockX
+        _MOVE_CAMERA_COMPONENT d1, camY, sbtYScale, sbtLockY
 
         CAMERA_MOVE d0, d1
 

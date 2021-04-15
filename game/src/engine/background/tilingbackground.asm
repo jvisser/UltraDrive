@@ -57,7 +57,7 @@ _TilingBackgroundTrackerInit:
         VDP_TASK_QUEUE_ADD #_TilingBackgroundTrackerCommit, a0
 
         ; Calculate initial scrolling positions
-        move.l  d0, d2
+        move.l  d0, d4                                              ; d4 = plane id for CameraInit
         exg     a1, a2
         jsr     _TilingBackgroundTrackerSync
         exg     a1, a2
@@ -65,6 +65,8 @@ _TilingBackgroundTrackerInit:
         ; Initialize the camera
         move.w  (tilingBackgroundTracker + tbtX), d0
         move.w  (tilingBackgroundTracker + tbtY), d1
+        move.w  (vdpMetrics + vdpPlaneWidth), d2                    ; Always let camera match plane dimensions to full plane gets rendered
+        move.w  (vdpMetrics + vdpPlaneHeight), d3
         jsr     CameraInit
         rts
 
