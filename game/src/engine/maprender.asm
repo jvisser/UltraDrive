@@ -6,7 +6,7 @@
 ; Map render buffers
 ; ----------------
     DEFINE_VAR FAST
-        VAR.w               mapRenderBuffer,            64 * 4  ; NB: Assumes scrollable plane side will never be 128.
+        VAR.w               mapRenderBuffer,            128 * 2 * 2  ; Reserve one 64 pattern name table entry buffer per plane per side
         VAR.w               mapCurrentRenderBuffer
         VAR.VDPDMATransfer  mapRowBufferDMATransfer
         VAR.VDPDMATransfer  mapColumnBufferDMATransfer
@@ -54,18 +54,20 @@ MapRenderReset:
 ; - a0: Map address
 ; - d0: Top map coorinate (in 8 pixel rows)
 ; - d1: Left map coordinate (in 8 pixel columns)
-; - d2: Plane id
+; - d2: Width (in 8 pixel columns)
+; - d3: Height (in 8 pixel rows)
+; - d4: Plane id
 ; Uses: d0-d7/a0-a6
 MapRender:
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d3
         subq.w  #1, d3
 
     .rowLoop:
-            PUSHM   d0-d3/a0
+            PUSHM   d0-d4/a0
             MAP_RENDER_RESET
+            move.l  d4, d3
             bsr     MapRenderRow
             jsr     VDPDMAQueueFlush        ; TODO: Use CPU/direct transfer
-            POPM    d0-d3/a0
+            POPM    d0-d4/a0
 
             addq.w  #1, d0
         dbra    d3, .rowLoop
@@ -76,8 +78,8 @@ MapRender:
 ; Shared macros between row/column renderer
 ; ----------------
 
-_BUFFER_ACCESS_MODE_WRAPPED     = 0
-_BUFFER_ACCESS_MODE_CONTINUOUS  = 1
+_BUFFER_ACCESS_MODE_WRAPPED     Equ 0
+_BUFFER_ACCESS_MODE_CONTINUOUS  Equ 1
 
 _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 
@@ -177,7 +179,7 @@ _RENDER_PARTIAL_CHUNK Macro start, patternNumber
 ; Render the full render buffer
 ; ----------------
 ; Input:
-; - a0: Plane size in patterns
+; - a0: Number of patterns to render
 ; - d2: Map start row/column (Opposite of rendered dimension)
 ; Reserved registers: a2-a4
 ; Required macros:
@@ -230,6 +232,7 @@ _RENDER_BUFFER Macro
             PUSHW d2                                                ; Store for later use
 
             lsr.w   #4, d2                                          ; d2 = number of full chunks
+            beq .lastChunk\@
 
             subq.w  #1, d2
         .fullChunkLoop\@:
@@ -266,7 +269,7 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 
             ; ---------------------------------------------
             ; Render the last partial chunk
-
+    .lastChunk\@:
             POPW d2                                                 ; d2 = number of patterns left to render
 
             andi.w  #$0f, d2
@@ -285,9 +288,7 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
                     _RENDER_PARTIAL_CHUNK_FIXED d2, d4
 
         .done\@:
-            move.w  a0, d2
-            add.w   d2, d2
-            add.w   d2, mapCurrentRenderBuffer
+            add.w   #128, mapCurrentRenderBuffer
     Endm
 
 
@@ -298,7 +299,8 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 ; - a0: Map address
 ; - d0: Map row
 ; - d1: Map start column
-; - d2: Plane id
+; - d2: Width to render
+; - d3: Plane id
 ; Uses: d0-d7/a0-a6
 MapRenderRow:
         move.w d0, d6
@@ -317,7 +319,7 @@ MapRenderRow:
         move.w  d0, d5
         swap    d5
         or.w    #VDP_CMD_AS_DMA, d5
-        add.l   d2, d5
+        add.l   d3, d5
         move.l  d5, (mapRowBufferDMATransfer + dmaTarget)
 
         ; Calculate DMA source
@@ -341,6 +343,7 @@ MapRenderRow:
 ; - a0: Map address
 ; - d0: Map row
 ; - d1: Map start column
+; - d2: Width to render
 ; Uses: d0-d7/a0-a6
 _MapRenderRowBuffer:
 _READ_CHUNK Macro
@@ -429,7 +432,7 @@ _RENDER_BLOCK Macro position
         ; - d0: Buffer mask for looping
         ; - d1: Buffer offset
         ; - d2: Map start column
-        ; - a0: width of the plane rendered
+        ; - a0: width to be rendered
         ; - a1: Address of first chunk in map
         ; - a2: Base address of chunk table
         ; - a3: Base address of block table
@@ -461,9 +464,9 @@ _RENDER_BLOCK Macro position
         add.w   d6, d6
 
         ; Buffer offset/rotation mask
+        movea.w  d2, a0                                             ; a0 = render size
         move.w  d1, d2                                              ; d2 = current map column
         move.w  (vdpMetrics + vdpPlaneWidthPatterns), d0
-        move.w  d0, a0                                              ; Store row size in a0
         subq.w  #1, d0
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset
@@ -482,7 +485,8 @@ _RENDER_BLOCK Macro position
 ; - a0: Map address
 ; - d0: Map column
 ; - d1: Map start row
-; - d2: VDP plane id
+; - d2: Height to render
+; - d3: VDP plane id
 ; Uses: d0-d7/a0-a6
 MapRenderColumn:
         movea.l a0, a6
@@ -497,7 +501,7 @@ MapRenderColumn:
         add.w   d5, d5
         swap    d5
         or.w    #VDP_CMD_AS_DMA, d5
-        add.l   d2, d5
+        add.l   d3, d5
         move.l  d5, (mapColumnBufferDMATransfer + dmaTarget)
 
         ; Calculate DMA source
@@ -521,6 +525,7 @@ MapRenderColumn:
 ; - a0: Map address
 ; - d0: Map column
 ; - d1: Map start row
+; - d2: Height to render
 ; Uses: d0-d7/a0-a6
 _MapRenderColumnBuffer:
 _READ_CHUNK Macro
@@ -613,7 +618,7 @@ _RENDER_BLOCK Macro position
         ; - d0: Buffer mask for looping
         ; - d1: Buffer offset
         ; - d2: Map start row
-        ; - a0: height of the plane rendered
+        ; - a0: height to be rendered
         ; - a1: Address of first chunk in map
         ; - a2: Base address of chunk table
         ; - a3: Base address of block table
@@ -646,9 +651,9 @@ _RENDER_BLOCK Macro position
         add.w   d6, d6
 
         ; Buffer offset/rotation mask
+        movea.w  d2, a0                                             ; a0 = render size
         move.w  d1, d2                                              ; d2 = current map column
         move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
-        movea.l d0, a0                                              ; a0 = Store plane height
         subq.w  #1, d0
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset

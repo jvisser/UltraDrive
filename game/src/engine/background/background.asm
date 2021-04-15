@@ -3,9 +3,9 @@
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; One time initialization for all trackers. Called by engine init.
+; One time initialization. Called by engine init.
 ; ----------------
-BackgroundTrackerInit:
+BackgroundInit:
         jsr     StreamingBackgroundTrackerInit
         jsr     TilingBackgroundTrackerInit
         rts

@@ -22,6 +22,8 @@
         STRUCT_MEMBER.w camAbsoluteMaxY
         STRUCT_MEMBER.l camMapAddress
         STRUCT_MEMBER.l camPlaneId
+        STRUCT_MEMBER.w camWidthPatterns
+        STRUCT_MEMBER.w camHeightPatterns
         ; Externally managed
         STRUCT_MEMBER.l camMoveCallback             ; Mandatory
         STRUCT_MEMBER.l camData
@@ -47,7 +49,9 @@ CAMERA_MOVE Macro xDisp, yDisp
 ; - a1: Map to associate with camera
 ; - d0: x
 ; - d1: y
-; - d2: Associated plane id
+; - d2: width
+; - d3: height
+; - d4: Associated plane id
 ; Uses: d0-d7/a0-a6
 CameraInit:
 _VIEWPORT_CLAMP Macro component, mapSize, screenSize
@@ -66,11 +70,21 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
             .clampDone\@:
         Endm
 
+        ; Store camera size for later use
+        PUSHW    d2
+        PUSHW    d3
+
+        ; Store camera size in patterns
+        lsr.w   #PATTERN_SHIFT, d2
+        lsr.w   #PATTERN_SHIFT, d3
+        move.w  d2, camWidthPatterns(a0)
+        move.w  d3, camHeightPatterns(a0)
+
         ; Associate map
         move.l  a1, camMapAddress(a0)
 
 		; Set plane id
-		move.l	d2, camPlaneId(a0)
+		move.l	d4, camPlaneId(a0)
 
         ; Store maximum camera bounds based on the current map
         move.w  mapWidthPixels(a1), d2
@@ -105,10 +119,12 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         move.w  d1, camMinY(a0)
 
         ; Calculate camera max position
-        add.w   (vdpMetrics + vdpPlaneWidth), d0
-        add.w   (vdpMetrics + vdpPlaneHeight), d1
-        sub.w   (vdpMetrics + vdpScreenWidth), d0
-        sub.w   (vdpMetrics + vdpScreenHeight), d1
+        POPW    d3
+        POPW    d2
+        sub.w   (vdpMetrics + vdpScreenWidth), d2
+        sub.w   (vdpMetrics + vdpScreenHeight), d3
+        add.w   d2, d0
+        add.w   d3, d1
         subq.w  #1, d0
         subq.w  #1, d1
         move.w  d0, camMaxX(a0)
@@ -134,7 +150,9 @@ CameraRenderView:
         move.w  camMinX(a0), d1
         lsr.w   #PATTERN_SHIFT, d0
         lsr.w   #PATTERN_SHIFT, d1
-        move.l  camPlaneId(a0), d2
+        move.w  camWidthPatterns(a0), d2
+        move.w  camHeightPatterns(a0), d3
+        move.l  camPlaneId(a0), d4
         movea.l camMapAddress(a0), a0
         jsr     MapRender
     rts
@@ -221,11 +239,12 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
                 move.l  d4, \store
         Endm
 
-_MAP_UPDATE Macro renderer
+_MAP_UPDATE Macro renderer, size
 				PUSHL 	a0
                 lsr.w   #PATTERN_SHIFT, d0
                 lsr.w   #PATTERN_SHIFT, d1
-                move.l  camPlaneId(a0), d2
+                move.w  \size(a0), d2
+                move.l  camPlaneId(a0), d3
                 movea.l camMapAddress(a0), a0
                 jsr     \renderer
 				POPL 	a0
@@ -294,7 +313,7 @@ _MAP_UPDATE Macro renderer
                         move.w  d6, d0
                         move.w  camMinX(a0), d1
 
-                        _MAP_UPDATE MapRenderRow
+                        _MAP_UPDATE MapRenderRow, camWidthPatterns
                     POPM    d5/d7
                 bra     .checkBackgroundYDone
             .checkMaxY:
@@ -305,7 +324,7 @@ _MAP_UPDATE Macro renderer
                         add.w   (vdpMetrics + vdpScreenHeight), d0
                         move.w  camMinX(a0), d1
 
-                        _MAP_UPDATE MapRenderRow
+                        _MAP_UPDATE MapRenderRow, camWidthPatterns
                     POPM    d5/d7
             .checkBackgroundYDone:
 
@@ -315,7 +334,7 @@ _MAP_UPDATE Macro renderer
                     move.w  d7, d0
                     move.w  camMinY(a0), d1
 
-                    _MAP_UPDATE MapRenderColumn
+                    _MAP_UPDATE MapRenderColumn, camHeightPatterns
                 bra     .checkBackgroundXDone
             .checkMaxX:
                 btst    #1, d5
@@ -324,7 +343,7 @@ _MAP_UPDATE Macro renderer
                     add.w   (vdpMetrics + vdpScreenWidth), d0
                     move.w  camMinY(a0), d1
 
-                    _MAP_UPDATE MapRenderColumn
+                    _MAP_UPDATE MapRenderColumn, camHeightPatterns
             .checkBackgroundXDone:
 
     .done:

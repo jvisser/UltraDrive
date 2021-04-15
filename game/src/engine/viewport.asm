@@ -60,7 +60,7 @@ VIEWPORT_TRACK_ENTITY_END Macro
 ;-------------------------------------------------
 ; Initialize the viewport library with defaults. Called on engine init.
 ; ----------------
-ViewportLibraryInit:
+ViewportEngineInit:
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportBackground
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportForeground
         rts
@@ -81,7 +81,11 @@ ViewportInit:
         MAP_GET a1
         lea     (viewport + viewportForeground), a0
         movea.l mapForegroundAddress(a1), a1
-        move.l  #VDP_PLANE_A, d2
+        move.w  (vdpMetrics + vdpScreenWidth), d2
+        addq.w  #8, d2                                  ; Foreground camera width = screen width + 1 pattern for scrolling
+        move.w  (vdpMetrics + vdpScreenHeight), d3
+        addq.w  #8, d3                                  ; Foreground camera height = screen height + 1 pattern for scrolling
+        move.l  #VDP_PLANE_A, d4
 
         ; Force scroll update on next screen refresh
         VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
