@@ -9,7 +9,9 @@ The following features have been implemented:
 - [Tiled](https://www.mapeditor.org/) map support
   - Very large map support for both foreground and background
   - Reusable tilesets
-    - 8x8 meta tiles of 2x2 pattern meta tiles with support for priority at the pattern level
+    - 8x8 meta tiles of 2x2 pattern meta tiles
+      - Support for specifying priority at the base pattern level
+      - Support for overriding pattern priority at the block (2x2 pattern) level 
     - Collision data (height field + angle)
     - Animations
         - Timer scheduled

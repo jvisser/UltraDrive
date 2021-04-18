@@ -45,7 +45,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
     BIT_CONST.BLOCK_REF_SOLID_TOP       13
     BIT_CONST.BLOCK_REF_SOLID_LRB       14
     BIT_MASK.BLOCK_REF_SOLIDITY         13, 2
-    BIT_MASK.BLOCK_REF_TYPE             15, 1
+    BIT_MASK.BLOCK_REF_PRIORITY         15, 1
 
 
 ;-------------------------------------------------

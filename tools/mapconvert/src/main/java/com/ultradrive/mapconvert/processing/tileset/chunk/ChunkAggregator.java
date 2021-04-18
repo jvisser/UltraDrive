@@ -68,7 +68,7 @@ public class ChunkAggregator
         BlockReference.Builder blockReferenceBuilder = blockAggregator.getReference(chunkBlockResourceReference.getId());
         blockReferenceBuilder.reorient(chunkBlockResourceReference.getOrientation());
         blockReferenceBuilder.setSolidity(BlockSolidity.fromId(chunkElementModel.getSolidityReference().getId()));
-        blockReferenceBuilder.setType(chunkElementModel.getTypeReference().getId());
+        blockReferenceBuilder.setPriority(chunkElementModel.getPriorityReference().getId() > 0);
 
         return blockReferenceBuilder.build();
     }

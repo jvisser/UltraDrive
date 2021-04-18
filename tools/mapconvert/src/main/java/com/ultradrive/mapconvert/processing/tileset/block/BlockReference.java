@@ -8,20 +8,18 @@ import java.util.Objects;
 
 public class BlockReference extends MetaTileReference<BlockReference>
 {
-    private static final int TYPE_BIT_COUNT = 1;
-
     private final BlockSolidity solidity;
-    private final int type;
+    private final boolean priority;
 
     public static class Builder extends MetaTileReference.Builder<BlockReference>
     {
         private BlockSolidity solidity;
-        private int type;
+        private boolean priority;
 
         public Builder()
         {
             solidity = BlockSolidity.NONE;
-            type = 0;
+            priority = false;
         }
 
         public Builder(BlockReference blockReference)
@@ -30,13 +28,13 @@ public class BlockReference extends MetaTileReference<BlockReference>
 
             solidity = blockReference.solidity;
             empty = blockReference.empty;
-            type = blockReference.type;
+            priority = blockReference.priority;
         }
 
         @Override
         public BlockReference build()
         {
-            return new BlockReference(referenceId, orientation, solidity, empty, type);
+            return new BlockReference(referenceId, orientation, solidity, empty, priority);
         }
 
         public void setSolidity(BlockSolidity solidity)
@@ -49,18 +47,18 @@ public class BlockReference extends MetaTileReference<BlockReference>
             this.empty = empty;
         }
 
-        public void setType(int type)
+        public void setPriority(boolean priority)
         {
-            this.type = type;
+            this.priority = priority;
         }
     }
 
-    public BlockReference(int referenceId, Orientation orientation, BlockSolidity solidity, boolean empty, int type)
+    public BlockReference(int referenceId, Orientation orientation, BlockSolidity solidity, boolean empty, boolean priority)
     {
         super(referenceId, orientation, empty);
 
         this.solidity = solidity;
-        this.type = type;
+        this.priority = priority;
     }
 
     @Override
@@ -79,14 +77,14 @@ public class BlockReference extends MetaTileReference<BlockReference>
             return false;
         }
         final BlockReference that = (BlockReference) o;
-        return type == that.type &&
+        return priority == that.priority &&
                solidity == that.solidity;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(super.hashCode(), solidity, type);
+        return Objects.hash(super.hashCode(), solidity, priority);
     }
 
     @Override
@@ -100,7 +98,7 @@ public class BlockReference extends MetaTileReference<BlockReference>
     {
         return super.pack()
                 .add(solidity)
-                .add(type, TYPE_BIT_COUNT);
+                .add(priority);
     }
 
     public BlockSolidity getSolidity()
@@ -108,8 +106,8 @@ public class BlockReference extends MetaTileReference<BlockReference>
         return solidity;
     }
 
-    public int getType()
+    public boolean isPriority()
     {
-        return type;
+        return priority;
     }
 }
