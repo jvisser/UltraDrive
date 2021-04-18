@@ -4,15 +4,15 @@ public final class ChunkElementModel
 {
     private final ResourceReference blockReference;
     private final ResourceReference solidityReference;
-    private final ResourceReference typeReference;
+    private final ResourceReference priorityReference;
 
     public ChunkElementModel(ResourceReference blockReference,
                              ResourceReference solidityReference,
-                             ResourceReference typeReference)
+                             ResourceReference priorityReference)
     {
         this.blockReference = blockReference;
         this.solidityReference = solidityReference;
-        this.typeReference = typeReference;
+        this.priorityReference = priorityReference;
     }
 
     public ResourceReference getBlockReference()
@@ -25,8 +25,8 @@ public final class ChunkElementModel
         return solidityReference;
     }
 
-    public ResourceReference getTypeReference()
+    public ResourceReference getPriorityReference()
     {
-        return typeReference;
+        return priorityReference;
     }
 }

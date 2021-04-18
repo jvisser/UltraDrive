@@ -93,6 +93,8 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 ; - d3: Orientation flags of chunk + block
 _RENDER_PATTERN Macro mode
             eor.w   d3, d4                                          ; orient pattern ref by block + chunk orientation
+            swap    d3
+            or.w    d3, d4                                          ; Add block priority override
             If (_BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED)
                 and.w   d0, d1                                      ; Wrap buffer position
                 move.w  d4, (a4, d1)                                ; Write pattern to DMA buffer
@@ -382,9 +384,12 @@ _RENDER_BLOCK Macro position
             adda.w  d7, a5
             btst    #BLOCK_REF_EMPTY, d3
             bne     .blockEmpty\@
-            swap    d7
             move.w  d3, d4
-            eor.w   d7, d3                                          ; d3 = current orientation
+            andi.w  #BLOCK_REF_PRIORITY_MASK, d3
+            swap    d3
+            move.w  d4, d3
+            swap    d7
+            eor.w   d7, d3                                          ; d3 = [block priority]:[current orientation]
             swap    d7
             andi.w  #BLOCK_REF_INDEX_MASK, d4
             lsl.w   #3, d4
@@ -404,6 +409,7 @@ _RENDER_BLOCK Macro position
 
             If ((narg = 0) | strcmp('\position', 'START'))
                 _RENDER_PATTERN
+                swap    d3
             EndIf
 
             If ((narg = 0) | strcmp('\position', 'END'))
@@ -568,9 +574,12 @@ _RENDER_BLOCK Macro position
             adda.w  d7, a5
             btst    #BLOCK_REF_EMPTY, d3
             bne     .blockEmpty\@
-            swap    d7
             move.w  d3, d4
-            eor.w   d7, d3                                          ; d3 = current orientation
+            andi.w  #BLOCK_REF_PRIORITY_MASK, d3
+            swap    d3
+            move.w  d4, d3
+            swap    d7
+            eor.w   d7, d3                                          ; d3 = [block priority]:[current orientation]
             swap    d7
             andi.w  #BLOCK_REF_INDEX_MASK, d4
             lsl.w   #3, d4
@@ -590,6 +599,7 @@ _RENDER_BLOCK Macro position
 
             If ((narg = 0) | strcmp('\position', 'START'))
                 _RENDER_PATTERN
+                swap    d3
             EndIf
 
             If ((narg = 0) | strcmp('\position', 'END'))

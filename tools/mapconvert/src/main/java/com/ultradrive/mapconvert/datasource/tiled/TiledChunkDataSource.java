@@ -16,7 +16,7 @@ class TiledChunkDataSource extends TiledMetaTileset implements ChunkDataSource
 {
     private static final String BLOCK_TILESET_NAME = "blocks";
 
-    private static final String CHUNK_TYPE_LAYER_NAME = "Type";
+    private static final String CHUNK_PRIORITY_LAYER_NAME = "Priority";
     private static final String CHUNK_SOLIDITY_LAYER_NAME = "Solidity";
     private static final String CHUNK_BLOCK_LAYER_NAME = "Block";
 
@@ -51,7 +51,7 @@ class TiledChunkDataSource extends TiledMetaTileset implements ChunkDataSource
     @Override
     public ChunkModel getChunkModel(int chunkId)
     {
-        TiledTileLayer typeLayer = getLayer(CHUNK_TYPE_LAYER_NAME);
+        TiledTileLayer priorityLayer = getLayer(CHUNK_PRIORITY_LAYER_NAME);
         TiledTileLayer solidityLayer = getLayer(CHUNK_SOLIDITY_LAYER_NAME);
         TiledTileLayer blockLayer = getLayer(CHUNK_BLOCK_LAYER_NAME);
 
@@ -72,7 +72,7 @@ class TiledChunkDataSource extends TiledMetaTileset implements ChunkDataSource
                 elements.add(new ChunkElementModel(
                         getResourceReference(blockLayer, blockX, blockY),
                         getResourceReference(solidityLayer, blockX, blockY),
-                        getResourceReference(typeLayer, blockX, blockY)
+                        getResourceReference(priorityLayer, blockX, blockY)
                 ));
             }
         }
