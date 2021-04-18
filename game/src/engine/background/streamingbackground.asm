@@ -90,7 +90,7 @@ _StreamingBackgroundTrackerInit:
         mulu    d3, d1
         swap    d1                                              ; Camera expects non fixed point result
         move.w  (vdpMetrics + vdpScreenHeight), d3              ; If not locked: set camera height to screen height + 1 pattern for scrolling
-        addq.w  #8, d2
+        addq.w  #8, d3
         bra     .verticalSetupDone
     .verticallyLocked:
         move.w  (vdpMetrics + vdpPlaneHeight), d3               ; If locked: set camera width to plane height (= render full plane) to allow for custom scrolling (parallax)
