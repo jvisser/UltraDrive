@@ -113,7 +113,7 @@ _StreamingBackgroundTrackerInit:
 ; - a1: Foreground camera
 ; Uses: d0-d3/a2
 _StreamingBackgroundTrackerSync:
-_MOVE_CAMERA_COMPONENT Macro result, position, scale, lock
+_MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
                 moveq   #0, \result
                 tst.b   \lock(a2)
                 bne     .noMovement\@
@@ -121,13 +121,14 @@ _MOVE_CAMERA_COMPONENT Macro result, position, scale, lock
                 muls    \position(a1), \result
                 swap    \result
                 sub.w   \position(a0), \result
+                sub.w   \displacement(a0), \result
             .noMovement\@:
         Endm
 
         lea streamingBackgroundTracker, a2
 
-        _MOVE_CAMERA_COMPONENT d0, camX, sbtXScale, sbtLockX
-        _MOVE_CAMERA_COMPONENT d1, camY, sbtYScale, sbtLockY
+        _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, sbtXScale, sbtLockX
+        _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, sbtYScale, sbtLockY
 
         CAMERA_MOVE d0, d1
 
