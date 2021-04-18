@@ -117,8 +117,8 @@ _MOVE_CAMERA_COMPONENT Macro result, position, scale, lock
                 moveq   #0, \result
                 tst.b   \lock(a2)
                 bne     .noMovement\@
-                move.w  \position(a1), \result
-                muls    \scale(a2), \result
+                move.w  \scale(a2), \result
+                muls    \position(a1), \result
                 swap    \result
                 sub.w   \position(a0), \result
             .noMovement\@:
