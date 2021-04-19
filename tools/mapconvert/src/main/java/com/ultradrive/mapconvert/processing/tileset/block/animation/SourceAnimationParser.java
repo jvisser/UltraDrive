@@ -18,16 +18,14 @@ import static java.util.stream.Collectors.toMap;
 
 class SourceAnimationParser
 {
-    private final List<Block> blocks;
     private final MetaTileMetrics blockMetrics;
 
-    SourceAnimationParser(List<Block> blocks, MetaTileMetrics blockMetrics)
+    SourceAnimationParser(MetaTileMetrics blockMetrics)
     {
-        this.blocks = blocks;
         this.blockMetrics = blockMetrics;
     }
 
-    public List<SourceAnimation> parseAnimations()
+    public List<SourceAnimation> parseAnimations(List<Block> blocks)
     {
         Map<String, List<Block>> animationBlocksByAnimationId = blocks.stream()
                 .filter(Block::hasAnimation)
