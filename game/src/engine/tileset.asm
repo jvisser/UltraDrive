@@ -223,6 +223,7 @@ TilesetLoad:
         bsr     _TilesetLoadAnimations
     .noAnimations:
 
+        ; TODO: This is not allowed according to the Sega manual: DMA Transfer code running from ROM and the source of the DMA trigger command word in ROM. But it works on my MD1 no TMSS!?
         ; Load palette
         movea.l tsPaletteAddress(a6), a0
         VDP_DMA_TRANSFER_COMMAND_LIST a0
@@ -268,7 +269,6 @@ _TilesetLoadPatternSections:
         lea     blockTable, a1
         jsr     ComperDecompress
 
-        ; TODO: This is not allowed according to the Sega manual: DMA Transfer code running from ROM and the source of the DMA trigger command word in ROM. But it works on my MD1 no TMSS!?
         VDP_DMA_TRANSFER_COMMAND_LIST tsPatternDMATransferCommandList(a3)
 
         ; Next module
