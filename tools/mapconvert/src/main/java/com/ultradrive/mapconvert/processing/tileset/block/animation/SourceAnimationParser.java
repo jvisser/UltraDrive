@@ -4,10 +4,11 @@ import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.BlockAnimationMetaData;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
@@ -88,21 +89,26 @@ class SourceAnimationParser
 
     private List<Block> orderBlocksByGraphicId(String animationId, List<Block> animationBlocks)
     {
-        Map<Integer, List<Block>> blocksByGraphicsId = animationBlocks.stream()
-                .collect(groupingBy(animationBlock -> getGraphicsId(animationId, animationBlock), TreeMap::new, toList()));
+        // TODO: Order by actual block id (which is lost at this point)
+        return animationBlocks.stream()
+                .sorted(Comparator.comparingInt(block -> getGraphicsId(animationId, block)))
+                .collect(Collectors.toUnmodifiableList());
 
-        return blocksByGraphicsId.entrySet().stream()
-                .flatMap(orderedBlockEntry -> {
-                    List<Block> orderedBlock = orderedBlockEntry.getValue();
-                    if (orderedBlock.size() > 1)
-                    {
-                        throw new IllegalArgumentException(
-                                format("Animation with id '%s' references the same graphic element more than once.",
-                                       animationId));
-                    }
-                    return orderedBlock.stream();
-                })
-                .collect(toList());
+//        Map<Integer, List<Block>> blocksByGraphicsId = animationBlocks.stream()
+//                .collect(groupingBy(animationBlock -> getGraphicsId(animationId, animationBlock), TreeMap::new, toList()));
+//
+//        return blocksByGraphicsId.entrySet().stream()
+//                .flatMap(orderedBlockEntry -> {
+//                    List<Block> orderedBlock = orderedBlockEntry.getValue();
+//                    if (orderedBlock.size() > 1)
+//                    {
+//                        throw new IllegalArgumentException(
+//                                format("Animation with id '%s' references the same graphic element more than once.",
+//                                       animationId));
+//                    }
+//                    return orderedBlock.stream();
+//                })
+//                .collect(toList());
     }
 
     private int getGraphicsId(String animationId, Block block)
