@@ -3987,22 +3987,390 @@
  <tile id="3898" type="Block"/>
  <tile id="3899" type="Block"/>
  <tile id="3900" type="Block"/>
- <tile id="3901" type="Block"/>
- <tile id="3902" type="Block"/>
- <tile id="3903" type="Block"/>
- <tile id="3904" type="Block"/>
- <tile id="3905" type="Block"/>
- <tile id="3906" type="Block"/>
- <tile id="3907" type="Block"/>
- <tile id="3908" type="Block"/>
- <tile id="3909" type="Block"/>
- <tile id="3910" type="Block"/>
- <tile id="3911" type="Block"/>
- <tile id="3912" type="Block"/>
- <tile id="3913" type="Block"/>
- <tile id="3914" type="Block"/>
- <tile id="3915" type="Block"/>
- <tile id="3916" type="Block"/>
+ <tile id="3901" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3902" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3903" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3904" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3905" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3906" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3907" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3908" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3909" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3910" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3911" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3912" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3913" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3914" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3915" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3915" duration="100"/>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+  </animation>
+ </tile>
+ <tile id="3916" type="ViewportAnimationBlock">
+  <properties>
+   <property name="animation_id" value="shutter"/>
+   <property name="animation_shift" type="int" value="4"/>
+  </properties>
+  <animation>
+   <frame tileid="3916" duration="100"/>
+   <frame tileid="3901" duration="100"/>
+   <frame tileid="3902" duration="100"/>
+   <frame tileid="3903" duration="100"/>
+   <frame tileid="3904" duration="100"/>
+   <frame tileid="3905" duration="100"/>
+   <frame tileid="3906" duration="100"/>
+   <frame tileid="3907" duration="100"/>
+   <frame tileid="3908" duration="100"/>
+   <frame tileid="3909" duration="100"/>
+   <frame tileid="3910" duration="100"/>
+   <frame tileid="3911" duration="100"/>
+   <frame tileid="3912" duration="100"/>
+   <frame tileid="3913" duration="100"/>
+   <frame tileid="3914" duration="100"/>
+   <frame tileid="3915" duration="100"/>
+  </animation>
+ </tile>
  <tile id="3917" type="Block"/>
  <tile id="3918" type="Block"/>
  <tile id="3919" type="Block"/>
