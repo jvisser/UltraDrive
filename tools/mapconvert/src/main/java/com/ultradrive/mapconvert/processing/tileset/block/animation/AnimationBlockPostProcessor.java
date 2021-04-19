@@ -40,7 +40,7 @@ public class AnimationBlockPostProcessor
 
     public AnimationBlockPostProcessingResult process()
     {
-        List<SourceAnimation> sourceAnimations = new SourceAnimationParser(blocks, blockMetrics).parseAnimations();
+        List<SourceAnimation> sourceAnimations = new SourceAnimationParser(blockMetrics).parseAnimations(blocks);
 
         Set<SourceAnimationFrame> allSourceAnimationFrames = sourceAnimations.stream()
                 .flatMap(sourceAnimation -> sourceAnimation.getAnimationFrameReferences().stream()

@@ -6,7 +6,6 @@ import com.ultradrive.mapconvert.datasource.model.ResourceReference;
 import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlockPostProcessingResult;
 import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlockPostProcessor;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
-import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.allocator.PatternAllocator;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.HashMap;
@@ -33,8 +32,9 @@ public class BlockAggregator
         this.imagePatternProducer = imagePatternProducer;
         this.blockMetrics = blockMetrics;
         this.patternAllocator = patternAllocator;
-
-        this.blockFactory = new BlockFactory(blockMetrics, new ImageBlockPatternReferenceProducer(imagePatternProducer, patternAllocator));
+        this.blockFactory = new BlockFactory(blockMetrics, new BlockPatternReferenceProducerFactory(blockMetrics,
+                                                                                                    imagePatternProducer,
+                                                                                                    patternAllocator));
         this.blockPool = new BlockPool();
         this.blockReferenceIndex = new HashMap<>();
     }

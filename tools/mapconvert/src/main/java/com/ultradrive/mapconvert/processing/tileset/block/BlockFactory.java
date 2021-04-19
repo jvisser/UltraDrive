@@ -2,8 +2,6 @@ package com.ultradrive.mapconvert.processing.tileset.block;
 
 import com.ultradrive.mapconvert.datasource.model.BlockModel;
 import com.ultradrive.mapconvert.datasource.model.ResourceReference;
-import com.ultradrive.mapconvert.processing.tileset.block.animation.AnimationBlockPatternReferenceProducer;
-import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternReferenceProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.PatternReference;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.List;
@@ -13,16 +11,13 @@ import java.util.stream.IntStream;
 
 class BlockFactory
 {
-    private final ImageBlockPatternReferenceProducer imagePatternReferenceProducer;
-    private final AnimationBlockPatternReferenceProducer animationPatternReferenceProducer;
-
     private final MetaTileMetrics blockMetrics;
+    private final BlockPatternReferenceProducerFactory blockPatternReferenceProducerFactory;
 
-    BlockFactory(MetaTileMetrics blockMetrics, ImageBlockPatternReferenceProducer imagePatternReferenceProducer)
+    BlockFactory(MetaTileMetrics blockMetrics, BlockPatternReferenceProducerFactory blockPatternReferenceProducerFactory)
     {
-        this.imagePatternReferenceProducer = imagePatternReferenceProducer;
-        this.animationPatternReferenceProducer = new AnimationBlockPatternReferenceProducer(blockMetrics);
         this.blockMetrics = blockMetrics;
+        this.blockPatternReferenceProducerFactory = blockPatternReferenceProducerFactory;
     }
 
     public Block createBlock(BlockModel blockModel)
@@ -31,19 +26,12 @@ class BlockFactory
         ResourceReference collisionReference = blockModel.getCollisionReference();
 
         return new Block(collisionReference.getId(),
-                                new BlockAnimationMetaData(blockModel.getAnimation()),
-                                getPatternReferences(
-                                        selectPatternReferenceProducer(blockModel),
-                                        graphicReference,
-                                        blockModel.getPriorityReference()))
+                         new BlockAnimationMetaData(blockModel.getAnimation()),
+                         getPatternReferences(
+                                 blockPatternReferenceProducerFactory.getBlockPatternReferenceProducer(blockModel),
+                                 graphicReference,
+                                 blockModel.getPriorityReference()))
                 .reorient(graphicReference.getOrientation());
-    }
-
-    private BlockPatternReferenceProducer selectPatternReferenceProducer(BlockModel blockModel)
-    {
-        return blockModel.hasAnimation()
-               ? animationPatternReferenceProducer
-               : imagePatternReferenceProducer;
     }
 
     private List<PatternReference> getPatternReferences(
