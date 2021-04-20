@@ -1,12 +1,11 @@
 ;------------------------------------------------------------------------------------------
-; Streaming background tracker implementation. Scrolls at a rate of the ratio between the background and foreground maps.
-; Streams in map data as required.
+; Default background tracker implementation. Scrolls at a rate of the ratio between the background and foreground maps.
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Streaming background tracker structures
+; Default background tracker structures
 ; ----------------
-    DEFINE_STRUCT StreamingBackgroundTracker, EXTENDS, BackgroundTracker
+    DEFINE_STRUCT DefaultBackgroundTracker, EXTENDS, BackgroundTracker
         STRUCT_MEMBER.b sbtLockX                                            ; Lock horizontal movement
         STRUCT_MEMBER.b sbtLockY                                            ; Lock vertical movement
         STRUCT_MEMBER.w sbtXScale                                           ; Ratios fractional part (16:16 fixedpoint)
@@ -14,24 +13,23 @@
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
-        VAR.StreamingBackgroundTracker  streamingBackgroundTracker
+        VAR.DefaultBackgroundTracker  defaultBackgroundTracker
     DEFINE_VAR_END
 
-    INIT_STRUCT streamingBackgroundTracker
-        INIT_STRUCT_MEMBER.btInit      _StreamingBackgroundTrackerInit
-        INIT_STRUCT_MEMBER.btSync      _StreamingBackgroundTrackerSync
-        INIT_STRUCT_MEMBER.btFinalize  _StreamingBackgroundTrackerFinalize
+    INIT_STRUCT defaultBackgroundTracker
+        INIT_STRUCT_MEMBER.btInit      _DefaultBackgroundTrackerInit
+        INIT_STRUCT_MEMBER.btSync      _DefaultBackgroundTrackerSync
     INIT_STRUCT_END
 
 
 ;-------------------------------------------------
-; Initialize the streaming background tracker. Should be called at least once before using.
+; Initialize the background tracker. Called by engine init.
 ; ----------------
-StreamingBackgroundTrackerInit Equ streamingBackgroundTrackerInit
+DefaultBackgroundTrackerInit Equ defaultBackgroundTrackerInit
 
 
 ;-------------------------------------------------
-; Streaming background tracker init implementation. Calculates the ratio between the back/foreground maps. And initializes the background camera.
+; Default background tracker init implementation. Calculates the ratio between the back/foreground maps. And initializes the background camera.
 ; ----------------
 ; Input:
 ; - a0: Background camera to initialize
@@ -39,7 +37,7 @@ StreamingBackgroundTrackerInit Equ streamingBackgroundTrackerInit
 ; - a2: Foreground camera
 ; - d0: Background camera plane id
 ; Uses: d0-d5/a3-a4
-_StreamingBackgroundTrackerInit:
+_DefaultBackgroundTrackerInit:
         PUSHL   d0                                              ; Push plane id for CameraInit
 
         moveq   #0, d0
@@ -66,12 +64,12 @@ _StreamingBackgroundTrackerInit:
         ; Calculate maps ratio and displacement steps (store fractional part)
         divu    d0, d2
         divu    d1, d3
-        move.w  d2, (streamingBackgroundTracker + sbtXScale)
-        move.w  d3, (streamingBackgroundTracker + sbtYScale)
+        move.w  d2, (defaultBackgroundTracker + sbtXScale)
+        move.w  d3, (defaultBackgroundTracker + sbtYScale)
 
         ; Update initial camera position
         moveq   #0, d0
-        move.b   mapLockHorizontal(a1), (streamingBackgroundTracker + sbtLockX)
+        move.b   mapLockHorizontal(a1), (defaultBackgroundTracker + sbtLockX)
         bne     .horizontallyLocked
         move.w  camX(a2), d0
         mulu    d2, d0
@@ -84,7 +82,7 @@ _StreamingBackgroundTrackerInit:
     .horizontalSetupDone:
 
         moveq   #0, d1
-        move.b   mapLockVertical(a1), (streamingBackgroundTracker + sbtLockY)
+        move.b   mapLockVertical(a1), (defaultBackgroundTracker + sbtLockY)
         bne     .verticallyLocked
         move.w  camY(a2), d1
         mulu    d3, d1
@@ -96,9 +94,6 @@ _StreamingBackgroundTrackerInit:
         move.w  (vdpMetrics + vdpPlaneHeight), d3               ; If locked: set camera width to plane height (= render full plane) to allow for custom scrolling (parallax)
     .verticalSetupDone:
 
-        ; Force update of scroll values on next screen refresh
-        VDP_TASK_QUEUE_ADD #_StreamingBackgroundTrackerCommit, a0
-
         ; Initialize background camera
         POPL    d4                                              ; d4 = Camera plane id
         jsr     CameraInit
@@ -106,13 +101,13 @@ _StreamingBackgroundTrackerInit:
 
 
 ;-------------------------------------------------
-; Streaming background tracker sync implementation
+; Default background tracker sync implementation
 ; ----------------
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
 ; Uses: d0-d3/a2
-_StreamingBackgroundTrackerSync:
+_DefaultBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
                 moveq   #0, \result
                 tst.b   \lock(a2)
@@ -125,7 +120,7 @@ _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
             .noMovement\@:
         Endm
 
-        lea streamingBackgroundTracker, a2
+        lea defaultBackgroundTracker, a2
 
         _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, sbtXScale, sbtLockX
         _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, sbtYScale, sbtLockY
@@ -133,32 +128,4 @@ _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
         CAMERA_MOVE d0, d1
 
         Purge _MOVE_CAMERA_COMPONENT
-        rts
-
-
-;-------------------------------------------------
-; If there was camera movement update VDP
-; ----------------
-; Input:
-; - a0: Background camera
-; Uses: a2
-_StreamingBackgroundTrackerFinalize:
-        tst.l   camLastXDisplacement(a0)
-        beq     .noMovement
-
-        ; Update VDP scroll values if there was camera movement
-        VDP_TASK_QUEUE_ADD #_StreamingBackgroundTrackerCommit, a0
-
-    .noMovement:
-        rts
-
-
-;-------------------------------------------------
-; Commit scroll to VDP
-; ----------------
-; Input:
-; - a0: Background camera
-; Uses: d0
-_StreamingBackgroundTrackerCommit:
-        BACKGROUND_UPDATE_VDP_SCROLL camX(a0), camY(a0)
         rts

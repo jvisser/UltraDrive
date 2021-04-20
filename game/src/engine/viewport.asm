@@ -16,6 +16,7 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
         STRUCT_MEMBER.l         viewportBackgroundTracker       ; Used to update the background camera
+        STRUCT_MEMBER.l         viewportScrollHandlerAddress    ; Used to update the VDP scroll values
         STRUCT_MEMBER.w         viewportTrackingEntity          ; Entity to keep in view
     DEFINE_STRUCT_END
 
@@ -87,9 +88,6 @@ ViewportInit:
         addq.w  #8, d3                                  ; Foreground camera height = screen height + 1 pattern for scrolling
         move.l  #VDP_PLANE_A, d4
 
-        ; Force scroll update on next screen refresh
-        VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
-
         jsr     CameraInit
 
         ; Let background tracker initialize the background camera
@@ -102,6 +100,20 @@ ViewportInit:
         lea     (viewport + viewportForeground), a2
         move.l  #VDP_PLANE_B, d0
         jsr     (a3)
+
+        ; Initialize scroll handler
+        MAP_GET a1
+        move.l  mapScrollHandlerAddress(a1), a1
+        move.l  a1, (viewport + viewportScrollHandlerAddress)
+        move.l  shInit(a1), a1
+        lea     viewport, a0
+        jsr     (a1)
+
+        ; Force initial update of scroll values
+        move.l  (viewport + viewportScrollHandlerAddress), a1
+        move.l  shUpdate(a1), a1
+        lea     viewport, a0
+        jsr     (a1)
 
         ; Render views
         lea     (viewport + viewportBackground), a0
@@ -138,12 +150,6 @@ ViewportFinalize:
         ; Finalize foreground camera
         jsr     CameraFinalize
 
-        ; If camera changed update VDP scroll
-        tst.l   camLastXDisplacement(a0)
-        beq     .noMovement
-        VDP_TASK_QUEUE_ADD #_ViewportCommit, a0
-    .noMovement:
-
         ; Let the background tracker update the background camera
         movea.l (viewport + viewportBackgroundTracker), a2
         movea.l btSync(a2), a2
@@ -155,9 +161,10 @@ ViewportFinalize:
         lea     (viewport + viewportBackground), a0
         jsr     CameraFinalize
 
-        ; Finalize the background tracker
-        movea.l (viewport + viewportBackgroundTracker), a2
-        movea.l btFinalize(a2), a2
+        ; Update scrolling
+        move.l  (viewport + viewportScrollHandlerAddress), a2
+        move.l  shUpdate(a2), a2
+        lea     viewport, a0
         jmp     (a2)
 
 
@@ -194,25 +201,4 @@ _ENSURE_ACTIVE_AREA Macro screenMetric, activeAreaSize, axis, result
         CAMERA_MOVE d0, d1
 
         Purge _ENSURE_ACTIVE_AREA
-        rts
-
-
-;-------------------------------------------------
-; Default commit handler. Assumes plane based scolling and updates scroll values accordingly.
-; ----------------
-; Input:
-; - a0: Foreground camera
-; Uses: d0
-_ViewportCommit:
-
-        ; Update horizontal scroll
-        VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR
-        move.w  camX(a0), d0
-        neg.w   d0
-        move.w  d0, (MEM_VDP_DATA)
-
-        ; Update vertical scroll
-        VDP_ADDR_SET WRITE, VSRAM, $00
-        move.w  camY(a0), d0
-        move.w  d0, (MEM_VDP_DATA)
         rts

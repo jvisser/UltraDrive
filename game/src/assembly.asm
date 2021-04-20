@@ -45,8 +45,12 @@
     Include './engine/mapcollision.asm'
     Include './engine/backgroundtracker.asm'
     Include './engine/background/background.asm'
-    Include './engine/background/streamingbackground.asm'
-    Include './engine/background/tilingbackground.asm'
+    Include './engine/background/defaultbackground.asm'
+    Include './engine/background/staticbackground.asm'
+    Include './engine/scrollhandler.asm'
+    Include './engine/scroll/scroll.asm'
+    Include './engine/scroll/defaultscroll.asm'
+    Include './engine/scroll/tilingscroll.asm'
     Include './engine/entity.asm'
 
 
