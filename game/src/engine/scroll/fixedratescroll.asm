@@ -1,36 +1,35 @@
 ;------------------------------------------------------------------------------------------
-; Tiling scroll handler. Treats the background as a single repetitive tile.
 ; Ignores the background camera position and scrolls at a fixed division of the foreground.
 ; Therefore the background should be static when using this scroll updater handler.
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Tiling scroll handler constants
+; FixedRate scroll handler constants
 ; ----------------
-TILING_SCROLL_HANDLER_SHIFT Equ 2
+FIXED_RATE_SCROLL_HANDLER_SHIFT Equ 2
 
 
 ;-------------------------------------------------
-; Tiling scroll handler structure
+; FixedRate scroll handler structure
 ; ----------------
     ; struct ScrollHandler
-    tilingScrollHandler:
+    fixedRateScrollHandler:
         ; .shInit
-        dc.l _TilingScrollHandlerInit
+        dc.l _FixedRateScrollHandlerInit
         ; .shUpdate
-        dc.l _TilingScrollHandlerUpdate
+        dc.l _FixedRateScrollHandlerUpdate
 
 
 ;-------------------------------------------------
-; Initialize the tiling scroll handler. Called on engine init.
+; Initialize the fixedRate scroll handler. Called on engine init.
 ; ----------------
-TilingScrollHandlerInit Equ tilingScrollHandlerInit
+FixedRateScrollHandlerInit Equ fixedRateScrollHandlerInit
 
 
 ;-------------------------------------------------
 ; Setup the correct VDP scrolling mode
 ; ----------------
-_TilingScrollHandlerInit:
+_FixedRateScrollHandlerInit:
         ; Enable plane scrolling mode (clear scroll mode bits)
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_HSCROLL_MASK
         rts
@@ -42,14 +41,14 @@ _TilingScrollHandlerInit:
 ; Input:
 ; - a0: Viewport
 ; Uses: d0-d1/a6
-_TilingScrollHandlerUpdate:
+_FixedRateScrollHandlerUpdate:
         move.l  viewportBackground + camLastXDisplacement(a0), d0       ; d0 = [back X displacement]:[back Y displacement]
         move.l  viewportForeground + camLastXDisplacement(a0), d1       ; d1 = [front X displacement]:[front Y displacement]
         or.l    d0, d1
         beq     .noMovement
         
         ; Update VDP scroll values
-        VDP_TASK_QUEUE_ADD #_TilingScrollHandlerCommit, a0
+        VDP_TASK_QUEUE_ADD #_FixedRateScrollHandlerCommit, a0
         
     .noMovement:
         rts
@@ -61,7 +60,7 @@ _TilingScrollHandlerUpdate:
 ; Input:
 ; - a0: Viewport
 ; Uses: d0-d1/a1
-_TilingScrollHandlerCommit:
+_FixedRateScrollHandlerCommit:
         move.w  viewportForeground + camX(a0), d0
         move.w  viewportForeground + camY(a0), d1
         
@@ -74,12 +73,12 @@ _TilingScrollHandlerCommit:
         VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR
         neg.w   d0
         move.w  d0, (a1)
-        asr.w   #TILING_SCROLL_HANDLER_SHIFT, d0
+        asr.w   #FIXED_RATE_SCROLL_HANDLER_SHIFT, d0
         move.w  d0, (a1)
         
         ; Update vertical scroll
         VDP_ADDR_SET WRITE, VSRAM, $00
         move.w  d1, (a1)
-        lsr.w   #TILING_SCROLL_HANDLER_SHIFT, d1
+        lsr.w   #FIXED_RATE_SCROLL_HANDLER_SHIFT, d1
         move.w  d1, (a1)
         rts
