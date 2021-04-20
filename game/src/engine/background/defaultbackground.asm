@@ -5,27 +5,19 @@
 ;-------------------------------------------------
 ; Default background tracker structures
 ; ----------------
-    DEFINE_STRUCT DefaultBackgroundTracker, EXTENDS, BackgroundTracker
-        STRUCT_MEMBER.b sbtLockX                                            ; Lock horizontal movement
-        STRUCT_MEMBER.b sbtLockY                                            ; Lock vertical movement
-        STRUCT_MEMBER.w sbtXScale                                           ; Ratios fractional part (16:16 fixedpoint)
-        STRUCT_MEMBER.w sbtYScale
-    DEFINE_STRUCT_END
-
     DEFINE_VAR FAST
-        VAR.DefaultBackgroundTracker  defaultBackgroundTracker
+        VAR.b sbtLockX                                          ; Lock horizontal movement
+        VAR.b sbtLockY                                          ; Lock vertical movement
+        VAR.w sbtXScale                                         ; Ratios fractional part (16:16 fixedpoint)
+        VAR.w sbtYScale
     DEFINE_VAR_END
 
-    INIT_STRUCT defaultBackgroundTracker
-        INIT_STRUCT_MEMBER.btInit      _DefaultBackgroundTrackerInit
-        INIT_STRUCT_MEMBER.btSync      _DefaultBackgroundTrackerSync
-    INIT_STRUCT_END
-
-
-;-------------------------------------------------
-; Initialize the background tracker. Called by engine init.
-; ----------------
-DefaultBackgroundTrackerInit Equ defaultBackgroundTrackerInit
+    ; struct BackgroundTracker
+    defaultBackgroundTracker:
+        ; .btInit
+        dc.l _DefaultBackgroundTrackerInit
+        ; .btSync
+        dc.l _DefaultBackgroundTrackerSync
 
 
 ;-------------------------------------------------
@@ -64,12 +56,12 @@ _DefaultBackgroundTrackerInit:
         ; Calculate maps ratio and displacement steps (store fractional part)
         divu    d0, d2
         divu    d1, d3
-        move.w  d2, (defaultBackgroundTracker + sbtXScale)
-        move.w  d3, (defaultBackgroundTracker + sbtYScale)
+        move.w  d2, sbtXScale
+        move.w  d3, sbtYScale
 
         ; Update initial camera position
         moveq   #0, d0
-        move.b   mapLockHorizontal(a1), (defaultBackgroundTracker + sbtLockX)
+        move.b   mapLockHorizontal(a1), sbtLockX
         bne     .horizontallyLocked
         move.w  camX(a2), d0
         mulu    d2, d0
@@ -82,7 +74,7 @@ _DefaultBackgroundTrackerInit:
     .horizontalSetupDone:
 
         moveq   #0, d1
-        move.b   mapLockVertical(a1), (defaultBackgroundTracker + sbtLockY)
+        move.b   mapLockVertical(a1), sbtLockY
         bne     .verticallyLocked
         move.w  camY(a2), d1
         mulu    d3, d1
@@ -110,17 +102,15 @@ _DefaultBackgroundTrackerInit:
 _DefaultBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
                 moveq   #0, \result
-                tst.b   \lock(a2)
+                tst.b   \lock
                 bne     .noMovement\@
-                move.w  \scale(a2), \result
+                move.w  \scale, \result
                 muls    \position(a1), \result
                 swap    \result
                 sub.w   \position(a0), \result
                 sub.w   \displacement(a0), \result
             .noMovement\@:
         Endm
-
-        lea defaultBackgroundTracker, a2
 
         _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, sbtXScale, sbtLockX
         _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, sbtYScale, sbtLockY
