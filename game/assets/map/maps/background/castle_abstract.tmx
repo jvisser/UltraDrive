@@ -4,7 +4,7 @@
   <property name="background_tracker" value="static"/>
   <property name="camera_lock_horizontal" type="bool" value="true"/>
   <property name="camera_lock_vertical" type="bool" value="true"/>
-  <property name="scroll_type" value="tiling"/>
+  <property name="scroll_type" value="fixedRate"/>
  </properties>
  <tileset firstgid="1" source="../../tilesets/castle/chunks.tsx"/>
  <layer id="1" name="Chunks" width="4" height="2">

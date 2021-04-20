@@ -48,7 +48,7 @@
     Include './engine/background/staticbackground.asm'
     Include './engine/scrollhandler.asm'
     Include './engine/scroll/defaultscroll.asm'
-    Include './engine/scroll/tilingscroll.asm'
+    Include './engine/scroll/fixedratescroll.asm'
     Include './engine/entity.asm'
 
 
