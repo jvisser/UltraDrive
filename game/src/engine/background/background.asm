@@ -7,5 +7,4 @@
 ; ----------------
 BackgroundInit:
         jsr     DefaultBackgroundTrackerInit
-        jsr     StaticBackgroundTrackerInit
         rts

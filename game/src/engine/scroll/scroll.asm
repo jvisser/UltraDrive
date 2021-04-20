@@ -6,6 +6,4 @@
 ; One time initialization. Called by engine init.
 ; ----------------
 ScrollInit:
-        jsr     DefaultScrollHandlerInit
-        jsr     TilingScrollHandlerInit
         rts
