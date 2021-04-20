@@ -3,22 +3,14 @@
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Default scrollHandler structures
+; Default scrollHandler structure
 ; ----------------
-    DEFINE_VAR FAST
-        VAR.ScrollHandler  defaultScrollHandler
-    DEFINE_VAR_END
-
-    INIT_STRUCT defaultScrollHandler
-        INIT_STRUCT_MEMBER.shInit   _DefaultScrollHandlerInit
-        INIT_STRUCT_MEMBER.shUpdate _DefaultScrollHandlerUpdate
-    INIT_STRUCT_END
-
-
-;-------------------------------------------------
-; Initialize the default scroll handler. Called on engine init.
-; ----------------
-DefaultScrollHandlerInit Equ defaultScrollHandlerInit
+    ; struct ScrollHandler
+    defaultScrollHandler:
+        ; .shInit
+        dc.l _DefaultScrollHandlerInit
+        ; .shUpdate
+        dc.l _DefaultScrollHandlerUpdate
 
 
 ;-------------------------------------------------

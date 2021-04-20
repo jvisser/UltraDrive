@@ -5,20 +5,12 @@
 ;-------------------------------------------------
 ; Static background tracker structures
 ; ----------------
-    DEFINE_VAR FAST
-        VAR.BackgroundTracker  staticBackgroundTracker
-    DEFINE_VAR_END
-
-    INIT_STRUCT staticBackgroundTracker
-        INIT_STRUCT_MEMBER.btInit      _StaticBackgroundTrackerInit
-        INIT_STRUCT_MEMBER.btSync      NoOperation
-    INIT_STRUCT_END
-
-
-;-------------------------------------------------
-; Initialize the background tracker. Called by engine init.
-; ----------------
-StaticBackgroundTrackerInit Equ staticBackgroundTrackerInit
+    ; struct BackgroundTracker
+    staticBackgroundTracker:
+        ; .btInit
+        dc.l _StaticBackgroundTrackerInit
+        ; .btSync
+        dc.l NoOperation
 
 
 ;-------------------------------------------------

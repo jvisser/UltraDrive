@@ -11,16 +11,14 @@ TILING_SCROLL_HANDLER_SHIFT Equ 2
 
 
 ;-------------------------------------------------
-; Tiling scroll handler structures
+; Tiling scroll handler structure
 ; ----------------
-    DEFINE_VAR FAST
-        VAR.ScrollHandler  tilingScrollHandler
-    DEFINE_VAR_END
-
-    INIT_STRUCT tilingScrollHandler
-        INIT_STRUCT_MEMBER.shInit   _TilingScrollHandlerInit
-        INIT_STRUCT_MEMBER.shUpdate _TilingScrollHandlerUpdate
-    INIT_STRUCT_END
+    ; struct ScrollHandler
+    tilingScrollHandler:
+        ; .shInit
+        dc.l _TilingScrollHandlerInit
+        ; .shUpdate
+        dc.l _TilingScrollHandlerUpdate
 
 
 ;-------------------------------------------------
