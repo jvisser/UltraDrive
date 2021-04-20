@@ -6,10 +6,10 @@
 ; Default background tracker structures
 ; ----------------
     DEFINE_VAR FAST
-        VAR.b sbtLockX                                          ; Lock horizontal movement
-        VAR.b sbtLockY                                          ; Lock vertical movement
-        VAR.w sbtXScale                                         ; Ratios fractional part (16:16 fixedpoint)
-        VAR.w sbtYScale
+        VAR.b dbtLockX                                          ; Lock horizontal movement
+        VAR.b dbtLockY                                          ; Lock vertical movement
+        VAR.w dbtXScale                                         ; Ratios fractional part (16:16 fixedpoint)
+        VAR.w dbtYScale
     DEFINE_VAR_END
 
     ; struct BackgroundTracker
@@ -56,12 +56,12 @@ _DefaultBackgroundTrackerInit:
         ; Calculate maps ratio and displacement steps (store fractional part)
         divu    d0, d2
         divu    d1, d3
-        move.w  d2, sbtXScale
-        move.w  d3, sbtYScale
+        move.w  d2, dbtXScale
+        move.w  d3, dbtYScale
 
         ; Update initial camera position
         moveq   #0, d0
-        move.b   mapLockHorizontal(a1), sbtLockX
+        move.b   mapLockHorizontal(a1), dbtLockX
         bne     .horizontallyLocked
         move.w  camX(a2), d0
         mulu    d2, d0
@@ -74,7 +74,7 @@ _DefaultBackgroundTrackerInit:
     .horizontalSetupDone:
 
         moveq   #0, d1
-        move.b   mapLockVertical(a1), sbtLockY
+        move.b   mapLockVertical(a1), dbtLockY
         bne     .verticallyLocked
         move.w  camY(a2), d1
         mulu    d3, d1
@@ -112,8 +112,8 @@ _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
             .noMovement\@:
         Endm
 
-        _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, sbtXScale, sbtLockX
-        _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, sbtYScale, sbtLockY
+        _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, dbtXScale, dbtLockX
+        _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, dbtYScale, dbtLockY
 
         CAMERA_MOVE d0, d1
 
