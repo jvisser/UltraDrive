@@ -32,6 +32,8 @@
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
             ; .mapBackgroundTrackerAddress
             dc.l [(${#strings.toLowerCase(map.properties.getOrDefault('background_tracker', map.properties['background'].properties['background_tracker']))})]BackgroundTracker
+            ; .mapScrollHandlerAddress
+            dc.l [(${#strings.toLowerCase(map.properties.getOrDefault('scroll_type', map.properties['background'].properties['scroll_type']))})]ScrollHandler
         Even
     [/]
 

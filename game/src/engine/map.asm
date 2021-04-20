@@ -15,6 +15,7 @@
         STRUCT_MEMBER.l mapBackgroundAddress
         STRUCT_MEMBER.l mapTilesetAddress
         STRUCT_MEMBER.l mapBackgroundTrackerAddress
+        STRUCT_MEMBER.l mapScrollHandlerAddress
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Map
