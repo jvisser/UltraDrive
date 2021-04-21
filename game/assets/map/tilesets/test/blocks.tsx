@@ -435,9 +435,9 @@
  <tile id="431" type="Block"/>
  <tile id="432" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="lava"/>
-   <property name="animation_initial_trigger" type="int" value="1"/>
-   <property name="animation_trigger_interval" type="int" value="1"/>
+   <property name="animationId" value="lava"/>
+   <property name="animationInitialTrigger" type="int" value="1"/>
+   <property name="animationTriggerInterval" type="int" value="1"/>
   </properties>
   <animation>
    <frame tileid="432" duration="100"/>
@@ -460,7 +460,7 @@
  </tile>
  <tile id="433" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="lava"/>
+   <property name="animationId" value="lava"/>
   </properties>
   <animation>
    <frame tileid="433" duration="100"/>
@@ -529,10 +529,10 @@
  <tile id="479" type="Block"/>
  <tile id="480" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="2"/>
-   <property name="animation_id" value="lava_slow"/>
-   <property name="animation_initial_trigger" type="int" value="7"/>
-   <property name="animation_trigger_interval" type="int" value="1"/>
+   <property name="animationFrameInterval" type="int" value="2"/>
+   <property name="animationId" value="lava_slow"/>
+   <property name="animationInitialTrigger" type="int" value="7"/>
+   <property name="animationTriggerInterval" type="int" value="1"/>
   </properties>
   <animation>
    <frame tileid="480" duration="100"/>
@@ -555,7 +555,7 @@
  </tile>
  <tile id="481" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="lava_slow"/>
+   <property name="animationId" value="lava_slow"/>
   </properties>
   <animation>
    <frame tileid="481" duration="100"/>
@@ -624,10 +624,10 @@
  <tile id="527" type="Block"/>
  <tile id="528" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="6"/>
-   <property name="animation_id" value="newton_cradle_start"/>
-   <property name="animation_initial_trigger" type="int" value="1"/>
-   <property name="animation_trigger_interval" type="int" value="54"/>
+   <property name="animationFrameInterval" type="int" value="6"/>
+   <property name="animationId" value="newton_cradle_start"/>
+   <property name="animationInitialTrigger" type="int" value="1"/>
+   <property name="animationTriggerInterval" type="int" value="54"/>
   </properties>
   <animation>
    <frame tileid="528" duration="100"/>
@@ -643,7 +643,7 @@
  </tile>
  <tile id="529" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="newton_cradle_start"/>
+   <property name="animationId" value="newton_cradle_start"/>
   </properties>
   <animation>
    <frame tileid="529" duration="100"/>
@@ -681,7 +681,7 @@
  <tile id="551" type="Block"/>
  <tile id="552" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="newton_cradle_start"/>
+   <property name="animationId" value="newton_cradle_start"/>
   </properties>
   <animation>
    <frame tileid="552" duration="100"/>
@@ -697,7 +697,7 @@
  </tile>
  <tile id="553" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="newton_cradle_start"/>
+   <property name="animationId" value="newton_cradle_start"/>
   </properties>
   <animation>
    <frame tileid="553" duration="100"/>
@@ -735,10 +735,10 @@
  <tile id="575" type="Block"/>
  <tile id="576" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="6"/>
-   <property name="animation_id" value="newton_cradle_end"/>
-   <property name="animation_initial_trigger" type="int" value="54"/>
-   <property name="animation_trigger_interval" type="int" value="54"/>
+   <property name="animationFrameInterval" type="int" value="6"/>
+   <property name="animationId" value="newton_cradle_end"/>
+   <property name="animationInitialTrigger" type="int" value="54"/>
+   <property name="animationTriggerInterval" type="int" value="54"/>
   </properties>
   <animation>
    <frame tileid="576" duration="100"/>
@@ -754,7 +754,7 @@
  </tile>
  <tile id="577" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="newton_cradle_end"/>
+   <property name="animationId" value="newton_cradle_end"/>
   </properties>
   <animation>
    <frame tileid="577" duration="100"/>
@@ -792,7 +792,7 @@
  <tile id="599" type="Block"/>
  <tile id="600" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="newton_cradle_end"/>
+   <property name="animationId" value="newton_cradle_end"/>
   </properties>
   <animation>
    <frame tileid="600" duration="100"/>
@@ -808,7 +808,7 @@
  </tile>
  <tile id="601" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="newton_cradle_end"/>
+   <property name="animationId" value="newton_cradle_end"/>
   </properties>
   <animation>
    <frame tileid="601" duration="100"/>
@@ -849,10 +849,10 @@
    <property name="animation_activation">initialTrigger: 1
 triggerInterval: 60
 frameInterval: 60</property>
-   <property name="animation_frame_interval" type="int" value="60"/>
-   <property name="animation_id" value="water"/>
-   <property name="animation_initial_trigger" type="int" value="1"/>
-   <property name="animation_trigger_interval" type="int" value="60"/>
+   <property name="animationFrameInterval" type="int" value="60"/>
+   <property name="animationId" value="water"/>
+   <property name="animationInitialTrigger" type="int" value="1"/>
+   <property name="animationTriggerInterval" type="int" value="60"/>
   </properties>
   <animation>
    <frame tileid="624" duration="100"/>
@@ -861,7 +861,7 @@ frameInterval: 60</property>
  </tile>
  <tile id="625" type="Block">
   <properties>
-   <property name="animation_id" value="water"/>
+   <property name="animationId" value="water"/>
   </properties>
  </tile>
  <tile id="626" type="Block"/>
@@ -888,7 +888,7 @@ frameInterval: 60</property>
  <tile id="647" type="Block"/>
  <tile id="648" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="lava_manual"/>
+   <property name="animationId" value="lava_manual"/>
   </properties>
   <animation>
    <frame tileid="648" duration="100"/>
@@ -926,7 +926,7 @@ frameInterval: 60</property>
  </tile>
  <tile id="649" type="AnimationBlock">
   <properties>
-   <property name="animation_id" value="lava_manual"/>
+   <property name="animationId" value="lava_manual"/>
   </properties>
   <animation>
    <frame tileid="649" duration="100"/>
@@ -1010,8 +1010,8 @@ frameInterval: 60</property>
  <tile id="695" type="Block"/>
  <tile id="696" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_camera" value="background"/>
-   <property name="animation_id" value="clouds_light"/>
+   <property name="animationCamera" value="background"/>
+   <property name="animationId" value="clouds_light"/>
   </properties>
   <animation>
    <frame tileid="696" duration="100"/>
@@ -1057,9 +1057,9 @@ frameInterval: 60</property>
  <tile id="719" type="Block"/>
  <tile id="720" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_camera" value="background"/>
-   <property name="animation_id" value="clouds_dark"/>
-   <property name="animation_shift" type="int" value="2"/>
+   <property name="animationCamera" value="background"/>
+   <property name="animationId" value="clouds_dark"/>
+   <property name="animationShift" type="int" value="2"/>
   </properties>
   <animation>
    <frame tileid="720" duration="100"/>
@@ -1105,9 +1105,9 @@ frameInterval: 60</property>
  <tile id="743" type="Block"/>
  <tile id="744" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_axis" value="y"/>
-   <property name="animation_id" value="wall_vertical"/>
-   <property name="animation_shift" type="int" value="3"/>
+   <property name="animationAxis" value="y"/>
+   <property name="animationId" value="wall_vertical"/>
+   <property name="animationShift" type="int" value="3"/>
   </properties>
   <animation>
    <frame tileid="744" duration="100"/>

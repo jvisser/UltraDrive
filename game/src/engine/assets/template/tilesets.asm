@@ -19,11 +19,11 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS 
     th:with="tilesetName=${#strings.capitalize(tileset.name)}, 
              maxModuleSize=${0x6c00}, 
              collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)}, 
-             animationsByScheduler=${#collection.groupBy({'animation_scheduler'}, tileset.animations)}, 
-             videoAnimations=${#collection.groupOf({'video_refresh'}, animationsByScheduler)},
+             animationsByScheduler=${#collection.groupBy({'animationScheduler'}, tileset.animations)},
+             videoAnimations=${#collection.groupOf({'videoRefresh'}, animationsByScheduler)},
              viewportAnimationsByCamera=${
                 #collection.ensureGroups({{'background'}, {'foreground'}},
-                    #collection.groupBy({'animation_camera'}, 
+                    #collection.groupBy({'animationCamera'},
                         #collection.groupOf({'viewport'}, animationsByScheduler)))}"]
 
 VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
@@ -176,17 +176,17 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
             ; .tsAnimationFrameTransferListAddress
             dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList
             ; .tsAnimationInitialTrigger
-            dc.w [(${animation.properties['animation_initial_trigger']})]
+            dc.w [(${animation.properties['animationInitialTrigger']})]
             ; .tsAnimationTriggerInterval
-            dc.w [(${animation.properties['animation_trigger_interval']})]
+            dc.w [(${animation.properties['animationTriggerInterval']})]
             ; .tsAnimationFrameInterval
-            dc.w [(${animation.properties['animation_frame_interval']})]
+            dc.w [(${animation.properties['animationFrameInterval']})]
     [/]
 
     ; Viewport based animation definitions
     [# th:each="viewportCameraKey : ${viewportAnimationsByCamera.keySet()}"
         th:with="viewportCamera=${#strings.capitalize(viewportCameraKey.{^ true}[0])}, 
-                 viewportAnimationGroups=${#collection.groupBy({'animation_shift', 'animation_axis'}, viewportAnimationsByCamera[viewportCameraKey]).values()}"]
+                 viewportAnimationGroups=${#collection.groupBy({'animationShift', 'animationAxis'}, viewportAnimationsByCamera[viewportCameraKey]).values()}"]
         
         ; struct TilesetViewportAnimations
         Tileset[(${tilesetName})]ViewportAnimationTable[(${viewportCamera})]:
@@ -208,9 +208,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
                 ; struct TilesetViewportAnimationGroup
                 Tileset[(${tilesetName})]ViewportAnimationGroup[(${viewportCamera})][(${iter.index})]:
                     ; .tsvpAnimationGroupCameraProperty
-                    dc.w cam[(${#strings.toUpperCase(animationGroupProperties['animation_axis'])})]
+                    dc.w cam[(${#strings.toUpperCase(animationGroupProperties['animationAxis'])})]
                     ; .tsvpShift
-                    dc.w [(${animationGroupProperties['animation_shift']})]
+                    dc.w [(${animationGroupProperties['animationShift']})]
                     ; .tsvpAnimationCount
                     dc.w [(${animationGroup.size})]
                     ; .tsvpAnimationsTable
