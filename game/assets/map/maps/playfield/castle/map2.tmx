@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="19" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
  <properties>
-  <property name="background" type="file" value="../../background/castle_abstract.tmx"/>
+  <property name="background" type="file" value="../../background/castle/abstract.tmx"/>
  </properties>
  <tileset firstgid="1" source="../../../tilesets/castle/chunks.tsx"/>
  <layer id="1" name="Chunks" width="19" height="10">
