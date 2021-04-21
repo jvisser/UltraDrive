@@ -26,7 +26,7 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource
     private static final String BLOCK_COLLISION_LAYER_NAME = "Collision";
     private static final String BLOCK_PRIORITY_LAYER_NAME = "Priority";
 
-    private static final String ANIMATION_ID_PROPERTY_NAME = "animation_id";
+    private static final String ANIMATION_ID_PROPERTY_NAME = "animationId";
 
     private final URL blockImageSource;
 

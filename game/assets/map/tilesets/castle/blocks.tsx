@@ -2804,10 +2804,10 @@
  <tile id="2800" type="Block"/>
  <tile id="2801" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="2"/>
-   <property name="animation_id" value="chain"/>
-   <property name="animation_initial_trigger" type="int" value="1"/>
-   <property name="animation_trigger_interval" type="int" value="2"/>
+   <property name="animationFrameInterval" type="int" value="2"/>
+   <property name="animationId" value="chain"/>
+   <property name="animationInitialTrigger" type="int" value="1"/>
+   <property name="animationTriggerInterval" type="int" value="2"/>
   </properties>
   <animation>
    <frame tileid="2801" duration="500"/>
@@ -3429,10 +3429,10 @@
  <tile id="3400" type="Block"/>
  <tile id="3401" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="6"/>
-   <property name="animation_id" value="lava_bubble_1"/>
-   <property name="animation_initial_trigger" type="int" value="1"/>
-   <property name="animation_trigger_interval" type="int" value="67"/>
+   <property name="animationFrameInterval" type="int" value="6"/>
+   <property name="animationId" value="lava_bubble_1"/>
+   <property name="animationInitialTrigger" type="int" value="1"/>
+   <property name="animationTriggerInterval" type="int" value="67"/>
   </properties>
   <animation>
    <frame tileid="3401" duration="100"/>
@@ -3549,10 +3549,10 @@
  <tile id="3500" type="Block"/>
  <tile id="3501" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="6"/>
-   <property name="animation_id" value="lava_bubble_2"/>
-   <property name="animation_initial_trigger" type="int" value="83"/>
-   <property name="animation_trigger_interval" type="int" value="83"/>
+   <property name="animationFrameInterval" type="int" value="6"/>
+   <property name="animationId" value="lava_bubble_2"/>
+   <property name="animationInitialTrigger" type="int" value="83"/>
+   <property name="animationTriggerInterval" type="int" value="83"/>
   </properties>
   <animation>
    <frame tileid="3501" duration="100"/>
@@ -3669,10 +3669,10 @@
  <tile id="3600" type="Block"/>
  <tile id="3601" type="AnimationBlock">
   <properties>
-   <property name="animation_frame_interval" type="int" value="6"/>
-   <property name="animation_id" value="lava_bubble_3"/>
-   <property name="animation_initial_trigger" type="int" value="109"/>
-   <property name="animation_trigger_interval" type="int" value="109"/>
+   <property name="animationFrameInterval" type="int" value="6"/>
+   <property name="animationId" value="lava_bubble_3"/>
+   <property name="animationInitialTrigger" type="int" value="109"/>
+   <property name="animationTriggerInterval" type="int" value="109"/>
   </properties>
   <animation>
    <frame tileid="3601" duration="100"/>
@@ -3989,8 +3989,8 @@
  <tile id="3900" type="Block"/>
  <tile id="3901" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3901" duration="100"/>
@@ -4013,8 +4013,8 @@
  </tile>
  <tile id="3902" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3902" duration="100"/>
@@ -4037,8 +4037,8 @@
  </tile>
  <tile id="3903" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3903" duration="100"/>
@@ -4061,8 +4061,8 @@
  </tile>
  <tile id="3904" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3904" duration="100"/>
@@ -4085,8 +4085,8 @@
  </tile>
  <tile id="3905" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3905" duration="100"/>
@@ -4109,8 +4109,8 @@
  </tile>
  <tile id="3906" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3906" duration="100"/>
@@ -4133,8 +4133,8 @@
  </tile>
  <tile id="3907" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3907" duration="100"/>
@@ -4157,8 +4157,8 @@
  </tile>
  <tile id="3908" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3908" duration="100"/>
@@ -4181,8 +4181,8 @@
  </tile>
  <tile id="3909" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3909" duration="100"/>
@@ -4205,8 +4205,8 @@
  </tile>
  <tile id="3910" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3910" duration="100"/>
@@ -4229,8 +4229,8 @@
  </tile>
  <tile id="3911" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3911" duration="100"/>
@@ -4253,8 +4253,8 @@
  </tile>
  <tile id="3912" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3912" duration="100"/>
@@ -4277,8 +4277,8 @@
  </tile>
  <tile id="3913" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3913" duration="100"/>
@@ -4301,8 +4301,8 @@
  </tile>
  <tile id="3914" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3914" duration="100"/>
@@ -4325,8 +4325,8 @@
  </tile>
  <tile id="3915" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3915" duration="100"/>
@@ -4349,8 +4349,8 @@
  </tile>
  <tile id="3916" type="ViewportAnimationBlock">
   <properties>
-   <property name="animation_id" value="shutter"/>
-   <property name="animation_shift" type="int" value="4"/>
+   <property name="animationId" value="shutter"/>
+   <property name="animationShift" type="int" value="4"/>
   </properties>
   <animation>
    <frame tileid="3916" duration="100"/>

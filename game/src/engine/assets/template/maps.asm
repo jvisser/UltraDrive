@@ -31,9 +31,9 @@
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
             ; .mapBackgroundTrackerAddress
-            dc.l [(${map.properties.getOrDefault('background_tracker', map.properties['background'].properties['background_tracker'])})]BackgroundTracker
+            dc.l [(${map.properties.getOrDefault('backgroundTracker', map.properties['background'].properties['backgroundTracker'])})]BackgroundTracker
             ; .mapScrollHandlerAddress
-            dc.l [(${map.properties.getOrDefault('scroll_type', map.properties['background'].properties['scroll_type'])})]ScrollHandler
+            dc.l [(${map.properties.getOrDefault('scrollType', map.properties['background'].properties['scrollType'])})]ScrollHandler
         Even
     [/]
 
@@ -56,9 +56,9 @@
         ; .mapDataAddress
         dc.l Map[(${mapName})]Data
         ; .mapLockHorizontal
-        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('camera_lock_horizontal', false))})]
+        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('cameraLockHorizontal', false))})]
         ; .mapLockVertical
-        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('camera_lock_vertical', false))})]
+        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('cameraLockVertical', false))})]
         ; .mapRowOffsetTable
         dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
 
