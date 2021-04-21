@@ -6,7 +6,7 @@
   <property name="cameraLockVertical" type="bool" value="true"/>
   <property name="scrollType" value="fixedRate"/>
  </properties>
- <tileset firstgid="1" source="../../tilesets/castle/chunks.tsx"/>
+ <tileset firstgid="1" source="../../../tilesets/castle/chunks.tsx"/>
  <layer id="1" name="Chunks" width="4" height="2">
   <data encoding="csv">
 258,259,258,259,
