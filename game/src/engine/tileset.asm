@@ -29,7 +29,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 ; ----------------
 
     ; Chunk reference structure
-    BIT_MASK.CHUNK_REF_INDEX            0,  10                                  ; Not call can be used due to memory constraints
+    BIT_MASK.CHUNK_REF_INDEX            0,  10
     BIT_CONST.CHUNK_REF_EMPTY           10                                      ; Chunk contains no graphic data
     BIT_MASK.CHUNK_REF_ORIENTATION      11,   2
     BIT_CONST.CHUNK_REF_HFLIP           11
@@ -223,10 +223,10 @@ TilesetLoad:
         bsr     _TilesetLoadAnimations
     .noAnimations:
 
-        ; TODO: This is not allowed according to the Sega manual: DMA Transfer code running from ROM and the source of the DMA trigger command word in ROM. But it works on my MD1 no TMSS!?
-        ; Load palette
+        ; Load palette. Use DMA queue to prevent ROM -> VRAM hardware glitch.
         movea.l tsPaletteAddress(a6), a0
-        VDP_DMA_TRANSFER_COMMAND_LIST a0
+        VDP_DMA_QUEUE_ADD_COMMAND_LIST a0
+        jsr     VDPDMAQueueFlush
         
         ; Install viewport movement handlers last
         jmp _TilesetInstallViewportMovementHandlers
@@ -306,10 +306,13 @@ _TilesetLoadAnimations:
         movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
         movea.l (a0), a0                                    ; a0 = VDPDMATransferCommandList address for first animation frame
 
-        ; TODO: This is not allowed according to the Sega manual: DMA Transfer code running from ROM and the source of the DMA trigger command word in ROM. But it works on my MD1 no TMSS!?
-        VDP_DMA_TRANSFER_COMMAND_LIST a0
+        ; Use DMA queue to prevent ROM -> VRAM hardware glitch.
+        VDP_DMA_QUEUE_ADD_COMMAND_LIST a0
 
         dbra    d6, .loadAnimationFrameLoop
+
+        ; Flush queued animation frames to VRAM
+        jsr     VDPDMAQueueFlush
 
         ; Enable animation ticker
         ENGINE_SCHEDULER_ENABLE SCHEDULER_TILESET
