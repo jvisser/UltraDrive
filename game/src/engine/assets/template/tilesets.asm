@@ -240,7 +240,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         ; [(${animation.animationId})] frame DMA transfer definitions
         [# th:each="animationFrameRef : ${#sets.toSet(animation.animationFrameReferences)}"]
         Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]:
-            VDP_DMA_DEFINE_VRAM_TRANSFER Tileset[(${tilesetName})]AnimationFrame[(${animationFrameRef.animationFrame.frameId})]Data, [(${animation.patternBaseId * 32})], [(${animation.size * 16})]
+            VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]AnimationFrame[(${animationFrameRef.animationFrame.frameId})]Data, [(${animation.patternBaseId * 32})], [(${animation.size * 16})]
         [/]
     [/]
 

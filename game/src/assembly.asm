@@ -49,6 +49,7 @@
     Include './engine/scrollhandler.asm'
     Include './engine/scroll/defaultscroll.asm'
     Include './engine/scroll/fixedratescroll.asm'
+    Include './engine/scroll/linescroll.asm'
     Include './engine/entity.asm'
 
 

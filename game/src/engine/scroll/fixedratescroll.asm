@@ -23,8 +23,12 @@ FIXED_RATE_SCROLL_HANDLER_SHIFT Equ 2
 ;-------------------------------------------------
 ; Setup the correct VDP scrolling mode
 ; ----------------
+; Input:
+; - a0: Viewport
 _FixedRateScrollHandlerInit:
-        ; Enable plane scrolling mode (clear scroll mode bits)
+        ; Enable vertical plane scrolling mode
+        VDP_REG_RESET_BITS vdpRegMode3, MODE3_VSCROLL_CELL
+        ; Enable horizontal plane scrolling mode
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_HSCROLL_MASK
         rts
 

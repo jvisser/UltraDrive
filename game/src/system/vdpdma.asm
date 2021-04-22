@@ -46,10 +46,10 @@ _VDP_DMA_DEFINE_COMMAND_LIST Macro length, dataStride
         If (strcmp('\dataStride', ''))
             dc.w VDP_CMD_RS_AUTO_INC + $02
         Else
-            dc.w VDP_CMD_RS_AUTO_INC + (\dataStride & $ff)
+            dc.w VDP_CMD_RS_AUTO_INC + ((\dataStride) & $ff)
         EndIf
-        dc.w VDP_CMD_RS_DMA_LEN_H + ((\length & $ff00) >> 8)
-        dc.w VDP_CMD_RS_DMA_LEN_L + (\length & $ff)
+        dc.w VDP_CMD_RS_DMA_LEN_H + (((\length) & $ff00) >> 8)
+        dc.w VDP_CMD_RS_DMA_LEN_L + ((\length) & $ff)
     Endm
 
 
@@ -59,9 +59,9 @@ _VDP_DMA_DEFINE_COMMAND_LIST Macro length, dataStride
 _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST Macro source, length, dataStride
         _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
         
-        dc.w VDP_CMD_RS_DMA_SRC_H + (((\source >> 1)& $7f0000) >> 16)
-        dc.w VDP_CMD_RS_DMA_SRC_M + (((\source >> 1)& $ff00) >> 8)
-        dc.w VDP_CMD_RS_DMA_SRC_L + ((\source >> 1) & $ff)
+        dc.w VDP_CMD_RS_DMA_SRC_H + ((((\source) >> 1)& $7f0000) >> 16)
+        dc.w VDP_CMD_RS_DMA_SRC_M + ((((\source) >> 1)& $ff00) >> 8)
+        dc.w VDP_CMD_RS_DMA_SRC_L + (((\source) >> 1) & $ff)
     Endm
 
 
@@ -69,7 +69,7 @@ _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST Macro source, length, dataStride
 ; Store VRAM DMA target address set command
 ; ----------------
 VDP_DMA_DEFINE_VRAM_TARGET_AS Macro target
-        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
+        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | (((\target) & $3fff) << 16) | (((\target) & $c000) >> 14)
     Endm
 
 
@@ -87,7 +87,7 @@ VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStri
 ; ----------------
 VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStride
         _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST \source, \length, \dataStride
-        dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+        dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | ((\target) << 16)
     Endm
 
 
@@ -96,7 +96,7 @@ VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStri
 ; ----------------
 VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStride
         _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST \source, \length, \dataStride
-        dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+        dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | ((\target) << 16)
     Endm
 
 
@@ -114,8 +114,8 @@ VDP_DMA_DEFINE_VRAM_FILL_COMMAND_LIST Macro target, length, dataStride
 ; ----------------
 VDP_DMA_DEFINE_VRAM_COPY_COMMAND_LIST Macro source, target, length, dataStride
         _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
-        dc.w VDP_CMD_RS_DMA_SRC_M + (((\source >> 1)& $ff00) >> 8)
-        dc.w VDP_CMD_RS_DMA_SRC_L + ((\source >> 1) & $ff)
+        dc.w VDP_CMD_RS_DMA_SRC_M + ((((\source) >> 1)& $ff00) >> 8)
+        dc.w VDP_CMD_RS_DMA_SRC_L + (((\source) >> 1) & $ff)
         VDP_DMA_DEFINE_VRAM_TARGET_AS \target
     Endm
 
@@ -130,8 +130,8 @@ VDP_DMA_DEFINE_VRAM_TRANSFER Macro source, target, length, dataStride
             dc.w 2
         EndIf
         dc.w \length
-        dc.l (\source >> 1) & $7fffff
-        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | ((\target & $3fff) << 16) | ((\target & $c000) >> 14)
+        dc.l ((\source) >> 1) & $7fffff
+        dc.l VDP_CMD_AS_VRAM_WRITE | VDP_CMD_AS_DMA | (((\target) & $3fff) << 16) | (((\target) & $c000) >> 14)
     Endm
 
 
@@ -145,8 +145,8 @@ VDP_DMA_DEFINE_CRAM_TRANSFER Macro source, target, length, dataStride
             dc.w 2
         EndIf
         dc.w \length
-        dc.l (\source >> 1) & $7fffff
-        dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+        dc.l ((\source) >> 1) & $7fffff
+        dc.l VDP_CMD_AS_CRAM_WRITE | VDP_CMD_AS_DMA | ((\target) << 16)
     Endm
 
 
@@ -160,8 +160,8 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length, dataStride
             dc.w 2
         EndIf
         dc.w \length
-        dc.l (\source >> 1) & $7fffff
-        dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | (\target << 16)
+        dc.l ((\source) >> 1) & $7fffff
+        dc.l VDP_CMD_AS_VSRAM_WRITE | VDP_CMD_AS_DMA | ((\target) << 16)
     Endm
 
 

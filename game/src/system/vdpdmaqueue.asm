@@ -20,7 +20,43 @@ VDP_DMA_QUEUE_SIZE Equ 32
 
 
 ;-------------------------------------------------
-; Queue DMA job by ref to static/predefined VDPDMATransfer
+; Queue job by VDPDMATransferCommandList
+; ----------------
+; Uses: a0-a1
+VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
+            OS_LOCK
+
+            movea.w vdpDMAQueueCurrentEntry, a1
+            cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
+            beq     .dmaQueueFull\@
+
+            If (~strcmp('\dmaTransferCommandList', 'a0'))
+                lea     \dmaTransferCommandList, a0
+            EndIf
+
+            move.l  (a0)+, (a1)+
+            move.l  (a0)+, (a1)+
+            move.l  (a0)+, (a1)+
+            move.l  (a0)+, (a1)+
+
+            move.w  a1, vdpDMAQueueCurrentEntry
+
+            If def(debug)
+                    bra .dmaQueueDone\@
+
+                .dmaQueueFull\@:
+                    DEBUG_MSG 'VDP_DMA_QUEUE_ADD_CMD_LIST: DMA Queue full'
+
+                .dmaQueueDone\@:
+            Else
+                .dmaQueueFull\@:
+            Endif
+            OS_UNLOCK
+    Endm
+
+
+;-------------------------------------------------
+; Queue DMA job by VDPDMATransfer
 ; ----------------
 ; Uses: d0/a0-a1
 VDP_DMA_QUEUE_ADD Macro dmaTransfer
@@ -56,7 +92,7 @@ VDP_DMA_QUEUE_ADD Macro dmaTransfer
                     bra .dmaQueueDone\@
 
                 .dmaQueueFull\@:
-                    DEBUG_MSG 'DMA Queue full'
+                    DEBUG_MSG 'VDP_DMA_QUEUE_ADD: DMA Queue full'
 
                 .dmaQueueDone\@:
             Else
@@ -89,9 +125,19 @@ VDPDMAQueueInit:
         move.w  #vdpDMAQueue, vdpDMAQueueCurrentEntry
         rts
 
+;-------------------------------------------------
+; Queue a DMA job by VDPDMATransferCommandList
+; ----------------
+; Input:
+; - a0: Address of the VDPDMATransferCommandList instance to queue
+; Uses: a0-a1
+VDPDMAQueueAddCommandList:
+        VDP_DMA_QUEUE_ADD_COMMAND_LIST a0
+        rts
+
 
 ;-------------------------------------------------
-; Queue a DMA job
+; Queue a DMA job by VDPDMATransfer
 ; ----------------
 ; Input:
 ; - a0: Address of the VDPDMATransfer instance to queue
