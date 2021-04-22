@@ -23,8 +23,8 @@ RomHeader:
     dcb.b 16 - strlen('\DEVICE_SUPPORT'), ' '                       ; Supported devices padding
     dc.l  $00000000                                                 ; Start address of ROM
     dc.l  RomImageEnd                                               ; End address of ROM
-    dc.l  $00ff0000                                                 ; Start address of RAM
-    dc.l  $00ffffff                                                 ; End address of RAM
+    dc.l  MEM_RAM_START                                             ; Start address of RAM
+    dc.l  MEM_RAM_END                                               ; End address of RAM
     dc.l  $00000000                                                 ; SRAM descriptor
     dc.l  $00000000                                                 ; Start address of SRAM
     dc.l  $00000000                                                 ; End address of SRAM

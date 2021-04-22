@@ -48,7 +48,6 @@ VDP_SPRITE_SIZE_H4 Equ                      $0c
         STRUCT_MEMBER.b vdpSpriteLink
         STRUCT_MEMBER.w vdpSpriteAttr3
         STRUCT_MEMBER.w vdpSpriteX
-
     DEFINE_STRUCT_END
 
     ; RAM shadow attribute table

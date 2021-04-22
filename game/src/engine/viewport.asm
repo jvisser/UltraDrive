@@ -16,7 +16,7 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
         STRUCT_MEMBER.l         viewportBackgroundTracker       ; Used to update the background camera
-        STRUCT_MEMBER.l         viewportScrollHandlerAddress    ; Used to update the VDP scroll values
+        STRUCT_MEMBER.l         viewportScrollHandler           ; Used to update the VDP scroll values
         STRUCT_MEMBER.w         viewportTrackingEntity          ; Entity to keep in view
     DEFINE_STRUCT_END
 
@@ -104,13 +104,13 @@ ViewportInit:
         ; Initialize scroll handler
         MAP_GET a1
         move.l  mapScrollHandlerAddress(a1), a1
-        move.l  a1, (viewport + viewportScrollHandlerAddress)
+        move.l  a1, (viewport + viewportScrollHandler)
         move.l  shInit(a1), a1
         lea     viewport, a0
         jsr     (a1)
 
         ; Force initial update of scroll values
-        move.l  (viewport + viewportScrollHandlerAddress), a1
+        move.l  (viewport + viewportScrollHandler), a1
         move.l  shUpdate(a1), a1
         lea     viewport, a0
         jsr     (a1)
@@ -162,7 +162,7 @@ ViewportFinalize:
         jsr     CameraFinalize
 
         ; Update scrolling
-        move.l  (viewport + viewportScrollHandlerAddress), a2
+        move.l  (viewport + viewportScrollHandler), a2
         move.l  shUpdate(a2), a2
         lea     viewport, a0
         jmp     (a2)
