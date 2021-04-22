@@ -21,12 +21,6 @@ FIXED_RATE_SCROLL_HANDLER_SHIFT Equ 2
 
 
 ;-------------------------------------------------
-; Initialize the fixedRate scroll handler. Called on engine init.
-; ----------------
-FixedRateScrollHandlerInit Equ fixedRateScrollHandlerInit
-
-
-;-------------------------------------------------
 ; Setup the correct VDP scrolling mode
 ; ----------------
 _FixedRateScrollHandlerInit:

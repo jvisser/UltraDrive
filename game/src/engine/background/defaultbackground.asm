@@ -28,7 +28,7 @@
 ; - a1: Background map address
 ; - a2: Foreground camera
 ; - d0: Background camera plane id
-; Uses: d0-d5/a3-a4
+; Uses: d0-d7/a0-a6
 _DefaultBackgroundTrackerInit:
         PUSHL   d0                                              ; Push plane id for CameraInit
 
@@ -98,7 +98,7 @@ _DefaultBackgroundTrackerInit:
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
-; Uses: d0-d3/a2
+; Uses: d0-d1
 _DefaultBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
                 moveq   #0, \result
