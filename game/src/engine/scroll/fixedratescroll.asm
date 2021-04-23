@@ -21,7 +21,7 @@ FIXED_RATE_SCROLL_HANDLER_SHIFT Equ 2
 
 
 ;-------------------------------------------------
-; Setup the correct VDP scrolling mode
+; Setup the correct VDP scroll state
 ; ----------------
 ; Input:
 ; - a0: Viewport
@@ -30,6 +30,9 @@ _FixedRateScrollHandlerInit:
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_VSCROLL_CELL
         ; Enable horizontal plane scrolling mode
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_HSCROLL_MASK
+
+        ; Setup VDP
+        bsr     _FixedRateScrollHandlerCommit
         rts
 
 
@@ -44,10 +47,10 @@ _FixedRateScrollHandlerUpdate:
         move.l  viewportForeground + camLastXDisplacement(a0), d1       ; d1 = [front X displacement]:[front Y displacement]
         or.l    d0, d1
         beq     .noMovement
-        
+
         ; Update VDP scroll values
         VDP_TASK_QUEUE_ADD #_FixedRateScrollHandlerCommit, a0
-        
+
     .noMovement:
         rts
 

@@ -109,12 +109,6 @@ ViewportInit:
         lea     viewport, a0
         jsr     (a1)
 
-        ; Force initial update of scroll values
-        move.l  (viewport + viewportScrollHandler), a1
-        move.l  shUpdate(a1), a1
-        lea     viewport, a0
-        jsr     (a1)
-
         ; Render views
         lea     (viewport + viewportBackground), a0
         jsr     CameraRenderView
