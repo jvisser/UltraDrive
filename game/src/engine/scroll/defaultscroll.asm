@@ -14,7 +14,7 @@
 
 
 ;-------------------------------------------------
-; Setup the correct VDP scrolling mode
+; Setup the correct VDP scroll state
 ; ----------------
 ; Input:
 ; - a0: Viewport
@@ -23,6 +23,9 @@ _DefaultScrollHandlerInit:
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_VSCROLL_CELL
         ; Enable plane scrolling mode
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_HSCROLL_MASK
+
+        ; Setup VDP
+        bsr     _DefaultScrollHandlerCommit
         rts
 
 
