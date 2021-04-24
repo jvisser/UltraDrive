@@ -14,8 +14,7 @@
         STRUCT_MEMBER.l mapForegroundAddress
         STRUCT_MEMBER.l mapBackgroundAddress
         STRUCT_MEMBER.l mapTilesetAddress
-        STRUCT_MEMBER.l mapBackgroundTrackerAddress
-        STRUCT_MEMBER.l mapScrollHandlerAddress
+        STRUCT_MEMBER.l mapViewportConfiguration
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Map
@@ -27,8 +26,6 @@
         STRUCT_MEMBER.w mapWidthPixels
         STRUCT_MEMBER.w mapHeightPixels
         STRUCT_MEMBER.l mapDataAddress                          ; Uncompressed
-        STRUCT_MEMBER.b mapLockHorizontal
-        STRUCT_MEMBER.b mapLockVertical
         STRUCT_MEMBER.b mapRowOffsetTable                       ; Marker
     DEFINE_STRUCT_END
 

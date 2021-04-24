@@ -12,12 +12,17 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
 ;-------------------------------------------------
 ; Viewport structures
 ; ----------------
+    DEFINE_STRUCT ViewportConfiguration
+        STRUCT_MEMBER.l                     vcBackgroundTracker             ; Used to update the background camera position
+        STRUCT_MEMBER.ScrollConfiguration   vcScrollConfiguration           ; Used to update VDP scroll values
+    DEFINE_STRUCT_END
+
     DEFINE_STRUCT Viewport
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
-        STRUCT_MEMBER.l         viewportBackgroundTracker       ; Used to update the background camera
-        STRUCT_MEMBER.l         viewportScrollHandler           ; Used to update the VDP scroll values
-        STRUCT_MEMBER.w         viewportTrackingEntity          ; Entity to keep in view
+        STRUCT_MEMBER.l         viewportBackgroundTracker                   ; Used to update the background camera
+        STRUCT_MEMBER.l         viewportVDPScrollUpdater                    ; Used to update the VDP scroll values
+        STRUCT_MEMBER.w         viewportTrackingEntity                      ; Entity to keep in view
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -92,7 +97,8 @@ ViewportInit:
 
         ; Let background tracker initialize the background camera
         MAP_GET a1
-        move.l  mapBackgroundTrackerAddress(a1), a3
+        move.l  mapViewportConfiguration(a1), a3
+        move.l  vcBackgroundTracker(a3), a3
         move.l  a3, (viewport + viewportBackgroundTracker)
         movea.l btInit(a3), a3
         lea     (viewport + viewportBackground), a0
@@ -103,11 +109,13 @@ ViewportInit:
 
         ; Initialize scroll handler
         MAP_GET a1
-        move.l  mapScrollHandlerAddress(a1), a1
-        move.l  a1, (viewport + viewportScrollHandler)
-        move.l  shInit(a1), a1
+        move.l  mapViewportConfiguration(a1), a1
+        lea     vcScrollConfiguration(a1), a1
+        move.l  scVDPScrollUpdaterAddress(a1), a2
+        move.l  a2, (viewport + viewportVDPScrollUpdater)
+        move.l  vdpsuInit(a2), a2
         lea     viewport, a0
-        jsr     (a1)
+        jsr     (a2)
 
         ; Render views
         lea     (viewport + viewportBackground), a0
@@ -156,8 +164,8 @@ ViewportFinalize:
         jsr     CameraFinalize
 
         ; Update scrolling
-        move.l  (viewport + viewportScrollHandler), a2
-        move.l  shUpdate(a2), a2
+        move.l  (viewport + viewportVDPScrollUpdater), a2
+        move.l  vdpsuUpdate(a2), a2
         lea     viewport, a0
         jmp     (a2)
 

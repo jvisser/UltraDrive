@@ -40,16 +40,20 @@
     Include './engine/map.asm'
     Include './engine/camera.asm'
     Include './engine/maprender.asm'
+    Include './engine/scroll.asm'
     Include './engine/viewport.asm'
+    Include './engine/viewportconfig.asm'
     Include './engine/tileset.asm'
     Include './engine/mapcollision.asm'
     Include './engine/background.asm'
-    Include './engine/background/defaultbackground.asm'
+    Include './engine/background/relativebackground.asm'
     Include './engine/background/staticbackground.asm'
-    Include './engine/scroll.asm'
-    Include './engine/scroll/defaultscroll.asm'
-    Include './engine/scroll/fixedratescroll.asm'
-    Include './engine/scroll/linescroll.asm'
+    Include './engine/scroll/vdpscrollshared.asm'
+    Include './engine/scroll/vdpplanescroll.asm'
+    Include './engine/scroll/plane/planescrollcamera.asm'
+    Include './engine/scroll/plane/planescrollcameradiv4.asm'
+    Include './engine/scroll/vdplinescroll.asm'
+    Include './engine/scroll/line/linescrollcamera.asm'
     Include './engine/entity.asm'
 
 
@@ -64,6 +68,7 @@
     Include 'ultradrive/metadata.asm'
     Include 'ultradrive/player.asm'
     Include 'ultradrive/main.asm'
+    Include 'ultradrive/viewportconfig.asm'
 
 
     ;-------------------------------------------------
