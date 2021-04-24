@@ -30,10 +30,8 @@
             dc.l Map[(${backgroundMapName})]
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-            ; .mapBackgroundTrackerAddress
-            dc.l [(${map.properties.getOrDefault('backgroundTracker', map.properties['background'].properties['backgroundTracker'])})]BackgroundTracker
-            ; .mapScrollHandlerAddress
-            dc.l [(${map.properties.getOrDefault('scrollType', map.properties['background'].properties['scrollType'])})]ScrollHandler
+            ; .mapViewportConfiguration
+            dc.l [(${#strings.capitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
         Even
     [/]
 
@@ -55,10 +53,6 @@
         dc.w [(${map.height * 16 * 8})]
         ; .mapDataAddress
         dc.l Map[(${mapName})]Data
-        ; .mapLockHorizontal
-        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('cameraLockHorizontal', false))})]
-        ; .mapLockVertical
-        dc.b [(${#strings.toUpperCase(map.properties.getOrDefault('cameraLockVertical', false))})]
         ; .mapRowOffsetTable
         dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
 
