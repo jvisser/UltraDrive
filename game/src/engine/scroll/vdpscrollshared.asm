@@ -5,28 +5,60 @@
 ;-------------------------------------------------
 ; Update flags
 ; ----------------
-    BIT_CONST.VDP_SCROLL_UPDATE_FOREGROUND_H   0
-    BIT_CONST.VDP_SCROLL_UPDATE_FOREGROUND_V   1
-    BIT_CONST.VDP_SCROLL_UPDATE_BACKGROUND_H   2
-    BIT_CONST.VDP_SCROLL_UPDATE_BACKGROUND_V   3
+    BIT_CONST.VDP_SCROLL_UPDATE_FOREGROUND      0
+    BIT_CONST.VDP_SCROLL_UPDATE_BACKGROUND      1
 
 
 ;-------------------------------------------------
-; Shared memory storage
+; VDPScrollUpdater shared memory
 ; ----------------
+
+    DEFINE_STRUCT VDPScrollUpdaterState
+        STRUCT_MEMBER.l   vssBackgroundScrollValueUpdateAddress
+        STRUCT_MEMBER.l   vssBackgroundScrollValueTableAddress
+        STRUCT_MEMBER.l   vssBackgroundScrollValueConfigurationAddress
+        STRUCT_MEMBER.w   vssBackgroundScrollValueCameraOffset
+        STRUCT_MEMBER.l   vssForegroundScrollValueUpdateAddress
+        STRUCT_MEMBER.l   vssForegroundScrollValueTableAddress
+        STRUCT_MEMBER.l   vssForegroundScrollValueConfigurationAddress
+        STRUCT_MEMBER.w   vssForegroundScrollValueCameraOffset
+        STRUCT_MEMBER.b   vssUpdateFlags
+    DEFINE_STRUCT_END
+
     DEFINE_VAR FAST
-        VAR.l   vssBackgroundScrollValueUpdateAddress
-        VAR.l   vssBackgroundScrollValueTableAddress
-        VAR.w   vssBackgroundScrollValueCameraOffset
-        VAR.l   vssForegroundScrollValueUpdateAddress
-        VAR.l   vssForegroundScrollValueTableAddress
-        VAR.w   vssForegroundScrollValueCameraOffset
-        VAR.b   vssUpdateFlags
+        VAR.VDPScrollUpdaterState   vsusHorizontalVDPScrollUpdaterState
+        VAR.VDPScrollUpdaterState   vsusVerticalVDPScrollUpdaterState
     DEFINE_VAR_END
 
     DEFINE_VAR SLOW
-        VAR.w   vdpScrollBuffer, 512                                ; Shared scroll value table buffer
+        VAR.w   vdpScrollBuffer,                    520                                                         ; Shared scroll value table buffer (contains space for 2x224 word line scroll buffer, 2x40 word cell scroll buffer and 4x16 word VDPDMATransferCommandList = 1040 bytes)
+        VAR.l   vdpScrollBufferAllocationPointer                                                                ; Current allocation pointer
     DEFINE_VAR_END
+
+
+;-------------------------------------------------
+; Reset all scroll buffers. Should be "called" once per viewport init.
+; ----------------
+VDP_SCROLL_UPDATER_RESET Macros
+    move.l  #vdpScrollBuffer, vdpScrollBufferAllocationPointer
+
+
+;-------------------------------------------------
+; Allocate memory from shared scroll buffer area
+; ----------------
+VDP_SCROLL_UPDATER_ALLOCATE Macro bytes, target, scratch
+        move.l  vdpScrollBufferAllocationPointer, \target
+        movea.l \target, \scratch
+        adda.w  #\bytes, \scratch
+        move.l  \scratch, vdpScrollBufferAllocationPointer
+    Endm
+
+
+;-------------------------------------------------
+; Put the address of the specified scroll table in target
+; ----------------
+VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Macros orientation, config, target
+    move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress, \target
 
 
 ;-------------------------------------------------
@@ -36,30 +68,36 @@
 ; - a0: Viewport
 ; - a1: ScrollConfiguration
 ; Uses: Uses: d0-d7/a2-a6
-VDP_SCROLL_UPDATER_INIT Macro config, scrollValueTableOffset
+VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
         PUSHM   a0-a1
 
-        lea     sc\config\ScrollUpdaterConfiguration(a1), a2        ; a2 = Scroll updater configuration address
-        move.w  svucCamera(a2), d0                                  ; d0 = Viewport camera offset
+        lea     sc\config\ScrollUpdaterConfiguration(a1), a3                                                    ; a3 = Scroll updater configuration address
+
+        ; Store scroll value updater configuration for later use
+        movea.l svucUpdaterData(a3), a2                                                                         ; a2 = Scroll value updater configuration address
+        move.l  a2, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueConfigurationAddress
 
         ; Store scroll updater camera offset for later use
-        move.w  d0, vss\config\ScrollValueCameraOffset
+        move.w  svucCamera(a3), d0                                                                              ; d0 = Viewport camera offset
+        move.w  d0, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueCameraOffset
 
-        ; Get scroll value update init routine parameters
-        lea     (a0, d0), a0                                        ; a0 = Camera address
-        lea     vdpScrollBuffer + \scrollValueTableOffset, a1       ; a1 = Scroll table address
+        ; Get camera address
+        lea     (a0, d0), a0                                                                                    ; a0 = Camera address
+
+        ; Allocate scroll table
+        VDP_SCROLL_UPDATER_ALLOCATE \scrollTableType\_Size, a1, a4
 
         ; Store scroll value table address for later use
-        move.l  a1, vss\config\ScrollValueTableAddress
+        move.l  a1, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress
 
-        move.l  svucUpdater(a2), a2                                 ; a2 = scroll updater address
+        move.l  svucUpdater(a3), a3                                                                             ; a3 = scroll updater address
 
         ; Store scroll value updater update routine address for later use
-        move.l  svuUpdate(a2), vss\config\ScrollValueUpdateAddress
+        move.l  svuUpdate(a3), vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueUpdateAddress
 
         ; Call scroll value updater: init(a0, a1)
-        move.l  svuInit(a2), a2                                     ; a2 = scroll updater init subroutine address
-        jsr     (a2)
+        move.l  svuInit(a3), a3                                                                                 ; a3 = scroll updater init subroutine address
+        jsr     (a3)
 
         POPM    a0-a1
     Endm
@@ -74,41 +112,108 @@ VDP_SCROLL_UPDATER_INIT Macro config, scrollValueTableOffset
 ; - d0: Foreground/Background update flags
 ; - ccr: Condition codes related to update flags
 ; Uses: Uses: d0-d7/a2-a6
-VDP_SCROLL_UPDATER_UPDATE Macro
+VDP_SCROLL_UPDATER_UPDATE Macro orientation
+_CALL_SCROLL_VALUE_UPDATER Macro orientation, config
+            move.w  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueCameraOffset, d0
+            lea     (a0, d0), a0                                                                                ; a0 = Camera address
+            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress, a1             ; a1 = Scroll table address
+            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueConfigurationAddress, a2     ; a2 = Scroll value updater configuration
+            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueUpdateAddress, a3            ; a3 = Scroll value update routine address
+
+            ; update(a0, a1, a2)
+            jsr     (a3)
+        Endm
+
         PUSHL   a0
 
-        move.w  vssBackgroundScrollValueCameraOffset, d0
-        lea     (a0, d0), a0                                            ; a0 = Camera address
-        move.l  vssBackgroundScrollValueTableAddress, a1                ; a1 = Scroll table address
-        move.l  vssBackgroundScrollValueUpdateAddress, a2               ; a2 = Scroll value update routine address
-
-        ; Call background scroll value updater: update(a0, a1)
-        jsr     (a2)
+        ; Call background scroll value updater
+        _CALL_SCROLL_VALUE_UPDATER \orientation, Background
 
         add.w   d0, d0
-        add.w   d0, d0
-        move.w  d0, vssUpdateFlags
+        move.w  d0, vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags
 
-        move.l  (sp), a0                                                ; a0 = viewport address
-        move.w  vssForegroundScrollValueCameraOffset, d0
-        lea     (a0, d0), a0                                            ; a0 = Camera address
-        move.l  vssForegroundScrollValueTableAddress, a1                ; a1 = Scroll table address
-        move.l  vssForegroundScrollValueUpdateAddress, a2               ; a2 = Scroll value update routine address
+        move.l  (sp), a0                                                                                        ; a0 = viewport address
 
-        ; Call foreground scroll value updater: update(a0, a1)
-        jsr     (a2)
+        ; Call foreground scroll value updater
+        _CALL_SCROLL_VALUE_UPDATER \orientation, Foreground
 
-        POPL    a0
+        POPL
 
-        move.w  vssUpdateFlags, d1
+        move.w  vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags, d1
         or.w    d1, d0
-        move.w  d0, vssUpdateFlags
+        move.w  d0, vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags
+
+        Purge _CALL_SCROLL_VALUE_UPDATER
     Endm
 
 
 ;-------------------------------------------------
-; Read update flags into the specified target location
+; Support routine for horizontal line scroll value updater implementations.
+; Fills the specified 224 word scroll buffer with a single value
+; The value gets negated before being written to allow symmetric scroll value interpretation for both vertical and horizontal scroll values at higher level code.
 ; ----------------
-VDP_SCROLL_UPDATE_FLAGS_GET Macro target
-        move.w  vssUpdateFlags, \target
-    Endm
+; Input:
+; - d0: Value to fill buffer with
+; - a0: 224 word scroll buffer address
+; Uses: d0-d1/a0-a6
+ScrollBufferFill224:
+        lea     224 * SIZE_WORD(a0), a0
+        neg.w   d0
+        move.w  d0, d2
+        swap    d0
+        move.w  d2, d0
+        move.l  d0, d1
+        move.l  d0, d2
+        move.l  d0, d3
+        move.l  d0, d4
+        move.l  d0, d5
+        move.l  d0, d6
+        move.l  d0, d7
+        movea.l d0, a1
+        movea.l d0, a2
+        movea.l d0, a3
+        movea.l d0, a4
+        movea.l d0, a5
+        movea.l d0, a6
+        Rept 224 / 28
+            movem.l d0-d7/a1-a6, -(a0)
+        Endr
+        rts
+
+
+;-------------------------------------------------
+; Support routine for horizontal cell scroll value updater implementations.
+; Fills the specified 28 word scroll buffer with a single value.
+; The value gets negated before being written to allow symmetric scroll value interpretation for both vertical and horizontal scroll values at higher level code.
+; ----------------
+; Input:
+; - d0: Value to fill buffer with
+; - a0: 28 word scroll buffer address
+; Uses: d0-d1/a0-a6
+ScrollBufferFill28:
+        neg.w   d0
+        move.w  d0, d2
+        swap    d0
+        move.w  d2, d0
+        Rept 14
+            move.l d0, (a0)+
+        Endr
+        rts
+
+
+;-------------------------------------------------
+; Support routine for vertical scroll value updater implementations.
+; Fills the specified 20 word scroll buffer with a single value
+; ----------------
+; Input:
+; - d0: Value to fill buffer with
+; - a0: 20 word scroll buffer address
+; Uses: d0-d1/a0-a6
+ScrollBufferFill20:
+        move.w  d0, d2
+        swap    d0
+        move.w  d2, d0
+        Rept 10
+            move.l d0, (a0)+
+        Endr
+        rts

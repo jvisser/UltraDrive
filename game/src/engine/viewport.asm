@@ -14,14 +14,16 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
 ; ----------------
     DEFINE_STRUCT ViewportConfiguration
         STRUCT_MEMBER.l                     vcBackgroundTracker             ; Used to update the background camera position
-        STRUCT_MEMBER.ScrollConfiguration   vcScrollConfiguration           ; Used to update VDP scroll values
+        STRUCT_MEMBER.ScrollConfiguration   vcHorizontalScrollConfiguration ; Used to update horizontal VDP scroll values
+        STRUCT_MEMBER.ScrollConfiguration   vcVerticalScrollConfiguration   ; Used to update vertical VDP scroll values
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Viewport
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
         STRUCT_MEMBER.l         viewportBackgroundTracker                   ; Used to update the background camera
-        STRUCT_MEMBER.l         viewportVDPScrollUpdater                    ; Used to update the VDP scroll values
+        STRUCT_MEMBER.l         viewportHorizontalVDPScrollUpdater          ; Used to update the horizontal VDP scroll values
+        STRUCT_MEMBER.l         viewportVerticalVDPScrollUpdater            ; Used to update the vertical VDP scroll values
         STRUCT_MEMBER.w         viewportTrackingEntity                      ; Entity to keep in view
     DEFINE_STRUCT_END
 
@@ -80,8 +82,20 @@ ViewportEngineInit:
 ; - d1: y
 ; Uses: d0-d7/a0-a6
 ViewportInit:
+_INIT_SCROLL Macro orientation
+            MAP_GET a1
+            move.l  mapViewportConfiguration(a1), a1
+            lea     vc\orientation\ScrollConfiguration(a1), a1
+            move.l  scVDPScrollUpdaterAddress(a1), a2
+            move.l  a2, (viewport + viewport\orientation\VDPScrollUpdater)
+            move.l  vdpsuInit(a2), a2
+            lea     viewport, a0
+            jsr     (a2)
+        Endm
 
         VIEWPORT_TRACK_ENTITY_END
+
+        VDP_SCROLL_UPDATER_RESET
 
         ; Initialize foreground plane camera
         MAP_GET a1
@@ -107,21 +121,17 @@ ViewportInit:
         move.l  #VDP_PLANE_B, d0
         jsr     (a3)
 
-        ; Initialize scroll handler
-        MAP_GET a1
-        move.l  mapViewportConfiguration(a1), a1
-        lea     vcScrollConfiguration(a1), a1
-        move.l  scVDPScrollUpdaterAddress(a1), a2
-        move.l  a2, (viewport + viewportVDPScrollUpdater)
-        move.l  vdpsuInit(a2), a2
-        lea     viewport, a0
-        jsr     (a2)
+        ; Initialize scroll updaters
+        _INIT_SCROLL Horizontal
+        _INIT_SCROLL Vertical
 
         ; Render views
         lea     (viewport + viewportBackground), a0
         jsr     CameraRenderView
         lea     (viewport + viewportForeground), a0
         jmp     CameraRenderView
+
+        Purge _INIT_SCROLL
 
 
 ;-------------------------------------------------
@@ -140,6 +150,13 @@ ViewportMove:
 ; ----------------
 ; Uses: d0-d7/a0-a6
 ViewportFinalize:
+_UPDATE_SCROLL Macro orientation
+            move.l  (viewport + viewport\orientation\VDPScrollUpdater), a2
+            move.l  vdpsuUpdate(a2), a2
+            lea     viewport, a0
+            jsr     (a2)
+        Endm
+
         MAP_RENDER_RESET
 
         lea     (viewport + viewportForeground), a0
@@ -163,11 +180,12 @@ ViewportFinalize:
         lea     (viewport + viewportBackground), a0
         jsr     CameraFinalize
 
-        ; Update scrolling
-        move.l  (viewport + viewportVDPScrollUpdater), a2
-        move.l  vdpsuUpdate(a2), a2
-        lea     viewport, a0
-        jmp     (a2)
+        ; Update VDP scroll tables
+        _UPDATE_SCROLL Horizontal
+        _UPDATE_SCROLL Vertical
+        rts
+
+        Purge _UPDATE_SCROLL
 
 
 ;-------------------------------------------------

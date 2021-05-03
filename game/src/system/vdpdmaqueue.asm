@@ -23,16 +23,14 @@ VDP_DMA_QUEUE_SIZE Equ 32
 ; Queue job by VDPDMATransferCommandList
 ; ----------------
 ; Uses: a0-a1
-VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
+_VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
             OS_LOCK
 
             movea.w vdpDMAQueueCurrentEntry, a1
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
             beq     .dmaQueueFull\@
 
-            If (~strcmp('\dmaTransferCommandList', 'a0'))
-                lea     \dmaTransferCommandList, a0
-            EndIf
+            _LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS \dmaTransferCommandList
 
             move.l  (a0)+, (a1)+
             move.l  (a0)+, (a1)+
@@ -54,21 +52,50 @@ VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
             OS_UNLOCK
     Endm
 
+;-------------------------------------------------
+; Queue a DMA transfer for the specified VDPDMATransferCommandList
+; ----------------
+; Uses: a0-a1
+VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
+_LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS Macro dmaTransferCommandList
+            lea \dmaTransferCommandList, a0
+        Endm
+
+        _VDP_DMA_QUEUE_ADD_COMMAND_LIST \dmaTransferCommandList
+
+        Purge _LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS
+    Endm
+
+
+;-------------------------------------------------
+; Queue a DMA transfer for the specified VDPDMATransferCommandList of which the address is stored in vdpDMATransferCommandList
+; ----------------
+; Uses: a0-a1
+VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT Macro dmaTransferCommandList
+_LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS Macro dmaTransferCommandList
+            If (~strcmp('\dmaTransferCommandList', 'a0'))
+                movea.l \dmaTransferCommandList, a0
+            EndIf
+        Endm
+
+        _VDP_DMA_QUEUE_ADD_COMMAND_LIST \dmaTransferCommandList
+
+        Purge _LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS
+    Endm
+
 
 ;-------------------------------------------------
 ; Queue DMA job by VDPDMATransfer
 ; ----------------
 ; Uses: d0/a0-a1
-VDP_DMA_QUEUE_ADD Macro dmaTransfer
+_VDP_DMA_QUEUE_ADD Macro dmaTransfer
             OS_LOCK
 
             movea.w vdpDMAQueueCurrentEntry, a1
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
             beq     .dmaQueueFull\@
 
-            If (~strcmp('\dmaTransfer', 'a0'))
-                lea     \dmaTransfer, a0
-            EndIf
+            _LOAD_DMA_TRANSFER_ADDRESS \dmaTransfer
 
             ; Write data stride
             move.b  dmaDataStride + 1(a0), vdpRegAutoInc + 1(a1)
@@ -104,6 +131,36 @@ VDP_DMA_QUEUE_ADD Macro dmaTransfer
 
 
 ;-------------------------------------------------
+; Queue a DMA transfer for the specified VDPDMATransfer
+; ----------------
+VDP_DMA_QUEUE_ADD Macro dmaTransfer
+_LOAD_DMA_TRANSFER_ADDRESS Macro dmaTransfer
+            lea \dmaTransfer, a0
+        Endm
+
+        _VDP_DMA_QUEUE_ADD \dmaTransfer
+
+        Purge _LOAD_DMA_TRANSFER_ADDRESS
+    Endm
+
+
+;-------------------------------------------------
+; Queue a DMA transfer for the specified VDPDMATransfer of which the address is stored in dmaTransfer
+; ----------------
+VDP_DMA_QUEUE_ADD_INDIRECT Macro dmaTransfer
+_LOAD_DMA_TRANSFER_ADDRESS Macro dmaTransfer
+            If (~strcmp('\dmaTransfer', 'a0'))
+                movea.l \dmaTransfer, a0
+            EndIf
+        Endm
+
+        _VDP_DMA_QUEUE_ADD \dmaTransfer
+
+        Purge _LOAD_DMA_TRANSFER_ADDRESS
+    Endm
+
+
+;-------------------------------------------------
 ; Initialize the DMA queue
 ; ----------------
 VDPDMAQueueInit:
@@ -125,6 +182,7 @@ VDPDMAQueueInit:
         move.w  #vdpDMAQueue, vdpDMAQueueCurrentEntry
         rts
 
+
 ;-------------------------------------------------
 ; Queue a DMA job by VDPDMATransferCommandList
 ; ----------------
@@ -132,7 +190,7 @@ VDPDMAQueueInit:
 ; - a0: Address of the VDPDMATransferCommandList instance to queue
 ; Uses: a0-a1
 VDPDMAQueueAddCommandList:
-        VDP_DMA_QUEUE_ADD_COMMAND_LIST a0
+        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT a0
         rts
 
 
@@ -143,7 +201,7 @@ VDPDMAQueueAddCommandList:
 ; - a0: Address of the VDPDMATransfer instance to queue
 ; Uses: d0/a0-a1
 VDPDMAQueueAdd:
-        VDP_DMA_QUEUE_ADD a0
+        VDP_DMA_QUEUE_ADD_INDIRECT a0
         rts
 
 
