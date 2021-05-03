@@ -14,28 +14,14 @@
         STRUCT_MEMBER.l dmaTarget
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT VDPDMACommandListBase
+    DEFINE_STRUCT VDPDMATransferCommandList
         STRUCT_MEMBER.w vdpRegAutoInc
         STRUCT_MEMBER.w vdpRegDMALengthHigh
         STRUCT_MEMBER.w vdpRegDMALengthLow
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT VDPDMATransferCommandListBase, EXTENDS, VDPDMACommandListBase
+        STRUCT_MEMBER.w vdpRegDMASourceHigh
         STRUCT_MEMBER.w vdpRegDMASourceMid
         STRUCT_MEMBER.w vdpRegDMASourceLow
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT VDPDMATransferCommandList, EXTENDS, VDPDMATransferCommandListBase
-        STRUCT_MEMBER.w vdpRegDMASourceHigh
         STRUCT_MEMBER.l vdpAddrDMATransferDestination
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT VDPDMACopyCommandList, EXTENDS, VDPDMATransferCommandListBase
-        STRUCT_MEMBER.l vdpAddrDMACopyDestination
-    DEFINE_STRUCT_END
-    
-    DEFINE_STRUCT VDPDMAFillCommandList, EXTENDS, VDPDMACommandListBase
-        STRUCT_MEMBER.l vdpAddrDMAFillDestination        
     DEFINE_STRUCT_END
 
 
@@ -58,7 +44,7 @@ _VDP_DMA_DEFINE_COMMAND_LIST Macro length, dataStride
 ; ----------------
 _VDP_DMA_DEFINE_TRANSFER_COMMAND_LIST Macro source, length, dataStride
         _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
-        
+
         dc.w VDP_CMD_RS_DMA_SRC_H + ((((\source) >> 1)& $7f0000) >> 16)
         dc.w VDP_CMD_RS_DMA_SRC_M + ((((\source) >> 1)& $ff00) >> 8)
         dc.w VDP_CMD_RS_DMA_SRC_L + (((\source) >> 1) & $ff)
@@ -101,22 +87,14 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStr
 
 
 ;-------------------------------------------------
-; Create static VDPDMAFillCommandList data block for VRAM fill without the fill value
+; Patch the source address in an existing VDPDMACopyCommandList
 ; ----------------
-VDP_DMA_DEFINE_VRAM_FILL_COMMAND_LIST Macro target, length, dataStride
-        _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
-        VDP_DMA_DEFINE_VRAM_TARGET_AS \target
-    Endm
-
-
-;-------------------------------------------------
-; Create static VDPDMACopyCommandList data block for VRAM copy
-; ----------------
-VDP_DMA_DEFINE_VRAM_COPY_COMMAND_LIST Macro source, target, length, dataStride
-        _VDP_DMA_DEFINE_COMMAND_LIST \length, \dataStride
-        dc.w VDP_CMD_RS_DMA_SRC_M + ((((\source) >> 1)& $ff00) >> 8)
-        dc.w VDP_CMD_RS_DMA_SRC_L + (((\source) >> 1) & $ff)
-        VDP_DMA_DEFINE_VRAM_TARGET_AS \target
+VDP_DMA_TRANSFER_COMMAND_LIST_PATCH_SOURCE Macro dmaCommandList, source
+        andi.l  #$fffffe, \source
+        lsl.l   #7, \source
+        move.b  vdpRegDMALengthLow + 1(\dmaCommandList), \source
+        ror.l   #8, \source
+        movep.l \source, vdpRegDMALengthLow + 1(\dmaCommandList)
     Endm
 
 
@@ -170,49 +148,27 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER Macro source, target, length, dataStride
 ; Uses: a0-a1
 ; ----------------
 VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
+        lea     \vdpDMATransferCommandList, a0
+        lea     MEM_VDP_CTRL, a1
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+    Endm
+
+
+;-------------------------------------------------
+; Start a DMA transfer for the specified VDPDMATransferCommandList of which the address is stored in vdpDMATransferCommandList
+; Uses: a0-a1
+; ----------------
+VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT Macro vdpDMATransferCommandList
         If (~strcmp('\vdpDMATransferCommandList', 'a0'))
-            lea     \vdpDMATransferCommandList, a0
+            movea.l \vdpDMATransferCommandList, a0
         EndIf
 
         lea     MEM_VDP_CTRL, a1
         move.l  (a0)+, (a1)
-        move.l  (a0)+, (a1)
-        move.l  (a0)+, (a1)
-        move.w  (a0)+, (a1)
-        move.w  (a0)+, (a1)
-    Endm
-
-
-;-------------------------------------------------
-; Start a DMA fill operation for the specified VDPDMAFillCommandList with the given fill value
-; Uses: a0-a1
-; ----------------
-VDP_DMA_FILL_COMMAND_LIST Macro vdpDMAFillCommandList, value
-        If (~strcmp('\vdpDMAFillCommandList', 'a0'))
-            lea     \vdpDMAFillCommandList, a0
-        EndIf
-
-        lea     MEM_VDP_CTRL, a1
-        move.w  #VDP_CMD_RS_DMA_SRC_H | DMA_SRC_H_FILL, (a1)
-        move.w  (a0)+, (a1)
-        move.l  (a0)+, (a1)
-        move.l  (a0)+, (a1)
-        move.w  \value, MEM_VDP_DATA
-    Endm
-
-
-;-------------------------------------------------
-; Start a DMA copy operation for the specified VDPDMACopyCommandList
-; Uses: a0-a1
-; ----------------
-VDP_DMA_COPY_COMMAND_LIST Macro vdpDMACopyCommandList
-        If (~strcmp('\vdpDMACopyCommandList', 'a0'))
-            lea     \vdpDMACopyCommandList, a0
-        EndIf
-
-        lea     MEM_VDP_CTRL, a1
-        move.w  #VDP_CMD_RS_DMA_SRC_H | DMA_SRC_H_COPY, (a1)
-        move.w  (a0)+, (a1)
         move.l  (a0)+, (a1)
         move.l  (a0)+, (a1)
         move.w  (a0)+, (a1)

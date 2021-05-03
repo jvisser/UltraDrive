@@ -154,7 +154,7 @@ VDPSpriteCommit:
         lea     vdpSpriteAttrTableDMATransfer, a0
         move.w  d0, dmaLength(a0)
 
-        VDP_DMA_QUEUE_ADD a0
+        VDP_DMA_QUEUE_ADD_INDIRECT a0
 
         rts
 

@@ -1,16 +1,19 @@
 patternRanges:
-    - id: "Window"              # Use complete window area for pattern data
-      startPatternId: 1408
-      endPatternId: 1471
-    - id: "PlaneA"              # Use the top half of the Plane A allocation for pattern data
+    - id: "HScrollTableToSpriteTable"
+      startPatternId: 1500
+      endPatternId: 1503
+    - id: "SpriteTableToPlaneA"
+      startPatternId: 1524
+      endPatternId: 1535
+    - id: "PlaneAToPlaneB"
       startPatternId: 1664
       endPatternId: 1791
-    - id: "PlaneB"              # Use the top half of the Plane B allocation for pattern data
+    - id: "PlaneBToVRAMEnd"
       startPatternId: 1920
       endPatternId: 2047
     - id: "Main"                # Remaining patterns go here
       startPatternId: 1
-      endPatternId: 1407
+      endPatternId: 1471
 preAllocatedPatterns:
     - patternId: 0
       pattern: "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"

@@ -3,14 +3,7 @@
 ;------------------------------------------------------------------------------------------
 
 ;-------------------------------------------------
-; Constants
-; ----------------
-    BIT_CONST.VDP_SCROLL_UPDATE_H   0                               ; Indicates horizontal scroll values have changed by scroll value updater
-    BIT_CONST.VDP_SCROLL_UPDATE_V   1                               ; Indicates vertical scroll values have changed
-
-
-;-------------------------------------------------
-; Handles updating the VDP scroll values for the viewport.
+; Handles transfering the scroll values to the VDP
 ; ----------------
     DEFINE_STRUCT VDPScrollUpdater
         STRUCT_MEMBER.l     vdpsuInit                               ; Init VDP scroll mode
@@ -19,25 +12,26 @@
 
 
 ;-------------------------------------------------
-; Handles updating the plane/cell/line scroll tables for the viewport background layer
+; Handles updating the plane/cell/line scroll tables for the viewport
 ; ----------------
     DEFINE_STRUCT ScrollValueUpdater
         STRUCT_MEMBER.l     svuInit                                 ; Init scroll table
-        STRUCT_MEMBER.l     svuUpdate                               ; Update scroll table (returns one of the VDP_SCROLL_UPDATE_* flags to indicate which values have changed)
+        STRUCT_MEMBER.l     svuUpdate                               ; Update scroll table (returns non zero if the table data has been updated)
     DEFINE_STRUCT_END
 
 
 ;-------------------------------------------------
-; Binds a specific viewport camera to scroll value updater
+; Binds the ScrollValueUpdater to a specific viewport camera and ScrollValueUpdater specific configuration data
 ; ----------------
     DEFINE_STRUCT ScrollValueUpdaterConfiguration
-        STRUCT_MEMBER.w     svucCamera                              ; Camera to bind updater to
-        STRUCT_MEMBER.l     svucUpdater                             ; Update scroll table
+        STRUCT_MEMBER.w     svucCamera                              ; Camera used to derive scroll values from
+        STRUCT_MEMBER.l     svucUpdaterData                         ; ScrollValueUpdater specific data
+        STRUCT_MEMBER.l     svucUpdater                             ; ScrollValueUpdater
     DEFINE_STRUCT_END
 
 
 ;-------------------------------------------------
-; Scroll configuration, combines VDPScrollUpdater and parallax updaters to ensure sensible configurations
+; Scroll configuration, combines VDPScrollUpdater and scroll value updaters to ensure sensible configurations
 ; ----------------
     DEFINE_STRUCT ScrollConfiguration
         STRUCT_MEMBER.l                                 scVDPScrollUpdaterAddress
