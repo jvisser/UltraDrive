@@ -273,22 +273,22 @@ _RotateVerticalCellCalculateScrollValues:
         ; ----------------
         ; RotateScrollAngleEntry[]
         rotateHorizontalLineScrollCameraAngleTable:
-            dc.l $000ab7cc, $ffffbdbf, $000a12a1, $ffffbfc5, $00097240, $ffffc1cd, $0008d6b5, $ffffc3d5
-            dc.l $0008400b, $ffffc5df, $0007ae4c, $ffffc7e9, $00072182, $ffffc9f5, $000699b6, $ffffcc02
-            dc.l $000616f2, $ffffce0f, $0005993f, $ffffd01d, $000520a5, $ffffd22c, $0004ad2d, $ffffd43c
-            dc.l $00043ede, $ffffd64d, $0003d5c1, $ffffd85e, $000371dc, $ffffda70, $00031336, $ffffdc83
-            dc.l $0002b9d6, $ffffde96, $000265c2, $ffffe0aa, $000216ff, $ffffe2bf, $0001cd94, $ffffe4d3
-            dc.l $00018984, $ffffe6e9, $00014ad5, $ffffe8ff, $0001118b, $ffffeb15, $0000ddaa, $ffffed2b
-            dc.l $0000af35, $ffffef42, $00008630, $fffff159, $0000629d, $fffff371, $00004480, $fffff588
-            dc.l $00002bd9, $fffff7a0, $000018ab, $fffff9b8, $00000af7, $fffffbd0, $000002bd, $fffffde8
-            dc.l $00000000, $00000000, $000002bd, $00000218, $00000af7, $00000430, $000018ab, $00000648
-            dc.l $00002bd9, $00000860, $00004480, $00000a78, $0000629d, $00000c8f, $00008630, $00000ea7
-            dc.l $0000af35, $000010be, $0000ddaa, $000012d5, $0001118b, $000014eb, $00014ad5, $00001701
-            dc.l $00018984, $00001917, $0001cd94, $00001b2d, $000216ff, $00001d41, $000265c2, $00001f56
-            dc.l $0002b9d6, $0000216a, $00031336, $0000237d, $000371dc, $00002590, $0003d5c1, $000027a2
-            dc.l $00043ede, $000029b3, $0004ad2d, $00002bc4, $000520a5, $00002dd4, $0005993f, $00002fe3
-            dc.l $000616f2, $000031f1, $000699b6, $000033fe, $00072182, $0000360b, $0007ae4c, $00003817
-            dc.l $0008400b, $00003a21, $0008d6b5, $00003c2b, $00097240, $00003e33, $000a12a1, $0000403b
+            dc.l $ffd80000, $ffffbdbf, $ffd92391, $ffffbfc5, $ffda49cc, $ffffc1cd, $ffdb729c, $ffffc3d5
+            dc.l $ffdc9dee, $ffffc5df, $ffddcbac, $ffffc7e9, $ffdefbc3, $ffffc9f5, $ffe02e1d, $ffffcc02
+            dc.l $ffe162a5, $ffffce0f, $ffe29947, $ffffd01d, $ffe3d1ec, $ffffd22c, $ffe50c7f, $ffffd43c
+            dc.l $ffe648ec, $ffffd64d, $ffe7871c, $ffffd85e, $ffe8c6f9, $ffffda70, $ffea086d, $ffffdc83
+            dc.l $ffeb4b63, $ffffde96, $ffec8fc5, $ffffe0aa, $ffedd57b, $ffffe2bf, $ffef1c70, $ffffe4d3
+            dc.l $fff0648d, $ffffe6e9, $fff1adbd, $ffffe8ff, $fff2f7e7, $ffffeb15, $fff442f6, $ffffed2b
+            dc.l $fff58ed3, $ffffef42, $fff6db68, $fffff159, $fff8289c, $fffff371, $fff9765b, $fffff588
+            dc.l $fffac48c, $fffff7a0, $fffc1319, $fffff9b8, $fffd61ea, $fffffbd0, $fffeb0ea, $fffffde8
+            dc.l $00000000, $00000000, $00014f16, $00000218, $00029e16, $00000430, $0003ece7, $00000648
+            dc.l $00053b74, $00000860, $000689a5, $00000a78, $0007d764, $00000c8f, $00092498, $00000ea7
+            dc.l $000a712d, $000010be, $000bbd0a, $000012d5, $000d0819, $000014eb, $000e5243, $00001701
+            dc.l $000f9b73, $00001917, $0010e390, $00001b2d, $00122a85, $00001d41, $0013703b, $00001f56
+            dc.l $0014b49d, $0000216a, $0015f793, $0000237d, $00173907, $00002590, $001878e4, $000027a2
+            dc.l $0019b714, $000029b3, $001af381, $00002bc4, $001c2e14, $00002dd4, $001d66b9, $00002fe3
+            dc.l $001e9d5b, $000031f1, $001fd1e3, $000033fe, $0021043d, $0000360b, $00223454, $00003817
+            dc.l $00236212, $00003a21, $00248d64, $00003c2b, $0025b634, $00003e33, $0026dc6f, $0000403b
 
         ; RotateScrollAngleEntry[]
         rotateVerticalCellScrollCameraAngleTable:
