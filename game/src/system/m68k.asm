@@ -49,7 +49,7 @@ POPW Macro value
 ; Read top word from stack
 ; ----------------
 PEEKW Macro value
-        move.w SIZE_WORD(sp), \value
+        move.w (sp), \value
     Endm
 
 
@@ -77,7 +77,7 @@ POPL Macro value
 ; Read top word from stack
 ; ----------------
 PEEKL Macro value
-        move.w SIZE_LONG(sp), \value
+        move.w (sp), \value
     Endm
 
 
