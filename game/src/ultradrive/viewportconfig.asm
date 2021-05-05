@@ -39,14 +39,14 @@ LineViewportConfiguration:
             ; .svucCamera
             dc.w viewportBackground
             ; .svucUpdaterData
-            dc.l planeVerticalScrollCameraDefaultConfig
+            dc.l planeVerticalScrollCameraConfig
             ; .svucUpdater
             dc.l planeScrollCamera
         ; .scForegroundScrollUpdaterConfiguration
             ; .svucCamera
             dc.w viewportForeground
             ; .svucUpdaterData
-            dc.l planeVerticalScrollCameraDefaultConfig
+            dc.l planeVerticalScrollCameraConfig
             ; .svucUpdater
             dc.l planeScrollCamera
 

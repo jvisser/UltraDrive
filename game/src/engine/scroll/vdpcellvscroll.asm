@@ -41,6 +41,9 @@ _CellVerticalVDPScrollUpdaterInit:
         ; Enable vertical cell scroll mode
         VDP_REG_SET_BITS vdpRegMode3, MODE3_VSCROLL_CELL
 
+        ; Disable column 0 to mask first 2 colum scroll bug some what
+        ;VDP_REG_SET_BITS vdpRegMode1, MODE1_DISABLE_COLUMN0
+
         ; Initialize background
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Vertical,                                       &

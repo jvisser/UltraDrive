@@ -31,14 +31,14 @@
     ; ----------------
 
     ; struct PlaneScrollCameraConfiguration
-    planeHorizontalScrollCameraDefaultConfig:
+    planeHorizontalScrollCameraConfig:
         ; .psccCameraProperty
         dc.b    camX
         ; .psccCameraValueShift
         dc.b    0
 
     ; struct PlaneScrollCameraConfiguration
-    planeVerticalScrollCameraDefaultConfig:
+    planeVerticalScrollCameraConfig:
         ; .psccCameraProperty
         dc.b    camY
         ; .psccCameraValueShift

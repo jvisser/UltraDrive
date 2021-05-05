@@ -19,8 +19,8 @@ VDP_CMD_AS_DMA              Equ $00000080   ; Or with a specific AS write comman
 ;-------------------------------------------------
 ; VDP register set commands (or with register value before writing to VDP control port)
 ; ----------------
-VDP_CMD_RS_MODE1            Equ $8000        ; Mode register #1 (Fixed to 9 bit color mode)
-VDP_CMD_RS_MODE2            Equ $8100        ; Mode register #2 (Fixed to display Mode 5)
+VDP_CMD_RS_MODE1            Equ $8000        ; Mode register #1
+VDP_CMD_RS_MODE2            Equ $8100        ; Mode register #2
 VDP_CMD_RS_MODE3            Equ $8b00        ; Mode register #3
 VDP_CMD_RS_MODE4            Equ $8c00        ; Mode register #4
 VDP_CMD_RS_PLANE_A          Equ $8200        ; Plane A table address
@@ -62,9 +62,10 @@ VDP_ADDR_SET_CONST Macro accessType, ramType, address
 ; ----------------
 
 ; Mode 1 register
-MODE1_HBLANK_ENABLE         Equ $02          ; Enable horizontal blank interrupt signal
+MODE1_HVCOUNTER_FREEZE      Equ $02          ; Freeze HV Counter on external interrupt
 MODE1_HIGH_COLOR            Equ $04          ; Mega Drive 9 bit color mode (3 otherwise)
-MODE1_HVCOUNTER_DISABLE     Equ $10          ; Disable HV Counter
+MODE1_HBLANK_ENABLE         Equ $10          ; Enable horizontal blank interrupt signal
+MODE1_DISABLE_COLUMN0       Equ $20          ; Disable the first 8 pixel column (show background color)
 
 ; Mode 2 register
 MODE2_MODE_5                Equ $04          ; Mega Drive display mode 5 (else Master System mode 4)
@@ -79,7 +80,7 @@ MODE3_HSCROLL_CELL          Equ $02          ; Per cell (8 pixels) horizontal sc
 MODE3_HSCROLL_LINE          Equ $03          ; Per line horizontal scroll mode
 MODE3_HSCROLL_MASK          Equ $03          ; Bitmask isolating HSCROLL bits
 MODE3_VSCROLL_CELL          Equ $04          ; Enable per 2 cell (16 pixels) vertical scroll mode
-MODE3_EXT_INT_ENABLE        Equ $08          ; Enable external interrupt (6800 level 2)
+MODE3_EXT_INT_ENABLE        Equ $08          ; Enable external interrupt (68000 level 2)
 
 ; Mode 4 register
 MODE4_H40_CELL              Equ $81          ; Enable horizontal 40 cell mode

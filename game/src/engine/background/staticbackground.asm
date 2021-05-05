@@ -14,7 +14,7 @@
 
 
 ;-------------------------------------------------
-; Default background tracker init implementation. Calculates the ratio between the back/foreground maps. And initializes the background camera.
+; Sets the camera size to the plane size
 ; ----------------
 ; Input:
 ; - a0: Background camera to initialize

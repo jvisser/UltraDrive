@@ -15,6 +15,9 @@
         STRUCT_MEMBER.b     msccCameraChangeProperty            ; Camera property used to detect movement
     DEFINE_STRUCT_END
 
+    ;-------------------------------------------------
+    ; Multi scroll camera ScrollValueUpdater definition
+    ; ----------------
     ; struct ScrollValueUpdater
     multiScrollCamera:
         ; .svuInit
