@@ -119,6 +119,8 @@ Main:
 
             PROFILE_CPU_START
 
+            jsr     ViewportUpdateAngle
+
             bsr     _UpdatePlayer
             bsr     _UpdateManualTilesetAnimations
 

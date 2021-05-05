@@ -31,7 +31,7 @@
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
             ; .mapViewportConfiguration
-            dc.l [(${#strings.capitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
+            dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
         Even
     [/]
 
