@@ -53,6 +53,7 @@
     Include './engine/scroll/vdpcellvscroll.asm'
     Include './engine/scroll/updaters/planescrollcamera.asm'
     Include './engine/scroll/updaters/multivaluescrollcamera.asm'
+    Include './engine/scroll/updaters/rotatescroll.asm'
     Include './engine/viewport.asm'
     Include './engine/viewportconfig.asm'
     Include './engine/tileset.asm'
@@ -70,8 +71,8 @@
     ; Code
     Include 'ultradrive/metadata.asm'
     Include 'ultradrive/player.asm'
+    Include 'ultradrive/viewport.asm'
     Include 'ultradrive/main.asm'
-    Include 'ultradrive/viewportconfig.asm'
 
 
     ;-------------------------------------------------

@@ -16,12 +16,16 @@
     DEFINE_STRUCT VDPScrollUpdaterState
         STRUCT_MEMBER.l   vssBackgroundScrollValueUpdateAddress
         STRUCT_MEMBER.l   vssBackgroundScrollValueTableAddress
+        STRUCT_MEMBER.l   vssBackgroundScrollValueStateAddress
         STRUCT_MEMBER.l   vssBackgroundScrollValueConfigurationAddress
         STRUCT_MEMBER.w   vssBackgroundScrollValueCameraOffset
+
         STRUCT_MEMBER.l   vssForegroundScrollValueUpdateAddress
         STRUCT_MEMBER.l   vssForegroundScrollValueTableAddress
+        STRUCT_MEMBER.l   vssForegroundScrollValueStateAddress
         STRUCT_MEMBER.l   vssForegroundScrollValueConfigurationAddress
         STRUCT_MEMBER.w   vssForegroundScrollValueCameraOffset
+
         STRUCT_MEMBER.b   vssUpdateFlags
     DEFINE_STRUCT_END
 
@@ -31,7 +35,14 @@
     DEFINE_VAR_END
 
     DEFINE_VAR SLOW
-        VAR.w   vdpScrollBuffer,                    520                                                         ; Shared scroll value table buffer (contains space for 2x224 word line scroll buffer, 2x40 word cell scroll buffer and 4x16 word VDPDMATransferCommandList = 1040 bytes)
+        ; Shared scroll value table buffer contains space for:
+            ; 2x224 word line scroll buffer
+            ; 2x40 word cell scroll buffer
+            ; 4x16 word VDPDMATransferCommandList
+            ; 16 word allocatable by value updaters
+            ;---------------
+            ; 1072 bytes
+        VAR.w   vdpScrollBuffer,                    536
         VAR.l   vdpScrollBufferAllocationPointer                                                                ; Current allocation pointer
     DEFINE_VAR_END
 
@@ -47,9 +58,9 @@ VDP_SCROLL_UPDATER_RESET Macros
 ; Allocate memory from shared scroll buffer area
 ; ----------------
 VDP_SCROLL_UPDATER_ALLOCATE Macro bytes, target, scratch
-        move.l  vdpScrollBufferAllocationPointer, \target
+        movea.l  vdpScrollBufferAllocationPointer, \target
         movea.l \target, \scratch
-        adda.w  #\bytes, \scratch
+        adda.w  #(((\bytes) + 1) & $fffe), \scratch
         move.l  \scratch, vdpScrollBufferAllocationPointer
     Endm
 
@@ -99,6 +110,9 @@ VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
         move.l  svuInit(a3), a3                                                                                 ; a3 = scroll updater init subroutine address
         jsr     (a3)
 
+        ; Store address of scroll value updater allocated memory for later use
+        move.l  a0, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueStateAddress
+
         POPM    a0-a1
     Endm
 
@@ -118,10 +132,11 @@ _CALL_SCROLL_VALUE_UPDATER Macro orientation, config
             lea     (a0, d0), a0                                                                                ; a0 = Camera address
             move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress, a1             ; a1 = Scroll table address
             move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueConfigurationAddress, a2     ; a2 = Scroll value updater configuration
-            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueUpdateAddress, a3            ; a3 = Scroll value update routine address
+            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueStateAddress, a3             ; a3 = Scroll value updater state address
+            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueUpdateAddress, a4            ; a3 = Scroll value update routine address
 
-            ; update(a0, a1, a2)
-            jsr     (a3)
+            ; update(a0, a1, a2, a3)
+            jsr     (a4)
         Endm
 
         PUSHL   a0

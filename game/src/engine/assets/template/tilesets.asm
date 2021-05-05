@@ -65,9 +65,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         dc.l Tileset[(${tilesetName})]ViewportAnimationTableForeground
         [# th:with="mainAllocation=${tileset.patternAllocation.getAllocationArea('Main')}"]
         ; .tsVramFreeAreaMin
-        dc.w [(${#format.format('$%04X', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
+        dc.w [(${#format.format('$%04x', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
         ; .tsVramFreeAreaMax
-        dc.w [(${#format.format('$%04X', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
+        dc.w [(${#format.format('$%04x', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
         [/]
 
     Even
@@ -82,7 +82,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]PaletteColors, 0, 64
         ; .tsColors
         Tileset[(${tilesetName})]PaletteColors:
-            [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04X', tileset.palette)}" ]
+            [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette)}" ]
                 [(${color})]
             [/]
 
@@ -260,7 +260,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     
     ; blockId -> blockMetaDataId mapping
     Tileset[(${tilesetName})]BlockMetaDataMapping:
-        [# th:each="collisionId : ${#format.formatArray('dc.w ', ', ', 16, '$%04X', tileset.blockTileset.tiles.{#this.collisionId})}"]
+        [# th:each="collisionId : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.blockTileset.tiles.{#this.collisionId})}"]
             [(${collisionId})]
         [/]
 
