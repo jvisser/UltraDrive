@@ -15,14 +15,14 @@ DefaultViewportConfiguration:
             ; .svucCamera
             dc.w viewportBackground
             ; .svucUpdaterData
-            dc.l planeHorizontalScrollCameraDefaultConfig
+            dc.l planeHorizontalScrollCameraConfig
             ; .svucUpdater
             dc.l planeScrollCamera
         ; .scForegroundScrollUpdaterConfiguration
             ; .svucCamera
             dc.w viewportForeground
             ; .svucUpdaterData
-            dc.l planeHorizontalScrollCameraDefaultConfig
+            dc.l planeHorizontalScrollCameraConfig
             ; .svucUpdater
             dc.l planeScrollCamera
     ; .vcVerticalScrollConfiguration
@@ -32,22 +32,21 @@ DefaultViewportConfiguration:
             ; .svucCamera
             dc.w viewportBackground
             ; .svucUpdaterData
-            dc.l planeVerticalScrollCameraDefaultConfig
+            dc.l planeVerticalScrollCameraConfig
             ; .svucUpdater
             dc.l planeScrollCamera
         ; .scForegroundScrollUpdaterConfiguration
             ; .svucCamera
             dc.w viewportForeground
             ; .svucUpdaterData
-            dc.l planeVerticalScrollCameraDefaultConfig
+            dc.l planeVerticalScrollCameraConfig
             ; .svucUpdater
             dc.l planeScrollCamera
 
 
 ;-------------------------------------------------
 ; Create a configuration with a static background that scrolls as a rate relative to the foreground camera. Effectively making the background repeat infinitely.
-; Speed can have one of the following values:
-; - Default: Same speed as the foreground camera movement.
+; Speed can be ommitted to scroll at the same speed as the foreground or have one of the following values:
 ; - HalfSpeed: Half speed of the foreground camera movement.
 ; - QuarterSpeed: Quarter speed of the foreground camera movement.
 ; ----------------
@@ -68,7 +67,7 @@ DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
                 ; .svucCamera
                 dc.w viewportForeground
                 ; .svucUpdaterData
-                dc.l planeHorizontalScrollCameraDefaultConfig
+                dc.l planeHorizontalScrollCameraConfig
                 ; .svucUpdater
                 dc.l planeScrollCamera
         ; .vcVerticalScrollConfiguration
@@ -85,7 +84,7 @@ DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
                 ; .svucCamera
                 dc.w viewportForeground
                 ; .svucUpdaterData
-                dc.l planeVerticalScrollCameraDefaultConfig
+                dc.l planeVerticalScrollCameraConfig
                 ; .svucUpdater
                 dc.l planeScrollCamera
     Endm
