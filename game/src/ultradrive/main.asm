@@ -98,6 +98,7 @@ Main:
 
         moveq   #0, d0
         moveq   #0, d1
+        jsr     ViewportInitAngle
         jsr     ViewportInit
         VIEWPORT_TRACK_ENTITY #player
 

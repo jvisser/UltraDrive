@@ -105,7 +105,7 @@ DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG Macro config
                 ; .svucUpdaterData
                 dc.l \config
                 ; .svucUpdater
-                dc.l rotateHorizontalLineScrollCamera
+                dc.l rotateHorizontalLineScroll
             ; .scForegroundScrollUpdaterConfiguration
                 ; .svucCamera
                 dc.w viewportForeground
@@ -122,7 +122,7 @@ DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG Macro config
                 ; .svucUpdaterData
                 dc.l \config
                 ; .svucUpdater
-                dc.l rotateVerticalCellScrollCamera
+                dc.l rotateVerticalCellScroll
             ; .scForegroundScrollUpdaterConfiguration
                 ; .svucCamera
                 dc.w viewportForeground
