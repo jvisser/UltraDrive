@@ -70,16 +70,6 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
             .clampDone\@:
         Endm
 
-        ; Store camera size for later use
-        PUSHW    d2
-        PUSHW    d3
-
-        ; Store camera size in patterns
-        lsr.w   #PATTERN_SHIFT, d2
-        lsr.w   #PATTERN_SHIFT, d3
-        move.w  d2, camWidthPatterns(a0)
-        move.w  d3, camHeightPatterns(a0)
-
         ; Associate map
         move.l  a1, camMapAddress(a0)
 
@@ -87,21 +77,19 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
 		move.l	d4, camPlaneId(a0)
 
         ; Store maximum camera bounds based on the current map
-        move.w  mapWidthPixels(a1), d2
-        move.w  mapHeightPixels(a1), d3
-        sub.w   (vdpMetrics + vdpScreenWidth), d2
-        sub.w   (vdpMetrics + vdpScreenHeight), d3
-        subq.w  #1, d2
-        subq.w  #1, d3
-        move.w  d2, camAbsoluteMaxX(a0)
-        move.w  d3, camAbsoluteMaxY(a0)
+        move.w  mapWidthPixels(a1), d5
+        move.w  mapHeightPixels(a1), d6
+        sub.w   (vdpMetrics + vdpScreenWidth), d5
+        sub.w   (vdpMetrics + vdpScreenHeight), d6
+        subq.w  #1, d5
+        subq.w  #1, d6
+        move.w  d5, camAbsoluteMaxX(a0)
+        move.w  d6, camAbsoluteMaxY(a0)
 
-        ; Clamp viewport to map
+        ; Clamp camera position to map
         _VIEWPORT_CLAMP d0, mapWidthPixels,  vdpScreenWidth
         _VIEWPORT_CLAMP d1, mapHeightPixels, vdpScreenHeight
 
-        move.w  d0, d2
-        move.w  d1, d3
         moveq   #0, d4
         move.w  d0, camX(a0)
         move.w  d1, camY(a0)
@@ -112,15 +100,34 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         _VIEWPORT_CLAMP d0, mapWidthPixels,  vdpPlaneWidth
         _VIEWPORT_CLAMP d1, mapHeightPixels, vdpPlaneHeight
 
-        ; Calculate camera min position based on VDP plane (pattern aligned)
+        ; Special case optimization: if (plane size == map size) then render full plane and effectively disable runtime map streaming
+        move.w  mapWidthPixels(a1), d5
+        swap    d5
+        move.w  mapHeightPixels(a1), d5
+        move.w  (vdpMetrics + vdpPlaneWidth), d6
+        swap    d6
+        move.w  (vdpMetrics + vdpPlaneHeight), d6
+        sub.l   d5, d6
+        bne     .skipMapPlaneOptimization
+            move.w  mapWidthPixels(a1), d2
+            move.w  mapHeightPixels(a1), d3
+    .skipMapPlaneOptimization:
+
+        ; Store camera size in patterns
+        move.w  d2, d5
+        move.w  d3, d6
+        lsr.w   #PATTERN_SHIFT, d5
+        lsr.w   #PATTERN_SHIFT, d6
+        move.w  d5, camWidthPatterns(a0)
+        move.w  d6, camHeightPatterns(a0)
+
+        ; Calculate camera min position
         andi.w  #~PATTERN_MASK, d0
         andi.w  #~PATTERN_MASK, d1
         move.w  d0, camMinX(a0)
         move.w  d1, camMinY(a0)
 
         ; Calculate camera max position
-        POPW    d3
-        POPW    d2
         sub.w   (vdpMetrics + vdpScreenWidth), d2
         sub.w   (vdpMetrics + vdpScreenHeight), d3
         add.w   d2, d0
