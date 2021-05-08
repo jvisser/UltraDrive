@@ -96,9 +96,10 @@ Main:
 
         DEBUG_MSG 'Map at index 0 loaded'
 
+        jsr     ViewportInitAngle
         moveq   #0, d0
         moveq   #0, d1
-        jsr     ViewportInitAngle
+        movea.l #NULL, a0
         jsr     ViewportInit
         VIEWPORT_TRACK_ENTITY #player
 
