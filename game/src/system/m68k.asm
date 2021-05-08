@@ -77,7 +77,7 @@ POPL Macro value
 ; Read top word from stack
 ; ----------------
 PEEKL Macro value
-        move.w (sp), \value
+        move.l (sp), \value
     Endm
 
 

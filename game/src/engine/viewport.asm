@@ -79,13 +79,13 @@ ViewportEngineInit:
 ; Initialize the viewport to point at the specified coordinates (within the bounds of the currently loaded map)
 ; ----------------
 ; Input:
+; - a0: ViewportConfiguration address. If NULL the ViewportConfiguration of the currently loaded map is used.
 ; - d0: x
 ; - d1: y
 ; Uses: d0-d7/a0-a6
 ViewportInit:
 _INIT_SCROLL Macro orientation
-            MAP_GET a1
-            move.l  mapViewportConfiguration(a1), a1
+            PEEKL   a1                                  ; a1 = current viewport configuration address
             lea     vc\orientation\ScrollConfiguration(a1), a1
             move.l  scVDPScrollUpdaterAddress(a1), a2
             move.l  a2, (viewport + viewport\orientation\VDPScrollUpdater)
@@ -98,8 +98,16 @@ _INIT_SCROLL Macro orientation
 
         VDP_SCROLL_UPDATER_RESET
 
-        ; Initialize foreground plane camera
+        ; Determine which viewport configuration to use and store in local variable
         MAP_GET a1
+        cmpa.l  #NULL, a0
+        bne     .viewportConfigurationOk
+            ; Use map's default viewport configuration if non specified
+            movea.l  mapViewportConfiguration(a1), a0
+    .viewportConfigurationOk:
+        PUSHL   a0                                      ; Store current viewport configuration address in local variable
+
+        ; Initialize foreground plane camera
         lea     (viewport + viewportForeground), a0
         movea.l mapForegroundAddress(a1), a1
         move.w  (vdpMetrics + vdpScreenWidth), d2
@@ -112,7 +120,7 @@ _INIT_SCROLL Macro orientation
 
         ; Let background tracker initialize the background camera
         MAP_GET a1
-        move.l  mapViewportConfiguration(a1), a4
+        PEEKL   a4                                      ; a4 = current viewport configuration address
         move.l  vcBackgroundTrackerConfiguration(a4), a3
         move.l  vcBackgroundTracker(a4), a4
         move.l  a4, (viewport + viewportBackgroundTracker)
@@ -126,6 +134,9 @@ _INIT_SCROLL Macro orientation
         ; Initialize scroll updaters
         _INIT_SCROLL Horizontal
         _INIT_SCROLL Vertical
+
+        ; Restore stack (remove local used to save viewport configuration)
+        POPL
 
         ; Render views
         lea     (viewport + viewportBackground), a0
