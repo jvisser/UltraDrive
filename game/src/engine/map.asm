@@ -90,5 +90,5 @@ MapLoad:
 MapUnload:
         jsr TilesetUnload
 
-        move.l #0, loadedMap
+        move.l #NULL, loadedMap
         rts
