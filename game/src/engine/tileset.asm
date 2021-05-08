@@ -243,7 +243,7 @@ TilesetUnload:
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK viewportForeground
 
         ; Clear tileset address
-        move.l  #0, loadedTileset
+        move.l  #NULL, loadedTileset
         rts
 
 

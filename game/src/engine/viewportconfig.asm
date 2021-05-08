@@ -8,6 +8,8 @@
 defaultViewportConfiguration:
     ; .vcBackgroundTracker
     dc.l relativeBackgroundTracker
+    ; .vcBackgroundTrackerConfiguration
+    dc.l relativeHorizontalVerticalBackgroundTrackerConfiguration
     ; .vcHorizontalScrollConfiguration
         ; .scVDPScrollUpdaterAddress
         dc.l planeHorizontalVDPScrollUpdater
@@ -53,6 +55,8 @@ defaultViewportConfiguration:
 DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
         ; .vcBackgroundTracker
         dc.l staticBackgroundTracker
+        ; .vcBackgroundTrackerConfiguration
+        dc.l NULL
         ; .vcHorizontalScrollConfiguration
             ; .scVDPScrollUpdaterAddress
             dc.l planeHorizontalVDPScrollUpdater
@@ -96,6 +100,8 @@ DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
 DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG Macro config
         ; .vcBackgroundTracker
         dc.l staticBackgroundTracker
+        ; .vcBackgroundTrackerConfiguration
+        dc.l NULL
         ; .vcHorizontalScrollConfiguration
             ; .scVDPScrollUpdaterAddress
             dc.l lineHorizontalVDPScrollUpdater

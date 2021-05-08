@@ -13,18 +13,19 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
 ; Viewport structures
 ; ----------------
     DEFINE_STRUCT ViewportConfiguration
-        STRUCT_MEMBER.l                     vcBackgroundTracker             ; Used to update the background camera position
-        STRUCT_MEMBER.ScrollConfiguration   vcHorizontalScrollConfiguration ; Used to update horizontal VDP scroll values
-        STRUCT_MEMBER.ScrollConfiguration   vcVerticalScrollConfiguration   ; Used to update vertical VDP scroll values
+        STRUCT_MEMBER.l                     vcBackgroundTracker                 ; Used to update the background camera position
+        STRUCT_MEMBER.l                     vcBackgroundTrackerConfiguration    ; Background tracker configuration address (if any)
+        STRUCT_MEMBER.ScrollConfiguration   vcHorizontalScrollConfiguration     ; Used to update horizontal VDP scroll values
+        STRUCT_MEMBER.ScrollConfiguration   vcVerticalScrollConfiguration       ; Used to update vertical VDP scroll values
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Viewport
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
-        STRUCT_MEMBER.l         viewportBackgroundTracker                   ; Used to update the background camera
-        STRUCT_MEMBER.l         viewportHorizontalVDPScrollUpdater          ; Used to update the horizontal VDP scroll values
-        STRUCT_MEMBER.l         viewportVerticalVDPScrollUpdater            ; Used to update the vertical VDP scroll values
-        STRUCT_MEMBER.w         viewportTrackingEntity                      ; Entity to keep in view
+        STRUCT_MEMBER.l         viewportBackgroundTracker                       ; Used to update the background camera
+        STRUCT_MEMBER.l         viewportHorizontalVDPScrollUpdater              ; Used to update the horizontal VDP scroll values
+        STRUCT_MEMBER.l         viewportVerticalVDPScrollUpdater                ; Used to update the vertical VDP scroll values
+        STRUCT_MEMBER.w         viewportTrackingEntity                          ; Entity to keep in view
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -111,15 +112,16 @@ _INIT_SCROLL Macro orientation
 
         ; Let background tracker initialize the background camera
         MAP_GET a1
-        move.l  mapViewportConfiguration(a1), a3
-        move.l  vcBackgroundTracker(a3), a3
-        move.l  a3, (viewport + viewportBackgroundTracker)
-        movea.l btInit(a3), a3
+        move.l  mapViewportConfiguration(a1), a4
+        move.l  vcBackgroundTrackerConfiguration(a4), a3
+        move.l  vcBackgroundTracker(a4), a4
+        move.l  a4, (viewport + viewportBackgroundTracker)
+        movea.l btInit(a4), a4
         lea     (viewport + viewportBackground), a0
         movea.l mapBackgroundAddress(a1), a1
         lea     (viewport + viewportForeground), a2
         move.l  #VDP_PLANE_B, d0
-        jsr     (a3)
+        jsr     (a4)
 
         ; Initialize scroll updaters
         _INIT_SCROLL Horizontal

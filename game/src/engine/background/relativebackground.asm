@@ -1,7 +1,7 @@
 ;------------------------------------------------------------------------------------------
 ; Relative background tracker implementation. Scrolls at a rate of the ratio between the background and foreground maps.
 ; Provides 3 configurations:
-; - relativeBackgroundTracker (Default): Scrolls on both axes
+; - relativeHorizontalVerticalBackgroundTrackerConfiguration: Scrolls on both axes
 ; - relativeHorizontalBackgroundTracker: Scrolls only horizontally
 ; - relativeVerticalBackgroundTracker: Scrolls only vertically
 ;------------------------------------------------------------------------------------------
@@ -22,7 +22,9 @@
         VAR.w rbtYScale
     DEFINE_VAR_END
 
-    ; Track background on both axes
+    ;-------------------------------------------------
+    ; Relative BackgroundTracker definition
+    ; ----------------
     ; struct BackgroundTracker
     relativeBackgroundTracker:
         ; .btInit
@@ -30,22 +32,20 @@
         ; .btSync
         dc.l _RelativeBackgroundTrackerSync
 
+
+    ;-------------------------------------------------
+    ; Predefined configurations
+    ; ----------------
+
+    ; Tracks both axes
     ; struct RelativeBackgroundTrackerConfiguration
-    relativeBackgroundTrackerConfiguration:
+    relativeHorizontalVerticalBackgroundTrackerConfiguration:
         ; .rbtcLockX
         dc.b FALSE
         ; .rbtcLockY
         dc.b FALSE
 
-
     ; Track background only on the horizontal axis. The vertical axis will be locked and have the same size as the background plane height.
-    ; struct BackgroundTracker
-    relativeHorizontalBackgroundTracker:
-        ; .btInit
-        dc.l _RelativeHorizontalBackgroundTrackerInit
-        ; .btSync
-        dc.l _RelativeBackgroundTrackerSync
-
     ; struct RelativeBackgroundTrackerConfiguration
     relativeHorizontalBackgroundTrackerConfiguration:
         ; .rbtcLockX
@@ -53,39 +53,13 @@
         ; .rbtcLockY
         dc.b TRUE
 
-
     ; Track background only on the vertical axis. The horizontal axis will be locked and have the same size as the background plane width.
-    ; struct BackgroundTracker
-    relativeVerticalBackgroundTracker:
-        ; .btInit
-        dc.l _RelativeVerticalBackgroundTrackerInit
-        ; .btSync
-        dc.l _RelativeBackgroundTrackerSync
-
     ; struct RelativeBackgroundTrackerConfiguration
     relativeVerticalBackgroundTrackerConfiguration:
         ; .rbtcLockX
         dc.b TRUE
         ; .rbtcLockY
         dc.b FALSE
-
-
-;-------------------------------------------------
-; Per configuration initializers... see __RelativeBackgroundTrackerInit for details
-; ----------------
-_RelativeBackgroundTrackerInit:
-    lea     relativeBackgroundTrackerConfiguration, a3
-    jmp     __RelativeBackgroundTrackerInit
-
-
-_RelativeHorizontalBackgroundTrackerInit:
-    lea     relativeHorizontalBackgroundTrackerConfiguration, a3
-    jmp     __RelativeBackgroundTrackerInit
-
-
-_RelativeVerticalBackgroundTrackerInit:
-    lea     relativeVerticalBackgroundTrackerConfiguration, a3
-    jmp     __RelativeBackgroundTrackerInit
 
 
 ;-------------------------------------------------
@@ -98,7 +72,7 @@ _RelativeVerticalBackgroundTrackerInit:
 ; - a3: Tracker configuration
 ; - d0: Background camera plane id
 ; Uses: d0-d7/a0-a6
-__RelativeBackgroundTrackerInit:
+_RelativeBackgroundTrackerInit:
         PUSHL   d0                                              ; Push plane id for CameraInit
 
         moveq   #0, d0
