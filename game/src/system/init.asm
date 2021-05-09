@@ -8,11 +8,11 @@
 SysInit:
         jsr MemInit ; Must be called first (Clears all memory)
 
-        jsr IOInit
+        jsr VDPInit
         jsr VDPDMAQueueInit
         jsr VDPTaskQueueInit
-        jsr VDPInit
         jsr VDPSpriteInit
+        jsr IOInit
         jsr OSInit
 
         ; Prepare cpu for processing once all sub systems have been initialized (ie proper handlers are setup)
