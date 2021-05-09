@@ -23,6 +23,7 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.Camera    viewportBackground
         STRUCT_MEMBER.Camera    viewportForeground
         STRUCT_MEMBER.l         viewportBackgroundTracker                       ; Used to update the background camera
+        STRUCT_MEMBER.l         viewportBackgroundTrackerConfiguration
         STRUCT_MEMBER.l         viewportHorizontalVDPScrollUpdater              ; Used to update the horizontal VDP scroll values
         STRUCT_MEMBER.l         viewportVerticalVDPScrollUpdater                ; Used to update the vertical VDP scroll values
         STRUCT_MEMBER.w         viewportTrackingEntity                          ; Entity to keep in view
@@ -121,8 +122,9 @@ _INIT_SCROLL Macro orientation
         ; Let background tracker initialize the background camera
         MAP_GET a1
         PEEKL   a4                                      ; a4 = current viewport configuration address
-        move.l  vcBackgroundTrackerConfiguration(a4), a3
-        move.l  vcBackgroundTracker(a4), a4
+        movea.l vcBackgroundTrackerConfiguration(a4), a3
+        move.l  a3, (viewport + viewportBackgroundTrackerConfiguration)
+        movea.l vcBackgroundTracker(a4), a4
         move.l  a4, (viewport + viewportBackgroundTracker)
         movea.l btInit(a4), a4
         lea     (viewport + viewportBackground), a0
@@ -183,11 +185,12 @@ _UPDATE_SCROLL Macro orientation
         jsr     CameraFinalize
 
         ; Let the background tracker update the background camera
-        movea.l (viewport + viewportBackgroundTracker), a2
-        movea.l btSync(a2), a2
+        movea.l (viewport + viewportBackgroundTracker), a3
+        movea.l btSync(a3), a3
         lea     (viewport + viewportBackground), a0
         lea     (viewport + viewportForeground), a1
-        jsr     (a2)
+        movea.l (viewport + viewportBackgroundTrackerConfiguration), a2
+        jsr     (a3)
 
         ; Finalize background camera
         lea     (viewport + viewportBackground), a0

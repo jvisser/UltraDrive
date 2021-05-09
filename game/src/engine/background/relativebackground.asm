@@ -16,8 +16,6 @@
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
-        VAR.b rbtLockX                                          ; Lock horizontal movement
-        VAR.b rbtLockY                                          ; Lock vertical movement
         VAR.w rbtXScale                                         ; Ratios fractional part (16:16 fixedpoint)
         VAR.w rbtYScale
     DEFINE_VAR_END
@@ -69,7 +67,7 @@
 ; - a0: Background camera to initialize
 ; - a1: Background map address
 ; - a2: Foreground camera
-; - a3: Tracker configuration
+; - a3: RelativeBackgroundTrackerConfiguration
 ; - d0: Background camera plane id
 ; Uses: d0-d7/a0-a6
 _RelativeBackgroundTrackerInit:
@@ -104,7 +102,7 @@ _RelativeBackgroundTrackerInit:
 
         ; Update initial camera position
         moveq   #0, d0
-        move.b   rbtcLockX(a3), rbtLockX
+        tst.b   rbtcLockX(a3)
         bne     .horizontallyLocked
         move.w  camX(a2), d0
         mulu    d2, d0
@@ -117,7 +115,7 @@ _RelativeBackgroundTrackerInit:
     .horizontalSetupDone:
 
         moveq   #0, d1
-        move.b   rbtcLockY(a3), rbtLockY
+        tst.b   rbtcLockY(a3)
         bne     .verticallyLocked
         move.w  camY(a2), d1
         mulu    d3, d1
@@ -141,11 +139,12 @@ _RelativeBackgroundTrackerInit:
 ; Input:
 ; - a0: Background camera
 ; - a1: Foreground camera
+; - a2: RelativeBackgroundTrackerConfiguration
 ; Uses: d0-d1
 _RelativeBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
                 moveq   #0, \result
-                tst.b   \lock
+                tst.b   \lock(a2)
                 bne     .noMovement\@
                 move.w  \scale, \result
                 muls    \position(a1), \result
@@ -155,8 +154,8 @@ _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
             .noMovement\@:
         Endm
 
-        _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, rbtXScale, rbtLockX
-        _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, rbtYScale, rbtLockY
+        _MOVE_CAMERA_COMPONENT d0, camX, camXDisplacement, rbtXScale, rbtcLockX
+        _MOVE_CAMERA_COMPONENT d1, camY, camXDisplacement, rbtYScale, rbtcLockY
 
         CAMERA_MOVE d0, d1
 
