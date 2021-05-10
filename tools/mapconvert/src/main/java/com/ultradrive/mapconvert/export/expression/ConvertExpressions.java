@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.ultradrive.mapconvert.common.ByteIterableInputStream;
 import com.ultradrive.mapconvert.processing.tileset.block.image.TilesetImageColor;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -74,18 +75,23 @@ public class ConvertExpressions
         return hex("", value);
     }
 
-    public TilesetImageColor color(Number rgb)
+    public TilesetImageColor tilesetColor(Number rgb)
     {
         return new TilesetImageColor(rgb.intValue());
     }
 
-    public TilesetImageColor color(String prefix, String hexRgb)
+    public TilesetImageColor tilesetColor(String prefix, String hexRgb)
     {
-        return color(hex(prefix, hexRgb));
+        return tilesetColor(hex(prefix, hexRgb));
     }
 
-    public TilesetImageColor color(String hexRgb)
+    public TilesetImageColor tilesetColor(String hexRgb)
     {
-        return color(hex(hexRgb));
+        return tilesetColor(hex(hexRgb));
+    }
+
+    public TilesetImageColor tilesetColor(Color awtColor)
+    {
+        return tilesetColor(awtColor.getRGB());
     }
 }

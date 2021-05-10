@@ -31,7 +31,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
     ; Chunk reference structure
     BIT_MASK.CHUNK_REF_INDEX            0,  10
     BIT_CONST.CHUNK_REF_EMPTY           10                                      ; Chunk contains no graphic data
-    BIT_MASK.CHUNK_REF_ORIENTATION      11,   2
+    BIT_MASK.CHUNK_REF_ORIENTATION      11, 2
     BIT_CONST.CHUNK_REF_HFLIP           11
     BIT_CONST.CHUNK_REF_VFLIP           12
     BIT_CONST.CHUNK_REF_COLLISION       13
@@ -39,7 +39,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
     ; Block reference structure
     BIT_MASK.BLOCK_REF_INDEX            0,  10
     BIT_CONST.BLOCK_REF_EMPTY           10                                      ; Block contains no graphic data
-    BIT_MASK.BLOCK_REF_ORIENTATION      11,   2
+    BIT_MASK.BLOCK_REF_ORIENTATION      11, 2
     BIT_CONST.BLOCK_REF_HFLIP           11
     BIT_CONST.BLOCK_REF_VFLIP           12
     BIT_CONST.BLOCK_REF_SOLID_TOP       13
@@ -65,6 +65,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
         STRUCT_MEMBER.l tsBlocksAddress                                         ; Compressed
         STRUCT_MEMBER.l tsPatternSectionsTableAddress                           ; Compressed (modular)
         STRUCT_MEMBER.l tsPaletteAddress                                        ; Uncompressed
+        STRUCT_MEMBER.l tsAlternativePaletteAddress                             ; Uncompressed
         STRUCT_MEMBER.l tsAnimationsTableAddress                                ; Uncompressed
         STRUCT_MEMBER.l tsViewportBackgroundAnimationsAddress                   ; Uncompressed
         STRUCT_MEMBER.l tsViewportForegroundAnimationsAddress                   ; Uncompressed
@@ -157,27 +158,31 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 
 
 ;-------------------------------------------------
+; Get tileset address
+; ----------------
+TILESET_GET Macros target
+        movea.l loadedTileset, \target
+
+
+;-------------------------------------------------
 ; Get block meta data mapping for current tileset
 ; ----------------
-TILESET_GET_META_DATA_MAPPING Macro target
+TILESET_GET_META_DATA_MAPPING Macros target
         movea.l tilesetMetaDataMapping, \target
-    Endm
 
 
 ;-------------------------------------------------
 ; Get tileset block collision data base address
 ; ----------------
-TILESET_GET_COLLISION_DATA Macro target
+TILESET_GET_COLLISION_DATA Macros target
         movea.l tilesetCollisionData, \target
-    Endm
 
 
 ;-------------------------------------------------
 ; Get tileset block angle data base address
 ; ----------------
-TILESET_GET_ANGLE_DATA Macro target
+TILESET_GET_ANGLE_DATA Macros target
         movea.l tilesetCollisionData, \target
-    Endm
 
 
 ;-------------------------------------------------

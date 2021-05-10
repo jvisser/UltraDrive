@@ -37,9 +37,8 @@
 ;-------------------------------------------------
 ; Get loaded map address in target
 ; ----------------
-MAP_GET Macro target
+MAP_GET Macros target
         movea.l loadedMap, \target
-    Endm
 
 
 ;-------------------------------------------------

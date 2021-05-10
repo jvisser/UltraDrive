@@ -1,7 +1,9 @@
 package com.ultradrive.mapconvert.processing.tileset.block.image;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -21,6 +23,11 @@ public class TilesetImagePalette implements Iterable<TilesetImageColor>
                 .collect(toUnmodifiableList());
     }
 
+    private TilesetImagePalette(ArrayList<TilesetImageColor> colors) // F'n type erasure
+    {
+        this.colors = colors;
+    }
+
     @Override
     @Nonnull
     public Iterator<TilesetImageColor> iterator()
@@ -31,6 +38,13 @@ public class TilesetImagePalette implements Iterable<TilesetImageColor>
     public TilesetImageColor getColor(int index)
     {
         return colors.get(index);
+    }
+
+    public TilesetImagePalette blend(TilesetImageColor color, float amount)
+    {
+        return new TilesetImagePalette(colors.stream()
+                                               .map(sourceColor -> sourceColor.blend(color, amount))
+                                               .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     public int getSize()
