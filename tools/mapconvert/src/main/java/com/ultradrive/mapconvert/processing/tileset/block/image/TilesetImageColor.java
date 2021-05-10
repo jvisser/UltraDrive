@@ -38,6 +38,25 @@ public class TilesetImageColor implements Packable
         this.rgb = rgb;
     }
 
+    public TilesetImageColor blend(TilesetImageColor color, float ratio)
+    {
+        float thisRatio = 1.0f - ratio;
+
+        int ra = (rgb >> 16) & 0xff;
+        int ga = (rgb >> 8) & 0xff;
+        int ba = rgb & 0xff;
+
+        int rb = (color.rgb >> 16) & 0xff;
+        int gb = (color.rgb >> 8) & 0xff;
+        int bb = color.rgb & 0xff;
+
+        int r = (int)((ra * thisRatio) + (rb * ratio));
+        int g = (int)((ga * thisRatio) + (gb * ratio));
+        int b = (int)((ba * thisRatio) + (bb * ratio));
+
+        return new TilesetImageColor((r << 16) | (g << 8) | b);
+    }
+
     public int getRGB()
     {
         return rgb;

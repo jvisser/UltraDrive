@@ -15,10 +15,10 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS 
 ; ----------------
     SECTION_START S_RODATA
 
-[# th:each="tileset : ${tilesets}" 
-    th:with="tilesetName=${#strings.capitalize(tileset.name)}, 
-             maxModuleSize=${0x6c00}, 
-             collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)}, 
+[# th:each="tileset : ${tilesets}"
+    th:with="tilesetName=${#strings.capitalize(tileset.name)},
+             maxModuleSize=${0x6c00},
+             collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)},
              animationsByScheduler=${#collection.groupBy({'animationScheduler'}, tileset.animations)},
              videoAnimations=${#collection.groupOf({'videoRefresh'}, animationsByScheduler)},
              viewportAnimationsByCamera=${
@@ -57,6 +57,8 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         dc.l Tileset[(${tilesetName})]PatternSectionsTable
         ; .tsPaletteAddress
         dc.l Tileset[(${tilesetName})]PaletteData
+        ; .tsAlternativePaletteAddress
+        dc.l [(${tileset.properties['waterColor'] != null ? ('Tileset' + tilesetName + 'AlternativePaletteData') : ('NULL')})]
         ; .tsAnimationsTableAddress
         dc.l Tileset[(${tilesetName})]AnimationsTable
         ; .tsViewportBackgroundAnimationsAddress
@@ -64,10 +66,10 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         ; .tsViewportForegroundAnimationsAddress
         dc.l Tileset[(${tilesetName})]ViewportAnimationTableForeground
         [# th:with="mainAllocation=${tileset.patternAllocation.getAllocationArea('Main')}"]
-        ; .tsVramFreeAreaMin
-        dc.w [(${#format.format('$%04x', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
-        ; .tsVramFreeAreaMax
-        dc.w [(${#format.format('$%04x', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
+            ; .tsVramFreeAreaMin
+            dc.w [(${#format.format('$%04x', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
+            ; .tsVramFreeAreaMax
+            dc.w [(${#format.format('$%04x', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
         [/]
 
     Even
@@ -87,6 +89,27 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
             [/]
 
     Even
+
+
+    [# th:with="alternativePaletteTargetColor=${tileset.properties['waterColor']}"]
+        [# th:if="${alternativePaletteTargetColor != null}"]
+
+            ;-------------------------------------------------
+            ; Tileset [(${tilesetName})] alternative palette
+            ; ----------------
+            ; struct TilesetPalette
+            Tileset[(${tilesetName})]AlternativePaletteData:
+                ; .tsPaletteDMATransferCommandList
+                VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]AlternativePaletteColors, 0, 64
+                ; .tsColors
+                Tileset[(${tilesetName})]AlternativePaletteColors:
+                    [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette.blend(#convert.tilesetColor(alternativePaletteTargetColor), 0.5f))}" ]
+                        [(${color})]
+                    [/]
+
+            Even
+        [/]
+    [/]
 
     ;-------------------------------------------------
     ; Tileset [(${tilesetName})] chunk/block data
@@ -185,9 +208,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
     ; Viewport based animation definitions
     [# th:each="viewportCameraKey : ${viewportAnimationsByCamera.keySet()}"
-        th:with="viewportCamera=${#strings.capitalize(viewportCameraKey.{^ true}[0])}, 
+        th:with="viewportCamera=${#strings.capitalize(viewportCameraKey.{^ true}[0])},
                  viewportAnimationGroups=${#collection.groupBy({'animationShift', 'animationAxis'}, viewportAnimationsByCamera[viewportCameraKey]).values()}"]
-        
+
         ; struct TilesetViewportAnimations
         Tileset[(${tilesetName})]ViewportAnimationTable[(${viewportCamera})]:
             ; .tsvpAnimationsGroupCount
@@ -198,13 +221,13 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
             [# th:each="animationGroup, iter : ${viewportAnimationGroups}" th:with="animationGroupProperties=${animationGroup[0].properties}"]
                 dc.l Tileset[(${tilesetName})]ViewportAnimationGroup[(${viewportCamera})][(${iter.index})]
             [/]
-            
+
             [# th:each="animationGroup, iter : ${viewportAnimationGroups}" th:with="animationGroupProperties=${animationGroup[0].properties}"]
 
                 Even
-            
+
                 ALLOC_VIEW_PORT_ANIMATION_GROUP_STATE
-            
+
                 ; struct TilesetViewportAnimationGroup
                 Tileset[(${tilesetName})]ViewportAnimationGroup[(${viewportCamera})][(${iter.index})]:
                     ; .tsvpAnimationGroupCameraProperty
@@ -223,10 +246,10 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
                     [/]
             [/]
     [/]
-    
+
     ; Per animation frame DMA transfers definitions
     [# th:each="animation : ${tileset.animations}"]
-    
+
         Even
 
         ; [(${animation.animationId})] frame DMA transfer list
@@ -234,9 +257,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         [# th:each="animationFrameRef : ${animation.animationFrameReferences}"]
             dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]
         [/]
-        
-        Even    
-        
+
+        Even
+
         ; [(${animation.animationId})] frame DMA transfer definitions
         [# th:each="animationFrameRef : ${#sets.toSet(animation.animationFrameReferences)}"]
         Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]:
@@ -257,7 +280,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     ;-------------------------------------------------
     ; Tileset [(${tilesetName})] block meta data mapping
     ; ----------------
-    
+
     ; blockId -> blockMetaDataId mapping
     Tileset[(${tilesetName})]BlockMetaDataMapping:
         [# th:each="collisionId : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.blockTileset.tiles.{#this.collisionId})}"]
