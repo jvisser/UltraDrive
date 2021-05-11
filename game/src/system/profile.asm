@@ -19,7 +19,7 @@ PROFILE_FRAME_TIME Macro color
 PROFILE_FRAME_TIME_END Macro
         If (def(debug))
             VDP_ADDR_SET WRITE, CRAM, $00
-            move.w  #0, MEM_VDP_DATA
+            move.w  #0, MEM_VDP_DATA            ; Don't use the clr instruction in this case, will cause a freeze die to the weird read-modify-write bus cycle of clr. The read will freeze as the dataport is in write mode.
         EndIf
     Endm
 

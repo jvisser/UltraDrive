@@ -408,7 +408,7 @@ TilesetSchedule:
 ; - a0: Animation schedule
 _TilesetAnimationStart:
         ; Reset the current frame and register animation frame callback
-        move.w  #0, tsAnimationCurrentFrame(a0)
+        clr.w   tsAnimationCurrentFrame(a0)
         move.l  #_TilesetAnimationFrame, tsAnimationTriggerCallback(a0)
 
         ; Run the initial frame immediately
