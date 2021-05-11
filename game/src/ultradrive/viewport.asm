@@ -17,22 +17,17 @@ tilingBackgroundViewportConfiguration:
 ; Static rotating background
 ; ----------------
 rotatingBackgroundViewportConfiguration:
-    DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG rotationConfiguration
+    DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG rotateScrollConfiguration
 
     DEFINE_VAR FAST
         VAR.w                           currentRotationAngle
-        VAR.RotateScrollConfiguration   rotationConfiguration
+        VAR.RotateScrollPosition        rotationPosition
     DEFINE_VAR_END
 
-    INIT_STRUCT rotationConfiguration
-        INIT_STRUCT_MEMBER.rsccHorizontalOffset                 0
-        INIT_STRUCT_MEMBER.rsccVerticalOffset                   0
-        INIT_STRUCT_MEMBER.rsccAngle                            0
-        INIT_STRUCT_MEMBER.rsccHorizontalScrollTableAddress     horizontalViewportAngleTable
-        INIT_STRUCT_MEMBER.rsccVerticalScrollTableAddress       verticalViewportAngleTable
-    INIT_STRUCT_END
-
-    Even
+    rotateScrollConfiguration:
+        dc.l    rotationPosition
+        dc.l    horizontalViewportAngleTable
+        dc.l    verticalViewportAngleTable
 
     horizontalViewportAngleTable:
         DEFINE_ROTATE_SCROLL_CENTER_HORIZONTAL_ANGLE_TABLE
@@ -41,9 +36,14 @@ rotatingBackgroundViewportConfiguration:
         DEFINE_ROTATE_SCROLL_CENTER_VERTICAL_ANGLE_TABLE
 
     ;-------------------------------------------------
-    ; Setup default values for rotationConfiguration
+    ; Setup default values for rotationPosition
     ; ----------------
-ViewportInitAngle Equ rotationConfigurationInit
+    ViewportInitAngle:
+            moveq   #0, d0
+            move.w  d0, (rotationPosition + rsapAngle)
+            move.w  d0, (rotationPosition + rsapHorizontalOffset)
+            move.w  d0, (rotationPosition + rsapVerticalOffset)
+            rts
 
     ;-------------------------------------------------
     ; Next viewport angle
@@ -59,5 +59,5 @@ ViewportInitAngle Equ rotationConfigurationInit
             move.w  (a0, d0), d0
             asr.w   #3, d0
             addi.w  #32, d0
-            move.b  d0, rotationConfiguration + rsccAngle
+            move.w  d0, rotationPosition + rsapAngle
             rts
