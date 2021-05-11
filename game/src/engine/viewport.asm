@@ -63,7 +63,7 @@ VIEWPORT_TRACK_ENTITY Macro entity
 ; Stop entity tracking
 ; ----------------
 VIEWPORT_TRACK_ENTITY_END Macro
-        move.w  #0, (viewport + viewportTrackingEntity)
+        clr.w  (viewport + viewportTrackingEntity)
     Endm
 
 

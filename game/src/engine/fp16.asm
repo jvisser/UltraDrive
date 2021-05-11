@@ -7,7 +7,7 @@
 ; ----------------
 INT_TO_FP16 Macro int
         swap    \int
-        move.w  #0, \int
+        clr.w   \int
     Endm
 
 

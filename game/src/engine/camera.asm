@@ -199,7 +199,7 @@ _UPDATE_POSITION Macro maxPosition, displacement
                 ble     .camOk\@
 
                 ; Camera position > max: Reset displacement and set camera position to max
-                move.w  #0, \displacement(a0)
+                clr.w   \displacement(a0)
                 move.w  \maxPosition(a0), d1
                 bra     .camOk\@
 
