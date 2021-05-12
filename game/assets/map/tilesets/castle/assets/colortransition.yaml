@@ -1,0 +1,7 @@
+# First palette only
+colorTransition:    # Contains indices of color triplets to transfer per screen line
+    - 0
+    - 12
+    - 3
+    - 6
+    - 9

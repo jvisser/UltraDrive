@@ -1,7 +1,5 @@
 # UltraDrive
 
-_DISCONTINUED_
-
 Project to learn how and also how not to implement a game engine for the [Sega Mega Drive/Genesis](https://en.wikipedia.org/wiki/Sega_Genesis).
 The program consists of a test case for all implemented features.
 
@@ -27,6 +25,8 @@ The following features have been implemented:
 - 3 and 6 button controller support on both controller ports
 - Independent camera with map streaming support for foreground and background
     - Background behavior can be configured in the map editor (Tiled)
+- Support for raster effects
+- Support for all horizontal and vertical scroll modes
 - 2 working tilesets
 
 ## How to run
@@ -65,6 +65,8 @@ This produces a ROM image `ultradrive.bin` which can be loaded in an emulator th
 - **button a**: press to initiate manually triggered tileset animations
 - **button b**: hold to disable collision detection
 - **button c**: hold to move fast
+- **button x**: move water level up
+- **button y**: move water level down
 
 ## Example
 ![UltraDrive test map running in BlastEm](ultradrive.gif)

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.5" tiledversion="1.5.0" name="Chunks" tilewidth="128" tileheight="128" tilecount="384" columns="16">
+<tileset version="1.5" tiledversion="1.6.0" name="Chunks" tilewidth="128" tileheight="128" tilecount="384" columns="16">
  <properties>
-  <property name="waterColor" type="color" value="#ffff00ff"/>
+  <property name="colorTransitionTable" type="file" value="assets/colortransition.yaml"/>
+  <property name="waterColor" type="color" value="#ff3400ce"/>
  </properties>
  <image source="chunks.tmx" width="2048" height="3072"/>
  <tile id="0" type="Chunk"/>

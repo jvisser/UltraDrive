@@ -15,6 +15,9 @@
         VAR.l cvsPlaneAScrollDMATransferCommandListAddress
     DEFINE_VAR_END
 
+    ;-------------------------------------------------
+    ; Vertical cell VDPScrollUpdater
+    ; ----------------
     ; struct VDPScrollUpdater
     cellVerticalVDPScrollUpdater:
         ; .vdpsuInit

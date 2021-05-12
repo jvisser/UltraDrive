@@ -29,7 +29,7 @@
 ;-------------------------------------------------
 ; Aliases
 ; ----------------
-VBlankInterruptHandler  Equ OSPrepareNextFrame
+VBlankInterruptHandler  Equ OSPrepareNextFrame              ; Patch address for 68k vector table
 OSInit                  Equ osContextInit
 
 
@@ -37,20 +37,27 @@ OSInit                  Equ osContextInit
 ; Prepare for next frame (Vint handler)
 ; ----------------
 OSPrepareNextFrame:
-        PUSH_CONTEXT
+        PUSH_USER_CONTEXT
 
         tst.w   (osContext + osFrameReady)
         beq     .notReady
 
-        clr.w   (osContext + osFrameReady)
-        addq.l  #1, (osContext + osFramesProcessed)
+            clr.w   (osContext + osFrameReady)
+            addq.l  #1, (osContext + osFramesProcessed)
 
-        jsr     VDPDMAQueueFlush
-        jsr     VDPTaskQueueProcess
-        jsr     IOUpdateDeviceState
+            ; Update VDP
+            jsr     VDPTaskQueueProcess
+            jsr     VDPDMAQueueFlush
 
-        movea.l  (osContext + osFrameProcessedCallback), a0
-        jsr     (a0)
+            ; Call RasterEffect.setupFrame()
+            jsr     _RasterEffectSetupFrame
+
+            ; Update input devices
+            jsr     IOUpdateDeviceState
+
+            ; Call frame processed callback
+            movea.l  (osContext + osFrameProcessedCallback), a0
+            jsr     (a0)
 
         bra     .done
 
@@ -59,9 +66,11 @@ OSPrepareNextFrame:
 
         addq.l  #1, (osContext + osFramesSkipped)
 
+        ; Call RasterEffect.setupFrame(). Always setup raster effects even on frame skip.
+        jsr     _RasterEffectSetupFrame
     .done:
 
-        POP_CONTEXT
+        POP_USER_CONTEXT
         rte
 
 
@@ -127,8 +136,10 @@ OSSetFrameProcessedCallback:
 ;-------------------------------------------------
 ; Wait until next frame is ready to be processed
 ; ----------------
-; Uses: d0
 OSNextFrameReadyWait:
+        ; Call RasterEffect.prepareNextFrame()
+        jsr _RasterEffectPrepareNextFrame
+
         OS_LOCK
 
         ; Mark frame as ready for processing

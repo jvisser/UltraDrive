@@ -22,8 +22,9 @@
     Include './system/vdp.asm'
     Include './system/exception.asm'
     Include './system/os.asm'
-    Include './system/vdpdma.asm'
     Include './system/vdptaskqueue.asm'
+    Include './system/rasterfx.asm'
+    Include './system/vdpdma.asm'
     Include './system/vdpdmaqueue.asm'
     Include './system/vdpsprite.asm'
     Include './system/init.asm'
@@ -57,6 +58,7 @@
     Include './engine/viewport.asm'
     Include './engine/viewportconfig.asm'
     Include './engine/tileset.asm'
+    Include './engine/rasterfx/paletteswaprasterfx.asm'
     Include './engine/mapcollision.asm'
     Include './engine/entity.asm'
 
@@ -72,6 +74,7 @@
     Include 'ultradrive/metadata.asm'
     Include 'ultradrive/player.asm'
     Include 'ultradrive/viewport.asm'
+    Include 'ultradrive/water.asm'
     Include 'ultradrive/main.asm'
 
 

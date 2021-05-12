@@ -12,10 +12,12 @@ SysInit:
         jsr VDPDMAQueueInit
         jsr VDPTaskQueueInit
         jsr VDPSpriteInit
+        jsr RasterEffectsInit
         jsr IOInit
         jsr OSInit
 
         ; Prepare cpu for processing once all sub systems have been initialized (ie proper handlers are setup)
+        jsr Z80Init
         jsr M68KInit
 
         ; Start main program

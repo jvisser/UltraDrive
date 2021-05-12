@@ -174,3 +174,38 @@ VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT Macro vdpDMATransferCommandList
         move.w  (a0)+, (a1)
         move.w  (a0)+, (a1)
     Endm
+
+
+;-------------------------------------------------
+; ROM Safe variant of VDP_DMA_TRANSFER_COMMAND_LIST uses stack memory for the dma trigger word write
+; Uses: a0-a1
+; ----------------
+VDP_DMA_TRANSFER_COMMAND_LIST_ROM_SAFE Macro vdpDMATransferCommandList
+        lea     \vdpDMATransferCommandList, a0
+        lea     MEM_VDP_CTRL, a1
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+        move.w  (a0)+, -(sp)
+        move.w  (sp)+, (a1)
+    Endm
+
+
+;-------------------------------------------------
+; ROM Safe variant of VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT uses stack memory for the dma trigger word write
+; Uses: a0-a1
+; ----------------
+VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Macro vdpDMATransferCommandList
+        If (~strcmp('\vdpDMATransferCommandList', 'a0'))
+            movea.l \vdpDMATransferCommandList, a0
+        EndIf
+
+        lea     MEM_VDP_CTRL, a1
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.l  (a0)+, (a1)
+        move.w  (a0)+, (a1)
+        move.w  (a0)+, -(sp)
+        move.w  (sp)+, (a1)
+    Endm

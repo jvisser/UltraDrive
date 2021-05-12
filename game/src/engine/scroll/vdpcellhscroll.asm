@@ -14,6 +14,9 @@
         VAR.l chsPlaneAScrollDMATransferCommandListAddress
     DEFINE_VAR_END
 
+    ;-------------------------------------------------
+    ; Horizontal cell VDPScrollUpdater
+    ; ----------------
     ; struct VDPScrollUpdater
     cellHorizontalVDPScrollUpdater:
         ; .vdpsuInit

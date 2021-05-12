@@ -24,8 +24,8 @@ Z80_GET_BUS Macro
             move.b  #$01, (MEM_Z80_BUS_REQUEST)
             
         .z80WaitLoop\@:
-            cmpi.b  #$01, (MEM_Z80_BUS_REQUEST)
-            bne     .z80WaitLoop\@
+            btst    #0, (MEM_Z80_BUS_REQUEST)
+            bne.s   .z80WaitLoop\@
     Endm
 
 
@@ -41,7 +41,6 @@ Z80_RELEASE Macro
 ; Assert Z80 reset
 ; ----------------
 Z80_RESET Macro
-            ; Z80 RESET is active low
             move.b #$00, (MEM_Z80_RESET)
     Endm
 
@@ -50,6 +49,14 @@ Z80_RESET Macro
 ; Cancel Z80 reset
 ; ----------------
 Z80_RESET_CANCEL Macro
-            ; Z80 RESET is active low
             move.b #$01, (MEM_Z80_RESET)
     Endm
+
+
+;-------------------------------------------------
+; Start Z80 (Cancel reset and request bus)
+; ----------------
+Z80Init:
+        Z80_RESET_CANCEL
+        Z80_GET_BUS
+        rts

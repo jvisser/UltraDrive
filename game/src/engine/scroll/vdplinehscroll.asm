@@ -14,6 +14,9 @@
         VAR.l lsPlaneAScrollDMATransferCommandListAddress
     DEFINE_VAR_END
 
+    ;-------------------------------------------------
+    ; VPlane VDPScrollUpdater
+    ; ----------------
     ; struct VDPScrollUpdater
     lineHorizontalVDPScrollUpdater:
         ; .vdpsuInit
