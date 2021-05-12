@@ -46,25 +46,36 @@ VIEWPORT_INSTALL_MOVEMENT_CALLBACK Macro camera, callback, cameraData
 ;-------------------------------------------------
 ; Restore the default movement callback for the specified camera
 ; ----------------
-VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Macro camera
+VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Macros camera
         move.l  #NoOperation, (viewport + \camera + camMoveCallback)
-    Endm
 
 
 ;-------------------------------------------------
 ; Start tracking the specified entity
 ; ----------------
-VIEWPORT_TRACK_ENTITY Macro entity
+VIEWPORT_TRACK_ENTITY Macros entity
         move.w  \entity, (viewport + viewportTrackingEntity)
-    Endm
 
 
 ;-------------------------------------------------
 ; Stop entity tracking
 ; ----------------
-VIEWPORT_TRACK_ENTITY_END Macro
+VIEWPORT_TRACK_ENTITY_END Macros
         clr.w  (viewport + viewportTrackingEntity)
-    Endm
+
+
+;-------------------------------------------------
+; Get viewport X position
+; ----------------
+VIEWPORT_GET_X Macros target
+    move.w  (viewport + viewportForeground + camX), \target
+
+
+;-------------------------------------------------
+; Get viewport Y position
+; ----------------
+VIEWPORT_GET_Y Macros target
+    move.w  (viewport + viewportForeground + camY), \target
 
 
 ;-------------------------------------------------

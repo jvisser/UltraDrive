@@ -10,11 +10,9 @@
         STRUCT_MEMBER.w     vpvsuScrollValue
     DEFINE_STRUCT_END
 
-
-;-------------------------------------------------
-; VPlane VDPScrollUpdater
-; ----------------
-
+    ;-------------------------------------------------
+    ; Vertical plane VDPScrollUpdater
+    ; ----------------
     ; struct VDPScrollUpdater
     planeVerticalVDPScrollUpdater:
         ; .vdpsuInit

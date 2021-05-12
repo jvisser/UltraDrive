@@ -111,24 +111,40 @@ Main:
 
         jsr     VDPEnableDisplay
 
+        ; Only enable water effect for specialized test map
+        If def(MapHeaderCastle_map4)
+            jsr WaterEffectInit
+
+            DEBUG_MSG 'Water effects enabled'
+        EndIf
+
+
         DEBUG_MSG 'UltraDrive Started!'
 
         jsr     OSResetStatistics
 
     .mainLoop:
 
-            PROFILE_FRAME_TIME $000e
+            ;PROFILE_FRAME_TIME $000e
 
-            PROFILE_CPU_START
+            ;PROFILE_CPU_START
 
-            jsr     ViewportUpdateAngle
+            ; Only update angle for specialized test map
+            If def(MapHeaderCastle_map3)
+                jsr     ViewportUpdateAngle
+            EndIf
+
+            ; Only update water level for specialized test map
+            If def(MapHeaderCastle_map4)
+                jsr WaterEffectUpdate
+            EndIf
 
             bsr     _UpdatePlayer
             bsr     _UpdateManualTilesetAnimations
 
-            PROFILE_CPU_END
+            ;PROFILE_CPU_END
 
-            PROFILE_FRAME_TIME_END
+            ;PROFILE_FRAME_TIME_END
 
             jsr     OSNextFrameReadyWait
 

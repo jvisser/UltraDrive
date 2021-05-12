@@ -59,6 +59,8 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         dc.l Tileset[(${tilesetName})]PaletteData
         ; .tsAlternativePaletteAddress
         dc.l [(${tileset.properties['waterColor'] != null ? ('Tileset' + tilesetName + 'AlternativePaletteData') : ('NULL')})]
+        ; .tsColorTransitionTableAddress
+        dc.l [(${tileset.properties['colorTransitionTable'] != null ? ('Tileset' + tilesetName + 'ColorTransitionTable') : ('NULL')})]
         ; .tsAnimationsTableAddress
         dc.l Tileset[(${tilesetName})]AnimationsTable
         ; .tsViewportBackgroundAnimationsAddress
@@ -75,13 +77,13 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     Even
 
     ;-------------------------------------------------
-    ; Tileset [(${tilesetName})] palette
+    ; Tileset [(${tilesetName})] palette ([(${tileset.palette.size})] colors)
     ; ----------------
 
     ; struct TilesetPalette
     Tileset[(${tilesetName})]PaletteData:
         ; .tsPaletteDMATransferCommandList
-        VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]PaletteColors, 0, 64
+        VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]PaletteColors, 0, [(${tileset.palette.size})]
         ; .tsColors
         Tileset[(${tilesetName})]PaletteColors:
             [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette)}" ]
@@ -91,25 +93,41 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     Even
 
 
-    [# th:with="alternativePaletteTargetColor=${tileset.properties['waterColor']}"]
-        [# th:if="${alternativePaletteTargetColor != null}"]
+    [# th:if="${tileset.properties['waterColor'] != null}" th:with="alternativePaletteTargetColor=${tileset.properties['waterColor']}"]
+        ;-------------------------------------------------
+        ; Tileset [(${tilesetName})] alternative palette ([(${tileset.palette.size})] colors)
+        ; ----------------
+        ; struct TilesetPalette
+        Tileset[(${tilesetName})]AlternativePaletteData:
+            ; .tsPaletteDMATransferCommandList
+            VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]AlternativePaletteColors, 0, [(${tileset.palette.size})]
+            ; .tsColors
+            Tileset[(${tilesetName})]AlternativePaletteColors:
+                [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette.blend(#convert.tilesetColor(alternativePaletteTargetColor), 0.5f))}" ]
+                    [(${color})]
+                [/]
 
-            ;-------------------------------------------------
-            ; Tileset [(${tilesetName})] alternative palette
-            ; ----------------
-            ; struct TilesetPalette
-            Tileset[(${tilesetName})]AlternativePaletteData:
-                ; .tsPaletteDMATransferCommandList
-                VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]AlternativePaletteColors, 0, 64
-                ; .tsColors
-                Tileset[(${tilesetName})]AlternativePaletteColors:
-                    [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette.blend(#convert.tilesetColor(alternativePaletteTargetColor), 0.5f))}" ]
-                        [(${color})]
-                    [/]
-
-            Even
-        [/]
+        Even
     [/]
+
+
+    [# th:if="${tileset.properties['colorTransitionTable'] != null}" th:with="colorTransitionTable=${#convert.yaml(#file.asString(tileset.properties['colorTransitionTable']))['colorTransition']}"]
+
+        ;-------------------------------------------------
+        ; Tileset [(${tilesetName})] color transition table
+        ; ----------------
+        ; struct TilesetColorTransitionTable
+        Tileset[(${tilesetName})]ColorTransitionTable:
+            ; .tscttCount
+            dc.w    [(${colorTransitionTable.size})]
+            ; .tscttPaletteColorOffsets
+            [# th:each="paletteOffset : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', colorTransitionTable.{#this * 2})}" ]
+                [(${paletteOffset})]
+            [/]
+
+        Even
+    [/]
+
 
     ;-------------------------------------------------
     ; Tileset [(${tilesetName})] chunk/block data

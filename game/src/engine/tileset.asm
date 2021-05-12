@@ -66,6 +66,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
         STRUCT_MEMBER.l tsPatternSectionsTableAddress                           ; Compressed (modular)
         STRUCT_MEMBER.l tsPaletteAddress                                        ; Uncompressed
         STRUCT_MEMBER.l tsAlternativePaletteAddress                             ; Uncompressed
+        STRUCT_MEMBER.l tsColorTransitionTableAddress                           ; Uncompressed
         STRUCT_MEMBER.l tsAnimationsTableAddress                                ; Uncompressed
         STRUCT_MEMBER.l tsViewportBackgroundAnimationsAddress                   ; Uncompressed
         STRUCT_MEMBER.l tsViewportForegroundAnimationsAddress                   ; Uncompressed
@@ -93,6 +94,11 @@ tilesetPatternDecompressionBuffer       Equ blockTable
     DEFINE_STRUCT TilesetPalette
         STRUCT_MEMBER.VDPDMATransferCommandList tsPaletteDMATransferCommandList
         STRUCT_MEMBER.w                         tsColors
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT TilesetColorTransitionTable
+        STRUCT_MEMBER.w                         tscttCount
+        STRUCT_MEMBER.w                         tscttPaletteColorOffsets
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Chunk
@@ -161,28 +167,28 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 ; Get tileset address
 ; ----------------
 TILESET_GET Macros target
-        movea.l loadedTileset, \target
+        move.l loadedTileset, \target
 
 
 ;-------------------------------------------------
 ; Get block meta data mapping for current tileset
 ; ----------------
 TILESET_GET_META_DATA_MAPPING Macros target
-        movea.l tilesetMetaDataMapping, \target
+        move.l tilesetMetaDataMapping, \target
 
 
 ;-------------------------------------------------
 ; Get tileset block collision data base address
 ; ----------------
 TILESET_GET_COLLISION_DATA Macros target
-        movea.l tilesetCollisionData, \target
+        move.l tilesetCollisionData, \target
 
 
 ;-------------------------------------------------
 ; Get tileset block angle data base address
 ; ----------------
 TILESET_GET_ANGLE_DATA Macros target
-        movea.l tilesetCollisionData, \target
+        move.l tilesetCollisionData, \target
 
 
 ;-------------------------------------------------
@@ -228,10 +234,9 @@ TilesetLoad:
         bsr     _TilesetLoadAnimations
     .noAnimations:
 
-        ; Load palette. Use DMA queue to prevent ROM -> VRAM hardware glitch.
+        ; Load palette
         movea.l tsPaletteAddress(a6), a0
-        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT a0
-        jsr     VDPDMAQueueFlush
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE a0
         
         ; Install viewport movement handlers last
         jmp _TilesetInstallViewportMovementHandlers
@@ -311,13 +316,9 @@ _TilesetLoadAnimations:
         movea.l tsAnimationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
         movea.l (a0), a0                                    ; a0 = VDPDMATransferCommandList address for first animation frame
 
-        ; Use DMA queue to prevent ROM -> VRAM hardware glitch.
-        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT a0
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE a0
 
         dbra    d6, .loadAnimationFrameLoop
-
-        ; Flush queued animation frames to VRAM
-        jsr     VDPDMAQueueFlush
 
         ; Enable animation ticker
         ENGINE_SCHEDULER_ENABLE SCHEDULER_TILESET

@@ -9,11 +9,9 @@
         STRUCT_MEMBER.w hpvsuScrollValue
     DEFINE_STRUCT_END
 
-
-;-------------------------------------------------
-; HPlane VDPScrollUpdater
-; ----------------
-
+    ;-------------------------------------------------
+    ; Horizontal plane VDPScrollUpdater
+    ; ----------------
     ; struct VDPScrollUpdater
     planeHorizontalVDPScrollUpdater:
         ; .vdpsuInit

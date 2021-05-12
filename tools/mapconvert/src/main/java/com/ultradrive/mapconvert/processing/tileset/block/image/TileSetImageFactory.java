@@ -143,6 +143,13 @@ public class TileSetImageFactory
             palette.add(colorModel.getRGB(i));
         }
 
-        return new TilesetImagePalette(palette);
+        // Trim trailing empty colors
+        int lastColor = palette.size() - 1;
+        while (lastColor >= 0 && palette.get(lastColor) == 0xff000000)
+        {
+            lastColor--;
+        }
+
+        return new TilesetImagePalette(palette.subList(0, lastColor + 1));
     }
 }
