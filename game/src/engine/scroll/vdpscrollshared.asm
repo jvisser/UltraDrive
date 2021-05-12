@@ -147,7 +147,7 @@ _CALL_SCROLL_VALUE_UPDATER Macro orientation, config
         add.w   d0, d0
         move.w  d0, vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags
 
-        move.l  (sp), a0                                                                                        ; a0 = viewport address
+        PEEKL   a0                                                                                              ; a0 = viewport address
 
         ; Call foreground scroll value updater
         _CALL_SCROLL_VALUE_UPDATER \orientation, Foreground
