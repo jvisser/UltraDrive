@@ -219,6 +219,10 @@ _IO_UPDATE_DEVICE_INFO Macro deviceStateStruct
         _IO_UPDATE_DEVICE_INFO ioDeviceState1
         _IO_UPDATE_DEVICE_INFO ioDeviceState2
 
+        _IO_RESET
+
+        bsr IOUpdateDeviceState
+
         ; Wait for IO reset so device readings down the line yield correct results
         _IO_RESET
 
