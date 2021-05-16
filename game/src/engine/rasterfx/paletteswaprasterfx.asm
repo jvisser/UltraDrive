@@ -142,13 +142,13 @@ _PaletteSwapRasterEffectInit:
 
 
 ;-------------------------------------------------
-; Install a raster effect
+; Restore default palette
 ; ----------------
 ; Input:
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectDestroy:
-        ; TODO: Queue default palette for DMA
-        DEBUG_MSG '_PaletteSwapRasterEffectDestroy'
+        TILESET_GET a1
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE tsPaletteAddress(a1)
         rts
 
 
