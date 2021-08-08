@@ -429,14 +429,17 @@ _COLLISION_BLOCK_FOUND Macro
             btst    #BLOCK_REF_HFLIP, d3
             beq     .blockNoHFlip\@
 
-                ; Horizontally flipped so add 90 degrees to angle
-                add.w   #ANGLE_90, d2
+                ; Negate angle
+                neg.w   d2
 
                 ; Invert collision field index
                 not.w   d5
                 andi.w  #$0f, d5
 
             .blockNoHFlip\@:
+
+                ; Add base angle
+                add.w   #ANGLE_90, d2
 
                 ; Get collision field height
                 move.b  (a2, d5), d5
@@ -541,19 +544,22 @@ _NEXT_CHUNK Macro
 ; - d1: y coordinate adjusted by height field
 ; - d2: angle adjusted by horizontal orientation
 _COLLISION_BLOCK_FOUND Macro
-            add.w   #ANGLE_270, d2
+            neg.w   d2
 
             btst    #BLOCK_REF_HFLIP, d3
             beq     .blockNoHFlip\@
 
-                ; Horizontally flipped so subtract 90 degrees from angle
-                sub.w   #ANGLE_90, d2
+                ; Negate angle
+                neg.w   d2
 
                 ; Invert collision field index
                 not.w   d5
                 andi.w  #$0f, d5
 
             .blockNoHFlip\@:
+
+                ; Add base angle
+                add.w   #ANGLE_270, d2
 
                 ; Get collision field height
                 move.b  (a2, d5), d5
@@ -599,7 +605,7 @@ MapCollisionFindLeftWall:
 ; Valid collision block has been found. Extract result to be returned from subroutine
 ; ----------------
 _COLLISION_BLOCK_FOUND Macro
-        move.w  #ANGLE_180, d2
+        move.w  #ANGLE_0, d2
         ori.w   #$0f, d0
         addq.w  #1, d0
     Endm
@@ -625,7 +631,7 @@ MapCollisionFindRightWall:
 ; Valid collision block has been found. Extract result to be returned from subroutine
 ; ----------------
 _COLLISION_BLOCK_FOUND Macro
-        move.w  #ANGLE_0, d2
+        move.w  #ANGLE_180, d2
         andi.w  #~$0f, d0
         subq.w  #1, d0
     Endm
