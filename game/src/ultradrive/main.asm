@@ -125,7 +125,9 @@ Main:
 
     .mainLoop:
 
-            ;PROFILE_FRAME_TIME $000e
+            If ~def(MapHeaderCastle_map4)
+                PROFILE_FRAME_TIME $000e
+            EndIf
 
             ;PROFILE_CPU_START
 
@@ -144,7 +146,9 @@ Main:
 
             ;PROFILE_CPU_END
 
-            ;PROFILE_FRAME_TIME_END
+            If ~def(MapHeaderCastle_map4)
+                PROFILE_FRAME_TIME_END
+            EndIf
 
             jsr     OSNextFrameReadyWait
 

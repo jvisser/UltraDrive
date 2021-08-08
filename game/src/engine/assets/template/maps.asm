@@ -21,8 +21,10 @@
 
     Even
 
-    [# th:if="${map.properties['background'] != null}" th:with="backgroundMapName=${#strings.capitalize(map.properties['background'].name)}"]
-        ; struct Map
+    [# th:if="${map.properties['background'] != null}"
+        th:with="backgroundMapName=${#strings.capitalize(map.properties['background'].name)},
+                objectGroupMap=${map.objectGroupMap}"]
+        ; struct MapHeader
         MapHeader[(${mapName})]:
             ; .mapForegroundAddress
             dc.l Map[(${mapName})]
@@ -30,9 +32,61 @@
             dc.l Map[(${backgroundMapName})]
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-            ; .mapViewportConfiguration
+            ; .mapObjectGroupMapAddress
+            dc.l MapObjectGroupMap[(${mapName})]
+            ; .mapViewportConfigurationAddress
             dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
+
         Even
+
+        ; struct MapObjectGroupMap
+        MapObjectGroupMap[(${mapName})]:
+            ; .mapogmStride
+            dc.w [(${objectGroupMap.width})] * SIZE_WORD
+            ; .mapogmWidth
+            dc.w [(${objectGroupMap.width})]
+            ; .mapogmHeight
+            dc.w [(${objectGroupMap.height})]
+            ; .mapogmContainersTableAddress
+            dc.l MapObjectGroupContainersTable[(${mapName})]
+            ; .mapogmContainersBaseAddress
+            dc.l MapObjectGroupContainersBase[(${mapName})]
+            ; .mapogmGroupsBaseAddress
+            dc.l MapObjectGroupsBase[(${mapName})]
+            ; .mapogmRowOffsetTable
+            dc.w [# th:each="index, iter : ${#numbers.sequence(0, objectGroupMap.height - 1)}"][(${index * objectGroupMap.width * 2})][# th:if="${!iter.last}"], [/][/]
+
+        Even
+
+        MapObjectGroupContainersTable[(${mapName})]:
+            [# th:each="objectGroupContainer : ${objectGroupMap.objectGroupContainers}"]
+                dc.w MapObjectGroupContainer[(${objectGroupContainer.id})][(${mapName})] - MapObjectGroupContainersBase[(${mapName})]
+            [/]
+
+        Even
+
+        MapObjectGroupContainersBase[(${mapName})]:
+            [# th:each="objectGroupContainer : ${objectGroupMap.objectGroupContainers}"]
+                MapObjectGroupContainer[(${objectGroupContainer.id})][(${mapName})]:
+                [# th:each="objectGroup : ${objectGroupContainer.objectGroups}"]
+                    dc.w MapObjectGroup[(${objectGroup.id})][(${mapName})] - MapObjectGroupsBase[(${mapName})]
+                [/]
+            [/]
+
+        Even
+
+        MapObjectGroupsBase[(${mapName})]:
+            [# th:each="objectGroup : ${objectGroupMap.objectGroups}"]
+                ; struct MapObjectGroup
+                MapObjectGroup[(${objectGroup.id})][(${mapName})]:
+                    ; .mapogFlagNumber
+                    dc.b [(${objectGroup.flagNumber})]
+                    ; .mapogObjectCount
+                    dc.b 0
+            [/]
+
+        Even
+
     [/]
 
     ; struct Map
