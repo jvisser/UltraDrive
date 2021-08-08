@@ -115,7 +115,7 @@ _INIT_SCROLL Macro orientation
         cmpa.l  #NULL, a0
         bne     .viewportConfigurationOk
             ; Use map's default viewport configuration if non specified
-            movea.l  mapViewportConfiguration(a1), a0
+            movea.l  mapViewportConfigurationAddress(a1), a0
     .viewportConfigurationOk:
         PUSHL   a0                                      ; Store current viewport configuration address in local variable
 
@@ -150,6 +150,11 @@ _INIT_SCROLL Macro orientation
 
         ; Restore stack (remove local used to save viewport configuration)
         POPL
+
+        ; Init active object groups
+        VIEWPORT_GET_X d0
+        VIEWPORT_GET_Y d1
+        jsr     MapInitActiveObjectGroups
 
         ; Render views
         lea     (viewport + viewportBackground), a0
@@ -210,6 +215,11 @@ _UPDATE_SCROLL Macro orientation
         ; Update VDP scroll tables
         _UPDATE_SCROLL Horizontal
         _UPDATE_SCROLL Vertical
+
+        ; Update active object groups
+        VIEWPORT_GET_X d0
+        VIEWPORT_GET_Y d1
+        jsr     MapUpdateActiveObjectGroups
         rts
 
         Purge _UPDATE_SCROLL
