@@ -2,11 +2,13 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;
 import com.ultradrive.mapconvert.datasource.model.MapModel;
+import com.ultradrive.mapconvert.processing.map.object.ObjectGroupMap;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.TilesetReferenceBuilderSource;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import java.util.ArrayList;
 import java.util.List;
+
 
 class TileMapBuilder
 {
@@ -14,6 +16,7 @@ class TileMapBuilder
     private final MapModel mapModel;
 
     private final List<ChunkReference> chunkReferences;
+    private ObjectGroupMap objectGroupMap;
 
     TileMapBuilder(TilesetReferenceBuilderSource tilesetReferenceBuilder, MapModel mapModel)
     {
@@ -25,13 +28,18 @@ class TileMapBuilder
 
     public void collectReferences()
     {
+        objectGroupMap = ObjectGroupMap.fromMapModel(mapModel);
+
         for (int row = 0; row < mapModel.getHeight(); row++)
         {
             for (int column = 0; column < mapModel.getWidth(); column++)
             {
                 ChunkReferenceModel chunkReferenceModel = mapModel.getChunkReference(row, column);
 
-                ChunkReference.Builder chunkReferenceBuilder = tilesetReferenceBuilder.getTileReference(chunkReferenceModel.getChunkId());
+                ChunkReference.Builder chunkReferenceBuilder =
+                        tilesetReferenceBuilder.getTileReference(chunkReferenceModel.getChunkId());
+                chunkReferenceBuilder.setObjectContainerGroupIndex(
+                        objectGroupMap.getChunkObjectGroupContainerIndex(row, column));
                 chunkReferenceBuilder.reorient(chunkReferenceModel.getOrientation());
                 chunkReferences.add(chunkReferenceBuilder.build());
             }
@@ -40,7 +48,7 @@ class TileMapBuilder
 
     public TileMap build(Tileset tileset)
     {
-        return new TileMap(tileset, chunkReferences,
+        return new TileMap(tileset, chunkReferences, objectGroupMap,
                            mapModel.getName(),
                            mapModel.getWidth(),
                            mapModel.getHeight(),

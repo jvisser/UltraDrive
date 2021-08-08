@@ -1,5 +1,6 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
+import com.ultradrive.mapconvert.common.UID;
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
 import com.ultradrive.mapconvert.processing.tileset.block.image.ImageBlockPatternProducer;
 import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
@@ -64,11 +65,10 @@ public class AnimationBlockPostProcessor
 
     private Map<SourceAnimationFrame, AnimationFrame> createAnimationFrames(Set<SourceAnimationFrame> sourceAnimationFrames)
     {
-        int frameId = 0;
         Map<SourceAnimationFrame, AnimationFrame> animationFrameMap = new HashMap<>();
         for (SourceAnimationFrame sourceAnimationFrame : sourceAnimationFrames)
         {
-            animationFrameMap.put(sourceAnimationFrame, createAnimationFrame(sourceAnimationFrame, frameId++));
+            animationFrameMap.put(sourceAnimationFrame, createAnimationFrame(sourceAnimationFrame, UID.create()));
         }
         return animationFrameMap;
     }

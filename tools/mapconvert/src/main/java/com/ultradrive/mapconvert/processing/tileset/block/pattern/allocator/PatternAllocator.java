@@ -80,7 +80,7 @@ public class PatternAllocator implements OrientablePoolListener<Pattern, Pattern
     {
         return sections.stream()
                 .filter(section -> section.hasSpace(numberOfPatterns))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new PatternAllocationException(
                         format("Unable for allocation space for %d pattern(s)", numberOfPatterns)));
     }

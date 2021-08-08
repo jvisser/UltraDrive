@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
+ <objecttype name="ObjectGroupChunk" color="#a0a0a4"/>
  <objecttype name="AnimationBlock" color="#a0a0a4">
   <property name="animationFrameInterval" type="int" default="1"/>
   <property name="animationId" type="string"/>
