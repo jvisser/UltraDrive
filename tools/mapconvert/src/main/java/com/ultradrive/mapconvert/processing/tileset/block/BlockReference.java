@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class BlockReference extends MetaTileReference<BlockReference>
 {
+    private static final int REFERENCE_ID_BIT_COUNT = 10;
+
     private final BlockSolidity solidity;
     private final boolean priority;
 
@@ -96,7 +98,10 @@ public class BlockReference extends MetaTileReference<BlockReference>
     @Override
     public BitPacker pack()
     {
-        return super.pack()
+        return new BitPacker(Short.SIZE)
+                .add(referenceId, REFERENCE_ID_BIT_COUNT)
+                .add(empty)
+                .add(orientation)
                 .add(solidity)
                 .add(priority);
     }

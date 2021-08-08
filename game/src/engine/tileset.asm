@@ -29,12 +29,14 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 ; ----------------
 
     ; Chunk reference structure
-    BIT_MASK.CHUNK_REF_INDEX            0,  10
+    BIT_MASK.CHUNK_REF_INDEX            0,  8
+    BIT_CONST.CHUNK_REF_RESERVED        8
+    BIT_CONST.CHUNK_REF_COLLISION       9
     BIT_CONST.CHUNK_REF_EMPTY           10                                      ; Chunk contains no graphic data
     BIT_MASK.CHUNK_REF_ORIENTATION      11, 2
     BIT_CONST.CHUNK_REF_HFLIP           11
     BIT_CONST.CHUNK_REF_VFLIP           12
-    BIT_CONST.CHUNK_REF_COLLISION       13
+    BIT_MASK.CHUNK_REF_OBJECT_GROUP_IDX 13, 3
 
     ; Block reference structure
     BIT_MASK.BLOCK_REF_INDEX            0,  10

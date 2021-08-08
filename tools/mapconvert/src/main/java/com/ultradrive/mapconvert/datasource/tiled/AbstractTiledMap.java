@@ -3,6 +3,7 @@ package com.ultradrive.mapconvert.datasource.tiled;
 import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.datasource.model.ResourceReference;
 import java.util.Objects;
+import java.util.Optional;
 import org.tiledreader.TiledMap;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
@@ -40,19 +41,30 @@ abstract class AbstractTiledMap
 
     protected TiledTileset getTileset(String tilesetName)
     {
-        return map.getTilesets().stream()
-                .filter(tiledTileset -> tiledTileset.getName().equalsIgnoreCase(tilesetName))
-                .findFirst()
+        return getTilesetOptional(tilesetName)
                 .orElseThrow(() -> new IllegalArgumentException(
                         String.format("Unable to find tileset '%s' in map '%s'", tilesetName, map.getPath())));
     }
 
+    protected Optional<TiledTileset> getTilesetOptional(String tilesetName)
+    {
+        return map.getTilesets().stream()
+                .filter(tiledTileset -> tiledTileset.getName().equalsIgnoreCase(tilesetName))
+                .findAny();
+    }
+
     protected TiledTileLayer getLayer(String layerName)
     {
-        return (TiledTileLayer) map.getTopLevelLayers().stream()
-                .filter(tiledLayer -> tiledLayer.getName().equalsIgnoreCase(layerName))
-                .findFirst()
+        return getLayerOptional(layerName)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Unable to find layer '%s' in map '%s'", layerName, map.getPath())));
+    }
+
+    protected Optional<TiledTileLayer> getLayerOptional(String layerName)
+    {
+        return map.getTopLevelLayers().stream()
+                .map(TiledTileLayer.class::cast)
+                .filter(tiledLayer -> tiledLayer.getName().equalsIgnoreCase(layerName))
+                .findAny();
     }
 
     protected ResourceReference getResourceReference(TiledTileLayer layer, int x, int y)

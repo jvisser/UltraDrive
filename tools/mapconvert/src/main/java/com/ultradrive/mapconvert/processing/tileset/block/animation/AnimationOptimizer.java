@@ -61,7 +61,7 @@ class AnimationOptimizer
     {
         return animationFrameOptimizations.stream()
                 .filter(animationFrameOptimizationResult -> animationFrameOptimizationResult.isForAnimation(unoptimizedAnimation))
-                .findFirst().orElseThrow(() -> new NoSuchElementException("No matching animation frame group found for animation."));
+                .findAny().orElseThrow(() -> new NoSuchElementException("No matching animation frame group found for animation."));
     }
 
     private Set<AnimationFrameOptimizationGroup> createFrameGroups()

@@ -40,14 +40,14 @@ public class PatternAllocation implements Iterable<PatternAllocationArea>
         return patternAllocationAreas.stream()
                 .filter(allocation -> allocation.hasPattern(patternReferenceId))
                 .map(allocation -> allocation.getPattern(patternReferenceId))
-                .findFirst();
+                .findAny();
     }
 
     public PatternAllocationArea getAllocationArea(String id)
     {
         return patternAllocationAreas.stream()
                 .filter(patternAllocationArea -> Objects.equals(patternAllocationArea.getId(), id))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new NoSuchElementException(format("Area with id '%s' not found", id)));
 
     }

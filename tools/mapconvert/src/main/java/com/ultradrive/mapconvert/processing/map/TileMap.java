@@ -2,6 +2,7 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.common.PropertySource;
 import com.ultradrive.mapconvert.config.PreAllocatedPattern;
+import com.ultradrive.mapconvert.processing.map.object.ObjectGroupMap;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import java.util.HashMap;
@@ -15,17 +16,21 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
 {
     private final Tileset tileset;
     private final List<ChunkReference> chunkReferences;
+    private final ObjectGroupMap objectGroupMap;
     private final Map<String, Object> properties;
 
     private final String name;
     private final int width;
     private final int height;
 
-    TileMap(Tileset tileset, List<ChunkReference> chunkReferences, String name, int width, int height,
+    TileMap(Tileset tileset, List<ChunkReference> chunkReferences,
+            ObjectGroupMap objectGroupMap,
+            String name, int width, int height,
             Map<String, Object> properties)
     {
         this.tileset = tileset;
         this.chunkReferences = chunkReferences;
+        this.objectGroupMap = objectGroupMap;
         this.properties = properties;
         this.name = name;
         this.width = width;
@@ -36,6 +41,7 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
     {
         this.tileset = source.tileset;
         this.chunkReferences = source.chunkReferences;
+        this.objectGroupMap = source.objectGroupMap;
         this.properties = new HashMap<>(source.properties);
         this.name = source.name;
         this.width = source.width;
@@ -65,6 +71,11 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
     public Tileset getTileset()
     {
         return tileset;
+    }
+
+    public ObjectGroupMap getObjectGroupMap()
+    {
+        return objectGroupMap;
     }
 
     public String getName()
