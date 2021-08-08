@@ -101,15 +101,15 @@ POPM Macro reglist
 ; Push full user mode CPU context from exception handler
 ; ----------------
 PUSH_USER_CONTEXT Macro
-        PUSHM   d0-d7/a0-a7
+        PUSHM   d0-d7/a0-a6
     Endm
 
 
 ;-------------------------------------------------
-; Pop full user mode XPU context from exception handler
+; Pop full user mode CPU context from exception handler
 ; ----------------
 POP_USER_CONTEXT Macro
-        POPM   d0-d7/a0-a7
+        POPM   d0-d7/a0-a6
     Endm
 
 
