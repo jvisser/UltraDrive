@@ -1,6 +1,7 @@
 package com.ultradrive.mapconvert.processing.map.object;
 
 import com.ultradrive.mapconvert.common.UID;
+import com.ultradrive.mapconvert.datasource.model.MapObject;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,11 +11,12 @@ import java.util.stream.Stream;
 
 class ObjectGroupBuilder
 {
-    public static ObjectGroupBuilder EMPTY = new ObjectGroupBuilder();
+    public static ObjectGroupBuilder ZERO = new ObjectGroupBuilder();
 
     private final int id = UID.create();
     private final Set<ObjectGroupContainerBuilder> containers = new HashSet<>();
     private final Set<ObjectGroupBuilder> potentiallyVisibleNonLocalGroups = new HashSet<>();
+    private final Set<MapObject> objects = new HashSet<>();
 
     private int assignedFlag = 0;
 
@@ -62,9 +64,22 @@ class ObjectGroupBuilder
                 .collect(Collectors.toSet());
     }
 
+    public void add(MapObject mapObject)
+    {
+        if (!isZeroGroup())
+        {
+            objects.add(mapObject);
+        }
+    }
+
+    public boolean isZeroGroup()
+    {
+        return this == ZERO;
+    }
+
     public ObjectGroup build()
     {
-        return new ObjectGroup(id, assignedFlag);
+        return new ObjectGroup(id, assignedFlag, objects);
     }
 
     public int getId()
@@ -74,6 +89,6 @@ class ObjectGroupBuilder
 
     public boolean isEmpty()
     {
-        return this == EMPTY;
+        return objects.isEmpty();
     }
 }

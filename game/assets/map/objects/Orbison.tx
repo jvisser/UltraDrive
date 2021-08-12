@@ -4,6 +4,7 @@
  <object name="Orbison" type="Object" gid="2" width="16" height="16">
   <properties>
    <property name="xCompensation" type="int" value="8"/>
+   <property name="yCompensation" type="int" value="-8"/>
   </properties>
  </object>
 </template>

@@ -42,7 +42,7 @@ class ObjectGroupContainerBuilder
 
     public int getGroupIndex(ObjectGroupBuilder objectGroupBuilder)
     {
-        if (objectGroupBuilder.isEmpty())
+        if (objectGroupBuilder.isZeroGroup())
         {
             return 0;
         }
@@ -53,7 +53,7 @@ class ObjectGroupContainerBuilder
     {
         return new ObjectGroupContainer(id, objectGroupBuilders.stream()
                 .map(objectGroupBuilder -> objectGroupsById.get(objectGroupBuilder.getId()))
-                .collect(Collectors.toUnmodifiableList()));
+                .collect(Collectors.toList()));
     }
 
     public int getAssignedFlags()
