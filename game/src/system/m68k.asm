@@ -114,11 +114,11 @@ POP_USER_CONTEXT Macro
 
 
 ;-------------------------------------------------
-; Push full CPU context onto the stack for exception handler
+; Push full CPU context onto the stack
 ; ----------------
 PUSH_CONTEXT Macro
         PUSHW   sr
-        PUSHM   d0-d7/a0-a7
+        PUSHM   d0-d7/a0-a6
     Endm
 
 
@@ -126,7 +126,7 @@ PUSH_CONTEXT Macro
 ; Pop full CPU context from the stack
 ; ----------------
 POP_CONTEXT Macro
-        POPM   d0-d7/a0-a7
+        POPM   d0-d7/a0-a6
         POPW   sr
     Endm
 
