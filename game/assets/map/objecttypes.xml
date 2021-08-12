@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
- <objecttype name="ObjectGroupChunk" color="#a0a0a4"/>
  <objecttype name="AnimationBlock" color="#a0a0a4">
   <property name="animationFrameInterval" type="int" default="1"/>
   <property name="animationId" type="string"/>
@@ -14,6 +13,11 @@
   <property name="angle" type="float" default="0"/>
  </objecttype>
  <objecttype name="GraphicsBlock" color="#a0a0a4"/>
+ <objecttype name="Object" color="#a0a0a4">
+  <property name="xCompensation" type="int" default="0"/>
+  <property name="yCompensation" type="int" default="0"/>
+ </objecttype>
+ <objecttype name="ObjectGroupChunk" color="#a0a0a4"/>
  <objecttype name="PriorityBlock" color="#a0a0a4"/>
  <objecttype name="SolidityBlock" color="#a0a0a4"/>
  <objecttype name="ViewportAnimationBlock" color="#a0a0a4">
