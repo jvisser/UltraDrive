@@ -1,13 +1,18 @@
 package com.ultradrive.mapconvert.datasource.tiled;
 
+import com.ultradrive.mapconvert.common.UID;
 import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.datasource.MapDataSource;
 import com.ultradrive.mapconvert.datasource.TilesetDataSource;
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;
+import com.ultradrive.mapconvert.datasource.model.MapObject;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.tiledreader.TiledMap;
+import org.tiledreader.TiledObjectLayer;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
@@ -21,6 +26,7 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
 
     private static final String CHUNK_LAYER_NAME = "Chunks";
     private static final String OBJECT_GROUP_LAYER_NAME = "ObjectGroup";
+    private static final String OBJECT_LAYER_NAME = "Object";
 
     private final TiledObjectFactory tiledObjectFactory;
     private final TiledPropertyTransformer propertyTransformer;
@@ -90,6 +96,23 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
                 Orientation.get(
                         chunkLayer.getTileHorizontalFlip(column, row),
                         chunkLayer.getTileVerticalFlip(column, row)));
+    }
+
+
+    @Override
+    public List<MapObject> getObjects()
+    {
+        return map.getTopLevelLayers().stream()
+                .filter(tiledLayer -> tiledLayer instanceof TiledObjectLayer &&
+                                      tiledLayer.getName().equalsIgnoreCase(OBJECT_LAYER_NAME))
+                .map(TiledObjectLayer.class::cast)
+                .flatMap(tiledObjectLayer -> tiledObjectLayer.getObjects().stream())
+                .map(tiledObject -> new
+                        MapObject(tiledObject.getName(),
+                                  UID.create(),
+                                  (int) (tiledObject.getX() + (Integer) tiledObject.getProperty("xCompensation")),
+                                  (int) (tiledObject.getY() + (Integer) tiledObject.getProperty("yCompensation"))))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -1,14 +1,22 @@
 package com.ultradrive.mapconvert.processing.map.object;
 
+import com.google.common.collect.ImmutableList;
+import com.ultradrive.mapconvert.datasource.model.MapObject;
+import java.util.Collection;
+import java.util.List;
+
+
 public class ObjectGroup
 {
     private final int id;
     private final int flag;
+    private final List<MapObject> objects;
 
-    public ObjectGroup(int id, int flag)
+    ObjectGroup(int id, int flag, Collection<MapObject> objects)
     {
         this.id = id;
         this.flag = flag;
+        this.objects = ImmutableList.copyOf(objects);
     }
 
     public int getId()
@@ -24,5 +32,10 @@ public class ObjectGroup
     public int getFlagNumber()
     {
         return Integer.numberOfTrailingZeros(flag);
+    }
+
+    public List<MapObject> getObjects()
+    {
+        return objects;
     }
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +26,7 @@ class ObjectGroupMapBuilder
     private final int screenHeight;
 
     private final ObjectGroupBuilder[][] chunkObjectGroupBuilderMap;
-    private final List<ObjectGroupBuilder> objectGroupBuilders;
+    private final Set<ObjectGroupBuilder> objectGroupBuilders;
     private final List<ObjectGroupContainerBuilder> objectGroupContainerBuilders;
 
     public ObjectGroupMapBuilder(MapModel mapModel, int screenWidth, int screenHeight)
@@ -37,13 +38,17 @@ class ObjectGroupMapBuilder
         this.screenHeight = screenHeight;
 
         this.chunkObjectGroupBuilderMap = new ObjectGroupBuilder[mapModel.getHeight()][mapModel.getWidth()];
-        this.objectGroupBuilders = new ArrayList<>();
+        this.objectGroupBuilders = new LinkedHashSet<>();
         this.objectGroupContainerBuilders = new ArrayList<>();
     }
 
     public ObjectGroupMap build()
     {
         createGroupMap();
+
+        addObjects();
+
+        removeEmptyGroups();
 
         createObjectGroupContainers();
 
@@ -66,7 +71,7 @@ class ObjectGroupMapBuilder
             {
                 int startGroupId = mapModel.getChunkReference(row, column).getObjectGroupId();
                 ObjectGroupBuilder currentGroup = startGroupId == ChunkReferenceModel.EMPTY_GROUP_ID
-                                                  ? ObjectGroupBuilder.EMPTY
+                                                  ? ObjectGroupBuilder.ZERO
                                                   : null;
 
                 if (row > 0 && sourceGroupIds[row - 1][column] == startGroupId)
@@ -103,6 +108,34 @@ class ObjectGroupMapBuilder
         }
     }
 
+    private void addObjects()
+    {
+        mapModel.getObjects()
+                .forEach(mapObject ->
+                         {
+                             int row = mapObject.getY() >> 7;
+                             int column = mapObject.getX() >> 7;
+
+                             chunkObjectGroupBuilderMap[row][column].add(mapObject);
+                         });
+    }
+
+    private void removeEmptyGroups()
+    {
+        for (ObjectGroupBuilder[] row : chunkObjectGroupBuilderMap)
+        {
+            for (int columnIndex = 0; columnIndex < row.length; columnIndex++)
+            {
+                if (row[columnIndex].isEmpty())
+                {
+                    objectGroupBuilders.remove(row[columnIndex]);
+
+                    row[columnIndex] = ObjectGroupBuilder.ZERO;
+                }
+            }
+        }
+    }
+
     private void createObjectGroupContainers()
     {
         Map<Integer, ObjectGroupContainerBuilder> containers = new LinkedHashMap<>();
@@ -117,7 +150,7 @@ class ObjectGroupMapBuilder
                         containers.computeIfAbsent(groupId, id -> new ObjectGroupContainerBuilder());
 
                 ObjectGroupBuilder objectGroupBuilder = row[columnIndex];
-                if (!objectGroupBuilder.isEmpty())
+                if (!objectGroupBuilder.isZeroGroup())
                 {
                     objectGroupContainerBuilder.add(objectGroupBuilder);
                 }
@@ -145,7 +178,7 @@ class ObjectGroupMapBuilder
                         ObjectGroupBuilder
                                 objectGroupBuilder =
                                 chunkObjectGroupBuilderMap[rowIndex + screenRow][columnIndex + screenColumn];
-                        if (!objectGroupBuilder.isEmpty())
+                        if (!objectGroupBuilder.isZeroGroup())
                         {
                             groupsInView.add(objectGroupBuilder);
                         }
@@ -168,7 +201,7 @@ class ObjectGroupMapBuilder
 
     private ObjectGroupMap createObjectGroupMap()
     {
-        ImmutableList.Builder<Integer> chunkLocalObjectGroupContainerIndicesBuilder = ImmutableList.builder();
+        List<Integer> chunkLocalObjectGroupContainerIndicesBuilder = new ArrayList<>();
         for (int rowIndex = 0; rowIndex < chunkObjectGroupBuilderMap.length; rowIndex++)
         {
             ObjectGroupBuilder[] row = chunkObjectGroupBuilderMap[rowIndex];
@@ -191,9 +224,9 @@ class ObjectGroupMapBuilder
         return new ObjectGroupMap(objectGroupContainerBuilders.stream()
                                           .map(objectGroupContainerBuilder ->
                                                        objectGroupContainerBuilder.build(objectGroupsById))
-                                          .collect(Collectors.toUnmodifiableList()),
+                                          .collect(Collectors.toList()),
                                   ImmutableList.copyOf(objectGroupsById.values()),
-                                  chunkLocalObjectGroupContainerIndicesBuilder.build(),
+                                  chunkLocalObjectGroupContainerIndicesBuilder,
                                   mapModel.getWidth(),
                                   objectGroupMapWidth, objectGroupMapHeight);
     }
