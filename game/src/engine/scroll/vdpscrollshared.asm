@@ -34,36 +34,6 @@
         VAR.VDPScrollUpdaterState   vsusVerticalVDPScrollUpdaterState
     DEFINE_VAR_END
 
-    DEFINE_VAR SLOW
-        ; Shared scroll value table buffer contains space for:
-            ; 2x224 word line scroll buffer
-            ; 2x40 word cell scroll buffer
-            ; 4x16 word VDPDMATransferCommandList
-            ; 16 word allocatable by value updaters
-            ;---------------
-            ; 1072 bytes
-        VAR.w   vdpScrollBuffer,                    536
-        VAR.l   vdpScrollBufferAllocationPointer                                                                ; Current allocation pointer
-    DEFINE_VAR_END
-
-
-;-------------------------------------------------
-; Reset all scroll buffers. Should be "called" once per viewport init.
-; ----------------
-VDP_SCROLL_UPDATER_RESET Macros
-    move.l  #vdpScrollBuffer, vdpScrollBufferAllocationPointer
-
-
-;-------------------------------------------------
-; Allocate memory from shared scroll buffer area
-; ----------------
-VDP_SCROLL_UPDATER_ALLOCATE Macro bytes, target, scratch
-        movea.l  vdpScrollBufferAllocationPointer, \target
-        movea.l \target, \scratch
-        adda.w  #(((\bytes) + 1) & $fffe), \scratch
-        move.l  \scratch, vdpScrollBufferAllocationPointer
-    Endm
-
 
 ;-------------------------------------------------
 ; Put the address of the specified scroll table in target
@@ -96,7 +66,7 @@ VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
         lea     (a0, d0), a0                                                                                    ; a0 = Camera address
 
         ; Allocate scroll table
-        VDP_SCROLL_UPDATER_ALLOCATE \scrollTableType\_Size, a1, a4
+        MEMORY_ALLOCATE \scrollTableType\_Size, a1, a4
 
         ; Store scroll value table address for later use
         move.l  a1, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress

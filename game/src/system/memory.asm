@@ -20,6 +20,8 @@ MEM_RAM_SIZE_BYTE   Equ (MEM_RAM_END - MEM_RAM_START + 1)
 MEM_RAM_SIZE_WORD   Equ (MEM_RAM_SIZE_BYTE / SIZE_WORD)
 MEM_RAM_SIZE_LONG   Equ (MEM_RAM_SIZE_BYTE / SIZE_LONG)
 
+MEM_RAM_STACK_SIZE  Equ 512
+
 
 ;-------------------------------------------------
 ; RAM allocation pointers. Grow upward by the size of each defined variable (Auto align according to OPT ae+).
@@ -240,6 +242,36 @@ _LONG_MEM_BYTES  Equ __SLOW_RAM_ALLOCATION_PTR - MEM_RAM_START
     Endm
 
 
+    DEFINE_VAR FAST
+        VAR.w   memAllocationPointer
+    DEFINE_VAR_END
+
+
+;-------------------------------------------------
+; Reset the allocator to the start of free RAM
+; ----------------
+MEMORY_ALLOCATOR_RESET Macros
+    move.w  RomHeaderRamStart + SIZE_WORD, memAllocationPointer
+
+
+;-------------------------------------------------
+; Allocate memory
+; ----------------
+MEMORY_ALLOCATE Macro bytes, target, scratch
+        movea.w  memAllocationPointer, \target
+        movea.l \target, \scratch
+        adda.w  #(((\bytes) + 1) & $fffe), \scratch
+        If def(debug)
+            cmpa.l  RomHeaderRamEnd, \scratch
+            ble     .allocOk\@
+                DEBUG_MSG 'RAM allocation overflow!'
+                trap #0
+        .allocOk\@:
+        EndIf
+        move.w  \scratch, memAllocationPointer
+    Endm
+
+
 ;-------------------------------------------------
 ; Fill RAM with zero's. This resets the stack so can only be called from top level code (SysInit or Main).
 ; ----------------
@@ -262,6 +294,8 @@ _CLR_RAM_LOOP_UNROLL Equ 8
 
         ; Reset stack pointer and return
         movea.l d1, sp
+
+        MEMORY_ALLOCATOR_RESET
         jmp (a1)
 
 
