@@ -81,7 +81,7 @@ _RotateHorizontalLineScrollInit:
         bsr _RotateHorizontalLineCalculateScrollValues
 
         ; Allocate value updater state for change detection
-        VDP_SCROLL_UPDATER_ALLOCATE RotateScrollState_Size, a0, a1
+        MEMORY_ALLOCATE RotateScrollState_Size, a0, a1
 
         ; Store scroll values
         move.w  rsapHorizontalOffset(a3), rscsLastOffset(a0)
@@ -200,7 +200,7 @@ _RotateVerticalCellScrollInit:
         bsr _RotateVerticalCellCalculateScrollValues
 
         ; Allocate value updater state for change detection
-        VDP_SCROLL_UPDATER_ALLOCATE RotateScrollState_Size, a0, a1
+        MEMORY_ALLOCATE RotateScrollState_Size, a0, a1
 
         ; Store scroll values
         move.w  rsapVerticalOffset(a3), rscsLastOffset(a0)

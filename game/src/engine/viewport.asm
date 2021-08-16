@@ -108,8 +108,6 @@ _INIT_SCROLL Macro orientation
 
         VIEWPORT_TRACK_ENTITY_END
 
-        VDP_SCROLL_UPDATER_RESET
-
         ; Determine which viewport configuration to use and store in local variable
         MAP_GET a1
         cmpa.l  #NULL, a0

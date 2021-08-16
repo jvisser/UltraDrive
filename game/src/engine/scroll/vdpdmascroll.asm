@@ -17,7 +17,7 @@ VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTem
         ; Setup DMA
 
         ; Copy DMA transfer command list template to RAM to its source address can be patched with the address of the dynamically allocated scroll table
-        VDP_SCROLL_UPDATER_ALLOCATE VDPDMATransferCommandList_Size, a2, a3
+        MEMORY_ALLOCATE VDPDMATransferCommandList_Size, a2, a3
         move.l  a2, \dmaTransferAddress
         movea.l a2, a1
         lea     \dmaTransferTemplate, a0

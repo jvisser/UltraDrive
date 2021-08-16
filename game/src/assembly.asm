@@ -68,17 +68,19 @@
     ; Game
     ; ----------------
 
-    ; Code
+    ; Game code
     Include 'ultradrive/metadata.asm'
     Include 'ultradrive/player.asm'
     Include 'ultradrive/viewport.asm'
     Include 'ultradrive/water.asm'
     Include 'ultradrive/objects/orbison.asm'
-    Include 'ultradrive/main.asm'
 
     ; Assets
     Include 'ultradrive/assets/tilesets.asm'
     Include 'ultradrive/assets/maps.asm'
+
+    ; Main
+    Include 'ultradrive/main.asm'
 
 
     ;-------------------------------------------------
