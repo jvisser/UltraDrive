@@ -38,4 +38,9 @@ public class ObjectGroup
     {
         return objects;
     }
+
+    public int getSize()
+    {
+        return objects.size();
+    }
 }

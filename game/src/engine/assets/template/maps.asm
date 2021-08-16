@@ -2,14 +2,25 @@
 ; Compiled map
 ;------------------------------------------------------------------------------------------
 
+;-------------------------------------------------
+; Macros
+; ----------------
+ALLOC_OBJECT_STATE Macro objectName
+ALLOC_OBJECT_STATE_OFFSET = ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectTypeSize
+    Endm
+
+
+;-------------------------------------------------
+; Map data
+; ----------------
     SECTION_START S_RODATA
 
         Even
 
 [# th:with="rootMaps=${maps.{? #this.properties['background'] != null}}"]
     ; struct MapDirectory
-    ; .mapCount
     MapDirectory:
+        ; .mapCount
         dc.w [(${rootMaps.size})]
         [# th:each="map : ${rootMaps}" th:with="mapName=${#strings.capitalize(map.name)}"]
                 ; .mapForegroundAddress
@@ -24,20 +35,6 @@
     [# th:if="${map.properties['background'] != null}"
         th:with="backgroundMapName=${#strings.capitalize(map.properties['background'].name)},
                 objectGroupMap=${map.objectGroupMap}"]
-        ; struct MapHeader
-        MapHeader[(${mapName})]:
-            ; .mapForegroundAddress
-            dc.l Map[(${mapName})]
-            ; .mapBackgroundAddress
-            dc.l Map[(${backgroundMapName})]
-            ; .mapTilesetAddress
-            dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-            ; .mapObjectGroupMapAddress
-            dc.l MapObjectGroupMap[(${mapName})]
-            ; .mapViewportConfigurationAddress
-            dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
-
-        Even
 
         ; struct MapObjectGroupMap
         MapObjectGroupMap[(${mapName})]:
@@ -75,6 +72,8 @@
 
         Even
 
+ALLOC_OBJECT_STATE_OFFSET = 0;
+
         MapObjectGroupsBase[(${mapName})]:
             [# th:each="objectGroup : ${objectGroupMap.objectGroups}"]
                 ; struct MapObjectGroup
@@ -82,8 +81,47 @@
                     ; .mapogFlagNumber
                     dc.b [(${objectGroup.flagNumber})]
                     ; .mapogObjectCount
-                    dc.b 0
+                    dc.b [(${objectGroup.size})]
+                    ; .mapogObjectSpawnData
+                    [# th:each="object : ${objectGroup.objects}"]
+                        ; struct ObjectSpawnData (type = [(${object.name})])
+                        MapObject[(${object.id})][(${mapName})]:
+                            ; .osdTypeOffset
+                            dc.w [(${object.name})]ObjectTypeOffset
+                            ; .osdX
+                            dc.w [(${object.x})]
+                            ; .osdY
+                            dc.w [(${object.y})]
+                            ; .osdStateOffset
+                            dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+
+                        ALLOC_OBJECT_STATE [(${object.name})]
+
+                        Even
+                    [/]
+                Even
             [/]
+
+        Even
+
+        ; struct MapHeader
+        MapHeader[(${mapName})]:
+            ; .mapForegroundAddress
+            dc.l Map[(${mapName})]
+            ; .mapBackgroundAddress
+            dc.l Map[(${backgroundMapName})]
+            ; .mapTilesetAddress
+            dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
+            ; .mapObjectStateSize
+            dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+            ; .mapObjectGroupMapAddress
+            dc.l MapObjectGroupMap[(${mapName})]
+            ; .mapViewportConfigurationAddress
+            dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
+
+            If def(debug)
+                Inform 0, 'Total object allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
+            EndIf
 
         Even
 

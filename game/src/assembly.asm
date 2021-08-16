@@ -61,21 +61,24 @@
     Include './engine/rasterfx/paletteswaprasterfx.asm'
     Include './engine/mapcollision.asm'
     Include './engine/entity.asm'
+    Include './engine/object.asm'
 
 
     ;-------------------------------------------------
     ; Game
     ; ----------------
-    ; Assets
-    Include 'ultradrive/assets/tilesets.asm'
-    Include 'ultradrive/assets/maps.asm'
 
     ; Code
     Include 'ultradrive/metadata.asm'
     Include 'ultradrive/player.asm'
     Include 'ultradrive/viewport.asm'
     Include 'ultradrive/water.asm'
+    Include 'ultradrive/objects/orbison.asm'
     Include 'ultradrive/main.asm'
+
+    ; Assets
+    Include 'ultradrive/assets/tilesets.asm'
+    Include 'ultradrive/assets/maps.asm'
 
 
     ;-------------------------------------------------
