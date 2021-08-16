@@ -14,6 +14,7 @@
     Section S_HEADER        ; Sega ROM header
     Section S_FASTDATA      ; .fastdata (absolute short addressable, NB: ow+ optimization does not seem to optimize this case!? so use absolute short addressing mode explicitly for data in this section)
     Section S_PROGRAM       ; .text
+    Section S_OBJECT_TYPE   ; .objecttype
     Section S_RODATA        ; .rodata
     Section S_DATA          ; .data
     Section S_DEBUG         ; .debug
@@ -65,6 +66,7 @@ SECTION_BASE = 0
         SECTION_INFO S_HEADER,          SECTION_BASE
         SECTION_INFO S_FASTDATA,        SECTION_BASE
         SECTION_INFO S_PROGRAM,         SECTION_BASE
+        SECTION_INFO S_OBJECT_TYPE,     SECTION_BASE
         SECTION_INFO S_RODATA,          SECTION_BASE
         SECTION_INFO S_DATA,            SECTION_BASE
         SECTION_INFO S_DEBUG,           SECTION_BASE

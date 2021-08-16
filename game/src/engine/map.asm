@@ -14,7 +14,7 @@
         STRUCT_MEMBER.w mapogmStride
         STRUCT_MEMBER.w mapogmWidth                             ; Granularity = 8x8 chunks or 1024x1024 pixels
         STRUCT_MEMBER.w mapogmHeight
-        STRUCT_MEMBER.l mapogmContainersTableAddress            ; *MapObjectGroup[mapogmHeight][mapogmWidth] indexed by CHUNK_REF_OBJECT_GROUP_IDX
+        STRUCT_MEMBER.l mapogmContainersTableAddress            ; MapObjectGroup*[mapogmHeight][mapogmWidth] indexed by CHUNK_REF_OBJECT_GROUP_IDX
         STRUCT_MEMBER.l mapogmContainersBaseAddress
         STRUCT_MEMBER.l mapogmGroupsBaseAddress
         STRUCT_MEMBER.b mapogmRowOffsetTable                    ; Marker
@@ -23,12 +23,14 @@
     DEFINE_STRUCT MapObjectGroup
         STRUCT_MEMBER.b mapogFlagNumber                         ; Each object group has a unique flag number in the active viewport
         STRUCT_MEMBER.b mapogObjectCount
+        STRUCT_MEMBER.b mapogObjectSpawnData                    ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapHeader
         STRUCT_MEMBER.l mapForegroundAddress
         STRUCT_MEMBER.l mapBackgroundAddress
         STRUCT_MEMBER.l mapTilesetAddress
+        STRUCT_MEMBER.w mapObjectStateSize
         STRUCT_MEMBER.l mapObjectGroupMapAddress
         STRUCT_MEMBER.l mapViewportConfigurationAddress
     DEFINE_STRUCT_END
