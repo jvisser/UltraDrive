@@ -6,7 +6,7 @@
 ; Start of 68000 execution (See reset vector)
 ; ----------------
 SysInit:
-        jsr MemInit ; Must be called first (Clears all memory)
+        jsr MemoryInit ; Must be called first (Clears all memory)
 
         jsr VDPInit
         jsr VDPDMAQueueInit

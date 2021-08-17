@@ -14,6 +14,7 @@
         STRUCT_MEMBER.w mapogmStride
         STRUCT_MEMBER.w mapogmWidth                             ; Granularity = 8x8 chunks or 1024x1024 pixels
         STRUCT_MEMBER.w mapogmHeight
+        STRUCT_MEMBER.w mapogmGroupsCount
         STRUCT_MEMBER.l mapogmContainersTableAddress            ; MapObjectGroup*[mapogmHeight][mapogmWidth] indexed by CHUNK_REF_OBJECT_GROUP_IDX
         STRUCT_MEMBER.l mapogmContainersBaseAddress
         STRUCT_MEMBER.l mapogmGroupsBaseAddress
@@ -23,6 +24,7 @@
     DEFINE_STRUCT MapObjectGroup
         STRUCT_MEMBER.b mapogFlagNumber                         ; Each object group has a unique flag number in the active viewport
         STRUCT_MEMBER.b mapogObjectCount
+        STRUCT_MEMBER.w mapogObjectStateOffset                  ; Offset into the map's allocated state array for this group
         STRUCT_MEMBER.b mapogObjectSpawnData                    ; Marker
     DEFINE_STRUCT_END
 
@@ -49,6 +51,7 @@
 
     DEFINE_VAR FAST
         VAR.l               mapLoadedMap                        ; MapHeader
+        VAR.w               mapObjectStateAddress
         VAR.w               mapActiveObjectGroupCount
         VAR.w               mapActiveObjectGroupSubChunkId
         VAR.l               mapActiveObjectGroups, 12
@@ -102,6 +105,55 @@ MapLoad:
         ; Load associated tileset
         movea.l mapTilesetAddress(a0), a0
         jsr     TilesetLoad
+
+        ; Init objects
+        bsr.s   _MapInitObjects
+        rts
+
+
+;-------------------------------------------------
+; Initialize all objects in the map
+; ----------------
+; Uses: d0-d7/a0-a6
+_MapInitObjects:
+        ; Allocate object state area and store ptr
+        movea.l mapLoadedMap, a3
+        move.w  mapObjectStateSize(a3), d0
+        jsr     MemoryAllocate
+        move.w  a0, mapObjectStateAddress
+
+        ; Init pointers and loop counters
+        movea.l a0, a1                                          ; a1 = Current ObjectState address
+        OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
+        movea.l mapObjectGroupMapAddress(a3), a3
+        movea.l mapogmGroupsBaseAddress(a3), a0                 ; a0 = Current group/object ObjectSpawnData
+        move.w  mapogmGroupsCount(a3), d7                       ; d7 = Object group counter
+        beq     .noObjects
+
+        ; Loop over all groups and objects and call Object.otInit()
+        subq.w  #1, d7
+    .objectGroupLoop:
+
+            move.b  mapogObjectCount(a0), d6                    ; d6 = Object counter
+            ext.w   d6
+            lea     mapogObjectSpawnData(a0), a0                ; a0 = Current ObjectSpawnData address for current group
+
+            swap    d7
+            subq.w  #1, d6
+        .objectLoop:
+
+                ; Call Object.otInit()
+                move.w  osdTypeOffset(a0), d7                   ; d7 = Type offset
+                movea.l otInit(a2, d7), a3
+                jsr     (a3)
+                adda.w  otStateSize(a2, d7), a1                 ; a1 = Next ObjectState address
+
+                ; Next object
+                adda.w  #ObjectSpawnData_Size, a0               ; a0 = Next ObjectSpawnData address
+            dbra    d6, .objectLoop
+            swap    d7
+        dbra    d7, .objectGroupLoop
+    .noObjects:
         rts
 
 

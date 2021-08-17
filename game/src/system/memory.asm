@@ -222,7 +222,7 @@ INIT_STRUCT_END Macro
             lea     \STRUCT_VAR_NAME\_InitData, a0
             lea     \STRUCT_VAR_NAME + __FIRST_STRUCT_INIT_MEMBER_OFFSET, a1
             move.w  #(__rs - __FIRST_STRUCT_INIT_MEMBER_OFFSET), d0
-            jmp     MemCopy
+            jmp     MemoryCopy
     Endm
 
 
@@ -255,19 +255,29 @@ MEMORY_ALLOCATOR_RESET Macros
 
 
 ;-------------------------------------------------
-; Allocate memory
+; Check for memory allocation overflow OS_KILL (trap 0) if so
 ; ----------------
-MEMORY_ALLOCATE Macro bytes, target, scratch
-        movea.w  memAllocationPointer, \target
-        movea.l \target, \scratch
-        adda.w  #(((\bytes) + 1) & $fffe), \scratch
+_MEMORY_CHECK_OVERFLOW Macro target
         If def(debug)
-            cmpa.l  RomHeaderRamEnd, \scratch
+            cmpa.l  RomHeaderRamEnd, \target
             ble     .allocOk\@
                 DEBUG_MSG 'RAM allocation overflow!'
                 trap #0
         .allocOk\@:
         EndIf
+    Endm
+
+
+;-------------------------------------------------
+; Allocate memory with a constant size
+; ----------------
+MEMORY_ALLOCATE Macro bytes, target, scratch
+        movea.w  memAllocationPointer, \target
+        movea.l \target, \scratch
+        adda.w  #(((\bytes) + 1) & $fffe), \scratch
+
+        _MEMORY_CHECK_OVERFLOW \scratch
+
         move.w  \scratch, memAllocationPointer
     Endm
 
@@ -276,7 +286,7 @@ MEMORY_ALLOCATE Macro bytes, target, scratch
 ; Fill RAM with zero's. This resets the stack so can only be called from top level code (SysInit or Main).
 ; ----------------
 ; Uses: d0-d1/a0-a1
-MemInit:
+MemoryInit:
 _CLR_RAM_LOOP_UNROLL Equ 8
 
         ; Save return address
@@ -303,11 +313,32 @@ _CLR_RAM_LOOP_UNROLL Equ 8
 ; Copy memory from source to destination
 ; ----------------
 ; Input:
+; - d0: Number of bytes to allocate
+; Output:
+; - a0: Address of allocated memory
+; Uses: d0/a0-a1
+MemoryAllocate:
+        movea.w  memAllocationPointer, a0
+        movea.l a0, a1
+        addq.w  #1, d0
+        andi.w  #$fffe, d0
+        adda.w  d0, a1
+
+        _MEMORY_CHECK_OVERFLOW a1
+
+        move.w  a1, memAllocationPointer
+        rts
+
+
+;-------------------------------------------------
+; Copy memory from source to destination
+; ----------------
+; Input:
 ; - a0: Source address
 ; - a1: Destination address
 ; - d0; Length in bytes
 ; Uses: d0/a0-a1
-MemCopy:
+MemoryCopy:
         subq.w  #1, d0
 
     .copyLoop:

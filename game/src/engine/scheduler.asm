@@ -68,7 +68,7 @@ EngineSchedulerInit:
         lea     EngineSchedulers, a0
         lea     engineSchedulerCallbacks, a1
         move.w  #EngineSchedulersEnd - EngineSchedulers, d0
-        jsr     MemCopy
+        jsr     MemoryCopy
 
         lea     EngineSchedule, a0
         jmp     OSSetFrameProcessedCallback

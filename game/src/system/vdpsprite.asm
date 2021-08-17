@@ -71,7 +71,7 @@ VDPSpriteInit
         lea     VDPSpriteAttrTableDMATransferTemplate, a0
         lea     vdpSpriteAttrTableDMATransfer, a1
         move.w  #VDPDMATransfer_Size, d0
-        jmp MemCopy
+        jmp MemoryCopy
 
 
 ;-------------------------------------------------
