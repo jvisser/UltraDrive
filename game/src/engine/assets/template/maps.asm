@@ -44,6 +44,8 @@ ALLOC_OBJECT_STATE_OFFSET = ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectTypeSi
             dc.w [(${objectGroupMap.width})]
             ; .mapogmHeight
             dc.w [(${objectGroupMap.height})]
+            ; .mapogmGroupsCount
+            dc.w [(${objectGroupMap.objectGroups.size})]
             ; .mapogmContainersTableAddress
             dc.l MapObjectGroupContainersTable[(${mapName})]
             ; .mapogmContainersBaseAddress
@@ -82,6 +84,8 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
                     dc.b [(${objectGroup.flagNumber})]
                     ; .mapogObjectCount
                     dc.b [(${objectGroup.size})]
+                    ; .mapogObjectStateOffset
+                    dc.w $\$ALLOC_OBJECT_STATE_OFFSET
                     ; .mapogObjectSpawnData
                     [# th:each="object : ${objectGroup.objects}"]
                         ; struct ObjectSpawnData (type = [(${object.name})])
@@ -92,8 +96,6 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
                             dc.w [(${object.x})]
                             ; .osdY
                             dc.w [(${object.y})]
-                            ; .osdStateOffset
-                            dc.w $\$ALLOC_OBJECT_STATE_OFFSET
 
                         ALLOC_OBJECT_STATE [(${object.name})]
 

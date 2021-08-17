@@ -38,6 +38,8 @@
     Include './engine/scheduler.asm'
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
+    Include './engine/entity.asm'
+    Include './engine/object.asm'
     Include './engine/map.asm'
     Include './engine/camera.asm'
     Include './engine/maprender.asm'
@@ -60,8 +62,6 @@
     Include './engine/tileset.asm'
     Include './engine/rasterfx/paletteswaprasterfx.asm'
     Include './engine/mapcollision.asm'
-    Include './engine/entity.asm'
-    Include './engine/object.asm'
 
 
     ;-------------------------------------------------

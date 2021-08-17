@@ -9,15 +9,14 @@
         STRUCT_MEMBER.w osdTypeOffset       ; Offset into global ObjectTypeTableBase
         STRUCT_MEMBER.w osdX                ; X position
         STRUCT_MEMBER.w osdY                ; Y position
-        STRUCT_MEMBER.w osdStateOffset      ; Offset into the map's allocated state area
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT ObjectState
     DEFINE_STRUCT_END
 
-    ; NB: All methods must preserve a5 and a6
     DEFINE_STRUCT ObjectType
-        STRUCT_MEMBER.l otInit              ; otInit(ObjectSpawnData*, ObjectState*)
+        STRUCT_MEMBER.w otStateSize
+        STRUCT_MEMBER.l otInit              ; otInit(ObjectSpawnData*, ObjectState*) must preserve d6-d7/a0-a2
         STRUCT_MEMBER.l otUpdate            ; otUpdate(ObjectSpawnData*, ObjectState*)
     DEFINE_STRUCT_END
 
@@ -28,6 +27,14 @@
     SECTION_START S_OBJECT_TYPE
         ObjectTypeTableBase:
     SECTION_END
+
+
+;-------------------------------------------------
+; Get address of the object type table base
+; ----------------
+OBJECT_TYPE_TABLE_GET Macro target
+        lea ObjectTypeTableBase, \target
+    Endm
 
 
 ;-------------------------------------------------
@@ -49,6 +56,7 @@ DEFINE_OBJECT_TYPE Macro name, stateName
         SECTION_START S_OBJECT_TYPE
             \name\ObjectType:
 \name\ObjectTypeOffset Equ (\name\ObjectType - ObjectTypeTableBase)
+                dc.w \name\ObjectTypeSize
     Endm
 
 

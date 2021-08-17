@@ -22,7 +22,7 @@ VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTem
         movea.l a2, a1
         lea     \dmaTransferTemplate, a0
         move.w  #VDPDMATransferCommandList_Size, d0
-        jsr     MemCopy
+        jsr     MemoryCopy
 
         ; Patch DMA source address to that of the allocated scroll buffer
         VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS \orientation\, \config\, d0
