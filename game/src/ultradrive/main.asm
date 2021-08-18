@@ -144,6 +144,8 @@ Main:
             bsr     _UpdatePlayer
             bsr     _UpdateManualTilesetAnimations
 
+            jsr     MapUpdateObjects
+
             ;PROFILE_CPU_END
 
             If ~def(MapHeaderCastle_map4)
