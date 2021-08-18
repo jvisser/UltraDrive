@@ -34,6 +34,7 @@ OrbisonInit:
 ; Input:
 ; - a0: ObjectSpawnData address
 ; - a1: OrbisonState address
+; - a2: ObjectType Table base address
 ; Uses: 
 OrbisonUpdate:
         rts

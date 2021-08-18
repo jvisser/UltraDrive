@@ -17,7 +17,7 @@
     DEFINE_STRUCT ObjectType
         STRUCT_MEMBER.w otStateSize
         STRUCT_MEMBER.l otInit              ; otInit(ObjectSpawnData*, ObjectState*) must preserve d6-d7/a0-a2
-        STRUCT_MEMBER.l otUpdate            ; otUpdate(ObjectSpawnData*, ObjectState*)
+        STRUCT_MEMBER.l otUpdate            ; otUpdate(ObjectSpawnData*, ObjectState*, ObjectTypeTableBase*) must preserve d6-d7/a0-a4
     DEFINE_STRUCT_END
 
 

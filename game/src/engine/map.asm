@@ -122,7 +122,7 @@ _MapInitObjects:
         jsr     MemoryAllocate
         move.w  a0, mapObjectStateAddress
 
-        ; Init pointers and loop counters
+        ; Init addresses and loop counters
         movea.l a0, a1                                          ; a1 = Current ObjectState address
         OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
         movea.l mapObjectGroupMapAddress(a3), a3
@@ -142,7 +142,7 @@ _MapInitObjects:
             subq.w  #1, d6
         .objectLoop:
 
-                ; Call Object.otInit()
+                ; Call Object.otInit(ObjectSpawnData*, ObjectState*)
                 move.w  osdTypeOffset(a0), d7                   ; d7 = Type offset
                 movea.l otInit(a2, d7), a3
                 jsr     (a3)
@@ -323,4 +323,50 @@ _MapUpdateActiveObjectGroups:
         adda.w  d4, a0
         addq.w  #1, d1
         dbra    d3, .rowLoop
+        rts
+
+
+;-------------------------------------------------
+; Update all currently active objects
+; ----------------
+; Uses: d0-d7/a0-a6
+MapUpdateObjects:
+        ; Load addresses
+        OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
+        lea     mapActiveObjectGroups, a3
+        movea.w mapObjectStateAddress, a4
+
+        move.w  mapActiveObjectGroupCount, d7
+        bne     .activeGroups
+            rts
+
+    .activeGroups:
+        subq.w  #1, d7
+
+    .activeGroupLoop:
+
+            movea.l (a3)+, a0                                   ; a0 = Current active group
+
+            move.w  mapogObjectStateOffset(a0), d6              ; d6 = Object state offset for current group
+            lea     (a4, d6), a1                                ; a1 = Current ObjectState address
+
+            moveq   #0, d6
+            move.b  mapogObjectCount(a0), d6                    ; d6 = Number of objects in current groups
+            lea     mapogObjectSpawnData(a0), a0                ; a0 = Current ObjectSpawnData
+
+            swap    d7
+            subq.w  #1, d6                                      ; d6 = Number of loops
+        .objectLoop:
+
+                move.w  osdTypeOffset(a0), d7                   ; d7 = Type offset for current object
+
+                ; call Object.otUpdate(ObjectSpawnData*, ObjectState*, ObjectTypeTableBase*)
+                movea.l otUpdate(a2, d7), a5
+                jsr     (a5)
+
+                adda.w  otStateSize(a2, d7), a1                 ; a1 = Next ObjectState address
+                adda.w  #ObjectSpawnData_Size, a0               ; a0 = Next ObjectSpawnData address
+            dbra    d6, .objectLoop
+            swap    d7
+        dbra    d7, .activeGroupLoop
         rts
