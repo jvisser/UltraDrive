@@ -140,6 +140,33 @@ VDPSpriteClear:
 
 
 ;-------------------------------------------------
+; Unlink sprites after the specified sprite index
+; ----------------
+; Input:
+; - d0: Last sprite number to retain
+; Uses: d0-d1/a0
+VDPSpriteUnlinkAfter:
+        move.w  d0, d1
+
+        ; Set sprite count
+        addq.w  #1, d1
+        move.w  d1, vdpSpriteCount
+
+        ; Get address of last sprite
+        lsr.w   #3, d0
+        lea     vdpSpriteAttrTable, a0
+        adda.w  d0, a0
+
+        ; Reset link
+        clr.b   vdpSpriteLink(a0)
+
+        ; Set new tail ptr
+        addq.l  #8, a0
+        move.w  a0, vdpSpriteAttrTableTail
+        rts
+
+
+;-------------------------------------------------
 ; Commit sprites to the VDP
 ; ----------------
 ; Uses: d0/a0-a1

@@ -59,8 +59,6 @@ _UpdatePlayer:
         movea.l  spriteAddr, a1
         move.w  d0, vdpSpriteX(a1)
         move.w  d1, vdpSpriteY(a1)
-
-        jsr     VDPSpriteCommit
         rts
 
 
@@ -109,6 +107,10 @@ Main:
 
         DEBUG_MSG 'Player initialized'
 
+        jsr     OrbisonLoad
+
+        DEBUG_MSG 'Orbison sprite tiles loaded'
+
         jsr     VDPEnableDisplay
 
         ; Only enable water effect for specialized test map
@@ -124,6 +126,8 @@ Main:
         jsr     OSResetStatistics
 
     .mainLoop:
+            moveq   #0, d0
+            jsr     VDPSpriteUnlinkAfter
 
             If ~def(MapHeaderCastle_map4)
                 PROFILE_FRAME_TIME $000e
@@ -151,6 +155,8 @@ Main:
             If ~def(MapHeaderCastle_map4)
                 PROFILE_FRAME_TIME_END
             EndIf
+
+            jsr     VDPSpriteCommit
 
             jsr     OSNextFrameReadyWait
 
