@@ -74,6 +74,7 @@
     Include 'ultradrive/viewport.asm'
     Include 'ultradrive/water.asm'
     Include 'ultradrive/objects/orbison.asm'
+    Include 'ultradrive/objects/fireball.asm'
 
     ; Assets
     Include 'ultradrive/assets/tilesets.asm'

@@ -15,6 +15,8 @@ ANGLE_270       Equ (ANGLE_45 * 6)
 ANGLE_315       Equ (ANGLE_45 * 7)
 ANGLE_360       Equ ANGLE_0
 
+ANGLE_MASK      Equ ((ANGLE_180 * 2) - 1)
+
 
 ;-------------------------------------------------
 ; Sine/Cosine tables

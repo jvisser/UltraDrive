@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <tileset firstgid="1" source="tileset/objects.tsx"/>
+ <object name="Fireball" type="Object" gid="1" width="16" height="16">
+  <properties>
+   <property name="xCompensation" type="int" value="8"/>
+   <property name="yCompensation" type="int" value="-8"/>
+  </properties>
+ </object>
+</template>

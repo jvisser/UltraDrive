@@ -108,8 +108,9 @@ Main:
         DEBUG_MSG 'Player initialized'
 
         jsr     OrbisonLoad
+        jsr     FireballLoad
 
-        DEBUG_MSG 'Orbison sprite tiles loaded'
+        DEBUG_MSG 'Sprite tiles loaded'
 
         jsr     VDPEnableDisplay
 
@@ -126,14 +127,14 @@ Main:
         jsr     OSResetStatistics
 
     .mainLoop:
-            moveq   #0, d0
-            jsr     VDPSpriteUnlinkAfter
-
             If ~def(MapHeaderCastle_map4)
                 PROFILE_FRAME_TIME $000e
             EndIf
 
             ;PROFILE_CPU_START
+
+            moveq   #0, d0
+            jsr     VDPSpriteUnlinkAfter
 
             ; Only update angle for specialized test map
             If def(MapHeaderCastle_map3)
@@ -150,13 +151,13 @@ Main:
 
             jsr     MapUpdateObjects
 
+            jsr     VDPSpriteCommit
+
             ;PROFILE_CPU_END
 
             If ~def(MapHeaderCastle_map4)
                 PROFILE_FRAME_TIME_END
             EndIf
-
-            jsr     VDPSpriteCommit
 
             jsr     OSNextFrameReadyWait
 
