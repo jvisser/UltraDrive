@@ -75,6 +75,22 @@ OSPrepareNextFrame:
 
 
 ;-------------------------------------------------
+; Get the lower word of the frame counter
+; ----------------
+OS_GET_FRAME_COUNTER_W Macro target
+        move.w  (osContext + osFramesProcessed + SIZE_WORD), \target
+    Endm
+
+
+;-------------------------------------------------
+; Get the the frame counter
+; ----------------
+OS_GET_FRAME_COUNTER_L Macro target
+        move.l  (osContext + osFramesProcessed), \target
+    Endm
+
+
+;-------------------------------------------------
 ; Lock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_LOCK Macro

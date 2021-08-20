@@ -331,18 +331,18 @@ _MapUpdateActiveObjectGroups:
 ; ----------------
 ; Uses: d0-d7/a0-a6
 MapUpdateObjects:
-        ; Load addresses
-        OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
-        lea     mapActiveObjectGroups, a3
-        movea.w mapObjectStateAddress, a4
-
         move.w  mapActiveObjectGroupCount, d7
         bne     .activeGroups
             rts
 
     .activeGroups:
-        subq.w  #1, d7
 
+        ; Load addresses
+        OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
+        lea     mapActiveObjectGroups, a3
+        movea.w mapObjectStateAddress, a4
+
+        subq.w  #1, d7
     .activeGroupLoop:
 
             movea.l (a3)+, a0                                   ; a0 = Current active group
