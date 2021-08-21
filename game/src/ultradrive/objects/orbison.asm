@@ -15,6 +15,8 @@ ORBISON_EXTENTS Equ 8
 
     ; State
     DEFINE_STRUCT OrbisonState, EXTENDS, ObjectState
+        STRUCT_MEMBER.w orbisonX
+        STRUCT_MEMBER.w orbisonY
     DEFINE_STRUCT_END
 
     ; Type
@@ -79,6 +81,8 @@ OrbisonLoad:
 ; - a0: ObjectSpawnData address
 ; - a1: OrbisonState address
 OrbisonInit:
+        move.w  osdX(a0), orbisonX(a1)
+        move.w  osdY(a0), orbisonY(a1)
         rts
 
 
@@ -95,11 +99,11 @@ OrbisonUpdate:
         VIEWPORT_GET_Y d1
 
         ; Convert map coordinates to (top/left) screen coordinates
-        move.w  osdX(a0), d3
+        move.w  orbisonX(a1), d3
         sub.w   d0, d3
         subq.w  #ORBISON_EXTENTS, d3
 
-        move.w  osdY(a0), d4
+        move.w  orbisonY(a1), d4
         sub.w   d1, d4
         subq.w  #ORBISON_EXTENTS, d4
 
