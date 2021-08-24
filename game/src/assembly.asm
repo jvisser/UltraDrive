@@ -34,6 +34,7 @@
     ; Engine
     ; ----------------
     Include './engine/engine.asm'
+    Include './engine/linkedlist.asm'
     Include './engine/fp16.asm'
     Include './engine/scheduler.asm'
     Include './engine/trigtable.asm'
@@ -41,6 +42,7 @@
     Include './engine/entity.asm'
     Include './engine/object.asm'
     Include './engine/map.asm'
+    Include './engine/mapobject.asm'
     Include './engine/camera.asm'
     Include './engine/maprender.asm'
     Include './engine/background.asm'
@@ -75,6 +77,7 @@
     Include 'ultradrive/water.asm'
     Include 'ultradrive/objects/orbison.asm'
     Include 'ultradrive/objects/fireball.asm'
+    Include 'ultradrive/objects/blob.asm'
 
     ; Assets
     Include 'ultradrive/assets/tilesets.asm'

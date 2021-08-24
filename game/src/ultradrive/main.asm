@@ -109,6 +109,7 @@ Main:
 
         jsr     OrbisonLoad
         jsr     FireballLoad
+        jsr     BlobLoad
 
         DEBUG_MSG 'Sprite tiles loaded'
 

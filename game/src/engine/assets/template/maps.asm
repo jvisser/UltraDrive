@@ -5,8 +5,16 @@
 ;-------------------------------------------------
 ; Macros
 ; ----------------
+ALLOC_OBJECT_GROUP_STATE Macro objectName
+ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + MapObjectGroupState_Size + 1) & -2)
+    Endm
+
+ALLOC_OBJECT_LINK_STATE Macro objectName
+ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + MapObjectLink_Size + 1) & -2)
+    Endm
+
 ALLOC_OBJECT_STATE Macro objectName
-ALLOC_OBJECT_STATE_OFFSET = ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectTypeSize
+ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectTypeSize + 1) & -2)
     Endm
 
 
@@ -78,29 +86,66 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
         MapObjectGroupsBase[(${mapName})]:
             [# th:each="objectGroup : ${objectGroupMap.objectGroups}"]
-                ; struct MapObjectGroup
-                MapObjectGroup[(${objectGroup.id})][(${mapName})]:
-                    ; .mapogFlagNumber
-                    dc.b [(${objectGroup.flagNumber})]
-                    ; .mapogObjectCount
-                    dc.b [(${objectGroup.size})]
-                    ; .mapogObjectStateOffset
-                    dc.w $\$ALLOC_OBJECT_STATE_OFFSET
-                    ; .mapogObjectSpawnData
-                    [# th:each="object : ${objectGroup.objects}"]
-                        ; struct ObjectSpawnData (type = [(${object.name})])
-                        MapObject[(${object.id})][(${mapName})]:
-                            ; .osdTypeOffset
-                            dc.w [(${object.name})]ObjectTypeOffset
-                            ; .osdX
-                            dc.w [(${object.x})]
-                            ; .osdY
-                            dc.w [(${object.y})]
+                [# th:with="objectsByTransferable=${#collection.ensureGroups({{true}, {false}}, #collection.groupBy({'objectTypeTransferable'}, objectGroup.objects))},
+                            staticObjects=${objectsByTransferable[#sets.toSet({false})]},
+                            transferableObjects=${objectsByTransferable[#sets.toSet({true})]},
+                            objects=${@com.google.common.collect.Iterables@concat(staticObjects, transferableObjects)}"]
 
-                        ALLOC_OBJECT_STATE [(${object.name})]
+                    ; struct MapObjectGroup
+                    MapObjectGroup[(${objectGroup.id})][(${mapName})]:
+                        ; .mapogFlagNumber
+                        dc.b [(${objectGroup.flagNumber})]
+                        ; .mapogObjectCount
+                        dc.b [(${staticObjects.size})]
+                        ; .mapogTransferableObjectCount
+                        dc.b [(${transferableObjects.size})]
+                        ; .mapogTotalObjectCount
+                        dc.b [(${staticObjects.size + transferableObjects.size})]
+                        ; .mapogObjectStateOffset
+                        dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+
+                        ALLOC_OBJECT_GROUP_STATE
 
                         Even
-                    [/]
+
+                        ; .mapogObjectDescriptors
+                        [# th:each="object : ${objects}"]
+
+                            [# th:if="${object.properties['objectTypeTransferable']}"]
+                                ALLOC_OBJECT_LINK_STATE
+                            [/]
+
+                            ; struct MapObjectDescriptor (type = [(${object.name})])
+                            MapObject[(${object.id})][(${mapName})]:
+                                ; .odTypeOffset
+                                dc.w [(${object.name})]ObjectTypeOffset
+                                ; .odSize
+                                dc.b MapObject[(${object.id})][(${mapName})]_End - MapObject[(${object.id})][(${mapName})]
+                                ; .odFlags
+                                dc.b [# th:if="${object.properties['objectTypeTransferable']}"]MODF_TRANSFERABLE_MASK|[/][# th:if="${object.properties['enabled']}"]MODF_ENABLED_MASK|[/][# th:if="${object.properties['active']}"]MODF_ACTIVE_MASK|[/][# th:if="${object.horizontalFlip}"]MODF_HFLIP_MASK|[/][# th:if="${object.verticalFlip}"]MODF_VFLIP_MASK|[/]0
+
+                                ; struct MapStatefulObjectDescriptor
+                                If ([(${object.name})]ObjectTypeSize > 0)
+                                    ; .odStateOffset
+                                    dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+                                EndIf
+
+                                [# th:if="${object.properties['objectTypePositional']}"]
+                                    ; struct MapObjectPosition
+                                        ; .opX
+                                        dc.w [(${object.x})]
+                                        ; .opY
+                                        dc.w [(${object.y})]
+                                [/]
+                            MapObject[(${object.id})][(${mapName})]_End:
+
+                            ALLOC_OBJECT_STATE [(${object.name})]
+
+                            Even
+                        [/]
+
+                [/]
+
                 Even
             [/]
 
@@ -114,16 +159,14 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
             dc.l Map[(${backgroundMapName})]
             ; .mapTilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-            ; .mapObjectStateSize
+            ; .mapStateSize
             dc.w $\$ALLOC_OBJECT_STATE_OFFSET
             ; .mapObjectGroupMapAddress
             dc.l MapObjectGroupMap[(${mapName})]
             ; .mapViewportConfigurationAddress
             dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
 
-            If def(debug)
-                Inform 0, 'Total object allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
-            EndIf
+            Inform 0, 'Total object allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
 
         Even
 
