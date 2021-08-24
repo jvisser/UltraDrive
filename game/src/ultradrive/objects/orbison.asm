@@ -13,8 +13,13 @@ ORBISON_EXTENTS Equ 8
 ; Orbison main structures
 ; ----------------
 
+    ; ObjectDescriptor
+    DEFINE_STRUCT OrbisonDescriptor, EXTENDS, MapStatefulObjectDescriptor
+        STRUCT_MEMBER.MapObjectPosition orbisonPosition
+    DEFINE_STRUCT_END
+
     ; State
-    DEFINE_STRUCT OrbisonState, EXTENDS, ObjectState
+    DEFINE_STRUCT OrbisonState
         STRUCT_MEMBER.w orbisonX
         STRUCT_MEMBER.w orbisonY
     DEFINE_STRUCT_END
@@ -78,11 +83,11 @@ OrbisonLoad:
 ; Init state
 ; ----------------
 ; Input:
-; - a0: ObjectSpawnData address
+; - a0: OrbisonDescriptor address
 ; - a1: OrbisonState address
 OrbisonInit:
-        move.w  osdX(a0), orbisonX(a1)
-        move.w  osdY(a0), orbisonY(a1)
+        move.w  orbisonPosition + opX(a0), orbisonX(a1)
+        move.w  orbisonPosition + opY(a0), orbisonY(a1)
         rts
 
 
@@ -90,42 +95,37 @@ OrbisonInit:
 ; Update and render
 ; ----------------
 ; Input:
-; - a0: ObjectSpawnData address
+; - a0: OrbisonDescriptor address
 ; - a1: OrbisonState address
-; - a2: ObjectType Table base address
-; Uses: d0-d4/a5-a6
+; Uses: d0-d4/a0-a1
 OrbisonUpdate:
+        ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        VIEWPORT_GET_Y d1
-
-        ; Convert map coordinates to (top/left) screen coordinates
         move.w  orbisonX(a1), d3
         sub.w   d0, d3
         subq.w  #ORBISON_EXTENTS, d3
-
-        move.w  orbisonY(a1), d4
-        sub.w   d1, d4
-        subq.w  #ORBISON_EXTENTS, d4
 
         ; Check left screen bounds
         cmpi.w  #-ORBISON_EXTENTS * 2, d3
         ble     .notVisible
 
-        ; Check top screen bounds
-        cmpi.w  #-ORBISON_EXTENTS * 2, d4
-        bmi     .notVisible
-
         ; Check right screen bounds
         cmpi.w  #320, d3
         bge     .notVisible
 
+        ; Convert vertical map coordinates to screen coordinates
+        VIEWPORT_GET_Y d1
+        move.w  orbisonY(a1), d4
+        sub.w   d1, d4
+        subq.w  #ORBISON_EXTENTS, d4
+
+        ; Check top screen bounds
+        cmpi.w  #-ORBISON_EXTENTS * 2, d4
+        bmi     .notVisible
+
         ; Check bottom screen bounds
         cmpi.w  #224, d4
         bge     .notVisible
-
-            ; Save a0-a1
-            movea.l a0, a5
-            movea.l a1, a6
 
             ; Convert to sprite coordinates
             addi.w  #128, d3
@@ -140,10 +140,6 @@ OrbisonUpdate:
             move.w  d4, vdpSpriteY(a0)
             move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, vdpSpriteSize(a0)
             move.w  #ORBISON_TILE_ID | (1 << PATTERN_REF_PALETTE_SHIFT), vdpSpriteAttr3(a0)
-
-            ; Restore a0-a1
-            movea.l a5, a0
-            movea.l a6, a1
 
     .notVisible:
         rts

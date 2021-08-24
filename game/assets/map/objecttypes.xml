@@ -14,8 +14,12 @@
  </objecttype>
  <objecttype name="GraphicsBlock" color="#a0a0a4"/>
  <objecttype name="Object" color="#a0a0a4">
-  <property name="xCompensation" type="int" default="0"/>
-  <property name="yCompensation" type="int" default="0"/>
+  <property name="active" type="bool" default="true"/>
+  <property name="enabled" type="bool" default="true"/>
+  <property name="objectTypeTransferable" type="bool" default="false"/>
+  <property name="objectTypePositional" type="bool" default="true"/>
+  <property name="objectTypeXCompensation" type="int" default="0"/>
+  <property name="objectTypeYCompensation" type="int" default="0"/>
  </objecttype>
  <objecttype name="ObjectGroupChunk" color="#a0a0a4"/>
  <objecttype name="PriorityBlock" color="#a0a0a4"/>

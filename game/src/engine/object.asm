@@ -5,19 +5,17 @@
 ;-------------------------------------------------
 ; Object structures
 ; ----------------
-    DEFINE_STRUCT ObjectSpawnData
-        STRUCT_MEMBER.w osdTypeOffset       ; Offset into global ObjectTypeTableBase
-        STRUCT_MEMBER.w osdX                ; X position
-        STRUCT_MEMBER.w osdY                ; Y position
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT ObjectState
+    DEFINE_STRUCT ObjectDescriptor
+        STRUCT_MEMBER.w odTypeOffset        ; Offset into global ObjectTypeTableBase
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT ObjectType
         STRUCT_MEMBER.w otStateSize
-        STRUCT_MEMBER.l otInit              ; otInit(ObjectSpawnData*, ObjectState*) must preserve d6-d7/a0-a2
-        STRUCT_MEMBER.l otUpdate            ; otUpdate(ObjectSpawnData*, ObjectState*, ObjectTypeTableBase*) must preserve d6-d7/a0-a4
+
+        ; In normal cases ObjectDescriptor and ObjectState are the same.
+        ; But they can be decoupled depending on how things are allocated. This depends on the implementation.
+        STRUCT_MEMBER.l otInit              ; otInit(ObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
+        STRUCT_MEMBER.l otUpdate            ; otUpdate(ObjectDescriptor*, ObjectState*) must preserve d6-d7/a2-a6
     DEFINE_STRUCT_END
 
 

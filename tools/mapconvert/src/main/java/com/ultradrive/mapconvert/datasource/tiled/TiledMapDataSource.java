@@ -110,8 +110,10 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
                 .map(tiledObject -> new
                         MapObject(tiledObject.getName(),
                                   UID.create(),
-                                  (int) (tiledObject.getX() + (Integer) tiledObject.getProperty("xCompensation")),
-                                  (int) (tiledObject.getY() + (Integer) tiledObject.getProperty("yCompensation"))))
+                                  tiledObject.getProperties(),
+                                  (int) (tiledObject.getX() + (Integer) tiledObject.getProperty("objectTypeXCompensation")),
+                                  (int) (tiledObject.getY() + (Integer) tiledObject.getProperty("objectTypeYCompensation")),
+                                  tiledObject.getTileXFlip(), tiledObject.getTileYFlip()))
                 .collect(Collectors.toList());
     }
 

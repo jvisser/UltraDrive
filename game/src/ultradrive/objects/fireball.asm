@@ -13,6 +13,11 @@ FIREBALL_EXTENTS Equ 8
 ; Fireball main structures
 ; ----------------
 
+    ; ObjectDescriptor
+    DEFINE_STRUCT FireballDescriptor, EXTENDS, MapObjectDescriptor
+        STRUCT_MEMBER.MapObjectPosition fbPosition
+    DEFINE_STRUCT_END
+
     ; Type
     DEFINE_OBJECT_TYPE Fireball
         dc.l    NoOperation
@@ -72,12 +77,12 @@ FireballLoad:
 ; Update and render
 ; ----------------
 ; Input:
-; - a0: ObjectSpawnData address
-; Uses: d0-d5/a5-a6
+; - a0: FireballDescriptor address
+; Uses: d0-d5/a0-a1
 FireballUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  osdX(a0), d3
+        move.w  fbPosition + opX(a0), d3
         move.w  d3, d5
         sub.w   d0, d3
         subq.w  #FIREBALL_EXTENTS, d3
@@ -92,7 +97,7 @@ FireballUpdate:
 
             ; Convert vertical map coordinates to screen coordinates
             VIEWPORT_GET_Y d1
-            move.w  osdY(a0), d4
+            move.w  fbPosition + opY(a0), d4
             sub.w   d1, d4
             subq.w  #FIREBALL_EXTENTS, d4
 
@@ -105,9 +110,9 @@ FireballUpdate:
             bhi     .notVisible         ; Not visible when sin is negative (ie below lava)
 
                 ; Movement
-                lea     Sin.w, a5
+                lea     Sin.w, a1
                 add.w   d0, d0
-                move.w  (a5, d0), d0
+                move.w  (a1, d0), d0
                 lsr.w   #2, d0
                 sub.w   d0, d4
 
@@ -118,10 +123,6 @@ FireballUpdate:
                 ; Check bottom screen bounds
                 cmpi.w  #224, d4
                 bge     .notVisible
-
-                    ; Save a0-a1
-                    movea.l a0, a5
-                    movea.l a1, a6
 
                     ; Convert to sprite coordinates
                     addi.w  #128, d3
@@ -136,10 +137,6 @@ FireballUpdate:
                     move.w  d4, vdpSpriteY(a0)
                     move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, vdpSpriteSize(a0)
                     move.w  #FIREBALL_TILE_ID | (1 << PATTERN_REF_PALETTE_SHIFT), vdpSpriteAttr3(a0)
-
-                    ; Restore a0-a1
-                    movea.l a5, a0
-                    movea.l a6, a1
 
     .notVisible:
         rts

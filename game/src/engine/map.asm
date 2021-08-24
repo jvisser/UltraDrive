@@ -24,15 +24,17 @@
     DEFINE_STRUCT MapObjectGroup
         STRUCT_MEMBER.b mapogFlagNumber                         ; Each object group has a unique flag number in the active viewport
         STRUCT_MEMBER.b mapogObjectCount
-        STRUCT_MEMBER.w mapogObjectStateOffset                  ; Offset into the map's allocated state array for this group
-        STRUCT_MEMBER.b mapogObjectSpawnData                    ; Marker
+        STRUCT_MEMBER.b mapogTransferableObjectCount
+        STRUCT_MEMBER.b mapogTotalObjectCount
+        STRUCT_MEMBER.w mapogStateOffset                        ; Offset into the map's allocated state array for this group
+        STRUCT_MEMBER.b mapogObjectDescriptors                  ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapHeader
         STRUCT_MEMBER.l mapForegroundAddress
         STRUCT_MEMBER.l mapBackgroundAddress
         STRUCT_MEMBER.l mapTilesetAddress
-        STRUCT_MEMBER.w mapObjectStateSize
+        STRUCT_MEMBER.w mapStateSize
         STRUCT_MEMBER.l mapObjectGroupMapAddress
         STRUCT_MEMBER.l mapViewportConfigurationAddress
     DEFINE_STRUCT_END
@@ -51,10 +53,6 @@
 
     DEFINE_VAR FAST
         VAR.l               mapLoadedMap                        ; MapHeader
-        VAR.w               mapObjectStateAddress
-        VAR.w               mapActiveObjectGroupCount
-        VAR.w               mapActiveObjectGroupSubChunkId
-        VAR.l               mapActiveObjectGroups, 12
     DEFINE_VAR_END
 
 
@@ -107,53 +105,7 @@ MapLoad:
         jsr     TilesetLoad
 
         ; Init objects
-        bsr.s   _MapInitObjects
-        rts
-
-
-;-------------------------------------------------
-; Initialize all objects in the map
-; ----------------
-; Uses: d0-d7/a0-a6
-_MapInitObjects:
-        ; Allocate object state area and store ptr
-        movea.l mapLoadedMap, a3
-        move.w  mapObjectStateSize(a3), d0
-        jsr     MemoryAllocate
-        move.w  a0, mapObjectStateAddress
-
-        ; Init addresses and loop counters
-        movea.l a0, a1                                          ; a1 = Current ObjectState address
-        OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
-        movea.l mapObjectGroupMapAddress(a3), a3
-        movea.l mapogmGroupsBaseAddress(a3), a0                 ; a0 = Current group/object ObjectSpawnData
-        move.w  mapogmGroupsCount(a3), d7                       ; d7 = Object group counter
-        beq     .noObjects
-
-        ; Loop over all groups and objects and call Object.otInit()
-        subq.w  #1, d7
-    .objectGroupLoop:
-
-            move.b  mapogObjectCount(a0), d6                    ; d6 = Object counter
-            ext.w   d6
-            lea     mapogObjectSpawnData(a0), a0                ; a0 = Current ObjectSpawnData address for current group
-
-            swap    d7
-            subq.w  #1, d6
-        .objectLoop:
-
-                ; Call Object.otInit(ObjectSpawnData*, ObjectState*)
-                move.w  osdTypeOffset(a0), d7                   ; d7 = Type offset
-                movea.l otInit(a2, d7), a3
-                jsr     (a3)
-                adda.w  otStateSize(a2, d7), a1                 ; a1 = Next ObjectState address
-
-                ; Next object
-                adda.w  #ObjectSpawnData_Size, a0               ; a0 = Next ObjectSpawnData address
-            dbra    d6, .objectLoop
-            swap    d7
-        dbra    d7, .objectGroupLoop
-    .noObjects:
+        jsr     MapInitObjects
         rts
 
 
@@ -164,209 +116,4 @@ MapUnload:
         jsr     TilesetUnload
 
         move.l  #NULL, mapLoadedMap
-        rts
-
-
-;-------------------------------------------------
-; Calculate sub chunk id
-; ----------------
-; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
-; Uses: result, scratch
-; Output:
-; - result: sub chunk id
-_CALCULATE_SUB_CHUNK_ID Macro result, scratch
-        move.w  d0, \result
-        move.w  d1, \scratch
-        add.w   \result, \result
-        andi.w  #$80, \result
-        andi.w  #$60, \scratch
-        or.w    \scratch, \result
-    Endm
-
-
-;-------------------------------------------------
-; Update active object groups based on view
-; ----------------
-; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
-; Uses: d0-d7/a0-a6
-MapInitActiveObjectGroups:
-    _CALCULATE_SUB_CHUNK_ID d2, d3
-
-    move.w  d2, mapActiveObjectGroupSubChunkId
-    bra     _MapUpdateActiveObjectGroups
-
-
-;-------------------------------------------------
-; Update active object groups based on view. Only updates when new chunks of the map become visible.
-; ----------------
-; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
-; Uses: d0-d7/a0-a6
-MapUpdateActiveObjectGroups:
-        _CALCULATE_SUB_CHUNK_ID d2, d3
-
-        move.w  mapActiveObjectGroupSubChunkId, d3
-        eor.w   d2, d3
-        bne     .updateActiveObjectGroups
-            rts
-
-    .updateActiveObjectGroups:
-        move.w  d2, mapActiveObjectGroupSubChunkId
-
-        ; NB: Fall through to _MapUpdateActiveObjectGroups
-
-
-;-------------------------------------------------
-; Update active object groups based on view
-; ----------------
-; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
-; Uses: d0-d7/a0-a6
-_MapUpdateActiveObjectGroups:
-        clr.w   mapActiveObjectGroupCount
-
-        ; Get number of columns in view
-        moveq   #3, d2
-        btst    #6, d0
-        seq     d3
-        ext.w   d3
-        add.w   d3, d2                                          ; d2 = number of columns - 1
-
-        ; Get number of rows in view
-        moveq   #2, d3
-        move.w  d1, d4
-        andi.w  #$0060, d4
-        seq     d4
-        ext.w   d4
-        add.w   d4, d3                                          ; d3 = number of rows - 1
-
-        ; Convert pixel coordinates to chunk coordinates
-        lsr.w   #7, d0                                          ; d0 = horizontal chunk coordinate
-        lsr.w   #7, d1                                          ; d1 = vertical chunk coordinate
-
-        ; Get pointers
-        MAP_GET a0
-        movea.l mapObjectGroupMapAddress(a0), a1                ; a1 = mapObjectGroupMapAddress
-        movea.l mapogmContainersTableAddress(a1), a2            ; a2 = mapogmContainersTableAddress
-        movea.l mapogmContainersBaseAddress(a1), a3             ; a3 = mapogmContainersBaseAddress
-        movea.l mapogmGroupsBaseAddress(a1), a4                 ; a4 = mapogmGroupsBaseAddress
-        lea     mapActiveObjectGroups, a5                       ; a5 = mapActiveObjectGroups
-        movea.l mapForegroundAddress(a0), a0
-        move.w  mapStride(a0), d4
-        subq.w  #SIZE_WORD, d4
-        sub.w   d2, d4
-        sub.w   d2, d4                                          ; d4 map stride - number of columns in view
-        move.w  d1, d5
-        add.w   d5, d5
-        move.w  mapRowOffsetTable(a0, d5), d5                   ; d5 = map row offset of top visible row
-        movea.l mapDataAddress(a0), a0
-        adda.w  d5, a0
-        move.w  d0, d6
-        add.w   d6, d6
-        adda.w  d6, a0                                          ; a0 = address of top left coordinate of first chunk in viewport
-
-        moveq   #0, d6                                          ; d6 = accumulated group flags
-    .rowLoop:
-
-        swap    d4
-        move.w  d2, d4                                          ; d4 = number of columns - 1
-        move.w  d0, d5                                          ; d5 = horizontal chunk coordinate
-        .colLoop:
-
-            ; Load object container address
-            move.w  d1, d7
-            lsr.w   #3, d7
-            add.w   d7, d7
-            move.w  mapogmRowOffsetTable(a1, d7), a6            ; a6 = container table vertical offset
-            move.w  d5, d7
-            lsr.w   #3, d7
-            add.w   d7, d7
-            add.w   a6, d7                                      ; d7 = container offset
-            move.w  (a2, d7), d7                                ; d7 = mapogmContainersTableAddress[d7] (= container offset into mapogmContainersBaseAddress)
-            lea     (a3, d7), a6                                ; a6 = mapogmContainersBaseAddress[d7] (= container address)
-
-            ; Load object group from container
-            move.w  (a0)+, d7                                   ; d7 = chunk ref
-            rol.w   #3, d7
-            andi.w  #7, d7                                      ; d7 = container group id
-            beq     .emptyObjectGroup
-
-                subq.w  #1, d7                                  ; d7 = container group index
-                add.w   d7, d7
-                move.w  (a6, d7), d7                            ; d7 = object group offset
-                lea     (a4, d7), a6                            ; a6 = object group address
-
-                ; Check if new group
-                move.b  mapogFlagNumber(a6), d7
-                bset    d7, d6
-                bne     .objectGroupAlreadyActive
-
-                    addq.w #1, mapActiveObjectGroupCount
-
-                    ; Add to active group list
-                    move.l  a6, (a5)+
-
-            .objectGroupAlreadyActive:
-
-        .emptyObjectGroup:
-
-            addq.w  #1, d5
-            dbra    d4, .colLoop
-
-        swap    d4
-        adda.w  d4, a0
-        addq.w  #1, d1
-        dbra    d3, .rowLoop
-        rts
-
-
-;-------------------------------------------------
-; Update all currently active objects
-; ----------------
-; Uses: d0-d7/a0-a6
-MapUpdateObjects:
-        move.w  mapActiveObjectGroupCount, d7
-        bne     .activeGroups
-            rts
-
-    .activeGroups:
-
-        ; Load addresses
-        OBJECT_TYPE_TABLE_GET a2                                ; a2 = Type table base address
-        lea     mapActiveObjectGroups, a3
-        movea.w mapObjectStateAddress, a4
-
-        subq.w  #1, d7
-    .activeGroupLoop:
-
-            movea.l (a3)+, a0                                   ; a0 = Current active group
-
-            move.w  mapogObjectStateOffset(a0), d6              ; d6 = Object state offset for current group
-            lea     (a4, d6), a1                                ; a1 = Current ObjectState address
-
-            moveq   #0, d6
-            move.b  mapogObjectCount(a0), d6                    ; d6 = Number of objects in current groups
-            lea     mapogObjectSpawnData(a0), a0                ; a0 = Current ObjectSpawnData
-
-            swap    d7
-            subq.w  #1, d6                                      ; d6 = Number of loops
-        .objectLoop:
-
-                move.w  osdTypeOffset(a0), d7                   ; d7 = Type offset for current object
-
-                ; call Object.otUpdate(ObjectSpawnData*, ObjectState*, ObjectTypeTableBase*)
-                movea.l otUpdate(a2, d7), a5
-                jsr     (a5)
-
-                adda.w  otStateSize(a2, d7), a1                 ; a1 = Next ObjectState address
-                adda.w  #ObjectSpawnData_Size, a0               ; a0 = Next ObjectSpawnData address
-            dbra    d6, .objectLoop
-            swap    d7
-        dbra    d7, .activeGroupLoop
         rts
