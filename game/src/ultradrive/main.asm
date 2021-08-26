@@ -13,19 +13,19 @@
 ; ----------------
 _InitPlayer:
         lea     player, a0
-        move.w  (viewport + viewportForeground + camX), d0
-        move.w  (viewport + viewportForeground + camY), d1
+        VIEWPORT_GET_X d0
+        VIEWPORT_GET_Y d1
         addi.l  #320/2, d0
         addi.l  #224/2, d1
         jsr     PlayerInit
 
         ; Create player placeholder sprite (Until we have sprite engine)
-PLAYER_SPRITE_TILE Equ 1000 ; Use Tileset.tsVramFreeAreaMin
+PLAYER_SPRITE_TILE Equ 1000 ; Use Tileset.vramFreeAreaMin
         moveq   #1, d0
         jsr     VDPSpriteAlloc
         move.l  a0, spriteAddr
-        move.w  #PLAYER_SPRITE_TILE, vdpSpriteAttr3(a0)
-        move.b  #VDP_SPRITE_SIZE_V4 | VDP_SPRITE_SIZE_H2, vdpSpriteSize(a0)
+        move.w  #PLAYER_SPRITE_TILE, VDPSprite_attr(a0)
+        move.b  #VDP_SPRITE_SIZE_V4 | VDP_SPRITE_SIZE_H2, VDPSprite_size(a0)
 
         ; Upload sprite patterns (15*31)
         VDP_ADDR_SET WRITE, VRAM, (PLAYER_SPRITE_TILE * $20), $2
@@ -49,16 +49,16 @@ _UpdatePlayer:
         jsr     ViewportFinalize
 
         ; Update player placeholder sprite
-        move.w  (player + entityX), d0
-        move.w  (player + entityY), d1
-        sub.w   (viewport + viewportForeground + camX), d0
-        sub.w   (viewport + viewportForeground + camY), d1
+        move.w  (player + Entity_x), d0
+        move.w  (player + Entity_y), d1
+        sub.w   (viewport + Viewport_foreground + Camera_x), d0
+        sub.w   (viewport + Viewport_foreground + Camera_y), d1
         add.w   #128 - 7, d0
         add.w   #128 - 15, d1
 
         movea.l  spriteAddr, a1
-        move.w  d0, vdpSpriteX(a1)
-        move.w  d1, vdpSpriteY(a1)
+        move.w  d0, VDPSprite_x(a1)
+        move.w  d1, VDPSprite_y(a1)
         rts
 
 

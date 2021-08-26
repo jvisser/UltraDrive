@@ -15,12 +15,12 @@ PLAYER_EXTENTS_WALL_Y   Equ     7
 ; Player structure
 ; ----------------
     DEFINE_STRUCT Player, EXTENDS, Entity
-        STRUCT_MEMBER.l playerStateHandler
-        STRUCT_MEMBER.l playerStateChangeFrameNumber
-        STRUCT_MEMBER.l playerXSpeed
-        STRUCT_MEMBER.l playerYSpeed
-        STRUCT_MEMBER.l playerGroundSpeed
-        STRUCT_MEMBER.w playerAngle
+        STRUCT_MEMBER.l stateHandler
+        STRUCT_MEMBER.l stateChangeFrameNumber
+        STRUCT_MEMBER.l xSpeed
+        STRUCT_MEMBER.l ySpeed
+        STRUCT_MEMBER.l groundSpeed
+        STRUCT_MEMBER.w angle
     DEFINE_STRUCT_END
 
 
@@ -35,11 +35,11 @@ PlayerInit:
         ; Convert position to 16.16 fixed point
         INT_TO_FP16 d0
         INT_TO_FP16 d1
-        move.l  d0, entityX(a0)
-        move.l  d1, entityY(a0)
+        move.l  d0, Entity_x(a0)
+        move.l  d1, Entity_y(a0)
 
         ; TODO: Check ground sensors to find floor if any: walk, else air
-        move.l  #PlayerStateWalk, playerStateHandler(a0)
+        move.l  #PlayerStateWalk, Player_stateHandler(a0)
         rts
 
 
@@ -49,7 +49,7 @@ PlayerInit:
 ; Input:
 ; - a0: player
 PlayerUpdate:
-        movea.l playerStateHandler(a0), a1
+        movea.l Player_stateHandler(a0), a1
         jmp (a1)
 
 
@@ -94,9 +94,9 @@ _MOVE_IF Macro up, down, var, disp, speed
         IO_GET_DEVICE_STATE IO_PORT_1, d6
 
         MAP_GET a0
-        movea.l mapForegroundAddress(a0), a0
-        move.w  (player + entityX), d0
-        move.w  (player + entityY), d1
+        movea.l MapHeader_foregroundAddress(a0), a0
+        move.w  (player + Entity_x), d0
+        move.w  (player + Entity_y), d1
 
         ; If button C is pressed move at max speed
         btst    #MD_PAD_C, d6
@@ -172,8 +172,8 @@ _MOVE_IF Macro up, down, var, disp, speed
     .collisionDone:
 
         ; Update player coordinates
-        move.w  d0, (player + entityX)
-        move.w  d1, (player + entityY)
+        move.w  d0, (player + Entity_x)
+        move.w  d1, (player + Entity_y)
 
         Purge _MOVE_IF
         rts

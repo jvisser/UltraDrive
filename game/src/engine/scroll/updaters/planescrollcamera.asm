@@ -10,8 +10,8 @@
     ; Plane scroll camera specific configuration
     ; ----------------
     DEFINE_STRUCT PlaneScrollCameraConfiguration
-        STRUCT_MEMBER.b     psccCameraProperty              ; Camera property to base scroll value on
-        STRUCT_MEMBER.b     psccCameraValueShift            ; Number of bits to shift the camera property value before using
+        STRUCT_MEMBER.b     cameraProperty              ; Camera property to base scroll value on
+        STRUCT_MEMBER.b     cameraValueShift            ; Number of bits to shift the camera property value before using
     DEFINE_STRUCT_END
 
 
@@ -20,9 +20,9 @@
     ; ----------------
     ; struct ScrollValueUpdater
     planeScrollCamera:
-        ; .svuInit
+        ; .init
         dc.l _PlaneScrollCameraInit
-        ; .svuUpdate
+        ; .update
         dc.l _PlaneScrollCameraUpdate
 
 
@@ -32,44 +32,44 @@
 
     ; struct PlaneScrollCameraConfiguration
     planeHorizontalScrollCameraConfig:
-        ; .psccCameraProperty
-        dc.b    camX
-        ; .psccCameraValueShift
+        ; .cameraProperty
+        dc.b    Camera_x
+        ; .cameraValueShift
         dc.b    0
 
     ; struct PlaneScrollCameraConfiguration
     planeVerticalScrollCameraConfig:
-        ; .psccCameraProperty
-        dc.b    camY
-        ; .psccCameraValueShift
+        ; .cameraProperty
+        dc.b    Camera_y
+        ; .cameraValueShift
         dc.b    0
 
     ; struct PlaneScrollCameraConfiguration
     planeHorizontalScrollCameraHalfSpeedConfig:
-        ; .psccCameraProperty
-        dc.b    camX
-        ; .psccCameraValueShift
+        ; .cameraProperty
+        dc.b    Camera_x
+        ; .cameraValueShift
         dc.b    1
 
     ; struct PlaneScrollCameraConfiguration
     planeVerticalScrollCameraHalfSpeedConfig:
-        ; .psccCameraProperty
-        dc.b    camY
-        ; .psccCameraValueShift
+        ; .cameraProperty
+        dc.b    Camera_y
+        ; .cameraValueShift
         dc.b    1
 
     ; struct PlaneScrollCameraConfiguration
     planeHorizontalScrollCameraQuarterSpeedConfig:
-        ; .psccCameraProperty
-        dc.b    camX
-        ; .psccCameraValueShift
+        ; .cameraProperty
+        dc.b    Camera_x
+        ; .cameraValueShift
         dc.b    2
 
     ; struct PlaneScrollCameraConfiguration
     planeVerticalScrollCameraQuarterSpeedConfig:
-        ; .psccCameraProperty
-        dc.b    camY
-        ; .psccCameraValueShift
+        ; .cameraProperty
+        dc.b    Camera_y
+        ; .cameraValueShift
         dc.b    2
 
 
@@ -82,9 +82,9 @@
 ; - a2: PlaneScrollCameraConfiguration address
 _PlaneScrollCameraInit:
         moveq   #0, d0
-        move.b  psccCameraProperty(a2), d0
+        move.b  PlaneScrollCameraConfiguration_cameraProperty(a2), d0
         move.w  (a0, d0), d0
-        move.b  psccCameraValueShift(a2), d1
+        move.b  PlaneScrollCameraConfiguration_cameraValueShift(a2), d1
         lsr.w   d1, d0
         move.w  d0, (a1)
         rts
@@ -103,9 +103,9 @@ _PlaneScrollCameraUpdate:
         moveq   #0, d0
         moveq   #0, d1
 
-        move.b  psccCameraProperty(a2), d1
+        move.b  PlaneScrollCameraConfiguration_cameraProperty(a2), d1
         move.w  (a0, d1), d1
-        move.b  psccCameraValueShift(a2), d2
+        move.b  PlaneScrollCameraConfiguration_cameraValueShift(a2), d2
         lsr.w   d2, d1
         cmp.w   (a1), d1
         beq     .noMovement

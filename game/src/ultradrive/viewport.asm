@@ -40,9 +40,9 @@ rotatingBackgroundViewportConfiguration:
     ; ----------------
     ViewportInitAngle:
             moveq   #0, d0
-            move.w  d0, (rotationPosition + rsapAngle)
-            move.w  d0, (rotationPosition + rsapHorizontalOffset)
-            move.w  d0, (rotationPosition + rsapVerticalOffset)
+            move.w  d0, (rotationPosition + RotateScrollPosition_angle)
+            move.w  d0, (rotationPosition + RotateScrollPosition_horizontalOffset)
+            move.w  d0, (rotationPosition + RotateScrollPosition_verticalOffset)
             rts
 
     ;-------------------------------------------------
@@ -59,5 +59,5 @@ rotatingBackgroundViewportConfiguration:
             move.w  (a0, d0), d0
             asr.w   #3, d0
             addi.w  #32, d0
-            move.w  d0, rotationPosition + rsapAngle
+            move.w  d0, rotationPosition + RotateScrollPosition_angle
             rts

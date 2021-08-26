@@ -15,13 +15,13 @@ BLOB_EXTENTS Equ 8
 
     ; ObjectDescriptor
     DEFINE_STRUCT BlobDescriptor, EXTENDS, MapStatefulObjectDescriptor
-        STRUCT_MEMBER.MapObjectPosition blobPosition
+        STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
 
     ; State
     DEFINE_STRUCT BlobState
-        STRUCT_MEMBER.w blobX
-        STRUCT_MEMBER.w blobY
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
     ; Type
@@ -86,8 +86,8 @@ BlobLoad:
 ; - a0: BlobDescriptor address
 ; - a1: BlobState address
 BlobInit:
-        move.w  blobPosition + opX(a0), blobX(a1)
-        move.w  blobPosition + opY(a0), blobY(a1)
+        move.w  BlobDescriptor_position + MapObjectPosition_x(a0), BlobState_x(a1)
+        move.w  BlobDescriptor_position + MapObjectPosition_y(a0), BlobState_y(a1)
         rts
 
 
@@ -101,7 +101,7 @@ BlobInit:
 BlobUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  blobX(a1), d3
+        move.w  BlobState_x(a1), d3
         sub.w   d0, d3
         subq.w  #BLOB_EXTENTS, d3
 
@@ -115,7 +115,7 @@ BlobUpdate:
 
         ; Convert vertical map coordinates to screen coordinates
         VIEWPORT_GET_Y d1
-        move.w  blobY(a1), d4
+        move.w  BlobState_y(a1), d4
         sub.w   d1, d4
         subq.w  #BLOB_EXTENTS, d4
 
@@ -136,10 +136,10 @@ BlobUpdate:
             jsr     VDPSpriteAlloc
 
             ; Update sprite attribute
-            move.w  d3, vdpSpriteX(a0)
-            move.w  d4, vdpSpriteY(a0)
-            move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, vdpSpriteSize(a0)
-            move.w  #BLOB_TILE_ID, vdpSpriteAttr3(a0)
+            move.w  d3, VDPSprite_x(a0)
+            move.w  d4, VDPSprite_y(a0)
+            move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, VDPSprite_size(a0)
+            move.w  #BLOB_TILE_ID, VDPSprite_attr(a0)
 
     .notVisible:
         rts

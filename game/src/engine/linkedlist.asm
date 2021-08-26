@@ -6,8 +6,8 @@
 ; Linked list/node structure. Uses short pointers so only works for addresses >= $ff8000
 ; ----------------
     DEFINE_STRUCT LinkedList
-        STRUCT_MEMBER.w llNext
-        STRUCT_MEMBER.w llPrevious
+        STRUCT_MEMBER.w next
+        STRUCT_MEMBER.w previous
     DEFINE_STRUCT_END
 
 
@@ -23,14 +23,14 @@ LINKED_LIST_INIT Macro node
 ; Insert before (inputs must be address registers)
 ; ----------------
 LINKED_LIST_INSERT_BEFORE Macro existingNode, newNode, scratch
-        movea.w llPrevious(\existingNode), \scratch
+        movea.w LinkedList_previous(\existingNode), \scratch
         cmpa.w  #0, \scratch
         beq     .noPrevious\@
-            move.w  \newNode, llNext(\scratch)
+            move.w  \newNode, LinkedList_next(\scratch)
     .noPrevious\@:
-        move.w  \newNode, llPrevious(\existingNode)
-        move.w  \scratch, llPrevious(\newNode)
-        move.w  \existingNode, llNext(\newNode)
+        move.w  \newNode, LinkedList_previous(\existingNode)
+        move.w  \scratch, LinkedList_previous(\newNode)
+        move.w  \existingNode, LinkedList_next(\newNode)
     Endm
 
 
@@ -38,14 +38,14 @@ LINKED_LIST_INSERT_BEFORE Macro existingNode, newNode, scratch
 ; Insert after (inputs must be address registers)
 ; ----------------
 LINKED_LIST_INSERT_AFTER Macro existingNode, newNode, scratch
-        movea.w llNext(\existingNode), \scratch
+        movea.w LinkedList_next(\existingNode), \scratch
         cmpa.w  #0, \scratch
         beq     .noNext\@
-            move.w  \newNode, llPrevious(\scratch)
+            move.w  \newNode, LinkedList_previous(\scratch)
     .noNext\@:
-        move.w  \newNode, llNext(\existingNode)
-        move.w  \scratch, llNext(\newNode)
-        move.w  \existingNode, llPrevious(\newNode)
+        move.w  \newNode, LinkedList_next(\existingNode)
+        move.w  \scratch, LinkedList_next(\newNode)
+        move.w  \existingNode, LinkedList_previous(\newNode)
     Endm
 
 
@@ -53,15 +53,15 @@ LINKED_LIST_INSERT_AFTER Macro existingNode, newNode, scratch
 ; Remove self from list
 ; ----------------
 LINKED_LIST_REMOVE Macro node, scratch
-        movea.w llNext(\node), \scratch
+        movea.w LinkedList_next(\node), \scratch
         cmpa.w  #0, \scratch
         beq     .noNext\@
-            move.w  llPrevious(\node), llPrevious(\scratch)
+            move.w  LinkedList_previous(\node), LinkedList_previous(\scratch)
     .noNext\@:
 
-        movea.w llPrevious(\node), \scratch
+        movea.w LinkedList_previous(\node), \scratch
         beq     .noPrevious\@
         beq     .noNext\@
-            move.w  llNext(\node), llNext(\scratch)
+            move.w  LinkedList_next(\node), LinkedList_next(\scratch)
     .noPrevious\@:
     Endm

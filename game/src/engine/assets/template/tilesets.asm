@@ -35,42 +35,42 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
     ; struct Tileset
     Tileset[(${tilesetName})]:
-        ; .tsChunksCount
+        ; .chunksCount
         dc.w [(${tileset.chunkTileset.size})]
-        ; .tsBlocksCount
+        ; .blocksCount
         dc.w [(${tileset.blockTileset.size})]
-        ; .tsPatternCount
+        ; .patternCount
         dc.w [(${tileset.patternAllocation.size})]
-        ; .tsPatternSectionCount
+        ; .patternSectionCount
         dc.w [(${tileset.patternAllocation.patternAllocationAreas.size})]
-        ; .tsAnimationsCount
+        ; .animationsCount
         dc.w [(${videoAnimations.size})]
-        ; .tsBlockMetaDataAddress
+        ; .blockMetaDataAddress
         dc.l BlockMetaData[(${collisionBlockListName})]
-        ; .tsBlockMetaDataMappingTableAddress
+        ; .blockMetaDataMappingTableAddress
         dc.l Tileset[(${tilesetName})]BlockMetaDataMapping
-        ; .tsChunksAddress
+        ; .chunksAddress
         dc.l Tileset[(${tilesetName})]ChunkData
-        ; .tsBlocksAddress
+        ; .blocksAddress
         dc.l Tileset[(${tilesetName})]BlockData
-        ; .tsPatternSectionsTableAddress
+        ; .patternSectionsTableAddress
         dc.l Tileset[(${tilesetName})]PatternSectionsTable
-        ; .tsPaletteAddress
+        ; .paletteAddress
         dc.l Tileset[(${tilesetName})]PaletteData
-        ; .tsAlternativePaletteAddress
+        ; .alternativePaletteAddress
         dc.l [(${tileset.properties['waterColor'] != null ? ('Tileset' + tilesetName + 'AlternativePaletteData') : ('NULL')})]
-        ; .tsColorTransitionTableAddress
+        ; .colorTransitionTableAddress
         dc.l [(${tileset.properties['colorTransitionTable'] != null ? ('Tileset' + tilesetName + 'ColorTransitionTable') : ('NULL')})]
-        ; .tsAnimationsTableAddress
+        ; .animationsTableAddress
         dc.l Tileset[(${tilesetName})]AnimationsTable
-        ; .tsViewportBackgroundAnimationsAddress
+        ; .viewportBackgroundAnimationsAddress
         dc.l Tileset[(${tilesetName})]ViewportAnimationTableBackground
-        ; .tsViewportForegroundAnimationsAddress
+        ; .viewportForegroundAnimationsAddress
         dc.l Tileset[(${tilesetName})]ViewportAnimationTableForeground
         [# th:with="mainAllocation=${tileset.patternAllocation.getAllocationArea('Main')}"]
-            ; .tsVramFreeAreaMin
+            ; .vramFreeAreaMin
             dc.w [(${#format.format('$%04x', (mainAllocation.patternBaseId + mainAllocation.totalPatternAllocationSize) * 32)})]
-            ; .tsVramFreeAreaMax
+            ; .vramFreeAreaMax
             dc.w [(${#format.format('$%04x', (mainAllocation.size - mainAllocation.totalPatternAllocationSize) * 32)})]
         [/]
 
@@ -82,9 +82,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
     ; struct TilesetPalette
     Tileset[(${tilesetName})]PaletteData:
-        ; .tsPaletteDMATransferCommandList
+        ; .paletteDMATransferCommandList
         VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]PaletteColors, 0, [(${tileset.palette.size})]
-        ; .tsColors
+        ; .colors
         Tileset[(${tilesetName})]PaletteColors:
             [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette)}" ]
                 [(${color})]
@@ -99,9 +99,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         ; ----------------
         ; struct TilesetPalette
         Tileset[(${tilesetName})]AlternativePaletteData:
-            ; .tsPaletteDMATransferCommandList
+            ; .paletteDMATransferCommandList
             VDP_DMA_DEFINE_CRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]AlternativePaletteColors, 0, [(${tileset.palette.size})]
-            ; .tsColors
+            ; .colors
             Tileset[(${tilesetName})]AlternativePaletteColors:
                 [# th:each="color : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', tileset.palette.blend(#convert.tilesetColor(alternativePaletteTargetColor), 0.5f))}" ]
                     [(${color})]
@@ -118,9 +118,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
         ; ----------------
         ; struct TilesetColorTransitionTable
         Tileset[(${tilesetName})]ColorTransitionTable:
-            ; .tscttCount
+            ; .count
             dc.w    [(${colorTransitionTable.size})]
-            ; .tscttPaletteColorOffsets
+            ; .paletteColorOffsets
             [# th:each="paletteOffset : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', colorTransitionTable.{#this * 2})}" ]
                 [(${paletteOffset})]
             [/]
@@ -173,20 +173,20 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
         ; struct TilesetPatternSection
         Tileset[(${tilesetName})]PatternSection[(${allocation.id})]:
-            ; .tsModuleCount
+            ; .moduleCount
             dc.w [(${#format.format('$%04x', ((allocation.allocatedPatternSize * 32) / maxModuleSize) + (((allocation.allocatedPatternSize * 32) % maxModuleSize) != 0 ? 1 : 0))})]
 
-            ; .tsModules
+            ; .modules
             [# th:if="${allocation.allocatedPatternSize > 0}" th:each="module, iter : ${#collection.group(maxModuleSize, #byteBE.from(#collection.flatten(allocation.patterns)))}"]
                 ; Module [(${iter.index})]
                 [# th:with="compressionResult=${#comper.compress(module)}, moduleOffset=${iter.index * maxModuleSize}"]
-                    ; .tsPatternCompressedSize (uncompressedSize=[(${compressionResult.uncompressedSize})], compressedSize=[(${compressionResult.compressedSize})], ratio=[(${compressionResult.compressionRatio})])
+                    ; .patternCompressedSize (uncompressedSize=[(${compressionResult.uncompressedSize})], compressedSize=[(${compressionResult.compressedSize})], ratio=[(${compressionResult.compressionRatio})])
                     dc.w [(${compressionResult.compressedSize})]
 
-                    ; .tsPatternDMATransferCommandList
+                    ; .patternDMATransferCommandList
                     VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST tilesetPatternDecompressionBuffer, [(${allocation.patternBaseId * 32 + moduleOffset})], [(${module.size / 2})]
 
-                    ; .tsPatternData
+                    ; .patternData
                     [# th:each="compressedPatternData : ${#format.formatArray('dc.b ', ', ', 16, '$%02x', compressionResult)}" ]
                         [(${compressedPatternData})]
                     [/]
@@ -212,15 +212,15 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     [# th:each="animation : ${videoAnimations}"]
         ; struct TilesetAnimation ([(${animation.animationId})])
         Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]:
-            ; .tsAnimationFrameCount
+            ; .animationFrameCount
             dc.w [(${animation.frameCount})]
-            ; .tsAnimationFrameTransferListAddress
+            ; .animationFrameTransferListAddress
             dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList
-            ; .tsAnimationInitialTrigger
+            ; .animationInitialTrigger
             dc.w [(${animation.properties['animationInitialTrigger']})]
-            ; .tsAnimationTriggerInterval
+            ; .animationTriggerInterval
             dc.w [(${animation.properties['animationTriggerInterval']})]
-            ; .tsAnimationFrameInterval
+            ; .animationFrameInterval
             dc.w [(${animation.properties['animationFrameInterval']})]
     [/]
 
@@ -231,11 +231,11 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
         ; struct TilesetViewportAnimations
         Tileset[(${tilesetName})]ViewportAnimationTable[(${viewportCamera})]:
-            ; .tsvpAnimationsGroupCount
+            ; .animationsGroupCount
             dc.w [(${viewportAnimationGroups.size})]
-            ; .tsvpAnimationsGroupStateAddress
+            ; .animationsGroupStateAddress
             dc.w $\$VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS
-            ; .tsvpAnimationsGroupTable
+            ; .animationsGroupTable
             [# th:each="animationGroup, iter : ${viewportAnimationGroups}" th:with="animationGroupProperties=${animationGroup[0].properties}"]
                 dc.l Tileset[(${tilesetName})]ViewportAnimationGroup[(${viewportCamera})][(${iter.index})]
             [/]
@@ -248,18 +248,18 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
                 ; struct TilesetViewportAnimationGroup
                 Tileset[(${tilesetName})]ViewportAnimationGroup[(${viewportCamera})][(${iter.index})]:
-                    ; .tsvpAnimationGroupCameraProperty
-                    dc.w cam[(${#strings.toUpperCase(animationGroupProperties['animationAxis'])})]
-                    ; .tsvpShift
+                    ; .cameraProperty
+                    dc.w Camera_[(${#strings.toLowerCase(animationGroupProperties['animationAxis'])})]
+                    ; .shift
                     dc.w [(${animationGroupProperties['animationShift']})]
-                    ; .tsvpAnimationCount
+                    ; .animationCount
                     dc.w [(${animationGroup.size})]
-                    ; .tsvpAnimationsTable
+                    ; .animationsTable
                     [# th:each="animation : ${animationGroup}"]
                         ; struct TilesetAnimationBase ([(${animation.animationId})])
-                        ; .tsAnimationFrameCount (For viewport animations this will act as the frame index mask so it will be: frameCount - 1)
+                        ; .animationFrameCount (For viewport animations this will act as the frame index mask so it will be: frameCount - 1)
                         dc.w [(${#format.format('$%02x', animation.frameCount - 1)})]
-                        ; .tsAnimationFrameTransferListAddress
+                        ; .animationFrameTransferListAddress
                         dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList
                     [/]
             [/]
@@ -318,9 +318,9 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
     ; struct BlockMetaData
     BlockMetaData[(${collisionBlockListName})]:
-        ; .tsBlockCollisionTableAddress
+        ; .blockCollisionTableAddress
         dc.l BlockMetaDataCollision[(${collisionBlockListName})]
-        ; .tsBlockAngleTableAddress
+        ; .blockAngleTableAddress
         dc.l BlockMetaDataAngle[(${collisionBlockListName})]
 
     ; Collision height fields

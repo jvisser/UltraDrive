@@ -15,9 +15,9 @@
     ; ----------------
     ; struct VDPScrollUpdater
     planeVerticalVDPScrollUpdater:
-        ; .vdpsuInit
+        ; .init
         dc.l _PlaneVerticalVDPScrollUpdaterInit
-        ; .vdpsuUpdate
+        ; .update
         dc.l _PlaneVerticalVDPScrollUpdaterUpdate
 
 
@@ -32,8 +32,8 @@ _PlaneVerticalVDPScrollUpdaterInit:
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_VSCROLL_CELL
 
         ; Initialize scroll values
-        VDP_SCROLL_UPDATER_INIT Vertical, Background, PlaneVerticalVDPScrollUpdaterState
-        VDP_SCROLL_UPDATER_INIT Vertical, Foreground, PlaneVerticalVDPScrollUpdaterState
+        VDP_SCROLL_UPDATER_INIT Vertical, background, PlaneVerticalVDPScrollUpdaterState
+        VDP_SCROLL_UPDATER_INIT Vertical, foreground, PlaneVerticalVDPScrollUpdaterState
 
         ; Setup VDP
         bsr     _VPlaneVDPScrollUpdaterCommit
@@ -66,8 +66,8 @@ _PlaneVerticalVDPScrollUpdaterUpdate:
 ; - a0: Viewport
 ; Uses: d0-d1/a1-a2
 _VPlaneVDPScrollUpdaterCommit:
-        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Vertical, Foreground, a1
-        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Vertical, Background, a2
+        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Vertical, foreground, a1
+        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Vertical, background, a2
 
         ; Update vertical scroll
         VDP_ADDR_SET WRITE, VSRAM, $00, SIZE_WORD

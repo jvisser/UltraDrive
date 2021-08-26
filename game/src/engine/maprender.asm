@@ -17,17 +17,17 @@
 ; Should be called at least once before using the map library or any time the VDP plane size changes
 ; ----------------
 MapRenderInit:
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d1
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
+        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d1
+        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d0
 
-        move.w  #2, (mapRowBufferDMATransfer + dmaDataStride)
-        move.w  d1, (mapRowBufferDMATransfer + dmaLength)
-        move.w  #$007f, (mapRowBufferDMATransfer + dmaSource)
+        move.w  #2, (mapRowBufferDMATransfer + VDPDMATransfer_dataStride)
+        move.w  d1, (mapRowBufferDMATransfer + VDPDMATransfer_length)
+        move.w  #$007f, (mapRowBufferDMATransfer + VDPDMATransfer_source)
 
         add.w   d1, d1
-        move.w  d1, (mapColumnBufferDMATransfer + dmaDataStride)
-        move.w  d0, (mapColumnBufferDMATransfer + dmaLength)
-        move.w  #$007f, (mapColumnBufferDMATransfer + dmaSource)
+        move.w  d1, (mapColumnBufferDMATransfer + VDPDMATransfer_dataStride)
+        move.w  d0, (mapColumnBufferDMATransfer + VDPDMATransfer_length)
+        move.w  #$007f, (mapColumnBufferDMATransfer + VDPDMATransfer_source)
 
         ; NB: Fall through to MapRenderReset
 
@@ -114,7 +114,7 @@ _RENDER_PATTERN_FIXED Macro value
                 move.w  \value, (a4, d1)                            ; Write empty pattern to DMA buffer.
                 addq.w  #SIZE_WORD, d1
             Else
-                move.w  \value, (a4)+                              ; Write pattern to DMA buffer
+                move.w  \value, (a4)+                               ; Write pattern to DMA buffer
             EndIf
     Endm
 
@@ -309,11 +309,11 @@ MapRenderRow:
         movea.l a0, a6
 
         ; Calculate DMA target
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d4
+        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d4
         subq.w  #1, d4
         and.w   d4, d0
         moveq   #0, d5
-        move.w  (vdpMetrics + vdpPlaneWidthShift), d5
+        move.w  (vdpMetrics + VDPMetrics_planeWidthShift), d5
         lsl.w   d5, d0
         move.w  d0, d5
         andi.w  #$3fff, d0
@@ -322,12 +322,12 @@ MapRenderRow:
         swap    d5
         or.w    #VDP_CMD_AS_DMA, d5
         add.l   d3, d5
-        move.l  d5, (mapRowBufferDMATransfer + dmaTarget)
+        move.l  d5, (mapRowBufferDMATransfer + VDPDMATransfer_target)
 
         ; Calculate DMA source
         move.w  mapCurrentRenderBuffer, d5
         asr.w   #1, d5
-        move.w  d5, (mapRowBufferDMATransfer + dmaSource + 2)
+        move.w  d5, (mapRowBufferDMATransfer + VDPDMATransfer_source + 2)
 
         ; Queue DMA job
         VDP_DMA_QUEUE_ADD mapRowBufferDMATransfer
@@ -445,8 +445,8 @@ _RENDER_BLOCK Macro position
         ; - a4: Base address of renderbuffer
 
         ; Load address registers
-        lea     mapRowOffsetTable(a0), a1                           ; a1 = row offset table
-        movea.l mapDataAddress(a0), a0                              ; a0 = map data
+        lea     Map_rowOffsetTable(a0), a1                          ; a1 = row offset table
+        movea.l Map_dataAddress(a0), a0                             ; a0 = map data
 
         ; Store address of first chunk in a1
         move.w  d1, d5
@@ -472,7 +472,7 @@ _RENDER_BLOCK Macro position
         ; Buffer offset/rotation mask
         movea.w  d2, a0                                             ; a0 = render size
         move.w  d1, d2                                              ; d2 = current map column
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d0
+        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d0
         subq.w  #1, d0
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset
@@ -501,19 +501,19 @@ MapRenderColumn:
         ; Queue DMA target
         moveq   #0, d5
         move.w  d0, d5
-        move.w  (vdpMetrics + vdpPlaneWidthPatterns), d4
+        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d4
         subq.w  #1, d4
         and.w   d4, d5
         add.w   d5, d5
         swap    d5
         or.w    #VDP_CMD_AS_DMA, d5
         add.l   d3, d5
-        move.l  d5, (mapColumnBufferDMATransfer + dmaTarget)
+        move.l  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_target)
 
         ; Calculate DMA source
         move.w  mapCurrentRenderBuffer, d5
         asr.w   #1, d5
-        move.w  d5, (mapColumnBufferDMATransfer + dmaSource + 2)
+        move.w  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_source + 2)
 
         ; Calculate DMA target
         VDP_DMA_QUEUE_ADD mapColumnBufferDMATransfer
@@ -636,10 +636,10 @@ _RENDER_BLOCK Macro position
 
         ; Load address registers
         moveq   #0, d7
-        move.w  mapWidth(a0), d7
-        lea     mapRowOffsetTable(a0), a1                           ; a1 = row offset table
-        movea.w mapStride(a0), a6                                   ; a6 = map stride
-        movea.l mapDataAddress(a0), a0                              ; a0 = map data
+        move.w  Map_width(a0), d7
+        lea     Map_rowOffsetTable(a0), a1                           ; a1 = row offset table
+        movea.w Map_stride(a0), a6                                   ; a6 = map stride
+        movea.l Map_dataAddress(a0), a0                              ; a0 = map data
 
         ; Store address of first chunk in a1
         move.w  d0, d5
@@ -663,7 +663,7 @@ _RENDER_BLOCK Macro position
         ; Buffer offset/rotation mask
         movea.w  d2, a0                                             ; a0 = render size
         move.w  d1, d2                                              ; d2 = current map column
-        move.w  (vdpMetrics + vdpPlaneHeightPatterns), d0
+        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d0
         subq.w  #1, d0
         add.w   d0, d0                                              ; d0 = buffer mask
         add.w   d1, d1                                              ; d1 = buffer offset

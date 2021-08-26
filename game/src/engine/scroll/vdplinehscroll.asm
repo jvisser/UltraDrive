@@ -19,9 +19,9 @@
     ; ----------------
     ; struct VDPScrollUpdater
     lineHorizontalVDPScrollUpdater:
-        ; .vdpsuInit
+        ; .init
         dc.l _LineHorizontalVDPScrollUpdaterInit
-        ; .vdpsuUpdate
+        ; .update
         dc.l _LineHorizontalVDPScrollUpdaterUpdate
 
 LS_LINE_BUFFER_SIZE Equ LineHorizontalVDPScrollUpdaterPlaneState_Size
@@ -46,7 +46,7 @@ _LineHorizontalVDPScrollUpdaterInit:
         ; Initialize background
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Horizontal,                                     &
-            Background,                                     &
+            background,                                     &
             LineHorizontalVDPScrollUpdaterPlaneState,       &
             lsPlaneBScrollDMATransferCommandListTemplate,   &
             lsPlaneBScrollDMATransferCommandListAddress
@@ -54,7 +54,7 @@ _LineHorizontalVDPScrollUpdaterInit:
         ; Initialize foreground
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Horizontal,                                     &
-            Foreground,                                     &
+            foreground,                                     &
             LineHorizontalVDPScrollUpdaterPlaneState,       &
             lsPlaneAScrollDMATransferCommandListTemplate,   &
             lsPlaneAScrollDMATransferCommandListAddress

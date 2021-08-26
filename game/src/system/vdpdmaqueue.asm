@@ -98,18 +98,18 @@ _VDP_DMA_QUEUE_ADD Macro dmaTransfer
             _LOAD_DMA_TRANSFER_ADDRESS \dmaTransfer
 
             ; Write data stride
-            move.b  dmaDataStride + 1(a0), vdpRegAutoInc + 1(a1)
+            move.b  VDPDMATransfer_dataStride + 1(a0), VDPDMATransferCommandList_vdpRegAutoInc + 1(a1)
 
             ; Write DMA source. Use vdpRegDMALengthLow as overflow area for high byte (will be overwritten in next step)
-            move.l  dmaSource(a0), d0
-            movep.l d0, vdpRegDMALengthLow + 1(a1)
+            move.l  VDPDMATransfer_source(a0), d0
+            movep.l d0, VDPDMATransferCommandList_vdpRegDMALengthLow + 1(a1)
 
             ; Write DMA length in words
-            move.w  dmaLength(a0), d0
-            movep.w d0, vdpRegDMALengthHigh + 1(a1)
+            move.w  VDPDMATransfer_length(a0), d0
+            movep.w d0, VDPDMATransferCommandList_vdpRegDMALengthHigh + 1(a1)
 
             ; Write DMA target
-            move.l  dmaTarget(a0), vdpAddrDMATransferDestination(a1)
+            move.l  VDPDMATransfer_target(a0), VDPDMATransferCommandList_vdpAddrDMATransferDestination(a1)
 
             ; Next entry
             addi.w  #VDPDMATransferCommandList_Size, a1

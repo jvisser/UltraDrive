@@ -8,10 +8,10 @@
 ; DMA structures
 ; ----------------
     DEFINE_STRUCT VDPDMATransfer
-        STRUCT_MEMBER.w dmaDataStride
-        STRUCT_MEMBER.w dmaLength
-        STRUCT_MEMBER.l dmaSource
-        STRUCT_MEMBER.l dmaTarget
+        STRUCT_MEMBER.w dataStride
+        STRUCT_MEMBER.w length
+        STRUCT_MEMBER.l source
+        STRUCT_MEMBER.l target
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT VDPDMATransferCommandList
@@ -92,9 +92,9 @@ VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST Macro source, target, length, dataStr
 VDP_DMA_TRANSFER_COMMAND_LIST_PATCH_SOURCE Macro dmaCommandList, source
         andi.l  #$fffffe, \source
         lsl.l   #7, \source
-        move.b  vdpRegDMALengthLow + 1(\dmaCommandList), \source
+        move.b  VDPDMATransferCommandList_vdpRegDMALengthLow + 1(\dmaCommandList), \source
         ror.l   #8, \source
-        movep.l \source, vdpRegDMALengthLow + 1(\dmaCommandList)
+        movep.l \source, VDPDMATransferCommandList_vdpRegDMALengthLow + 1(\dmaCommandList)
     Endm
 
 

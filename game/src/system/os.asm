@@ -6,11 +6,11 @@
 ; OS Context
 ; ----------------
     DEFINE_STRUCT OSContext
-        STRUCT_MEMBER.w osFrameReady
-        STRUCT_MEMBER.l osFramesProcessed
-        STRUCT_MEMBER.l osFramesSkipped
-        STRUCT_MEMBER.l osFrameProcessedCallback
-        STRUCT_MEMBER.w osLockCount
+        STRUCT_MEMBER.w frameReady
+        STRUCT_MEMBER.l framesProcessed
+        STRUCT_MEMBER.l framesSkipped
+        STRUCT_MEMBER.l frameProcessedCallback
+        STRUCT_MEMBER.w lockCount
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -18,11 +18,11 @@
     DEFINE_VAR_END
 
     INIT_STRUCT osContext
-        INIT_STRUCT_MEMBER.osFrameReady               0
-        INIT_STRUCT_MEMBER.osFramesProcessed          0
-        INIT_STRUCT_MEMBER.osFramesSkipped            0
-        INIT_STRUCT_MEMBER.osFrameProcessedCallback   NoOperation
-        INIT_STRUCT_MEMBER.osLockCount                0
+        INIT_STRUCT_MEMBER.frameReady               0
+        INIT_STRUCT_MEMBER.framesProcessed          0
+        INIT_STRUCT_MEMBER.framesSkipped            0
+        INIT_STRUCT_MEMBER.frameProcessedCallback   NoOperation
+        INIT_STRUCT_MEMBER.lockCount                0
     INIT_STRUCT_END
 
 
@@ -39,11 +39,11 @@ OSInit                  Equ osContextInit
 OSPrepareNextFrame:
         PUSH_USER_CONTEXT
 
-        tst.w   (osContext + osFrameReady)
+        tst.w   (osContext + OSContext_frameReady)
         beq     .notReady
 
-            clr.w   (osContext + osFrameReady)
-            addq.l  #1, (osContext + osFramesProcessed)
+            clr.w   (osContext + OSContext_frameReady)
+            addq.l  #1, (osContext + OSContext_framesProcessed)
 
             ; Update VDP
             jsr     VDPTaskQueueProcess
@@ -56,7 +56,7 @@ OSPrepareNextFrame:
             jsr     IOUpdateDeviceState
 
             ; Call frame processed callback
-            movea.l  (osContext + osFrameProcessedCallback), a0
+            movea.l  (osContext + OSContext_frameProcessedCallback), a0
             jsr     (a0)
 
         bra     .done
@@ -64,7 +64,7 @@ OSPrepareNextFrame:
     .notReady:
         DEBUG_MSG 'Frame skipped!'
 
-        addq.l  #1, (osContext + osFramesSkipped)
+        addq.l  #1, (osContext + OSContext_framesSkipped)
 
         ; Call RasterEffect.setupFrame(). Always setup raster effects even on frame skip.
         jsr     _RasterEffectSetupFrame
@@ -78,7 +78,7 @@ OSPrepareNextFrame:
 ; Get the lower word of the frame counter
 ; ----------------
 OS_GET_FRAME_COUNTER_W Macro target
-        move.w  (osContext + osFramesProcessed + SIZE_WORD), \target
+        move.w  (osContext + OSContext_framesProcessed + SIZE_WORD), \target
     Endm
 
 
@@ -86,7 +86,7 @@ OS_GET_FRAME_COUNTER_W Macro target
 ; Get the the frame counter
 ; ----------------
 OS_GET_FRAME_COUNTER_L Macro target
-        move.l  (osContext + osFramesProcessed), \target
+        move.l  (osContext + OSContext_framesProcessed), \target
     Endm
 
 
@@ -94,11 +94,11 @@ OS_GET_FRAME_COUNTER_L Macro target
 ; Lock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_LOCK Macro
-        tst.w (osContext + osLockCount)
+        tst.w (osContext + OSContext_lockCount)
         bne .alreadyLocked\@
             M68K_DISABLE_INT
     .alreadyLocked\@:
-        addq    #1, (osContext + osLockCount)
+        addq    #1, (osContext + OSContext_lockCount)
     Endm
 
 
@@ -106,9 +106,9 @@ OS_LOCK Macro
 ; Unlock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_UNLOCK Macro
-        tst.w (osContext + osLockCount)
+        tst.w (osContext + OSContext_lockCount)
         beq .alreadyUnlocked\@
-            subq #1, (osContext + osLockCount)
+            subq #1, (osContext + OSContext_lockCount)
             bne .alreadyUnlocked\@
                 M68K_ENABLE_INT
     .alreadyUnlocked\@:
@@ -132,8 +132,8 @@ OSResetStatistics:
         OS_LOCK
 
         moveq   #0, d0
-        move.l  d0, (osContext + osFramesProcessed)
-        move.l  d0, (osContext + osFramesSkipped)
+        move.l  d0, (osContext + OSContext_framesProcessed)
+        move.l  d0, (osContext + OSContext_framesSkipped)
 
         OS_UNLOCK
         rts
@@ -145,7 +145,7 @@ OSResetStatistics:
 ; Input:
 ; - a0: Callback address
 OSSetFrameProcessedCallback:
-        move.l  a0, (osContext + osFrameProcessedCallback)
+        move.l  a0, (osContext + OSContext_frameProcessedCallback)
         rts
 
 
@@ -159,15 +159,15 @@ OSNextFrameReadyWait:
         OS_LOCK
 
         ; Mark frame as ready for processing
-        move.w   #1, (osContext + osFrameReady)
+        move.w   #1, (osContext + OSContext_frameReady)
 
         ; Wait until processed
-        move.l  (osContext + osFramesProcessed), d0
+        move.l  (osContext + OSContext_framesProcessed), d0
 
         OS_UNLOCK
 
     .waitNextFrameLoop:
-        cmp.l  (osContext + osFramesProcessed), d0
+        cmp.l  (osContext + OSContext_framesProcessed), d0
         beq     .waitNextFrameLoop
         rts
 

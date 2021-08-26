@@ -20,26 +20,26 @@
     ; ----------------
 
     DEFINE_STRUCT RotateScrollAngleEntry
-        STRUCT_MEMBER.l     rsaeBase                            ; Base scroll value
-        STRUCT_MEMBER.l     rsaeIncrement                       ; Increment used to calculate subsequent values
+        STRUCT_MEMBER.l     base                                ; Base scroll value
+        STRUCT_MEMBER.l     increment                           ; Increment used to calculate subsequent values
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT RotateScrollPosition
-        STRUCT_MEMBER.w     rsapAngle                           ; Angle
-        STRUCT_MEMBER.w     rsapHorizontalOffset                ; Additional horizontal scroll to apply
-        STRUCT_MEMBER.w     rsapVerticalOffset                  ; Additional vertical scroll to apply
+        STRUCT_MEMBER.w     angle                               ; Angle
+        STRUCT_MEMBER.w     horizontalOffset                    ; Additional horizontal scroll to apply
+        STRUCT_MEMBER.w     verticalOffset                      ; Additional vertical scroll to apply
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT RotateScrollConfiguration
-        STRUCT_MEMBER.l     rsccAnglePosition                   ; Address of the RotateScrollPosition to use
-        STRUCT_MEMBER.l     rsccHorizontalScrollTableAddress    ; Address of the horizontal RotateScrollAngleEntry[64] table
-        STRUCT_MEMBER.l     rsccVerticalScrollTableAddress      ; Address of the vertical RotateScrollAngleEntry[64] table
+        STRUCT_MEMBER.l     anglePosition                       ; Address of the RotateScrollPosition to use
+        STRUCT_MEMBER.l     horizontalScrollTableAddress        ; Address of the horizontal RotateScrollAngleEntry[64] table
+        STRUCT_MEMBER.l     verticalScrollTableAddress          ; Address of the vertical RotateScrollAngleEntry[64] table
     DEFINE_STRUCT_END
 
     ; Used for change detection
     DEFINE_STRUCT RotateScrollState
-        STRUCT_MEMBER.w     rscsLastAngle
-        STRUCT_MEMBER.w     rscsLastOffset
+        STRUCT_MEMBER.w     lastAngle
+        STRUCT_MEMBER.w     lastOffset
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------
@@ -47,9 +47,9 @@
     ; ----------------
     ; struct ScrollValueUpdater
     rotateHorizontalLineScroll:
-        ; .svuInit
+        ; .nit
         dc.l _RotateHorizontalLineScrollInit
-        ; .svuUpdate
+        ; .update
         dc.l _RotateHorizontalLineScrollUpdate
 
     ;-------------------------------------------------
@@ -57,9 +57,9 @@
     ; ----------------
     ; struct ScrollValueUpdater
     rotateVerticalCellScroll:
-        ; .svuInit
+        ; .init
         dc.l _RotateVerticalCellScrollInit
-        ; .svuUpdate
+        ; .update
         dc.l _RotateVerticalCellScrollUpdate
 
 
@@ -75,7 +75,7 @@
 _RotateHorizontalLineScrollInit:
 
         ; Load RotateScrollPosition address from RotateScrollConfiguration
-        movea.l rsccAnglePosition(a2), a3                                               ; a3 = RotateScrollPosition
+        movea.l RotateScrollConfiguration_anglePosition(a2), a3                                               ; a3 = RotateScrollPosition
 
         ; Calculate the scroll table for specified angle
         bsr _RotateHorizontalLineCalculateScrollValues
@@ -84,8 +84,8 @@ _RotateHorizontalLineScrollInit:
         MEMORY_ALLOCATE RotateScrollState_Size, a0, a1
 
         ; Store scroll values
-        move.w  rsapHorizontalOffset(a3), rscsLastOffset(a0)
-        move.w  rsapAngle(a3), rscsLastAngle(a0)
+        move.w  RotateScrollPosition_horizontalOffset(a3), RotateScrollState_lastOffset(a0)
+        move.w  RotateScrollPosition_angle(a3), RotateScrollState_lastAngle(a0)
         rts
 
 
@@ -103,15 +103,15 @@ _RotateHorizontalLineScrollUpdate:
         moveq   #0, d0
 
         ; Load RotateScrollPosition address from RotateScrollConfiguration
-        movea.l rsccAnglePosition(a2), a4                                               ; a4 = RotateScrollPosition
+        movea.l RotateScrollConfiguration_anglePosition(a2), a4                                               ; a4 = RotateScrollPosition
 
-        move.w  rsapAngle(a4), d1
-        cmp.w   rscsLastAngle(a3), d1
+        move.w  RotateScrollPosition_angle(a4), d1
+        cmp.w   RotateScrollState_lastAngle(a3), d1
         beq     .noAngleChange
 
             ; Update last state
-            move.w  rsapHorizontalOffset(a4), rscsLastOffset(a3)
-            move.w  d1, rscsLastAngle(a3)
+            move.w  RotateScrollPosition_horizontalOffset(a4), RotateScrollState_lastOffset(a3)
+            move.w  d1, RotateScrollState_lastAngle(a3)
 
             ; Recalculate all values
             movea.l a4, a3
@@ -120,12 +120,12 @@ _RotateHorizontalLineScrollUpdate:
             rts
 
     .noAngleChange:
-        move.w  rscsLastOffset(a3), d2
-        sub.w   rsapHorizontalOffset(a4), d2
+        move.w  RotateScrollState_lastOffset(a3), d2
+        sub.w   RotateScrollPosition_horizontalOffset(a4), d2
         beq     .noOffsetChange
 
             ; Update last state
-            move.w  rsapHorizontalOffset(a4), rscsLastOffset(a3)
+            move.w  RotateScrollPosition_horizontalOffset(a4), RotateScrollState_lastOffset(a3)
 
             ; Offset table by horizontal position change
             move.w  #6, d1
@@ -151,19 +151,19 @@ _RotateHorizontalLineScrollUpdate:
 ; - a3: RotateScrollPosition address
 _RotateHorizontalLineCalculateScrollValues:
         ; Calculate RotateScrollAngleEntry offset
-        move.w  rsapAngle(a3), d0
+        move.w  RotateScrollPosition_angle(a3), d0
         lsl.w   #3, d0
-        movea.l rsccHorizontalScrollTableAddress(a2), a4
+        movea.l RotateScrollConfiguration_horizontalScrollTableAddress(a2), a4
 
         ; Get angle increment
-        move.l  rsaeIncrement(a4, d0), d1
+        move.l  RotateScrollAngleEntry_increment(a4, d0), d1
 
         ; Calculate scroll base
-        move.l  rsaeBase(a4, d0), d2
+        move.l  RotateScrollAngleEntry_base(a4, d0), d2
 
         ; Add horizontal offset from configuration
         moveq   #0, d3
-        move.w  rsapHorizontalOffset(a3), d3
+        move.w  RotateScrollPosition_horizontalOffset(a3), d3
         neg.w   d3
         swap    d3
         add.l   d3, d2
@@ -194,7 +194,7 @@ _RotateHorizontalLineCalculateScrollValues:
 _RotateVerticalCellScrollInit:
 
         ; Load RotateScrollPosition address from RotateScrollConfiguration
-        movea.l rsccAnglePosition(a2), a3                                               ; a3 = RotateScrollPosition
+        movea.l RotateScrollConfiguration_anglePosition(a2), a3                                               ; a3 = RotateScrollPosition
 
         ; Calculate the scroll table for specified angle
         bsr _RotateVerticalCellCalculateScrollValues
@@ -203,8 +203,8 @@ _RotateVerticalCellScrollInit:
         MEMORY_ALLOCATE RotateScrollState_Size, a0, a1
 
         ; Store scroll values
-        move.w  rsapVerticalOffset(a3), rscsLastOffset(a0)
-        move.w  rsapAngle(a3), rscsLastAngle(a0)
+        move.w  RotateScrollPosition_verticalOffset(a3), RotateScrollState_lastOffset(a0)
+        move.w  RotateScrollPosition_angle(a3), RotateScrollState_lastAngle(a0)
         rts
 
 
@@ -222,15 +222,15 @@ _RotateVerticalCellScrollUpdate:
         moveq   #0, d0
 
         ; Load RotateScrollPosition address from RotateScrollConfiguration
-        movea.l rsccAnglePosition(a2), a4                                               ; a4 = RotateScrollPosition
+        movea.l RotateScrollConfiguration_anglePosition(a2), a4                                               ; a4 = RotateScrollPosition
 
-        move.w  rsapAngle(a4), d1
-        cmp.w   rscsLastAngle(a3), d1
+        move.w  RotateScrollPosition_angle(a4), d1
+        cmp.w   RotateScrollState_lastAngle(a3), d1
         beq     .noAngleChange
 
             ; Update last state
-            move.w  rsapVerticalOffset(a4), rscsLastOffset(a3)
-            move.w  d1, rscsLastAngle(a3)
+            move.w  RotateScrollPosition_verticalOffset(a4), RotateScrollState_lastOffset(a3)
+            move.w  d1, RotateScrollState_lastAngle(a3)
 
             ; Recalculate all values
             movea.l a4, a3
@@ -239,12 +239,12 @@ _RotateVerticalCellScrollUpdate:
             rts
 
     .noAngleChange:
-        move.w  rsapVerticalOffset(a4), d2
-        sub.w   rscsLastOffset(a3), d2
+        move.w  RotateScrollPosition_verticalOffset(a4), d2
+        sub.w   RotateScrollState_lastOffset(a3), d2
         beq     .noOffsetChange
 
             ; Update last state
-            move.w  rsapVerticalOffset(a4), rscsLastOffset(a3)
+            move.w  RotateScrollPosition_verticalOffset(a4), RotateScrollState_lastOffset(a3)
 
             ; Offset table by horizontal position change
             Rept 20
@@ -266,19 +266,19 @@ _RotateVerticalCellScrollUpdate:
 ; - a3: RotateScrollPosition address
 _RotateVerticalCellCalculateScrollValues:
         ; Calculate RotateScrollAngleEntry offset
-        move.w  rsapAngle(a3), d0
+        move.w  RotateScrollPosition_angle(a3), d0
         lsl.w   #3, d0
-        movea.l rsccVerticalScrollTableAddress(a2), a4
+        movea.l RotateScrollConfiguration_verticalScrollTableAddress(a2), a4
 
         ; Get angle increment
-        move.l  rsaeIncrement(a4, d0), d1
+        move.l  RotateScrollAngleEntry_increment(a4, d0), d1
 
         ; Calculate scroll base
-        move.l  rsaeBase(a4, d0), d2
+        move.l  RotateScrollAngleEntry_base(a4, d0), d2
 
         ; Add horizontal offset from configuration
         moveq   #0, d3
-        move.w  rsapVerticalOffset(a3), d3
+        move.w  RotateScrollPosition_verticalOffset(a3), d3
         swap    d3
         add.l   d3, d2
 

@@ -10,9 +10,9 @@
     ; Multi scroll camera specific configuration
     ; ----------------
     DEFINE_STRUCT MultiScrollCameraConfiguration
-        STRUCT_MEMBER.l     msccBufferUpdateSubRoutineAddress   ; Address of the buffer update routine to use (NB: only gets called when there is a related camera position update)
-        STRUCT_MEMBER.b     msccCameraProperty                  ; Camera property to scroll value on
-        STRUCT_MEMBER.b     msccCameraChangeProperty            ; Camera property used to detect movement
+        STRUCT_MEMBER.l     bufferUpdateSubRoutineAddress       ; Address of the buffer update routine to use (NB: only gets called when there is a related camera position update)
+        STRUCT_MEMBER.b     cameraProperty                      ; Camera property to scroll value on
+        STRUCT_MEMBER.b     cameraChangeProperty                ; Camera property used to detect movement
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------
@@ -20,9 +20,9 @@
     ; ----------------
     ; struct ScrollValueUpdater
     multiScrollCamera:
-        ; .svuInit
+        ; .init
         dc.l _MultiScrollCameraInit
-        ; .svuUpdate
+        ; .update
         dc.l _MultiScrollCameraUpdate
 
 
@@ -32,30 +32,30 @@
 
     ; struct MultiScrollCameraConfiguration
     lineHorizontalScrollCameraConfig:
-        ; .msccBufferUpdateSubRoutineAddress
+        ; .bufferUpdateSubRoutineAddress
         dc.l    ScrollBufferFill224
-        ; .msccCameraProperty
-        dc.b    camX
-        ; .msccCameraChangeProperty
-        dc.b    camLastXDisplacement
+        ; .cameraProperty
+        dc.b    Camera_x
+        ; .MultiScrollCameraConfiguration_cameraChangeProperty
+        dc.b    Camera_lastXDisplacement
 
     ; struct MultiScrollCameraConfiguration
     cellHorizontalScrollCameraConfig:
-        ; .msccBufferUpdateSubRoutineAddress
+        ; .bufferUpdateSubRoutineAddress
         dc.l    ScrollBufferFill28
-        ; .msccCameraProperty
-        dc.b    camX
-        ; .msccCameraChangeProperty
-        dc.b    camLastXDisplacement
+        ; .cameraProperty
+        dc.b    Camera_x
+        ; .MultiScrollCameraConfiguration_cameraChangeProperty
+        dc.b    Camera_lastXDisplacement
 
     ; struct MultiScrollCameraConfiguration
     cellVerticalScrollCameraConfig:
-        ; .msccBufferUpdateSubRoutineAddress
+        ; .bufferUpdateSubRoutineAddress
         dc.l    ScrollBufferFill20
-        ; .msccCameraProperty
-        dc.b    camY
-        ; .msccCameraChangeProperty
-        dc.b    camLastYDisplacement
+        ; .cameraProperty
+        dc.b    Camera_y
+        ; .MultiScrollCameraConfiguration_cameraChangeProperty
+        dc.b    Camera_lastYDisplacement
 
 
 ;-------------------------------------------------
@@ -68,10 +68,10 @@
 _MultiScrollCameraInit:
         ; Initialize the scroll table
         moveq   #0, d0
-        move.b  msccCameraProperty(a2), d0
+        move.b  MultiScrollCameraConfiguration_cameraProperty(a2), d0
         move.w  (a0, d0), d0
         movea.l a1, a0
-        movea.l msccBufferUpdateSubRoutineAddress(a2), a3
+        movea.l MultiScrollCameraConfiguration_bufferUpdateSubRoutineAddress(a2), a3
         jsr     (a3)
         rts
 
@@ -90,15 +90,15 @@ _MultiScrollCameraUpdate:
 
         ; Check for  movement
         moveq   #0, d1
-        move.b  msccCameraChangeProperty(a2), d1
+        move.b  MultiScrollCameraConfiguration_cameraChangeProperty(a2), d1
         tst.w   (a0, d1)
         beq     .noMovement
 
             ; Update  multi buffer
-            move.b  msccCameraProperty(a2), d1
+            move.b  MultiScrollCameraConfiguration_cameraProperty(a2), d1
             move.w  (a0, d1), d0
             movea.l a1, a0
-            movea.l msccBufferUpdateSubRoutineAddress(a2), a3
+            movea.l MultiScrollCameraConfiguration_bufferUpdateSubRoutineAddress(a2), a3
             jsr     (a3)
 
             moveq   #1, d0

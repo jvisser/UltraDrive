@@ -14,9 +14,9 @@
     ; ----------------
     ; struct VDPScrollUpdater
     planeHorizontalVDPScrollUpdater:
-        ; .vdpsuInit
+        ; .init
         dc.l _PlaneHorizontalVDPScrollUpdaterInit
-        ; .vdpsuUpdate
+        ; .update
         dc.l _PlaneHorizontalVDPScrollUpdaterUpdate
 
 
@@ -31,8 +31,8 @@ _PlaneHorizontalVDPScrollUpdaterInit:
         VDP_REG_RESET_BITS vdpRegMode3, MODE3_HSCROLL_MASK
 
         ; Initialize scroll values
-        VDP_SCROLL_UPDATER_INIT Horizontal, Background, PlaneHorizontalVDPScrollUpdaterState
-        VDP_SCROLL_UPDATER_INIT Horizontal, Foreground, PlaneHorizontalVDPScrollUpdaterState
+        VDP_SCROLL_UPDATER_INIT Horizontal, background, PlaneHorizontalVDPScrollUpdaterState
+        VDP_SCROLL_UPDATER_INIT Horizontal, foreground, PlaneHorizontalVDPScrollUpdaterState
 
         ; Setup VDP
         bsr     _HPlaneVDPScrollUpdaterCommit
@@ -65,8 +65,8 @@ _PlaneHorizontalVDPScrollUpdaterUpdate:
 ; - a0: Viewport
 ; Uses: d0-d1/a1-a2
 _HPlaneVDPScrollUpdaterCommit:
-        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Horizontal, Foreground, a1
-        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Horizontal, Background, a2
+        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Horizontal, foreground, a1
+        VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Horizontal, background, a2
 
         ; Update horizontal scroll
         VDP_ADDR_SET WRITE, VRAM, VDP_HSCROLL_ADDR, SIZE_WORD
