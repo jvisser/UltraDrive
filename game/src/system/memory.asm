@@ -49,25 +49,33 @@ DEFINE_STRUCT Macro name, extends, base
 ; Input:
 ; - 0: datatype b/w/l or struct
 STRUCT_MEMBER Macro name, elementCount
+    Local STRUCT_NAME, MEMBER_NAME
+    Popp STRUCT_NAME
+
+MEMBER_NAME Equs '\STRUCT_NAME\_\name'
+
+\MEMBER_NAME\_Struct Equs '\MEMBER_NAME'
+
     If (strcmp('\0', 'b') | strcmp('\0', 'w') | strcmp('\0', 'l'))
         If (narg=2)
-\name               Rs.\0 \elementCount
-\name\_ElementCount Equs '\elementCount'
+\MEMBER_NAME               Rs.\0 \elementCount
+\MEMBER_NAME\_ElementCount Equs '\elementCount'
         Else
-\name               Rs.\0 1
-\name\_ElementCount Equs '1'
+\MEMBER_NAME               Rs.\0 1
+\MEMBER_NAME\_ElementCount Equs '1'
         EndIf
-\name\_Size Equs '\0'
+\MEMBER_NAME\_Size Equs '\0'
     Else
         If (narg=2)
-\name               Rs.b (\0\_Size * \elementCount)
-\name\_ElementCount Equs '\0\_Size * \elementCount'
+\MEMBER_NAME               Rs.b (\0\_Size * \elementCount)
+\MEMBER_NAME\_ElementCount Equs '\0\_Size * \elementCount'
         Else
-\name               Rs.b \0\_Size
-\name\_ElementCount Equs '\0\_Size'
+\MEMBER_NAME               Rs.b \0\_Size
+\MEMBER_NAME\_ElementCount Equs '\0\_Size'
         EndIf
-\name\_Size Equs 'b'
+\MEMBER_NAME\_Size Equs 'b'
     EndIf
+    Pushp '\STRUCT_NAME'
     Endm
 
 
@@ -102,6 +110,7 @@ DEFINE_VAR Macro allocationType
 ; - 2; Optional: Number of allocations to make
 VAR Macro varName
             Local VAR_START, VAR_ADDR, VAR_SIZE
+\varName\_Type Equs '\0'
 VAR_START = __rs
         If def(\varName)
             Inform 3, 'Variable "\varName\" already defined'
@@ -152,11 +161,15 @@ __\ALLOCATION_TYPE\_RAM_ALLOCATION_PTR = __rs
 ; Start structure initialization data
 ; ----------------
 INIT_STRUCT Macro structVarName
+    Local VAR_TYPE
 __FIRST_STRUCT_INIT_MEMBER_OFFSET = -1  ; TODO: Use macro stack
         SECTION_START S_DATA
 
+VAR_TYPE Equs \structVarName\_Type
+
         \structVarName\_InitData:
         Pushp '\structVarName'
+        Pushp '\VAR_TYPE'
         RsReset
     Endm
 
@@ -168,37 +181,41 @@ __FIRST_STRUCT_INIT_MEMBER_OFFSET = -1  ; TODO: Use macro stack
 ; - 0: Struct member name
 ; - 1: Value
 INIT_STRUCT_MEMBER Macro value
-        Local STRUCT_MEMBER_SIZE, STRUCT_MEMBER_ELEMENT_COUNT, PAD_BYTES
+        Local STRUCT_MEMBER_SIZE, STRUCT_MEMBER_ELEMENT_COUNT, PAD_BYTES, STRUCT_NAME, STRUCT_MEMBER_NAME
+
+        Popp STRUCT_NAME
 
         ; Record first struct member offset to be initialized. This is the offset the data should be copied to.
         If (__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1)
-__FIRST_STRUCT_INIT_MEMBER_OFFSET = \0
+__FIRST_STRUCT_INIT_MEMBER_OFFSET = \STRUCT_NAME\_\0
             RsSet __FIRST_STRUCT_INIT_MEMBER_OFFSET
         EndIf
 
         ; Add padding if offsets dont align
-        If (\0 > __rs)
-PAD_BYTES Equ (\0 - __rs)
-            Inform 1, 'Adding %d bytes of padding for struct member \0', PAD_BYTES
+        If (\STRUCT_NAME\_\0 > __rs)
+PAD_BYTES Equ (\STRUCT_NAME\_\0 - __rs)
+            Inform 1, 'Adding %d bytes of padding for struct member \STRUCT_NAME\_\0', PAD_BYTES
 
             dcb.b PAD_BYTES, $00
             Rs.b  PAD_BYTES
         EndIf
 
         ; If offset is still not equal to the current offset indicate data alignment error
-        If (\0 <> __rs)
-            Inform 3, 'Struct member data specified at incorrect offset. Expected $%h but got $%h', \0, __rs
+        If (\STRUCT_NAME\_\0 <> __rs)
+            Inform 3, 'Struct member data specified at incorrect offset. Expected $%h but got $%h', \STRUCT_NAME\_\0, __rs
         EndIf
 
-STRUCT_MEMBER_ELEMENT_COUNT Equs \0\_ElementCount
-STRUCT_MEMBER_SIZE          Equs \0\_Size
+STRUCT_MEMBER_ELEMENT_COUNT Equs \STRUCT_NAME\_\0\_ElementCount
+STRUCT_MEMBER_SIZE          Equs \STRUCT_NAME\_\0\_Size
 
         If (~strcmp('\STRUCT_MEMBER_ELEMENT_COUNT', '1'))
-            Inform 3, '\0\: Initialization of array types not supported!'
+            Inform 3, '\STRUCT_NAME\_\0\: Initialization of array types not supported!'
         EndIf
 
         Rs.\STRUCT_MEMBER_SIZE \STRUCT_MEMBER_ELEMENT_COUNT
         dc.\STRUCT_MEMBER_SIZE \value
+
+        Pushp '\STRUCT_NAME'
     Endm
 
 
@@ -209,6 +226,7 @@ INIT_STRUCT_END Macro
         SECTION_END
 
         Local STRUCT_VAR_NAME
+        Popp  STRUCT_VAR_NAME
         Popp  STRUCT_VAR_NAME
 
         If (__FIRST_STRUCT_INIT_MEMBER_OFFSET = -1)

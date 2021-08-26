@@ -43,11 +43,11 @@ VDP_SPRITE_SIZE_H4 Equ                      $0c
 
     ; VDP hardware sprite attribute struct (8 bytes)
     DEFINE_STRUCT VDPSprite
-        STRUCT_MEMBER.w vdpSpriteY
-        STRUCT_MEMBER.b vdpSpriteSize
-        STRUCT_MEMBER.b vdpSpriteLink
-        STRUCT_MEMBER.w vdpSpriteAttr3
-        STRUCT_MEMBER.w vdpSpriteX
+        STRUCT_MEMBER.w y
+        STRUCT_MEMBER.b size
+        STRUCT_MEMBER.b link
+        STRUCT_MEMBER.w attr
+        STRUCT_MEMBER.w x
     DEFINE_STRUCT_END
 
     ; RAM shadow attribute table
@@ -95,19 +95,19 @@ VDPSpriteAlloc:
         ; Link previous terminal sprite to the head of newly allocated sprite list
         tst.w   d1
         beq     .noPreviousSprite
-        move.b  d1, vdpSpriteLink - VDPSprite_Size(a0)
+        move.b  d1, VDPSprite_link - VDPSprite_Size(a0)
     .noPreviousSprite:
 
         ; Allocate and link requested amount of sprites
         subq    #1, d0
     .spriteAllocLoop:
         addq.w  #1, d1
-        move.b  d1, vdpSpriteLink(a1)
+        move.b  d1, VDPSprite_link(a1)
         addq.l  #VDPSprite_Size, a1
         dbra    d0, .spriteAllocLoop
 
         ; Terminate sprite list
-        move.b  #0, vdpSpriteLink - VDPSprite_Size(a1)
+        move.b  #0, VDPSprite_link - VDPSprite_Size(a1)
 
         ; Store current allocation tracking information
         move.w  d1, vdpSpriteCount
@@ -158,7 +158,7 @@ VDPSpriteUnlinkAfter:
         adda.w  d0, a0
 
         ; Reset link
-        clr.b   vdpSpriteLink(a0)
+        clr.b   VDPSprite_link(a0)
 
         ; Set new tail ptr
         addq.l  #8, a0
@@ -179,7 +179,7 @@ VDPSpriteCommit:
         add.w   d0, d0
         add.w   d0, d0
         lea     vdpSpriteAttrTableDMATransfer, a0
-        move.w  d0, dmaLength(a0)
+        move.w  d0, VDPDMATransfer_length(a0)
 
         VDP_DMA_QUEUE_ADD_INDIRECT a0
 

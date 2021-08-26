@@ -8,25 +8,25 @@
 ; Camera structure
 ; ----------------
     DEFINE_STRUCT Camera
-        STRUCT_MEMBER.w camX
-        STRUCT_MEMBER.w camY
-        STRUCT_MEMBER.w camMinX
-        STRUCT_MEMBER.w camMaxX
-        STRUCT_MEMBER.w camMinY
-        STRUCT_MEMBER.w camMaxY
-        STRUCT_MEMBER.w camXDisplacement
-        STRUCT_MEMBER.w camYDisplacement
-        STRUCT_MEMBER.w camLastXDisplacement
-        STRUCT_MEMBER.w camLastYDisplacement
-        STRUCT_MEMBER.w camAbsoluteMaxX
-        STRUCT_MEMBER.w camAbsoluteMaxY
-        STRUCT_MEMBER.l camMapAddress
-        STRUCT_MEMBER.l camPlaneId
-        STRUCT_MEMBER.w camWidthPatterns
-        STRUCT_MEMBER.w camHeightPatterns
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
+        STRUCT_MEMBER.w minX
+        STRUCT_MEMBER.w maxX
+        STRUCT_MEMBER.w minY
+        STRUCT_MEMBER.w maxY
+        STRUCT_MEMBER.w xDisplacement
+        STRUCT_MEMBER.w yDisplacement
+        STRUCT_MEMBER.w lastXDisplacement
+        STRUCT_MEMBER.w lastYDisplacement
+        STRUCT_MEMBER.w absoluteMaxX
+        STRUCT_MEMBER.w absoluteMaxY
+        STRUCT_MEMBER.l mapAddress
+        STRUCT_MEMBER.l planeId
+        STRUCT_MEMBER.w widthPatterns
+        STRUCT_MEMBER.w heightPatterns
         ; Externally managed
-        STRUCT_MEMBER.l camMoveCallback             ; Mandatory
-        STRUCT_MEMBER.l camData
+        STRUCT_MEMBER.l moveCallback                                ; Mandatory
+        STRUCT_MEMBER.l data
     DEFINE_STRUCT_END
 
 
@@ -36,8 +36,8 @@
 ; Input:
 ; - a0: Camera
 CAMERA_MOVE Macro xDisp, yDisp
-        add.w  \xDisp, camXDisplacement(a0)
-        add.w  \yDisp, camYDisplacement(a0)
+        add.w  \xDisp, Camera_xDisplacement(a0)
+        add.w  \yDisp, Camera_yDisplacement(a0)
     Endm
 
 
@@ -71,46 +71,46 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         Endm
 
         ; Associate map
-        move.l  a1, camMapAddress(a0)
+        move.l  a1, Camera_mapAddress(a0)
 
 		; Set plane id
-		move.l	d4, camPlaneId(a0)
+		move.l	d4, Camera_planeId(a0)
 
         ; Store maximum camera bounds based on the current map
-        move.w  mapWidthPixels(a1), d5
-        move.w  mapHeightPixels(a1), d6
-        sub.w   (vdpMetrics + vdpScreenWidth), d5
-        sub.w   (vdpMetrics + vdpScreenHeight), d6
+        move.w  Map_widthPixels(a1), d5
+        move.w  Map_heightPixels(a1), d6
+        sub.w   (vdpMetrics + VDPMetrics_screenWidth), d5
+        sub.w   (vdpMetrics + VDPMetrics_screenHeight), d6
         subq.w  #1, d5
         subq.w  #1, d6
-        move.w  d5, camAbsoluteMaxX(a0)
-        move.w  d6, camAbsoluteMaxY(a0)
+        move.w  d5, Camera_absoluteMaxX(a0)
+        move.w  d6, Camera_absoluteMaxY(a0)
 
         ; Clamp camera position to map
-        _VIEWPORT_CLAMP d0, mapWidthPixels,  vdpScreenWidth
-        _VIEWPORT_CLAMP d1, mapHeightPixels, vdpScreenHeight
+        _VIEWPORT_CLAMP d0, Map_widthPixels,  VDPMetrics_screenWidth
+        _VIEWPORT_CLAMP d1, Map_heightPixels, VDPMetrics_screenHeight
 
         moveq   #0, d4
-        move.w  d0, camX(a0)
-        move.w  d1, camY(a0)
-        move.l  d4, camXDisplacement(a0)    ; Reset both camXDisplacement and camYDisplacement
-        move.l  d4, camLastXDisplacement(a0); Reset both camLastXDisplacement and camLastYDisplacement
+        move.w  d0, Camera_x(a0)
+        move.w  d1, Camera_y(a0)
+        move.l  d4, Camera_xDisplacement(a0)                        ; Reset both xDisplacement and yDisplacement
+        move.l  d4, Camera_lastXDisplacement(a0)                    ; Reset both lastXDisplacement and lastYDisplacement
 
         ; Clamp VPD plane to map
-        _VIEWPORT_CLAMP d0, mapWidthPixels,  vdpPlaneWidth
-        _VIEWPORT_CLAMP d1, mapHeightPixels, vdpPlaneHeight
+        _VIEWPORT_CLAMP d0, Map_widthPixels,  VDPMetrics_planeWidth
+        _VIEWPORT_CLAMP d1, Map_heightPixels, VDPMetrics_planeHeight
 
         ; Special case optimization: if (plane size == map size) then render full plane and effectively disable runtime map streaming
-        move.w  mapWidthPixels(a1), d5
+        move.w  Map_widthPixels(a1), d5
         swap    d5
-        move.w  mapHeightPixels(a1), d5
-        move.w  (vdpMetrics + vdpPlaneWidth), d6
+        move.w  Map_heightPixels(a1), d5
+        move.w  (vdpMetrics + VDPMetrics_planeWidth), d6
         swap    d6
-        move.w  (vdpMetrics + vdpPlaneHeight), d6
+        move.w  (vdpMetrics + VDPMetrics_planeHeight), d6
         sub.l   d5, d6
         bne     .skipMapPlaneOptimization
-            move.w  mapWidthPixels(a1), d2
-            move.w  mapHeightPixels(a1), d3
+            move.w  Map_widthPixels(a1), d2
+            move.w  Map_heightPixels(a1), d3
     .skipMapPlaneOptimization:
 
         ; Store camera size in patterns
@@ -118,27 +118,27 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         move.w  d3, d6
         lsr.w   #PATTERN_SHIFT, d5
         lsr.w   #PATTERN_SHIFT, d6
-        move.w  d5, camWidthPatterns(a0)
-        move.w  d6, camHeightPatterns(a0)
+        move.w  d5, Camera_widthPatterns(a0)
+        move.w  d6, Camera_heightPatterns(a0)
 
         ; Calculate camera min position
         andi.w  #~PATTERN_MASK, d0
         andi.w  #~PATTERN_MASK, d1
-        move.w  d0, camMinX(a0)
-        move.w  d1, camMinY(a0)
+        move.w  d0, Camera_minX(a0)
+        move.w  d1, Camera_minY(a0)
 
         ; Calculate camera max position
-        sub.w   (vdpMetrics + vdpScreenWidth), d2
-        sub.w   (vdpMetrics + vdpScreenHeight), d3
+        sub.w   (vdpMetrics + VDPMetrics_screenWidth), d2
+        sub.w   (vdpMetrics + VDPMetrics_screenHeight), d3
         add.w   d2, d0
         add.w   d3, d1
         subq.w  #1, d0
         subq.w  #1, d1
-        move.w  d0, camMaxX(a0)
-        move.w  d1, camMaxY(a0)
+        move.w  d0, Camera_maxX(a0)
+        move.w  d1, Camera_maxY(a0)
 
         ; Initialize movement handler
-        movea.l  camMoveCallback(a0), a1
+        movea.l  Camera_moveCallback(a0), a1
         jsr     (a1)
 
         Purge _VIEWPORT_CLAMP
@@ -153,14 +153,14 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
 ; Uses: d0-d7/a0-a6
 CameraRenderView:
         ; Render map at min position
-        move.w  camMinY(a0), d0
-        move.w  camMinX(a0), d1
+        move.w  Camera_minY(a0), d0
+        move.w  Camera_minX(a0), d1
         lsr.w   #PATTERN_SHIFT, d0
         lsr.w   #PATTERN_SHIFT, d1
-        move.w  camWidthPatterns(a0), d2
-        move.w  camHeightPatterns(a0), d3
-        move.l  camPlaneId(a0), d4
-        movea.l camMapAddress(a0), a0
+        move.w  Camera_widthPatterns(a0), d2
+        move.w  Camera_heightPatterns(a0), d3
+        move.l  Camera_planeId(a0), d4
+        movea.l Camera_mapAddress(a0), a0
         jsr     MapRender
     rts
 
@@ -187,13 +187,13 @@ _DISPLACEMENT_CLAMP Macro displacement
                 move.w  #-PATTERN_DIMENSION, d0
 
             .clampOk\@:
-                sub.w   d0, \displacement(a0)                   ; Update remaining displacement
+                sub.w   d0, \displacement(a0)                       ; Update remaining displacement
                 swap    d0
         Endm
 
 ; Assumes camera position in d1
 _UPDATE_POSITION Macro maxPosition, displacement
-                add.w   d0, d1                                  ; Add displacement
+                add.w   d0, d1                                      ; Add displacement
                 blt     .camMinOverflow\@
                 cmp.w   \maxPosition(a0), d1
                 ble     .camOk\@
@@ -219,11 +219,11 @@ _UPDATE_MIN_MAX Macro minMax, store
                 Local MIN_MAX_DISPLACEMENT
 MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
 
-                move.l  \minMax(a0), d4                         ; d4 = camMin:camMax
-                cmp.w   d4, d1                                  ; Max overflow?
+                move.l  \minMax(a0), d4                             ; d4 = camMin:camMax
+                cmp.w   d4, d1                                      ; Max overflow?
                 bgt     .camMaxOverflow\@
                 swap    d4
-                cmp.w   d4, d1                                  ; Min overflow
+                cmp.w   d4, d1                                      ; Min overflow
                 bge     .camOk\@
 
              .camMinOverflow\@:
@@ -251,8 +251,8 @@ _MAP_UPDATE Macro renderer, size
                 lsr.w   #PATTERN_SHIFT, d0
                 lsr.w   #PATTERN_SHIFT, d1
                 move.w  \size(a0), d2
-                move.l  camPlaneId(a0), d3
-                movea.l camMapAddress(a0), a0
+                move.l  Camera_planeId(a0), d3
+                movea.l Camera_mapAddress(a0), a0
                 jsr     \renderer
 				POPL 	a0
         Endm
@@ -261,54 +261,54 @@ _MAP_UPDATE Macro renderer, size
         ; Start of sub routine CameraFinalize
         ; ----------------
 
-        move.l  camXDisplacement(a0), d0                        ; Read camXDisplacement:camYDisplacement into d0
+        move.l  Camera_xDisplacement(a0), d0                        ; Read xDisplacement:yDisplacement into d0
         bne     .updatePosition
         ; Nothing to update, clear last displacement and return
         moveq   #0, d4
-        move.l  d4, camLastXDisplacement(a0)
+        move.l  d4, Camera_lastXDisplacement(a0)
         rts
 
     .updatePosition:
         ; Clamp displacement values to the maximum allowed for one update cycle
-        _DISPLACEMENT_CLAMP camYDisplacement
-        _DISPLACEMENT_CLAMP camXDisplacement
+        _DISPLACEMENT_CLAMP Camera_yDisplacement
+        _DISPLACEMENT_CLAMP Camera_xDisplacement
 
         ; Update camera position
-        move.l  camX(a0), d1                                    ; Read camX:camY into d1
+        move.l  Camera_x(a0), d1                                    ; Read x:y into d1
         move.l  d1, d3
 
         ; Update camera position within the bounds of the map
-        _UPDATE_POSITION camAbsoluteMaxY, camYDisplacement
-        _UPDATE_POSITION camAbsoluteMaxX, camXDisplacement
+        _UPDATE_POSITION Camera_absoluteMaxY, Camera_yDisplacement
+        _UPDATE_POSITION Camera_absoluteMaxX, Camera_xDisplacement
 
-        ; Store new camera position (camX and camY)
-        move.l  d1, camX(a0)
+        ; Store new camera position (x and y)
+        move.l  d1, Camera_x(a0)
 
         ; Store actual movement of the camera
         move.l  d1, d4
         sub.w   d3, d4
-        move.w  d4, camLastYDisplacement(a0)
+        move.w  d4, Camera_lastYDisplacement(a0)
         swap d3
         swap d4
         sub.w   d3, d4
-        move.w  d4, camLastXDisplacement(a0)
+        move.w  d4, Camera_lastXDisplacement(a0)
 
         ; Check if there was movement. If so call movement callback
         tst.l   d4
         beq     .noMovement
             PUSHM   d1/a0
-            movea.l camMoveCallback(a0), a1
+            movea.l Camera_moveCallback(a0), a1
             jsr     (a1)
             POPM    d1/a0
         .noMovement:
 
         ; Update min max for both dimensions
-        moveq   #0, d5                                          ; d5 = render flags (0 = min, 1 = max)
-        _UPDATE_MIN_MAX camMinY, d6                             ; d6 = updated min/max for y
+        moveq   #0, d5                                              ; d5 = render flags (0 = min, 1 = max)
+        _UPDATE_MIN_MAX Camera_minY, d6                             ; d6 = updated min/max for y
         swap    d1
-        add.w   d5, d5                                          ; Next render flag set
+        add.w   d5, d5                                              ; Next render flag set
         add.w   d5, d5
-        _UPDATE_MIN_MAX camMinX, d7                             ; d7 = updated min/max for x
+        _UPDATE_MIN_MAX Camera_minX, d7                             ; d7 = updated min/max for x
 
         ; Stream new background data if necessary
         tst.l   d5
@@ -318,9 +318,9 @@ _MAP_UPDATE Macro renderer, size
                     PUSHM   d5/d7
                         swap    d6
                         move.w  d6, d0
-                        move.w  camMinX(a0), d1
+                        move.w  Camera_minX(a0), d1
 
-                        _MAP_UPDATE MapRenderRow, camWidthPatterns
+                        _MAP_UPDATE MapRenderRow, Camera_widthPatterns
                     POPM    d5/d7
                 bra     .checkBackgroundYDone
             .checkMaxY:
@@ -328,10 +328,10 @@ _MAP_UPDATE Macro renderer, size
                 beq     .checkBackgroundYDone
                     PUSHM   d5/d7
                         move.w  d6, d0
-                        add.w   (vdpMetrics + vdpScreenHeight), d0
-                        move.w  camMinX(a0), d1
+                        add.w   (vdpMetrics + VDPMetrics_screenHeight), d0
+                        move.w  Camera_minX(a0), d1
 
-                        _MAP_UPDATE MapRenderRow, camWidthPatterns
+                        _MAP_UPDATE MapRenderRow, Camera_widthPatterns
                     POPM    d5/d7
             .checkBackgroundYDone:
 
@@ -339,18 +339,18 @@ _MAP_UPDATE Macro renderer, size
             beq     .checkMaxX
                     swap    d7
                     move.w  d7, d0
-                    move.w  camMinY(a0), d1
+                    move.w  Camera_minY(a0), d1
 
-                    _MAP_UPDATE MapRenderColumn, camHeightPatterns
+                    _MAP_UPDATE MapRenderColumn, Camera_heightPatterns
                 bra     .checkBackgroundXDone
             .checkMaxX:
                 btst    #1, d5
                 beq     .checkBackgroundXDone
                     move.w  d7, d0
-                    add.w   (vdpMetrics + vdpScreenWidth), d0
-                    move.w  camMinY(a0), d1
+                    add.w   (vdpMetrics + VDPMetrics_screenWidth), d0
+                    move.w  Camera_minY(a0), d1
 
-                    _MAP_UPDATE MapRenderColumn, camHeightPatterns
+                    _MAP_UPDATE MapRenderColumn, Camera_heightPatterns
             .checkBackgroundXDone:
 
     .done:

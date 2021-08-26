@@ -6,43 +6,43 @@
 ; Default viewport configuration. Relative background using plane based scrolling based on the camera
 ; ----------------
 defaultViewportConfiguration:
-    ; .vcBackgroundTracker
+    ; .backgroundTracker
     dc.l relativeBackgroundTracker
-    ; .vcBackgroundTrackerConfiguration
+    ; .backgroundTrackerConfiguration
     dc.l relativeHorizontalVerticalBackgroundTrackerConfiguration
-    ; .vcHorizontalScrollConfiguration
-        ; .scVDPScrollUpdaterAddress
+    ; .horizontalScrollConfiguration
+        ; .vdpScrollUpdaterAddress
         dc.l planeHorizontalVDPScrollUpdater
-        ; .scBackgroundScrollUpdaterConfiguration
-            ; .svucCamera
-            dc.w viewportBackground
-            ; .svucUpdaterData
+        ; .backgroundScrollUpdaterConfiguration
+            ; .camera
+            dc.w Viewport_background
+            ; .updaterData
             dc.l planeHorizontalScrollCameraConfig
-            ; .svucUpdater
+            ; .updater
             dc.l planeScrollCamera
-        ; .scForegroundScrollUpdaterConfiguration
-            ; .svucCamera
-            dc.w viewportForeground
-            ; .svucUpdaterData
+        ; .foregroundScrollUpdaterConfiguration
+            ; .camera
+            dc.w Viewport_foreground
+            ; .updaterData
             dc.l planeHorizontalScrollCameraConfig
-            ; .svucUpdater
+            ; .updater
             dc.l planeScrollCamera
-    ; .vcVerticalScrollConfiguration
-        ; .scVDPScrollUpdaterAddress
+    ; .verticalScrollConfiguration
+        ; .vdpScrollUpdaterAddress
         dc.l planeVerticalVDPScrollUpdater
-        ; .scBackgroundScrollUpdaterConfiguration
-            ; .svucCamera
-            dc.w viewportBackground
-            ; .svucUpdaterData
+        ; .backgroundScrollUpdaterConfiguration
+            ; .camera
+            dc.w Viewport_background
+            ; .updaterData
             dc.l planeVerticalScrollCameraConfig
-            ; .svucUpdater
+            ; .updater
             dc.l planeScrollCamera
-        ; .scForegroundScrollUpdaterConfiguration
-            ; .svucCamera
-            dc.w viewportForeground
-            ; .svucUpdaterData
+        ; .foregroundScrollUpdaterConfiguration
+            ; .camera
+            dc.w Viewport_foreground
+            ; .updaterData
             dc.l planeVerticalScrollCameraConfig
-            ; .svucUpdater
+            ; .updater
             dc.l planeScrollCamera
 
 
@@ -53,43 +53,43 @@ defaultViewportConfiguration:
 ; - QuarterSpeed: Quarter speed of the foreground camera movement.
 ; ----------------
 DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
-        ; .vcBackgroundTracker
+        ; .backgroundTracker
         dc.l staticBackgroundTracker
-        ; .vcBackgroundTrackerConfiguration
+        ; .backgroundTrackerConfiguration
         dc.l NULL
-        ; .vcHorizontalScrollConfiguration
-            ; .scVDPScrollUpdaterAddress
+        ; .horizontalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
             dc.l planeHorizontalVDPScrollUpdater
-            ; .scBackgroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportForeground
-                ; .svucUpdaterData
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
                 dc.l planeHorizontalScrollCamera\speed\Config
-                ; .svucUpdater
+                ; .updater
                 dc.l planeScrollCamera
-            ; .scForegroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportForeground
-                ; .svucUpdaterData
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
                 dc.l planeHorizontalScrollCameraConfig
-                ; .svucUpdater
+                ; .updater
                 dc.l planeScrollCamera
-        ; .vcVerticalScrollConfiguration
-            ; .scVDPScrollUpdaterAddress
+        ; .verticalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
             dc.l planeVerticalVDPScrollUpdater
-            ; .scBackgroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportForeground
-                ; .svucUpdaterData
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
                 dc.l planeVerticalScrollCamera\speed\Config
-                ; .svucUpdater
+                ; .updater
                 dc.l planeScrollCamera
-            ; .scForegroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportForeground
-                ; .svucUpdaterData
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
                 dc.l planeVerticalScrollCameraConfig
-                ; .svucUpdater
+                ; .updater
                 dc.l planeScrollCamera
     Endm
 
@@ -98,42 +98,42 @@ DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
 ; Create a viewport configuration with a static background that rotates and translates according to the specified RotateScrollCameraConfiguration
 ; ----------------
 DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG Macro config
-        ; .vcBackgroundTracker
+        ; .backgroundTracker
         dc.l staticBackgroundTracker
-        ; .vcBackgroundTrackerConfiguration
+        ; .backgroundTrackerConfiguration
         dc.l NULL
-        ; .vcHorizontalScrollConfiguration
-            ; .scVDPScrollUpdaterAddress
+        ; .horizontalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
             dc.l lineHorizontalVDPScrollUpdater
-            ; .scBackgroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportBackground
-                ; .svucUpdaterData
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
                 dc.l \config
-                ; .svucUpdater
+                ; .updater
                 dc.l rotateHorizontalLineScroll
-            ; .scForegroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportForeground
-                ; .svucUpdaterData
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
                 dc.l lineHorizontalScrollCameraConfig
-                ; .svucUpdater
+                ; .updater
                 dc.l multiScrollCamera
-        ; .vcVerticalScrollConfiguration
-            ; .scVDPScrollUpdaterAddress
+        ; .verticalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
             dc.l cellVerticalVDPScrollUpdater
-            ; .scBackgroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportBackground
-                ; .svucUpdaterData
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
                 dc.l \config
-                ; .svucUpdater
+                ; .updater
                 dc.l rotateVerticalCellScroll
-            ; .scForegroundScrollUpdaterConfiguration
-                ; .svucCamera
-                dc.w viewportForeground
-                ; .svucUpdaterData
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
                 dc.l cellVerticalScrollCameraConfig
-                ; .svucUpdater
+                ; .updater
                 dc.l multiScrollCamera
     Endm

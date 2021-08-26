@@ -15,13 +15,13 @@ ORBISON_EXTENTS Equ 8
 
     ; ObjectDescriptor
     DEFINE_STRUCT OrbisonDescriptor, EXTENDS, MapStatefulObjectDescriptor
-        STRUCT_MEMBER.MapObjectPosition orbisonPosition
+        STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
 
     ; State
     DEFINE_STRUCT OrbisonState
-        STRUCT_MEMBER.w orbisonX
-        STRUCT_MEMBER.w orbisonY
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
     ; Type
@@ -86,8 +86,8 @@ OrbisonLoad:
 ; - a0: OrbisonDescriptor address
 ; - a1: OrbisonState address
 OrbisonInit:
-        move.w  orbisonPosition + opX(a0), orbisonX(a1)
-        move.w  orbisonPosition + opY(a0), orbisonY(a1)
+        move.w  OrbisonDescriptor_position + MapObjectPosition_x(a0), OrbisonState_x(a1)
+        move.w  OrbisonDescriptor_position + MapObjectPosition_y(a0), OrbisonState_y(a1)
         rts
 
 
@@ -101,7 +101,7 @@ OrbisonInit:
 OrbisonUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  orbisonX(a1), d3
+        move.w  OrbisonState_x(a1), d3
         sub.w   d0, d3
         subq.w  #ORBISON_EXTENTS, d3
 
@@ -115,7 +115,7 @@ OrbisonUpdate:
 
         ; Convert vertical map coordinates to screen coordinates
         VIEWPORT_GET_Y d1
-        move.w  orbisonY(a1), d4
+        move.w  OrbisonState_y(a1), d4
         sub.w   d1, d4
         subq.w  #ORBISON_EXTENTS, d4
 
@@ -136,10 +136,10 @@ OrbisonUpdate:
             jsr     VDPSpriteAlloc
 
             ; Update sprite attribute
-            move.w  d3, vdpSpriteX(a0)
-            move.w  d4, vdpSpriteY(a0)
-            move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, vdpSpriteSize(a0)
-            move.w  #ORBISON_TILE_ID | (1 << PATTERN_REF_PALETTE_SHIFT), vdpSpriteAttr3(a0)
+            move.w  d3, VDPSprite_x(a0)
+            move.w  d4, VDPSprite_y(a0)
+            move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, VDPSprite_size(a0)
+            move.w  #ORBISON_TILE_ID | (1 << PATTERN_REF_PALETTE_SHIFT), VDPSprite_attr(a0)
 
     .notVisible:
         rts

@@ -101,16 +101,16 @@ PATTERN_MASK        Equ 7
 
     ; VDP metrics structure
     DEFINE_STRUCT VDPMetrics
-        STRUCT_MEMBER.w vdpScreenWidth
-        STRUCT_MEMBER.w vdpScreenHeight
-        STRUCT_MEMBER.w vdpScreenWidthPatterns
-        STRUCT_MEMBER.w vdpScreenHeightPatterns
-        STRUCT_MEMBER.w vdpPlaneWidth
-        STRUCT_MEMBER.w vdpPlaneHeight
-        STRUCT_MEMBER.w vdpPlaneWidthPatterns
-        STRUCT_MEMBER.w vdpPlaneHeightPatterns
-        STRUCT_MEMBER.w vdpPlaneWidthShift
-        STRUCT_MEMBER.w vdpPlaneHeightShift
+        STRUCT_MEMBER.w screenWidth
+        STRUCT_MEMBER.w screenHeight
+        STRUCT_MEMBER.w screenWidthPatterns
+        STRUCT_MEMBER.w screenHeightPatterns
+        STRUCT_MEMBER.w planeWidth
+        STRUCT_MEMBER.w planeHeight
+        STRUCT_MEMBER.w planeWidthPatterns
+        STRUCT_MEMBER.w planeHeightPatterns
+        STRUCT_MEMBER.w planeWidthShift
+        STRUCT_MEMBER.w planeHeightShift
     DEFINE_STRUCT_END
 
     ; Allocate VDPContext
@@ -139,16 +139,16 @@ PATTERN_MASK        Equ 7
     INIT_STRUCT_END
 
     INIT_STRUCT vdpMetrics
-        INIT_STRUCT_MEMBER.vdpScreenWidth           320
-        INIT_STRUCT_MEMBER.vdpScreenHeight          224
-        INIT_STRUCT_MEMBER.vdpScreenWidthPatterns   40
-        INIT_STRUCT_MEMBER.vdpScreenHeightPatterns  28
-        INIT_STRUCT_MEMBER.vdpPlaneWidth            64 * 8
-        INIT_STRUCT_MEMBER.vdpPlaneHeight           32 * 8
-        INIT_STRUCT_MEMBER.vdpPlaneWidthPatterns    64
-        INIT_STRUCT_MEMBER.vdpPlaneHeightPatterns   32
-        INIT_STRUCT_MEMBER.vdpPlaneWidthShift       7       ; Adjusted for word sized shift
-        INIT_STRUCT_MEMBER.vdpPlaneHeightShift      6
+        INIT_STRUCT_MEMBER.screenWidth           320
+        INIT_STRUCT_MEMBER.screenHeight          224
+        INIT_STRUCT_MEMBER.screenWidthPatterns   40
+        INIT_STRUCT_MEMBER.screenHeightPatterns  28
+        INIT_STRUCT_MEMBER.planeWidth            64 * 8
+        INIT_STRUCT_MEMBER.planeHeight           32 * 8
+        INIT_STRUCT_MEMBER.planeWidthPatterns    64
+        INIT_STRUCT_MEMBER.planeHeightPatterns   32
+        INIT_STRUCT_MEMBER.planeWidthShift       7       ; Adjusted for word sized shift
+        INIT_STRUCT_MEMBER.planeHeightShift      6
     INIT_STRUCT_END
 
 
@@ -156,7 +156,7 @@ PATTERN_MASK        Equ 7
 ; Write cached register value to VDP
 ; ----------------
 _VDP_REG_SYNC Macro vdpReg
-        move.w  (vdpContext + \vdpReg), MEM_VDP_CTRL
+        move.w  (vdpContext + VDPContext_\vdpReg), MEM_VDP_CTRL
     Endm
 
 
@@ -164,7 +164,7 @@ _VDP_REG_SYNC Macro vdpReg
 ; Set register value
 ; ----------------
 VDP_REG_SET Macro vdpReg, value
-        move.b   #\value, (vdpContext + \vdpReg + 1)
+        move.b   #\value, (vdpContext + VDPContext_\vdpReg + 1)
 
         _VDP_REG_SYNC \vdpReg
     Endm
@@ -174,7 +174,7 @@ VDP_REG_SET Macro vdpReg, value
 ; Enable a VDP flag in the specified register
 ; ----------------
 VDP_REG_SET_BITS Macro vdpReg, flag
-        ori.b   #\flag, (vdpContext + \vdpReg + 1)
+        ori.b   #\flag, (vdpContext + VDPContext_\vdpReg + 1)
 
         _VDP_REG_SYNC \vdpReg
     Endm
@@ -184,7 +184,7 @@ VDP_REG_SET_BITS Macro vdpReg, flag
 ; Disable a VDP flag in the specified register
 ; ----------------
 VDP_REG_RESET_BITS Macro vdpReg, flag
-        andi.b   #~\flag & $ff, (vdpContext + \vdpReg + 1)
+        andi.b   #~\flag & $ff, (vdpContext + VDPContext_\vdpReg + 1)
 
         _VDP_REG_SYNC \vdpReg
     Endm
@@ -194,8 +194,8 @@ VDP_REG_RESET_BITS Macro vdpReg, flag
 ; Set bit field
 ; ----------------
 VDP_REG_SET_BIT_FIELD Macro vdpReg, bitFieldMask, bitFieldValue
-        andi.b  #~\bitFieldMask, (vdpContext + \vdpReg + 1)
-        ori.b   #\bitFieldValue, (vdpContext + \vdpReg + 1)
+        andi.b  #~\bitFieldMask, (vdpContext + VDPContext_\vdpReg + 1)
+        ori.b   #\bitFieldValue, (vdpContext + VDPContext_\vdpReg + 1)
 
         _VDP_REG_SYNC \vdpReg
     Endm
@@ -340,8 +340,8 @@ VDPVSyncEndWait:
 ; Uses: d0-d1/a0
 VDPSetPlaneSize
 _WRITE_PLANE_SIZE_METRICS Macro
-            move.l  .planeMetrics(pc, d0), vdpPlaneWidth(a0)
-            move.w  .planeMetrics + SIZE_LONG(pc, d0), vdpPlaneWidth + SIZE_LONG(a0)
+            move.l  .planeMetrics(pc, d0), VDPMetrics_planeWidth(a0)
+            move.w  .planeMetrics + SIZE_LONG(pc, d0), VDPMetrics_planeWidth + SIZE_LONG(a0)
         Endm
 
         move.w  #VDP_CMD_RS_PLANE_SIZE, d1
@@ -373,8 +373,8 @@ _WRITE_PLANE_SIZE_METRICS Macro
 ; ----------------
 VDPSetV30CellMode:
         VDP_REG_SET_BITS vdpRegMode2, MODE2_V30_CELL
-        move.w #240, (vdpMetrics + vdpScreenHeight)
-        move.w #30, (vdpMetrics + vdpScreenHeightPatterns)
+        move.w #240, (vdpMetrics + VDPMetrics_screenHeight)
+        move.w #30, (vdpMetrics + VDPMetrics_screenHeightPatterns)
         rts
 
 
@@ -383,8 +383,8 @@ VDPSetV30CellMode:
 ; ----------------
 VDPSetV28CellMode:
         VDP_REG_SET_BITS vdpRegMode2, MODE2_V30_CELL
-        move.w #224, (vdpMetrics + vdpScreenHeight)
-        move.w #28, (vdpMetrics + vdpScreenHeightPatterns)
+        move.w #224, (vdpMetrics + VDPMetrics_screenHeight)
+        move.w #28, (vdpMetrics + VDPMetrics_screenHeightPatterns)
         rts
 
 
@@ -393,8 +393,8 @@ VDPSetV28CellMode:
 ; ----------------
 VDPSetH40CellMode:
         VDP_REG_SET_BITS vdpRegMode4, MODE4_H40_CELL
-        move.w #320, (vdpMetrics + vdpScreenWidth)
-        move.w #40, (vdpMetrics + vdpScreenWidthPatterns)
+        move.w #320, (vdpMetrics + VDPMetrics_screenWidth)
+        move.w #40, (vdpMetrics + VDPMetrics_screenWidthPatterns)
         rts
 
 
@@ -403,8 +403,8 @@ VDPSetH40CellMode:
 ; ----------------
 VDPSetH32CellMode:
         VDP_REG_RESET_BITS vdpRegMode4, MODE4_H40_CELL
-        move.w #256, (vdpMetrics + vdpScreenWidth)
-        move.w #32, (vdpMetrics + vdpScreenWidthPatterns)
+        move.w #256, (vdpMetrics + VDPMetrics_screenWidth)
+        move.w #32, (vdpMetrics + VDPMetrics_screenWidthPatterns)
         rts
 
 

@@ -28,10 +28,10 @@ ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectType
 [# th:with="rootMaps=${maps.{? #this.properties['background'] != null}}"]
     ; struct MapDirectory
     MapDirectory:
-        ; .mapCount
+        ; .count
         dc.w [(${rootMaps.size})]
         [# th:each="map : ${rootMaps}" th:with="mapName=${#strings.capitalize(map.name)}"]
-                ; .mapForegroundAddress
+                ; .foregroundAddress
                 dc.l MapHeader[(${mapName})]
         [/]
 [/]
@@ -46,21 +46,21 @@ ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectType
 
         ; struct MapObjectGroupMap
         MapObjectGroupMap[(${mapName})]:
-            ; .mapogmStride
+            ; .stride
             dc.w [(${objectGroupMap.width})] * SIZE_WORD
-            ; .mapogmWidth
+            ; .width
             dc.w [(${objectGroupMap.width})]
-            ; .mapogmHeight
+            ; .height
             dc.w [(${objectGroupMap.height})]
-            ; .mapogmGroupsCount
+            ; .groupCount
             dc.w [(${objectGroupMap.objectGroups.size})]
-            ; .mapogmContainersTableAddress
+            ; .containersTableAddress
             dc.l MapObjectGroupContainersTable[(${mapName})]
-            ; .mapogmContainersBaseAddress
+            ; .containersBaseAddress
             dc.l MapObjectGroupContainersBase[(${mapName})]
-            ; .mapogmGroupsBaseAddress
+            ; .groupsBaseAddress
             dc.l MapObjectGroupsBase[(${mapName})]
-            ; .mapogmRowOffsetTable
+            ; .rowOffsetTable
             dc.w [# th:each="index, iter : ${#numbers.sequence(0, objectGroupMap.height - 1)}"][(${index * objectGroupMap.width * 2})][# th:if="${!iter.last}"], [/][/]
 
         Even
@@ -93,13 +93,13 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
                     ; struct MapObjectGroup
                     MapObjectGroup[(${objectGroup.id})][(${mapName})]:
-                        ; .mapogFlagNumber
+                        ; .flagNumber
                         dc.b [(${objectGroup.flagNumber})]
-                        ; .mapogObjectCount
+                        ; .objectCount
                         dc.b [(${staticObjects.size})]
-                        ; .mapogTransferableObjectCount
+                        ; .transferableObjectCount
                         dc.b [(${transferableObjects.size})]
-                        ; .mapogTotalObjectCount
+                        ; .totalObjectCount
                         dc.b [(${staticObjects.size + transferableObjects.size})]
                         ; .mapogObjectStateOffset
                         dc.w $\$ALLOC_OBJECT_STATE_OFFSET
@@ -108,7 +108,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
                         Even
 
-                        ; .mapogObjectDescriptors
+                        ; .objectDescriptors
                         [# th:each="object : ${objects}"]
 
                             [# th:if="${object.properties['objectTypeTransferable']}"]
@@ -117,24 +117,24 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
                             ; struct MapObjectDescriptor (type = [(${object.name})])
                             MapObject[(${object.id})][(${mapName})]:
-                                ; .odTypeOffset
+                                ; .typeOffset
                                 dc.w [(${object.name})]ObjectTypeOffset
-                                ; .odSize
+                                ; .size
                                 dc.b MapObject[(${object.id})][(${mapName})]_End - MapObject[(${object.id})][(${mapName})]
-                                ; .odFlags
+                                ; .flags
                                 dc.b [# th:if="${object.properties['objectTypeTransferable']}"]MODF_TRANSFERABLE_MASK|[/][# th:if="${object.properties['enabled']}"]MODF_ENABLED_MASK|[/][# th:if="${object.properties['active']}"]MODF_ACTIVE_MASK|[/][# th:if="${object.horizontalFlip}"]MODF_HFLIP_MASK|[/][# th:if="${object.verticalFlip}"]MODF_VFLIP_MASK|[/]0
 
                                 ; struct MapStatefulObjectDescriptor
                                 If ([(${object.name})]ObjectTypeSize > 0)
-                                    ; .odStateOffset
+                                    ; .stateOffset
                                     dc.w $\$ALLOC_OBJECT_STATE_OFFSET
                                 EndIf
 
                                 [# th:if="${object.properties['objectTypePositional']}"]
                                     ; struct MapObjectPosition
-                                        ; .opX
+                                        ; .x
                                         dc.w [(${object.x})]
-                                        ; .opY
+                                        ; .y
                                         dc.w [(${object.y})]
                                 [/]
                             MapObject[(${object.id})][(${mapName})]_End:
@@ -153,17 +153,17 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
         ; struct MapHeader
         MapHeader[(${mapName})]:
-            ; .mapForegroundAddress
+            ; .foregroundAddress
             dc.l Map[(${mapName})]
-            ; .mapBackgroundAddress
+            ; .backgroundAddress
             dc.l Map[(${backgroundMapName})]
-            ; .mapTilesetAddress
+            ; .tilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
-            ; .mapStateSize
+            ; .stateSize
             dc.w $\$ALLOC_OBJECT_STATE_OFFSET
-            ; .mapObjectGroupMapAddress
+            ; .objectGroupMapAddress
             dc.l MapObjectGroupMap[(${mapName})]
-            ; .mapViewportConfigurationAddress
+            ; .viewportConfigurationAddress
             dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
 
             Inform 0, 'Total object allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
@@ -174,23 +174,23 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
     ; struct Map
     Map[(${mapName})]:
-        ; .mapWidth
+        ; .width
         dc.w [(${map.width})]
-        ; .mapStride
+        ; .stride
         dc.w [(${map.width})] * SIZE_WORD
-        ; .mapHeight
+        ; .height
         dc.w [(${map.height})]
-        ; .mapWidthPatterns
+        ; .widthPatterns
         dc.w [(${map.width * 16})]
-        ; .mapHeightPatterns
+        ; .heightPatterns
         dc.w [(${map.height * 16})]
-        ; .mapWidthPixels
+        ; .widthPixels
         dc.w [(${map.width * 16 * 8})]
-        ; .mapHeightPixels
+        ; .heightPixels
         dc.w [(${map.height * 16 * 8})]
-        ; .mapDataAddress
+        ; .dataAddress
         dc.l Map[(${mapName})]Data
-        ; .mapRowOffsetTable
+        ; .rowOffsetTable
         dc.w [# th:each="index, iter : ${#numbers.sequence(0, map.height - 1)}"][(${index * map.width * 2})][# th:if="${!iter.last}"], [/][/]
 
     Even

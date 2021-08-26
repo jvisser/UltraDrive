@@ -6,49 +6,49 @@
 ; Map structures
 ; ----------------
     DEFINE_STRUCT MapDirectory
-        STRUCT_MEMBER.w mapCount
+        STRUCT_MEMBER.w count
         STRUCT_MEMBER.b maps                                    ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectGroupMap
-        STRUCT_MEMBER.w mapogmStride
-        STRUCT_MEMBER.w mapogmWidth                             ; Granularity = 8x8 chunks or 1024x1024 pixels
-        STRUCT_MEMBER.w mapogmHeight
-        STRUCT_MEMBER.w mapogmGroupsCount
-        STRUCT_MEMBER.l mapogmContainersTableAddress            ; MapObjectGroup*[mapogmHeight][mapogmWidth] indexed by CHUNK_REF_OBJECT_GROUP_IDX
-        STRUCT_MEMBER.l mapogmContainersBaseAddress
-        STRUCT_MEMBER.l mapogmGroupsBaseAddress
-        STRUCT_MEMBER.b mapogmRowOffsetTable                    ; Marker
+        STRUCT_MEMBER.w stride
+        STRUCT_MEMBER.w width                                   ; Granularity = 8x8 chunks or 1024x1024 pixels
+        STRUCT_MEMBER.w height
+        STRUCT_MEMBER.w groupCount
+        STRUCT_MEMBER.l containersTableAddress                  ; MapObjectGroup*[height][width] indexed by CHUNK_REF_OBJECT_GROUP_IDX
+        STRUCT_MEMBER.l containersBaseAddress
+        STRUCT_MEMBER.l groupsBaseAddress
+        STRUCT_MEMBER.b rowOffsetTable                          ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectGroup
-        STRUCT_MEMBER.b mapogFlagNumber                         ; Each object group has a unique flag number in the active viewport
-        STRUCT_MEMBER.b mapogObjectCount
-        STRUCT_MEMBER.b mapogTransferableObjectCount
-        STRUCT_MEMBER.b mapogTotalObjectCount
-        STRUCT_MEMBER.w mapogStateOffset                        ; Offset into the map's allocated state array for this group
-        STRUCT_MEMBER.b mapogObjectDescriptors                  ; Marker
+        STRUCT_MEMBER.b flagNumber                              ; Each object group has a unique flag number in the active viewport
+        STRUCT_MEMBER.b objectCount
+        STRUCT_MEMBER.b transferableObjectCount
+        STRUCT_MEMBER.b totalObjectCount
+        STRUCT_MEMBER.w stateOffset                             ; Offset into the map's allocated state array for this group
+        STRUCT_MEMBER.b objectDescriptors                       ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapHeader
-        STRUCT_MEMBER.l mapForegroundAddress
-        STRUCT_MEMBER.l mapBackgroundAddress
-        STRUCT_MEMBER.l mapTilesetAddress
-        STRUCT_MEMBER.w mapStateSize
-        STRUCT_MEMBER.l mapObjectGroupMapAddress
-        STRUCT_MEMBER.l mapViewportConfigurationAddress
+        STRUCT_MEMBER.l foregroundAddress
+        STRUCT_MEMBER.l backgroundAddress
+        STRUCT_MEMBER.l tilesetAddress
+        STRUCT_MEMBER.w stateSize
+        STRUCT_MEMBER.l objectGroupMapAddress
+        STRUCT_MEMBER.l viewportConfigurationAddress
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT Map
-        STRUCT_MEMBER.w mapWidth
-        STRUCT_MEMBER.w mapStride
-        STRUCT_MEMBER.w mapHeight
-        STRUCT_MEMBER.w mapWidthPatterns
-        STRUCT_MEMBER.w mapHeightPatterns
-        STRUCT_MEMBER.w mapWidthPixels
-        STRUCT_MEMBER.w mapHeightPixels
-        STRUCT_MEMBER.l mapDataAddress                          ; Uncompressed
-        STRUCT_MEMBER.b mapRowOffsetTable                       ; Marker
+        STRUCT_MEMBER.w width
+        STRUCT_MEMBER.w stride
+        STRUCT_MEMBER.w height
+        STRUCT_MEMBER.w widthPatterns
+        STRUCT_MEMBER.w heightPatterns
+        STRUCT_MEMBER.w widthPixels
+        STRUCT_MEMBER.w heightPixels
+        STRUCT_MEMBER.l dataAddress                             ; Uncompressed
+        STRUCT_MEMBER.b rowOffsetTable                          ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -71,13 +71,13 @@ MAP_GET Macros target
 ; Uses: d0-d7/a0-a6
 MapLoadDirectoryIndex:
             lea     MapDirectory, a0
-            move.w  mapCount(a0), d1
+            move.w  MapDirectory_count(a0), d1
             cmp.w   d1, d0
             bge     .invalidMapIndex
 
             add.w   d0, d0
             add.w   d0, d0
-            move.l  maps(a0, d0), a0
+            move.l  MapDirectory_maps(a0, d0), a0
             jmp     MapLoad
 
         .invalidMapIndex:
@@ -101,7 +101,7 @@ MapLoad:
         clr.w   mapActiveObjectGroupCount
 
         ; Load associated tileset
-        movea.l mapTilesetAddress(a0), a0
+        movea.l MapHeader_tilesetAddress(a0), a0
         jsr     TilesetLoad
 
         ; Init objects

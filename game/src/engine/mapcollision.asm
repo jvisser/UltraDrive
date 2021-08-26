@@ -54,8 +54,8 @@ _READ_CHUNK_REF Macro
 ; - a3: map data base address
 ; - d3: chunk ref
 _START_CHUNK Macro
-        lea     mapRowOffsetTable(a0), a2
-        movea.l mapDataAddress(a0), a3
+        lea     Map_rowOffsetTable(a0), a2
+        movea.l Map_dataAddress(a0), a3
         move.w  d1, d2
         lsr.w   #7, d2
         add.w   d2, d2
@@ -409,7 +409,7 @@ _NEXT_CHUNK Macro
             add.w   #CHUNK_ELEMENT_COUNT, d7
 
             ; Go one row up in the map
-            sub.w   mapStride(a0), d5
+            sub.w   Map_stride(a0), d5
         Endm
 
 ;-------------------------------------------------
@@ -527,7 +527,7 @@ _NEXT_CHUNK Macro
             sub.w   #CHUNK_ELEMENT_COUNT, d7
 
             ; Go one row down in the map
-            add.w   mapStride(a0), d5
+            add.w   Map_stride(a0), d5
         Endm
 
 ;-------------------------------------------------

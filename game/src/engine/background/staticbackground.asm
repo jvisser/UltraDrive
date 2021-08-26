@@ -7,9 +7,9 @@
 ; ----------------
     ; struct BackgroundTracker
     staticBackgroundTracker:
-        ; .btInit
+        ; .init
         dc.l _StaticBackgroundTrackerInit
-        ; .btSync
+        ; .sync
         dc.l NoOperation
 
 
@@ -26,7 +26,7 @@ _StaticBackgroundTrackerInit:
         move.l  d0, d4
         moveq   #0, d0
         moveq   #0, d1
-        move.w  (vdpMetrics + vdpPlaneWidth), d2
-        move.w  (vdpMetrics + vdpPlaneHeight), d3
+        move.w  (vdpMetrics + VDPMetrics_planeWidth), d2
+        move.w  (vdpMetrics + VDPMetrics_planeHeight), d3
         jsr     CameraInit
         rts

@@ -15,7 +15,7 @@ FIREBALL_EXTENTS Equ 8
 
     ; ObjectDescriptor
     DEFINE_STRUCT FireballDescriptor, EXTENDS, MapObjectDescriptor
-        STRUCT_MEMBER.MapObjectPosition fbPosition
+        STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
 
     ; Type
@@ -82,7 +82,7 @@ FireballLoad:
 FireballUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  fbPosition + opX(a0), d3
+        move.w  FireballDescriptor_position + MapObjectPosition_x(a0), d3
         move.w  d3, d5
         sub.w   d0, d3
         subq.w  #FIREBALL_EXTENTS, d3
@@ -97,7 +97,7 @@ FireballUpdate:
 
             ; Convert vertical map coordinates to screen coordinates
             VIEWPORT_GET_Y d1
-            move.w  fbPosition + opY(a0), d4
+            move.w  FireballDescriptor_position + MapObjectPosition_y(a0), d4
             sub.w   d1, d4
             subq.w  #FIREBALL_EXTENTS, d4
 
@@ -133,10 +133,10 @@ FireballUpdate:
                     jsr     VDPSpriteAlloc
 
                     ; Update sprite attribute
-                    move.w  d3, vdpSpriteX(a0)
-                    move.w  d4, vdpSpriteY(a0)
-                    move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, vdpSpriteSize(a0)
-                    move.w  #FIREBALL_TILE_ID | (1 << PATTERN_REF_PALETTE_SHIFT), vdpSpriteAttr3(a0)
+                    move.w  d3, VDPSprite_x(a0)
+                    move.w  d4, VDPSprite_y(a0)
+                    move.b  #VDP_SPRITE_SIZE_H2 | VDP_SPRITE_SIZE_V2, VDPSprite_size(a0)
+                    move.w  #FIREBALL_TILE_ID | (1 << PATTERN_REF_PALETTE_SHIFT), VDPSprite_attr(a0)
 
     .notVisible:
         rts

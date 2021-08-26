@@ -14,19 +14,19 @@
 ; ----------------
 
     DEFINE_STRUCT VDPScrollUpdaterState
-        STRUCT_MEMBER.l   vssBackgroundScrollValueUpdateAddress
-        STRUCT_MEMBER.l   vssBackgroundScrollValueTableAddress
-        STRUCT_MEMBER.l   vssBackgroundScrollValueStateAddress
-        STRUCT_MEMBER.l   vssBackgroundScrollValueConfigurationAddress
-        STRUCT_MEMBER.w   vssBackgroundScrollValueCameraOffset
+        STRUCT_MEMBER.l   backgroundScrollValueUpdateAddress
+        STRUCT_MEMBER.l   backgroundScrollValueTableAddress
+        STRUCT_MEMBER.l   backgroundScrollValueStateAddress
+        STRUCT_MEMBER.l   backgroundScrollValueConfigurationAddress
+        STRUCT_MEMBER.w   backgroundScrollValueCameraOffset
 
-        STRUCT_MEMBER.l   vssForegroundScrollValueUpdateAddress
-        STRUCT_MEMBER.l   vssForegroundScrollValueTableAddress
-        STRUCT_MEMBER.l   vssForegroundScrollValueStateAddress
-        STRUCT_MEMBER.l   vssForegroundScrollValueConfigurationAddress
-        STRUCT_MEMBER.w   vssForegroundScrollValueCameraOffset
+        STRUCT_MEMBER.l   foregroundScrollValueUpdateAddress
+        STRUCT_MEMBER.l   foregroundScrollValueTableAddress
+        STRUCT_MEMBER.l   foregroundScrollValueStateAddress
+        STRUCT_MEMBER.l   foregroundScrollValueConfigurationAddress
+        STRUCT_MEMBER.w   foregroundScrollValueCameraOffset
 
-        STRUCT_MEMBER.b   vssUpdateFlags
+        STRUCT_MEMBER.b   updateFlags
     DEFINE_STRUCT_END
 
     DEFINE_VAR FAST
@@ -39,7 +39,7 @@
 ; Put the address of the specified scroll table in target
 ; ----------------
 VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Macros orientation, config, target
-    move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress, \target
+    move.l  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueTableAddress, \target
 
 
 ;-------------------------------------------------
@@ -52,36 +52,36 @@ VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Macros orientation, config, target
 VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
         PUSHM   a0-a1
 
-        lea     sc\config\ScrollUpdaterConfiguration(a1), a3                                                    ; a3 = Scroll updater configuration address
+        lea     ScrollConfiguration_\config\ScrollUpdaterConfiguration(a1), a3                                                      ; a3 = Scroll updater configuration address
 
         ; Store scroll value updater configuration for later use
-        movea.l svucUpdaterData(a3), a2                                                                         ; a2 = Scroll value updater configuration address
-        move.l  a2, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueConfigurationAddress
+        movea.l ScrollValueUpdaterConfiguration_updaterData(a3), a2                                                                 ; a2 = Scroll value updater configuration address
+        move.l  a2, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueConfigurationAddress
 
         ; Store scroll updater camera offset for later use
-        move.w  svucCamera(a3), d0                                                                              ; d0 = Viewport camera offset
-        move.w  d0, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueCameraOffset
+        move.w  ScrollValueUpdaterConfiguration_camera(a3), d0                                                                      ; d0 = Viewport camera offset
+        move.w  d0, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueCameraOffset
 
         ; Get camera address
-        lea     (a0, d0), a0                                                                                    ; a0 = Camera address
+        lea     (a0, d0), a0                                                                                                        ; a0 = Camera address
 
         ; Allocate scroll table
         MEMORY_ALLOCATE \scrollTableType\_Size, a1, a4
 
         ; Store scroll value table address for later use
-        move.l  a1, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress
+        move.l  a1, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueTableAddress
 
-        move.l  svucUpdater(a3), a3                                                                             ; a3 = scroll updater address
+        move.l  ScrollValueUpdaterConfiguration_updater(a3), a3                                                                     ; a3 = scroll updater address
 
         ; Store scroll value updater update routine address for later use
-        move.l  svuUpdate(a3), vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueUpdateAddress
+        move.l  ScrollValueUpdater_update(a3), vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueUpdateAddress
 
         ; Call scroll value updater: init(a0, a1)
-        move.l  svuInit(a3), a3                                                                                 ; a3 = scroll updater init subroutine address
+        move.l  ScrollValueUpdater_init(a3), a3                                                                                     ; a3 = scroll updater init subroutine address
         jsr     (a3)
 
         ; Store address of scroll value updater allocated memory for later use
-        move.l  a0, vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueStateAddress
+        move.l  a0, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueStateAddress
 
         POPM    a0-a1
     Endm
@@ -98,12 +98,12 @@ VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
 ; Uses: Uses: d0-d7/a2-a6
 VDP_SCROLL_UPDATER_UPDATE Macro orientation
 _CALL_SCROLL_VALUE_UPDATER Macro orientation, config
-            move.w  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueCameraOffset, d0
-            lea     (a0, d0), a0                                                                                ; a0 = Camera address
-            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueTableAddress, a1             ; a1 = Scroll table address
-            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueConfigurationAddress, a2     ; a2 = Scroll value updater configuration
-            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueStateAddress, a3             ; a3 = Scroll value updater state address
-            move.l  vsus\orientation\VDPScrollUpdaterState + vss\config\ScrollValueUpdateAddress, a4            ; a3 = Scroll value update routine address
+            move.w  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueCameraOffset, d0
+            lea     (a0, d0), a0                                                                                                    ; a0 = Camera address
+            move.l  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueTableAddress, a1              ; a1 = Scroll table address
+            move.l  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueConfigurationAddress, a2      ; a2 = Scroll value updater configuration
+            move.l  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueStateAddress, a3              ; a3 = Scroll value updater state address
+            move.l  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueUpdateAddress, a4             ; a3 = Scroll value update routine address
 
             ; update(a0, a1, a2, a3)
             jsr     (a4)
@@ -112,21 +112,21 @@ _CALL_SCROLL_VALUE_UPDATER Macro orientation, config
         PUSHL   a0
 
         ; Call background scroll value updater
-        _CALL_SCROLL_VALUE_UPDATER \orientation, Background
+        _CALL_SCROLL_VALUE_UPDATER \orientation, background
 
         add.w   d0, d0
-        move.w  d0, vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags
+        move.w  d0, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_updateFlags
 
-        PEEKL   a0                                                                                              ; a0 = viewport address
+        PEEKL   a0                                                                                                                  ; a0 = viewport address
 
         ; Call foreground scroll value updater
-        _CALL_SCROLL_VALUE_UPDATER \orientation, Foreground
+        _CALL_SCROLL_VALUE_UPDATER \orientation, foreground
 
         POPL
 
-        move.w  vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags, d1
+        move.w  vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_updateFlags, d1
         or.w    d1, d0
-        move.w  d0, vsus\orientation\VDPScrollUpdaterState + vssUpdateFlags
+        move.w  d0, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_updateFlags
 
         Purge _CALL_SCROLL_VALUE_UPDATER
     Endm

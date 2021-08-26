@@ -12,17 +12,17 @@
 ; Palette swap raster effect structs
 ; ----------------
     DEFINE_STRUCT PaletteSwapRasterEffectConfiguration
-        STRUCT_MEMBER.l psrecVerticalPosition                           ; Address of the variable containing the vertical absolute position
+        STRUCT_MEMBER.l verticalPosition                                ; Address of the variable containing the vertical absolute position
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT PaletteSwapRasterEffectState
-        STRUCT_MEMBER.w psresScreenLine                                 ; currently used screen relative position of psrecVerticalPosition
-        STRUCT_MEMBER.l psresStartPalette                               ; currently used starting palette
-        STRUCT_MEMBER.w psresMaxScreenLine                              ; Max screenline the hint can occur at (to prevent vblank conflicts)
-        STRUCT_MEMBER.w psresMinScreenLine                              ; Min screenline the hint can occur at
-        STRUCT_MEMBER.w psresHIntScreenLineOffset                       ; Line difference between hint line and the visual effect actually appearing
-        STRUCT_MEMBER.w psresHIntPosition                               ; Horizontal interrupt line (vdpRegHRate register value)
-        STRUCT_MEMBER.b psresHIntHandled                                ; Used to prevent multiple hblank interrupts per frame
+        STRUCT_MEMBER.w screenLine                                      ; currently used screen relative position of verticalPosition
+        STRUCT_MEMBER.l startPalette                                    ; currently used starting palette
+        STRUCT_MEMBER.w maxScreenLine                                   ; Max screenline the hint can occur at (to prevent vblank conflicts)
+        STRUCT_MEMBER.w minScreenLine                                   ; Min screenline the hint can occur at
+        STRUCT_MEMBER.w hIntScreenLineOffset                            ; Line difference between hint line and the visual effect actually appearing
+        STRUCT_MEMBER.w hIntPosition                                    ; Horizontal interrupt line (vdpRegHRate register value)
+        STRUCT_MEMBER.b hIntHandled                                     ; Used to prevent multiple hblank interrupts per frame
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------
@@ -30,15 +30,15 @@
     ; ----------------
     ; struct RasterEffect
     paletteSwapRasterEffect:
-        ; .rfxSetupFrame
+        ; .setupFrame
         dc.l    _PaletteSwapRasterEffectSetupFrame
-        ; .rfxPrepareNextFrame
+        ; .prepareNextFrame
         dc.l    _PaletteSwapRasterEffectPrepareNextFrame
-        ; .rfxResetFrame
+        ; .resetFrame
         dc.l    _PaletteSwapRasterEffectResetFrame
-        ; .rfxInit
+        ; .init
         dc.l    _PaletteSwapRasterEffectInit
-        ; .rfxDestroy
+        ; .destroy
         dc.l    _PaletteSwapRasterEffectDestroy
 
     ;-------------------------------------------------
@@ -60,30 +60,30 @@ _PaletteSwapRasterEffectInit:
 
     .tileSetOk:
         movea.l d0, a1                                                  ; a1 = tileset address
-        tst.l   tsAlternativePaletteAddress(a1)
+        tst.l   Tileset_alternativePaletteAddress(a1)
         bne     .paletteOk
 
             OS_KILL 'No alternative palette available in tileset!'
 
     .paletteOk:
 
-        tst.l   tsColorTransitionTableAddress(a1)
+        tst.l   Tileset_colorTransitionTableAddress(a1)
         beq     .useDMA
 
             DEBUG_MSG 'Palette swap raster effect using color transition table'
 
-            ; d0 = psresHIntScreenLineOffset = 1: one line for the setup process
+            ; d0 = hIntScreenLineOffset = 1: one line for the setup process
             moveq  #1, d0
 
-            ; psresMaxScreenLine = vdpScreenHeight - psresHIntScreenLineOffset - transitionTable.size - 2 (Add 2 lines for safety to prevent vblank conflicts)
-            move.w  (vdpMetrics + vdpScreenHeight), d1
-            movea.l tsColorTransitionTableAddress(a1), a2
-            sub.w   tscttCount(a2), d1
+            ; PaletteSwapRasterEffectState_maxScreenLine = VDPMetrics_screenHeight - hIntScreenLineOffset - transitionTable.size - 2 (Add 2 lines for safety to prevent vblank conflicts)
+            move.w  (vdpMetrics + VDPMetrics_screenHeight), d1
+            movea.l Tileset_colorTransitionTableAddress(a1), a2
+            sub.w   TilesetColorTransitionTable_count(a2), d1
             sub.w   d0, d1
             subq.w  #2, d1
 
-            move.w  d0, (paletteSwapRasterEffectState + psresHIntScreenLineOffset)
-            move.w  d1, (paletteSwapRasterEffectState + psresMaxScreenLine)
+            move.w  d0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntScreenLineOffset)
+            move.w  d1, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_maxScreenLine)
 
             ; Return interrupt handler address in a3
             lea _PaletteSwapRasterEffectColorTransitionHblank, a3
@@ -93,47 +93,47 @@ _PaletteSwapRasterEffectInit:
 
             DEBUG_MSG 'Palette swap raster effect using DMA'
 
-            ; d0 = psresHIntScreenLineOffset = 0
+            ; d0 = PaletteSwapRasterEffectState_hIntScreenLineOffset = 0
             moveq  #0, d0
 
-            ; psresMaxScreenLine = vdpScreenHeight - psresHIntScreenLineOffset - 6 (Add 4 lines for DMA and 2 lines for safety to prevent vblank conflicts)
-            move.w  (vdpMetrics + vdpScreenHeight), d1
+            ; maxScreenLine = VDPMetrics_screenHeight - hIntScreenLineOffset - 6 (Add 4 lines for DMA and 2 lines for safety to prevent vblank conflicts)
+            move.w  (vdpMetrics + VDPMetrics_screenHeight), d1
             sub.w   d0, d1
             subq.w  #6, d1
 
-            move.w  d0, (paletteSwapRasterEffectState + psresHIntScreenLineOffset)
-            move.w  d1, (paletteSwapRasterEffectState + psresMaxScreenLine)
+            move.w  d0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntScreenLineOffset)
+            move.w  d1, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_maxScreenLine)
 
             ; Return interrupt handler address in a3
             lea _PaletteSwapRasterEffectDMAHblank, a3
 
     .setupPaletteSwapMethodDone:
 
-            ; psresMinScreenLine = 1 + psresHIntScreenLineOffset
-            move.w  (paletteSwapRasterEffectState + psresHIntScreenLineOffset), d0
+            ; minScreenLine = 1 + hIntScreenLineOffset
+            move.w  (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntScreenLineOffset), d0
             addq.w  #1, d0
-            move.w  d0, (paletteSwapRasterEffectState + psresMinScreenLine)
+            move.w  d0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine)
 
-            ; psresScreenLine = psrecVerticalPosition - viewport.y
-            move.w  psrecVerticalPosition(a0), d0
+            ; screenLine = verticalPosition - viewport.y
+            move.w  PaletteSwapRasterEffectConfiguration_verticalPosition(a0), d0
             VIEWPORT_GET_Y d1
             sub.w   d1, d0
-            move.w  d0, (paletteSwapRasterEffectState + psresScreenLine)
+            move.w  d0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_screenLine)
 
-            ; psresStartPalette = (psresScreenLine < psresMinScreenLine) ? tsAlternativePaletteAddress : tsPaletteAddress
-            cmp.w   (paletteSwapRasterEffectState + psresMinScreenLine), d0
+            ; startPalette = (screenLine < minScreenLine) ? Tileset_alternativePaletteAddress : Tileset_paletteAddress
+            cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine), d0
             bge     .normalPalette
-                move.l  tsAlternativePaletteAddress(a1), (paletteSwapRasterEffectState + psresStartPalette)
+                move.l  Tileset_alternativePaletteAddress(a1), (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
             bra .paletteSelectDone
         .normalPalette:
-                move.l  tsPaletteAddress(a1), (paletteSwapRasterEffectState + psresStartPalette)
+                move.l  Tileset_paletteAddress(a1), (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
         .paletteSelectDone:
 
-            ; psresHIntPosition = $ff (disable hint, setup by prepareNextFrame)
-            move.w  #$ff, (paletteSwapRasterEffectState + psresHIntPosition)
+            ; hIntPosition = $ff (disable hint, setup by prepareNextFrame)
+            move.w  #$ff, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition)
 
-            ; VDPDMAQueueAddCommandList(psresStartPalette)
-            movea.l (paletteSwapRasterEffectState + psresStartPalette), a0
+            ; VDPDMAQueueAddCommandList(startPalette)
+            movea.l (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette), a0
             jsr     VDPDMAQueueAddCommandList
 
             ; Return HBLank interrupt handler address
@@ -148,7 +148,7 @@ _PaletteSwapRasterEffectInit:
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectDestroy:
         TILESET_GET a1
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE tsPaletteAddress(a1)
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Tileset_paletteAddress(a1)
         rts
 
 
@@ -160,24 +160,24 @@ _PaletteSwapRasterEffectDestroy:
 _PaletteSwapRasterEffectPrepareNextFrame:
 
         ; Determine current screen line
-        move.w  psrecVerticalPosition(a0), d0
+        move.w  PaletteSwapRasterEffectConfiguration_verticalPosition(a0), d0
         VIEWPORT_GET_Y d1
-        sub.w   d1, d0                                                      ; d0 = current screen line
+        sub.w   d1, d0                                                  ; d0 = current screen line
 
-        ; if (screenline < psresMinScreenLine)
-        cmp.w   (paletteSwapRasterEffectState + psresMinScreenLine), d0
+        ; if (screenline < minScreenLine)
+        cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine), d0
         bge     .checkMaxScreenLine
 
-            ; if (psresScreenLine >= psresMinScreenLine)
-            move.w  (paletteSwapRasterEffectState + psresScreenLine), d1
-            cmp.w   (paletteSwapRasterEffectState + psresMinScreenLine), d1
+            ; if (screenLine >= minScreenLine)
+            move.w  (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_screenLine), d1
+            cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine), d1
             blt .skipTopPaletteDMA
 
                 TILESET_GET a0
 
                 ; Starting palette changed
-                movea.l tsAlternativePaletteAddress(a0), a0
-                move.l a0, (paletteSwapRasterEffectState + psresStartPalette)
+                movea.l Tileset_alternativePaletteAddress(a0), a0
+                move.l a0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
 
                 ; Queue palette change
                 jsr VDPDMAQueueAddCommandList
@@ -185,24 +185,24 @@ _PaletteSwapRasterEffectPrepareNextFrame:
         .skipTopPaletteDMA:
 
             ; Disable hint
-            move.w  #$ff, (paletteSwapRasterEffectState + psresHIntPosition)
+            move.w  #$ff, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition)
 
         bra     .screenLineCheckDone
     .checkMaxScreenLine:
-        ; else if (screenline > psresMaxScreenLine)
-        cmp.w   (paletteSwapRasterEffectState + psresMaxScreenLine), d0
+        ; else if (screenline > maxScreenLine)
+        cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_maxScreenLine), d0
         ble     .midScreenLine
 
-            ; if (psresScreenLine <= maxScreenLine)
-            move.w  (paletteSwapRasterEffectState + psresScreenLine), d1
-            cmp.w   (paletteSwapRasterEffectState + psresMaxScreenLine), d1
+            ; if (screenLine <= maxScreenLine)
+            move.w  (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_screenLine), d1
+            cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_maxScreenLine), d1
             bgt .skipBottomPaletteDMA
 
                 TILESET_GET a0
 
                 ; Starting palette changed
-                movea.l tsPaletteAddress(a0), a0
-                move.l a0, (paletteSwapRasterEffectState + psresStartPalette)
+                movea.l Tileset_paletteAddress(a0), a0
+                move.l a0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
 
                 ; Queue palette change
                 jsr VDPDMAQueueAddCommandList
@@ -210,7 +210,7 @@ _PaletteSwapRasterEffectPrepareNextFrame:
         .skipBottomPaletteDMA:
 
             ; Disable hint
-            move.w  #$ff, (paletteSwapRasterEffectState + psresHIntPosition)
+            move.w  #$ff, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition)
 
         bra     .screenLineCheckDone
         ; else
@@ -219,20 +219,20 @@ _PaletteSwapRasterEffectPrepareNextFrame:
         TILESET_GET a0
 
         ; Always refresh palette for when mid screen
-        movea.l tsPaletteAddress(a0), a0
-        move.l a0, (paletteSwapRasterEffectState + psresStartPalette)
+        movea.l Tileset_paletteAddress(a0), a0
+        move.l a0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
 
         ; Queue palette change
         jsr VDPDMAQueueAddCommandList
 
         ; Set hint to screen line position
         move.w  d0, d1
-        sub.w   (paletteSwapRasterEffectState + psresHIntScreenLineOffset), d1
-        move.w  d1, (paletteSwapRasterEffectState + psresHIntPosition)
+        sub.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntScreenLineOffset), d1
+        move.w  d1, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition)
 
     .screenLineCheckDone:
 
-        move.w  d0, (paletteSwapRasterEffectState + psresScreenLine)
+        move.w  d0, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_screenLine)
         rts
 
 
@@ -242,7 +242,7 @@ _PaletteSwapRasterEffectPrepareNextFrame:
 ; Input:
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectResetFrame:
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE (paletteSwapRasterEffectState + psresStartPalette)
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
         rts
 
 
@@ -253,11 +253,11 @@ _PaletteSwapRasterEffectResetFrame:
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectSetupFrame:
         ; Clear interrupt handled state
-        clr.b   (paletteSwapRasterEffectState + psresHIntHandled)
+        clr.b   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
 
         ; Setup horizontal interrupt position
         move.w  #VDP_CMD_RS_HINT_RATE, d0
-        or.w    (paletteSwapRasterEffectState + psresHIntPosition), d0
+        or.w    (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition), d0
         move.w  d0, MEM_VDP_CTRL
         rts
 
@@ -266,10 +266,10 @@ _PaletteSwapRasterEffectSetupFrame:
 ; Color transition table based palette swap hblank handler (Based on Sonic 3's implementation)
 ; ----------------
 _PaletteSwapRasterEffectColorTransitionHblank:
-        tst.b   (paletteSwapRasterEffectState + psresHIntHandled)
+        tst.b   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
         bne     .handled
 
-            seq     (paletteSwapRasterEffectState + psresHIntHandled)
+            seq     (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
 
             ; Disable hint after the next occurence
             VDP_REG_SET vdpRegHRate, $ff
@@ -281,9 +281,9 @@ _PaletteSwapRasterEffectColorTransitionHblank:
 
             ; Load adresses
             TILESET_GET a0
-            movea.l tsColorTransitionTableAddress(a0), a1
-            movea.l tsAlternativePaletteAddress(a0), a0
-            adda.l  #tsColors, a0
+            movea.l Tileset_colorTransitionTableAddress(a0), a1
+            movea.l Tileset_alternativePaletteAddress(a0), a0
+            adda.l  #TilesetPalette_colors, a0
             lea     MEM_VDP_DATA, a2
             lea     MEM_VDP_CTRL, a3
 
@@ -295,19 +295,19 @@ _PaletteSwapRasterEffectColorTransitionHblank:
             nop                 ; 4 cycles
 
             moveq   #0, d1
-            move.w  (a1)+, d0                           ; d0 = number of color triplets in color transition table
-            subq.w  #1, d0                              ; d0 = line counter
+            move.w  (a1)+, d0                                           ; d0 = number of color triplets in color transition table
+            subq.w  #1, d0                                              ; d0 = line counter
         .lineLoop:
 
                 ; Get color offset of triplet
-                move.w (a1)+, d1                        ; d1 = offset of color triplet
+                move.w (a1)+, d1                                        ; d1 = offset of color triplet
 
                 ; Get color address
-                lea (a0, d1), a4                        ; a4 = RAM address of color triplet
+                lea (a0, d1), a4                                        ; a4 = RAM address of color triplet
 
                 ; Set VDP access mode to CRAM write at color triplet CRAM address
                 addi.w  #$c000, d1
-                swap    d1                              ; d1 = "write cram[index]" VDP command
+                swap    d1                                              ; d1 = "write cram[index]" VDP command
                 move.l  d1, (a3)
 
                 ; Write color
@@ -336,10 +336,10 @@ _PaletteSwapRasterEffectColorTransitionHblank:
 ; DMA based palette swap hblank handler
 ; ----------------
 _PaletteSwapRasterEffectDMAHblank:
-        tst.b   (paletteSwapRasterEffectState + psresHIntHandled)
+        tst.b   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
         bne     .handled
 
-            seq     (paletteSwapRasterEffectState + psresHIntHandled)
+            seq     (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
 
             ; Disable hint after the next occurence
             VDP_REG_SET vdpRegHRate, $ff
@@ -348,7 +348,7 @@ _PaletteSwapRasterEffectDMAHblank:
 
                 TILESET_GET a0
 
-                VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE tsAlternativePaletteAddress(a0)
+                VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Tileset_alternativePaletteAddress(a0)
 
             POPM a0-a1
 

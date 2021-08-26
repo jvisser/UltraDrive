@@ -237,7 +237,7 @@ _IO_UPDATE_DEVICE_INFO Macro deviceStateStruct
 IOUpdateDeviceState:
 _IO_UPDATE_DEVICE Macro deviceStateStruct
             lea     \deviceStateStruct, a0
-            movea.l updateCallback(a0), a1
+            movea.l IODeviceState_updateCallback(a0), a1
             jsr     (a1)
         Endm
 
@@ -291,14 +291,14 @@ _IO_PROBE_DATA_PORT Macro
 ; Uses: d0-d3,d6/a1
 IOUpdateDeviceInfo:
 _IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
-            move.l  #\deviceUpdateCallback, updateCallback(a0)
-            move.b  #\deviceTypeId, deviceType(a0)
+            move.l  #\deviceUpdateCallback, IODeviceState_updateCallback(a0)
+            move.b  #\deviceTypeId, IODeviceState_deviceType(a0)
         Endm
 
-        movea.l dataPortAddress(a0), a1
+        movea.l IODeviceState_dataPortAddress(a0), a1
 
         bsr     _IOGetDeviceId
-        move.b  d0, deviceId(a0)
+        move.b  d0, IODeviceState_deviceId(a0)
 
         cmpi.b  #IO_DEVICE_ID_MD_PAD, d0
         beq     .mdpad
@@ -388,7 +388,7 @@ _IO_GET_DEVICE_ID_BIT Macro bits
 ; - a0: Device state structure of device to update
 ; Uses: d0-d1/a1
 _IOUpdate3ButtonPad:
-        movea.l dataPortAddress(a0), a1
+        movea.l IODeviceState_dataPortAddress(a0), a1
 
         _IO_Z80_LOCK
 
@@ -404,7 +404,7 @@ _IOUpdate3ButtonPad:
         add.b   d1, d1
         or.b    d1, d0
 
-        move.w  d0, deviceState(a0)
+        move.w  d0, IODeviceState_deviceState(a0)
         rts
 
 
@@ -430,5 +430,5 @@ _IOUpdate6ButtonPad:
         _IO_Z80_UNLOCK
 
         andi.b  #(IO_DATA_READ_X | IO_DATA_READ_Y | IO_DATA_READ_Z | IO_DATA_READ_MODE), d0
-        move.b  d0, deviceState(a0)
+        move.b  d0, IODeviceState_deviceState(a0)
         rts

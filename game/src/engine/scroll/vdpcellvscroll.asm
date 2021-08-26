@@ -20,9 +20,9 @@
     ; ----------------
     ; struct VDPScrollUpdater
     cellVerticalVDPScrollUpdater:
-        ; .vdpsuInit
+        ; .init
         dc.l _CellVerticalVDPScrollUpdaterInit
-        ; .vdpsuUpdate
+        ; .update
         dc.l _CellVerticalVDPScrollUpdaterUpdate
 
 CVS_LINE_BUFFER_SIZE Equ CellVerticalVDPScrollUpdaterPlaneState_Size
@@ -50,7 +50,7 @@ _CellVerticalVDPScrollUpdaterInit:
         ; Initialize background
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Vertical,                                       &
-            Background,                                     &
+            background,                                     &
             CellVerticalVDPScrollUpdaterPlaneState,         &
             cvsPlaneBScrollDMATransferCommandListTemplate,  &
             cvsPlaneBScrollDMATransferCommandListAddress
@@ -58,7 +58,7 @@ _CellVerticalVDPScrollUpdaterInit:
         ; Initialize foreground
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Vertical,                                       &
-            Foreground,                                     &
+            foreground,                                     &
             CellVerticalVDPScrollUpdaterPlaneState,         &
             cvsPlaneAScrollDMATransferCommandListTemplate,  &
             cvsPlaneAScrollDMATransferCommandListAddress

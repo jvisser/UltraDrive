@@ -6,22 +6,22 @@
 ; Raster effect structs
 ; ----------------
     DEFINE_STRUCT RasterEffectConfiguration
-        STRUCT_MEMBER.l rfxcEffectAddress                           ; Address of the RasterEffect
-        STRUCT_MEMBER.l rfxcEffectDataAddress                       ; Address of the data passed to raster effect routines
+        STRUCT_MEMBER.l effectAddress                               ; Address of the RasterEffect
+        STRUCT_MEMBER.l effectDataAddress                           ; Address of the data passed to raster effect routines
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT RasterEffect
-        STRUCT_MEMBER.l rfxSetupFrame                               ; Prepare the next frame, last thing called before starting the next frame. Setup the VDP etc.
-        STRUCT_MEMBER.l rfxPrepareNextFrame                         ; Preprocessing for next frame, can be called during active display. Should not access the VDP directly and should not affect the hblank handler for the current frame.
-        STRUCT_MEMBER.l rfxResetFrame                               ; Last resort. Called just before rfxSetupFrame if rfxPrepareNextFrame was not called (frameskip case). Always called in vertical blank period, so safe to do VDP operations. Can not use the DMA Queue.
-        STRUCT_MEMBER.l rfxInit                                     ; Init state and return hblank handler address
-        STRUCT_MEMBER.l rfxDestroy                                  ; Restore system state
+        STRUCT_MEMBER.l setupFrame                                  ; Prepare the next frame, last thing called before starting the next frame. Setup the VDP etc.
+        STRUCT_MEMBER.l prepareNextFrame                            ; Preprocessing for next frame, can be called during active display. Should not access the VDP directly and should not affect the hblank handler for the current frame.
+        STRUCT_MEMBER.l resetFrame                                  ; Last resort. Called just before setupFrame if prepareNextFrame was not called (frameskip case). Always called in vertical blank period, so safe to do VDP operations. Can not use the DMA Queue.
+        STRUCT_MEMBER.l init                                        ; Init state and return hblank handler address
+        STRUCT_MEMBER.l destroy                                     ; Restore system state
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT RasterEffectHBlankJump
-        STRUCT_MEMBER.w rfxbjInstrJmp                               ; 68k jmp instruction
-        STRUCT_MEMBER.l rfxbjInstrJmpAddress                        ; 32 bit target address
-        STRUCT_MEMBER.l rfxbjInstrJmpParam                          ; Parameter space
+        STRUCT_MEMBER.w instrJmp                                    ; 68k jmp instruction
+        STRUCT_MEMBER.l instrJmpAddress                             ; 32 bit target address
+        STRUCT_MEMBER.l instrJmpParam                               ; Parameter space
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------
@@ -49,7 +49,7 @@ RasterEffectsInit:
         clr.l   rasterEffect
 
         ; Write: rte
-        move.w  #$4e73, (rasterEffectJump + rfxbjInstrJmp)
+        move.w  #$4e73, (rasterEffectJump + RasterEffectHBlankJump_instrJmp)
         rts
 
 
@@ -62,16 +62,16 @@ RasterEffectInstall:
         OS_LOCK
 
         ; Store raster effect addresses
-        movea.l rfxcEffectAddress(a0), a1
-        movea.l rfxcEffectDataAddress(a0), a0
+        movea.l RasterEffectConfiguration_effectAddress(a0), a1
+        movea.l RasterEffectConfiguration_effectDataAddress(a0), a0
         move.l  a1, rasterEffect
         move.l  a0, rasterEffectData
         clr.w   rasterEffectPrepared
 
         PUSHL a0
 
-            ; rfxInit(rfxcEffectDataAddress)
-            movea.l rfxInit(a1), a2
+            ; init(effectDataAddress)
+            movea.l RasterEffect_init(a1), a2
             jsr     (a2)
 
             ; Register returned hblank handler (a0)
@@ -79,7 +79,7 @@ RasterEffectInstall:
 
         POPL a0
 
-        ; Run rfxPrepareNextFrame
+        ; Run prepareNextFrame
         bsr _RasterEffectPrepareNextFrame
 
         OS_UNLOCK
@@ -123,11 +123,11 @@ _RASTEREFFECT_CALL Macro func
 ; - a0: hblank interrupt handler address
 _RasterEffectInstallHBlank:
         ; Write: "jmp __SkipFirstHBlank_HACK.l"
-        move.w  #$4ef9, (rasterEffectJump + rfxbjInstrJmp)
-        move.l  #__SkipFirstHBlank_HACK, (rasterEffectJump + rfxbjInstrJmpAddress)
-        move.l  a0, (rasterEffectJump + rfxbjInstrJmpParam)
+        move.w  #$4ef9, (rasterEffectJump + RasterEffectHBlankJump_instrJmp)
+        move.l  #__SkipFirstHBlank_HACK, (rasterEffectJump + RasterEffectHBlankJump_instrJmpAddress)
+        move.l  a0, (rasterEffectJump + RasterEffectHBlankJump_instrJmpParam)
 
-        ; Enable horizontal interrupts but set interval at invalid value (to be set by rastereffect itself through rfxSetupFrame)
+        ; Enable horizontal interrupts but set interval at invalid value (to be set by rastereffect itself through setupFrame)
         VDP_REG_SET         vdpRegHRate, $ff
         VDP_REG_SET_BITS    vdpRegMode1, MODE1_HBLANK_ENABLE
         rts
@@ -137,7 +137,7 @@ _RasterEffectInstallHBlank:
         ; TODO: Find a better way to deal with this
         __SkipFirstHBlank_HACK:
             ; Patch jump address to the actual raster effect hblank handler
-            move.l  (rasterEffectJump + rfxbjInstrJmpParam), (rasterEffectJump + rfxbjInstrJmpAddress)
+            move.l  (rasterEffectJump + RasterEffectHBlankJump_instrJmpParam), (rasterEffectJump + RasterEffectHBlankJump_instrJmpAddress)
             rte
 
 
@@ -150,10 +150,10 @@ _RasterEffectUninstallHBlank
         VDP_REG_SET         vdpRegHRate, $ff
 
         ; Write: rte
-        move.w  #$4e73, (rasterEffectJump + rfxbjInstrJmp)
+        move.w  #$4e73, (rasterEffectJump + RasterEffectHBlankJump_instrJmp)
 
-        ; Call rfxDestroy
-        _RASTEREFFECT_CALL rfxDestroy
+        ; Call destroy
+        _RASTEREFFECT_CALL RasterEffect_destroy
 
         ; Clear reference
         clr.l   rasterEffect
@@ -164,7 +164,7 @@ _RasterEffectUninstallHBlank
 ; Internal function called by OSNextFrameReadyWait
 ; ----------------
 _RasterEffectPrepareNextFrame:
-        _RASTEREFFECT_CALL rfxPrepareNextFrame
+        _RASTEREFFECT_CALL RasterEffect_prepareNextFrame
         move.w  #1, rasterEffectPrepared
         rts
 
@@ -176,11 +176,11 @@ _RasterEffectSetupFrame:
         tst.w   rasterEffectPrepared
         bne     .framePrepared
 
-        ; If rfxPrepareNextFrame was not called before rfxSetupFrame call rfxResetFrame first
-        _RASTEREFFECT_CALL rfxResetFrame
+        ; If prepareNextFrame was not called before setupFrame call resetFrame first
+        _RASTEREFFECT_CALL RasterEffect_resetFrame
 
     .framePrepared:
-        _RASTEREFFECT_CALL rfxSetupFrame
+        _RASTEREFFECT_CALL RasterEffect_setupFrame
 
         clr.w   rasterEffectPrepared
         rts
