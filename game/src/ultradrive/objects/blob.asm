@@ -14,7 +14,7 @@ BLOB_EXTENTS Equ 8
 ; ----------------
 
     ; ObjectDescriptor
-    DEFINE_STRUCT BlobDescriptor, EXTENDS, MapStatefulObjectDescriptor
+    DEFINE_STRUCT BlobDescriptor, MapStatefulObjectDescriptor
         STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
 

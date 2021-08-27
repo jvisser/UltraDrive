@@ -15,12 +15,12 @@
 ;-------------------------------------------------
 ; Map object structures
 ; ----------------
-    DEFINE_STRUCT MapObjectDescriptor, EXTENDS, ObjectDescriptor
+    DEFINE_STRUCT MapObjectDescriptor, ObjectDescriptor
         STRUCT_MEMBER.b size                                                    ; Size of the descriptor in bytes
         STRUCT_MEMBER.b flags
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT MapStatefulObjectDescriptor, EXTENDS, MapObjectDescriptor
+    DEFINE_STRUCT MapStatefulObjectDescriptor, MapObjectDescriptor
         STRUCT_MEMBER.w stateOffset                                             ; Offset into the maps state area
     DEFINE_STRUCT_END
 
@@ -30,7 +30,7 @@
         STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT MapObjectLink, EXTENDS, LinkedList
+    DEFINE_STRUCT MapObjectLink, LinkedList
         STRUCT_MEMBER.l objectDescriptorAddress                                 ; Address of the linked objects ObjectDescriptor
         STRUCT_MEMBER.w objectGroupStateAddress                                 ; Address of the MapObjectGroupState state this link is part of
     DEFINE_STRUCT_END

@@ -7,7 +7,7 @@
 ; ----------------
 
     DEFINE_STRUCT PlaneVerticalVDPScrollUpdaterState
-        STRUCT_MEMBER.w     vpvsuScrollValue
+        STRUCT_MEMBER.w scrollValue
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------

@@ -120,7 +120,7 @@ tilesetPatternDecompressionBuffer       Equ blockTable
         STRUCT_MEMBER.l animationFrameTransferListAddress
     DEFINE_STRUCT_END
         
-    DEFINE_STRUCT TilesetAnimation, EXTENDS, TilesetAnimationBase
+    DEFINE_STRUCT TilesetAnimation, TilesetAnimationBase
         STRUCT_MEMBER.w animationInitialTrigger
         STRUCT_MEMBER.w animationTriggerInterval
         STRUCT_MEMBER.w animationFrameInterval

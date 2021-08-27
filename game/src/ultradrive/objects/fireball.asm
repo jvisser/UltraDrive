@@ -14,7 +14,7 @@ FIREBALL_EXTENTS Equ 8
 ; ----------------
 
     ; ObjectDescriptor
-    DEFINE_STRUCT FireballDescriptor, EXTENDS, MapObjectDescriptor
+    DEFINE_STRUCT FireballDescriptor, MapObjectDescriptor
         STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
 

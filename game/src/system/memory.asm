@@ -33,9 +33,9 @@ __SLOW_RAM_ALLOCATION_PTR = MEM_RAM_START   ; Can not use absolute short address
 ;-------------------------------------------------
 ; Start struct type definition
 ; ----------------
-DEFINE_STRUCT Macro name, extends, base
+DEFINE_STRUCT Macro name, base
         Pushp '\name'
-        If (narg=3)
+        If (narg=2)
             RsSet \base\_Size
         Else
             RsReset

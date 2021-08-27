@@ -36,7 +36,7 @@
         dc.l    ScrollBufferFill224
         ; .cameraProperty
         dc.b    Camera_x
-        ; .MultiScrollCameraConfiguration_cameraChangeProperty
+        ; .cameraChangeProperty
         dc.b    Camera_lastXDisplacement
 
     ; struct MultiScrollCameraConfiguration
@@ -45,7 +45,7 @@
         dc.l    ScrollBufferFill28
         ; .cameraProperty
         dc.b    Camera_x
-        ; .MultiScrollCameraConfiguration_cameraChangeProperty
+        ; .cameraChangeProperty
         dc.b    Camera_lastXDisplacement
 
     ; struct MultiScrollCameraConfiguration
@@ -54,7 +54,7 @@
         dc.l    ScrollBufferFill20
         ; .cameraProperty
         dc.b    Camera_y
-        ; .MultiScrollCameraConfiguration_cameraChangeProperty
+        ; .cameraChangeProperty
         dc.b    Camera_lastYDisplacement
 
 
