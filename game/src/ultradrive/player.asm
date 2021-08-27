@@ -14,7 +14,7 @@ PLAYER_EXTENTS_WALL_Y   Equ     7
 ;-------------------------------------------------
 ; Player structure
 ; ----------------
-    DEFINE_STRUCT Player, EXTENDS, Entity
+    DEFINE_STRUCT Player, Entity
         STRUCT_MEMBER.l stateHandler
         STRUCT_MEMBER.l stateChangeFrameNumber
         STRUCT_MEMBER.l xSpeed

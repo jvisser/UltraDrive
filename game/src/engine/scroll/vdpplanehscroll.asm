@@ -6,7 +6,7 @@
 ; HPlane VDPScrollUpdater state structure
 ; ----------------
     DEFINE_STRUCT PlaneHorizontalVDPScrollUpdaterState
-        STRUCT_MEMBER.w hpvsuScrollValue
+        STRUCT_MEMBER.w scrollValue
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------
