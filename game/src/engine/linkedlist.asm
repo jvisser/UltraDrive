@@ -60,8 +60,8 @@ LINKED_LIST_REMOVE Macro node, scratch
     .noNext\@:
 
         movea.w LinkedList_previous(\node), \scratch
+        cmpa.w  #0, \scratch
         beq     .noPrevious\@
-        beq     .noNext\@
             move.w  LinkedList_next(\node), LinkedList_next(\scratch)
     .noPrevious\@:
     Endm
