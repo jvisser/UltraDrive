@@ -48,8 +48,6 @@ class ObjectGroupMapBuilder
 
         addObjects();
 
-        removeEmptyGroups();
-
         createObjectGroupContainers();
 
         linkObjectGroupsBasedOnScreenSpace();
@@ -118,22 +116,6 @@ class ObjectGroupMapBuilder
 
                              chunkObjectGroupBuilderMap[row][column].add(mapObject);
                          });
-    }
-
-    private void removeEmptyGroups()
-    {
-        for (ObjectGroupBuilder[] row : chunkObjectGroupBuilderMap)
-        {
-            for (int columnIndex = 0; columnIndex < row.length; columnIndex++)
-            {
-                if (row[columnIndex].isEmpty())
-                {
-                    objectGroupBuilders.remove(row[columnIndex]);
-
-                    row[columnIndex] = ObjectGroupBuilder.ZERO;
-                }
-            }
-        }
     }
 
     private void createObjectGroupContainers()
