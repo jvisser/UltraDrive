@@ -24,7 +24,13 @@
 ;-------------------------------------------------
 ; Map object structures
 ; ----------------
-    DEFINE_STRUCT MapObjectDescriptor, ObjectDescriptor
+    DEFINE_STRUCT MapObjectType, ObjectType
+        STRUCT_MEMBER.l init                                                    ; init(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
+        STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a2-a6
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT MapObjectDescriptor
+        STRUCT_MEMBER.w type                                                    ; Offset into global ObjectTypeTableBase
         STRUCT_MEMBER.b size                                                    ; Size of the descriptor in bytes
         STRUCT_MEMBER.b flags
     DEFINE_STRUCT_END
@@ -296,9 +302,9 @@ MapInitObjects:
                 move.l  d0, a7
             .notTransferable:
 
-                ; Call Object.init(ObjectDescriptor*, ObjectState*)
-                move.w  ObjectDescriptor_typeOffset(a0), d0                     ; d7 = Type offset
-                movea.l ObjectType_init(a2, d0), a5
+                ; Call Object.init(MapObjectDescriptor*, ObjectState*)
+                move.w  MapObjectDescriptor_type(a0), d0                        ; d7 = Type offset
+                movea.l MapObjectType_init(a2, d0), a5
                 move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0         ; d7 = State offset
                 lea     (a3, d0), a1                                            ; a1 = State address
                 jsr     (a5)
@@ -336,8 +342,8 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             lea     (a4, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
 
             ; Call Object.update(ObjectDescriptor*, ObjectState*)
-            move.w  ObjectDescriptor_typeOffset(a0), d0
-            movea.l ObjectType_update(a2, d0), a5
+            move.w  MapObjectDescriptor_type(a0), d0
+            movea.l MapObjectType_update(a2, d0), a5
             jsr     (a5)
 
             ; Process next transferable object
@@ -382,12 +388,12 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
                 subq.w  #1, d6
             .objectLoop:
 
-                ; Call Object.update(ObjectDescriptor*, ObjectState*)
+                ; Call Object.update(MapObjectDescriptor*, ObjectState*)
                 movea.l a5, a0                                                  ; a0 = Current object descriptor
                 move.w  MapStatefulObjectDescriptor_stateOffset(a5), d0
                 lea     (a4, d0), a1                                            ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
-                move.w  ObjectDescriptor_typeOffset(a5), d0
-                movea.l ObjectType_update(a2, d0), a6
+                move.w  MapObjectDescriptor_type(a5), d0
+                movea.l MapObjectType_update(a2, d0), a6
                 jsr     (a6)
 
                 ; Process next object
@@ -454,9 +460,9 @@ _MAP_ATTACH_OBJECT Macro
                 tst.w   d1
                 beq     .linkToGlobalGroup\@
 
-                    sub.w   Map_stride(a2), d2                                          ; d2 = chunk offset
+                    sub.w   Map_stride(a2), d2                                  ; d2 = chunk offset
                     move.w  (a3, d2), d3
-                    andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                        ; d3 = chunk object group id
+                    andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                ; d3 = chunk object group id
                     bne     .objectGroupFound\@
 
             EndIf
@@ -560,8 +566,8 @@ MapAttachObjectFloor:
 ; - a0: ObjectState address
 ; Uses: a1-a3
 MapActivateObject:
-        lea     -MapObjectLink_Size(a0), a1                                         ; a1 = MapObjectLink address
-        movea.w MapObjectLink_objectGroupStateAddress(a1), a2                      ; a2 = MapObjectGroupState_inactiveObjectsHead address
+        lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
+        movea.w MapObjectLink_objectGroupStateAddress(a1), a2                   ; a2 = MapObjectGroupState_inactiveObjectsHead address
 
         LINKED_LIST_REMOVE a1, a3
         LINKED_LIST_INSERT_AFTER a2, a1, a3
@@ -577,9 +583,9 @@ MapActivateObject:
 ; - a0: ObjectState address
 ; Uses: a1-a3
 MapDeactivateObject:
-        lea     -MapObjectLink_Size(a0), a1                                         ; a1 = MapObjectLink address
+        lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
         movea.w MapObjectLink_objectGroupStateAddress(a1), a2
-        addq.w  #MapObjectGroupState_inactiveObjectsHead, a2                        ; a2 = MapObjectGroupState_inactiveObjectsHead address
+        addq.w  #MapObjectGroupState_inactiveObjectsHead, a2                    ; a2 = MapObjectGroupState_inactiveObjectsHead address
 
         LINKED_LIST_REMOVE a1, a3
         LINKED_LIST_INSERT_AFTER a2, a1, a3

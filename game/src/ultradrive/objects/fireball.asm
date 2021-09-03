@@ -13,15 +13,15 @@ FIREBALL_EXTENTS Equ 8
 ; Fireball main structures
 ; ----------------
 
-    ; ObjectDescriptor
+    ; MapObjectDescriptor
     DEFINE_STRUCT FireballDescriptor, MapObjectDescriptor
         STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
 
-    ; Type
+    ; Type (MapObjectType)
     DEFINE_OBJECT_TYPE Fireball
-        dc.l    NoOperation
-        dc.l    FireballUpdate
+        dc.l    NoOperation                 ; MapObjectType.init()
+        dc.l    FireballUpdate              ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END
 
 

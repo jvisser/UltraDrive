@@ -5,17 +5,8 @@
 ;-------------------------------------------------
 ; Object structures
 ; ----------------
-    DEFINE_STRUCT ObjectDescriptor
-        STRUCT_MEMBER.w typeOffset        ; Offset into global ObjectTypeTableBase
-    DEFINE_STRUCT_END
-
     DEFINE_STRUCT ObjectType
         STRUCT_MEMBER.w stateSize
-
-        ; In normal cases ObjectDescriptor and ObjectState are the same.
-        ; But they can be decoupled depending on how things are allocated. This depends on the implementation.
-        STRUCT_MEMBER.l init              ; init(ObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
-        STRUCT_MEMBER.l update            ; update(ObjectDescriptor*, ObjectState*) must preserve d6-d7/a2-a6
     DEFINE_STRUCT_END
 
 

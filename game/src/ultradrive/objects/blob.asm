@@ -13,7 +13,7 @@ BLOB_EXTENTS Equ 8
 ; Blob main structures
 ; ----------------
 
-    ; ObjectDescriptor
+    ; MapObjectDescriptor
     DEFINE_STRUCT BlobDescriptor, MapStatefulObjectDescriptor
         STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
@@ -24,10 +24,10 @@ BLOB_EXTENTS Equ 8
         STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
-    ; Type
+    ; Type (MapObjectType)
     DEFINE_OBJECT_TYPE Blob, BlobState
-        dc.l    BlobInit
-        dc.l    BlobUpdate
+        dc.l    BlobInit                    ; MapObjectType.init()
+        dc.l    BlobUpdate                  ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END
 
 
