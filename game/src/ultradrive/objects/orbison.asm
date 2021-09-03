@@ -13,7 +13,7 @@ ORBISON_EXTENTS Equ 8
 ; Orbison main structures
 ; ----------------
 
-    ; ObjectDescriptor
+    ; MapObjectDescriptor
     DEFINE_STRUCT OrbisonDescriptor, MapStatefulObjectDescriptor
         STRUCT_MEMBER.MapObjectPosition position
     DEFINE_STRUCT_END
@@ -24,10 +24,10 @@ ORBISON_EXTENTS Equ 8
         STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
-    ; Type
+    ; Type (MapObjectType)
     DEFINE_OBJECT_TYPE Orbison, OrbisonState
-        dc.l    OrbisonInit
-        dc.l    OrbisonUpdate
+        dc.l    OrbisonInit                 ; MapObjectType.init()
+        dc.l    OrbisonUpdate               ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END
 
 
