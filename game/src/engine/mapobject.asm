@@ -1,14 +1,23 @@
 ;------------------------------------------------------------------------------------------
 ; Map object handling
 ;------------------------------------------------------------------------------------------
-; Public/user API's:
+; Public API's:
 ; - MapUpdateObjects
-; - MapAttachObject
-; - MapAttachObjectFloor
-; - MapActivateObject
-; - MapDeactivateObject
-; - MapActivateObjectGlobal
-; - MapDeactivateObjectGlobal
+; - MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE
+
+
+;-------------------------------------------------
+; Map object constants
+; ----------------
+MAP_TRANSFERABLE_STATE_CHANGE_QUEUE_ALLOCATION_SIZE Equ (64*SIZE_WORD)
+
+; MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE state change parameters
+MAP_OBJECT_STATE_CHANGE_ATTACH              Equ (_MapAttachTransferableObject - _MapProcessObjectStateChangesBaseOffset)
+MAP_OBJECT_STATE_CHANGE_ATTACH_FLOOR        Equ (_MapAttachTransferableObjectFloor - _MapProcessObjectStateChangesBaseOffset)
+MAP_OBJECT_STATE_CHANGE_ACTIVATE            Equ (_MapActivateTransferableObject - _MapProcessObjectStateChangesBaseOffset)
+MAP_OBJECT_STATE_CHANGE_DEACTIVATE          Equ (_MapDeactivateTransferableObject - _MapProcessObjectStateChangesBaseOffset)
+MAP_OBJECT_STATE_CHANGE_ACTIVATE_GLOBAL     Equ (_MapActivateTransferableObjectGlobal - _MapProcessObjectStateChangesBaseOffset)
+MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjectGlobal - _MapProcessObjectStateChangesBaseOffset)
 
 
 ;-------------------------------------------------
@@ -46,7 +55,7 @@
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectLink, LinkedList
-        STRUCT_MEMBER.l objectDescriptorAddress                                 ; Address of the linked objects ObjectDescriptor
+        STRUCT_MEMBER.l objectDescriptorAddress                                 ; Address of the linked objects MapObjectDescriptor
         STRUCT_MEMBER.w objectGroupStateAddress                                 ; Address of the MapObjectGroupState state this link is part of
     DEFINE_STRUCT_END
 
@@ -60,12 +69,41 @@
 ; Map object state
 ; ----------------
     DEFINE_VAR FAST
+        VAR.w                   mapTransferableStateChangeQueueAddress
+        VAR.w                   mapTransferableStateChangeQueueCount
         VAR.w                   mapStateAddress
         VAR.w                   mapActiveObjectGroupCount
         VAR.w                   mapActiveObjectGroupSubChunkId
         VAR.l                   mapActiveObjectGroups, 12
         VAR.MapObjectGroupState mapGlobalObjectGroupState
     DEFINE_VAR_END
+
+
+;-------------------------------------------------
+; Queue object state change.
+; This macros is to be used within MapObjectType.update() to prevent concurrent modifications to the object update list while updating;
+;
+; TODO: Add bounds check
+; ----------------
+; Input:
+; - stateChange: MAP_OBJECT_STATE_CHANGE_* representing the change requested
+; - objectStateAddress: Object state address
+; - scratch: Address register to use as scratch register
+; - param1: Optional state change specific parameter 1
+; - param2: Optional state change specific parameter 2
+MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE Macro stateChange, objectStateAddress, scratch, param1, param2
+        movea.w mapTransferableStateChangeQueueAddress, \scratch
+        If (narg>4)
+            move.w  \param2, (\scratch)+
+        EndIf
+        If (narg>3)
+            move.w  \param1, (\scratch)+
+        EndIf
+        move.w  \objectStateAddress, (\scratch)+
+        move.w  #\stateChange, (\scratch)+
+        move.w  \scratch, mapTransferableStateChangeQueueAddress
+        addq.w  #1, mapTransferableStateChangeQueueCount
+    Endm
 
 
 ;-------------------------------------------------
@@ -240,10 +278,16 @@ _MapUpdateActiveObjectGroups:
 ; ----------------
 ; Uses: d0-d7/a0-a6
 MapInitObjects:
+        ; Allocate object state change queue
+        move.w  #MAP_TRANSFERABLE_STATE_CHANGE_QUEUE_ALLOCATION_SIZE, d0
+        jsr     MemoryAllocate
+        move.w  a0, mapTransferableStateChangeQueueAddress
+        clr.w   mapTransferableStateChangeQueueCount
+
         ; Clear global group state
         _RESET_GROUP_STATE mapGlobalObjectGroupState
 
-        ; Allocate object state area and store ptr
+        ; Allocate object state area
         MAP_GET a4
         move.w  MapHeader_stateSize(a4), d0
         jsr     MemoryAllocate
@@ -267,7 +311,7 @@ MapInitObjects:
             _RESET_GROUP_STATE (a4)
 
             move.b  MapObjectGroup_totalObjectCount(a0), d6
-            addq.w  #MapObjectGroup_objectDescriptors, a0                       ; a0 = Current ObjectDescriptor address for current group
+            addq.w  #MapObjectGroup_objectDescriptors, a0                       ; a0 = Current MapObjectDescriptor address for current group
             beq     .emptyGroup
             ext.w   d6                                                          ; d6 = Object counter
 
@@ -299,7 +343,7 @@ MapInitObjects:
 
                 LINKED_LIST_INSERT_AFTER a7, a5, a6
 
-                move.l  d0, a7
+                movea.l d0, a7
             .notTransferable:
 
                 ; Call Object.init(MapObjectDescriptor*, ObjectState*)
@@ -312,7 +356,7 @@ MapInitObjects:
                 ; Next object
                 move.b  MapObjectDescriptor_size(a0), d0
                 ext.w   d0
-                adda.w  d0, a0                                                  ; a0 = Next ObjectDescriptor address
+                adda.w  d0, a0                                                  ; a0 = Next MapObjectDescriptor address
             dbra    d6, .objectLoop
 
         .emptyGroup:
@@ -341,7 +385,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0
             lea     (a4, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
 
-            ; Call Object.update(ObjectDescriptor*, ObjectState*)
+            ; Call Object.update(MapObjectDescriptor*, ObjectState*)
             move.w  MapObjectDescriptor_type(a0), d0
             movea.l MapObjectType_update(a2, d0), a5
             jsr     (a5)
@@ -366,6 +410,15 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         lea     mapActiveObjectGroups, a3
         movea.w mapStateAddress, a4
 
+        ; Update global objects
+        move.w  mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, d0
+        beq     .noGlobalTransferableObjects
+
+            _PROCESS_TRANSFERABLE_OBJECTS
+
+    .noGlobalTransferableObjects:
+
+        ; Update group local objects
         subq.w  #1, d7
     .activeGroupLoop:
 
@@ -399,7 +452,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
                 ; Process next object
                 move.b  MapObjectDescriptor_size(a5), d0
                 ext.w   d0
-                adda.w  d0, a5                                                  ; a5 = Next ObjectDescriptor address
+                adda.w  d0, a5                                                  ; a5 = Next MapObjectDescriptor address
 
                 dbra d6, .objectLoop
 
@@ -407,15 +460,30 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 
         dbra    d7, .activeGroupLoop
 
-        ; Update global objects
-        move.w  mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, d0
-        beq     .noGlobalTransferableObjects
-
-            _PROCESS_TRANSFERABLE_OBJECTS
-
-    .noGlobalTransferableObjects:
         Purge _PROCESS_TRANSFERABLE_OBJECTS
+
+        ; NB: Fall through to _MapProcessTransferableObjectStateChangeQueue
+
+
+;-------------------------------------------------
+; Process transferable state changes
+; ----------------
+_MapProcessTransferableObjectStateChangeQueue:
+        move.w  mapTransferableStateChangeQueueCount, d4
+        beq     .noStateChanges
+            move.w  mapTransferableStateChangeQueueAddress, a5
+            subq.w  #1, d4
+        .stateChangeLoop:
+            move.w  -(a5), d0
+            movea.w -(a5), a0
+            jsr     _MapProcessObjectStateChangesBaseOffset(pc, d0)
+            dbra    d4, .stateChangeLoop
+        clr.w   mapTransferableStateChangeQueueCount
+    .noStateChanges:
         rts
+
+
+_MapProcessObjectStateChangesBaseOffset:
 
 
 ;-------------------------------------------------
@@ -425,13 +493,11 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 ; TODO: Add support for ceilings (ie search down instead of up)
 ; ----------------
 ; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
+; - d0: x position
+; - d1: y position
 ; - a0: ObjectState address
 ;
 ; - Any macro parameter to also check the chunk above for a local group if no local group is found
-; Output:
-; - d0: Non zero if attached to local object group
 ; Uses: d0-d3/a1-a4
 _MAP_ATTACH_OBJECT Macro
 
@@ -470,9 +536,6 @@ _MAP_ATTACH_OBJECT Macro
         .linkToGlobalGroup\@:
             ; Link to global group
             lea     (mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead), a2
-
-            ; Return value: Global group found
-            moveq   #0, d0
             bra    .linkObjectToGroup\@
 
     .objectGroupFound\@:
@@ -499,9 +562,6 @@ _MAP_ATTACH_OBJECT Macro
         ; Get group state address
         movea.w mapStateAddress, a2
         lea     MapObjectGroupState_activeObjectsHead(a2, d0), a2               ; a2 = MapObjectGroupState.activeObjectsHead address
-
-        ; Return value: Local group found
-        moveq   #-1, d0
     .linkObjectToGroup\@:
 
         ; Transfer object from its current group to the found group if different (unlink/link)
@@ -525,13 +585,13 @@ _MAP_ATTACH_OBJECT Macro
 ; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
 ; ----------------
 ; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
 ; - a0: ObjectState address
-; Output:
-; - d0: Non zero if attached to local object group
+; - a5: Object transition queue top containing parameters
 ; Uses: d0-d3/a1-a4
-MapAttachObject:
+_MapAttachTransferableObject:
+        move.w  -(a5), d0       ; x position
+        move.w  -(a5), d1       ; y position
+
         _MAP_ATTACH_OBJECT
         rts
 
@@ -544,13 +604,13 @@ MapAttachObject:
 ; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
 ; ----------------
 ; Input:
-; - d0: Left coordinate of view
-; - d1: Top coordinate of view
 ; - a0: ObjectState address
-; Output:
-; - d0: Non zero if attached to local object group
+; - a5: Object transition queue top containing parameters
 ; Uses: d0-d3/a1-a4
-MapAttachObjectFloor:
+_MapAttachTransferableObjectFloor:
+        move.w  -(a5), d0       ; x position
+        move.w  -(a5), d1       ; y position
+
         _MAP_ATTACH_OBJECT FLOOR
         rts
 
@@ -559,13 +619,11 @@ MapAttachObjectFloor:
 
 ;-------------------------------------------------
 ; Transfer the object to the active object list of the object group (parent)
-;
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
 ; ----------------
 ; Input:
 ; - a0: ObjectState address
 ; Uses: a1-a3
-MapActivateObject:
+_MapActivateTransferableObject:
         lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
         movea.w MapObjectLink_objectGroupStateAddress(a1), a2                   ; a2 = MapObjectGroupState_inactiveObjectsHead address
 
@@ -576,13 +634,11 @@ MapActivateObject:
 
 ;-------------------------------------------------
 ; Transfer the object to the inactive object list of the object group (parent)
-;
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
 ; ----------------
 ; Input:
 ; - a0: ObjectState address
 ; Uses: a1-a3
-MapDeactivateObject:
+_MapDeactivateTransferableObject:
         lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
         movea.w MapObjectLink_objectGroupStateAddress(a1), a2
         addq.w  #MapObjectGroupState_inactiveObjectsHead, a2                    ; a2 = MapObjectGroupState_inactiveObjectsHead address
@@ -594,13 +650,11 @@ MapDeactivateObject:
 
 ;-------------------------------------------------
 ; Transfer the object to the active object list of the global object group
-;
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
 ; ----------------
 ; Input:
 ; - a0: ObjectState address
 ; Uses: a1-a3
-MapActivateObjectGlobal:
+_MapActivateTransferableObjectGlobal:
         lea     mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, a1
         lea     -MapObjectLink_Size(a0), a2
 
@@ -611,11 +665,11 @@ MapActivateObjectGlobal:
 
 ;-------------------------------------------------
 ; Transfer the object to the inactive object list of the global object group
-;
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
 ; ----------------
+; Input:
+; - a0: ObjectState address
 ; Uses: a1-a3
-MapDeactivateObjectGlobal:
+_MapDeactivateTransferableObjectGlobal:
         lea     mapGlobalObjectGroupState + MapObjectGroupState_inactiveObjectsHead, a1
         lea     -MapObjectLink_Size(a0), a2
 
