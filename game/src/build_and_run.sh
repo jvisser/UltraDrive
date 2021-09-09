@@ -17,7 +17,7 @@ java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
         -a './ultradrive/config/allocation.yaml'            \
         -r
 
-rm -f 'ultradrive.sym' 'ultradrive-tracelog.json'
+rm -f 'ultradrive-tracelog.json' 'ultradrive.sym.txt'
 
 # Compile source
 if [ $# -eq 2 ];
@@ -27,6 +27,12 @@ if [ $# -eq 2 ];
 else
     # Normal
     asm68k //p ./assembly.asm,ultradrive.bin,ultradrive.sym
+fi
+
+# Dump symbols to text file
+if command -v 'asm68kdump';
+    then
+    asm68kdump 'ultradrive.sym' > ultradrive.sym.txt
 fi
 
 # Run
@@ -41,3 +47,5 @@ if command -v 'md-profiler';
         rm -f 't'
     fi
 fi
+
+rm -f 'ultradrive.sym' 
