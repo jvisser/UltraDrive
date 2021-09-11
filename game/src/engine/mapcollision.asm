@@ -643,7 +643,7 @@ _COLLISION_BLOCK_FOUND Macro
 ;-------------------------------------------------
 ; Block offsets per possible orientation
 ; ----------------
-    SECTION_START S_FASTDATA
+    SECTION_START S_RODATA_SHORT
 
         ChunkBlockOffsetTable:
             ; Default

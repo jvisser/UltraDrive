@@ -35,11 +35,11 @@ MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjec
 ; ----------------
     DEFINE_STRUCT MapObjectType, ObjectType
         STRUCT_MEMBER.l init                                                    ; init(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
-        STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a2-a6
+        STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a3-a6
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectDescriptor
-        STRUCT_MEMBER.w type                                                    ; Offset into global ObjectTypeTableBase
+        STRUCT_MEMBER.w type                                                    ; Address of object type
         STRUCT_MEMBER.b size                                                    ; Size of the descriptor in bytes
         STRUCT_MEMBER.b flags
     DEFINE_STRUCT_END
@@ -295,7 +295,6 @@ MapInitObjects:
 
         ; Init addresses and loop counters
         movea.l a0, a3                                                          ; a3 = Map state base
-        OBJECT_TYPE_TABLE_GET a2                                                ; a2 = Type table base address
         movea.l MapHeader_objectGroupMapAddress(a4), a4
         movea.l MapObjectGroupMap_groupsBaseAddress(a4), a0                     ; a0 = Current group/object ObjectDescriptor
         move.w  MapObjectGroupMap_groupCount(a4), d7                            ; d7 = Object group counter
@@ -318,7 +317,6 @@ MapInitObjects:
             subq.w  #1, d6
         .objectLoop:
 
-                move.l  a7, d0
                 btst    #MODF_TRANSFERABLE, MapObjectDescriptor_flags(a0)
                 beq     .notTransferable
 
@@ -332,24 +330,23 @@ MapInitObjects:
                     beq     .notEnabled
 
                         ; Link enabled
-                        lea MapObjectGroupState_activeObjectsHead(a4), a7       ; a7 = Active transferable object list head
+                        lea MapObjectGroupState_activeObjectsHead(a4), a2       ; a2 = Active transferable object list head
                         bra     .linkObject
                 .notEnabled:
 
                         ; Link disabled
-                        lea MapObjectGroupState_inactiveObjectsHead(a4), a7     ; a7 = Inactive transferable object list head
+                        lea MapObjectGroupState_inactiveObjectsHead(a4), a2     ; a2 = Inactive transferable object list head
 
                 .linkObject:
 
-                LINKED_LIST_INSERT_AFTER a7, a5, a6
+                LINKED_LIST_INSERT_AFTER a2, a5, a6
 
-                movea.l d0, a7
             .notTransferable:
 
                 ; Call Object.init(MapObjectDescriptor*, ObjectState*)
-                move.w  MapObjectDescriptor_type(a0), d0                        ; d7 = Type offset
-                movea.l MapObjectType_init(a2, d0), a5
-                move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0         ; d7 = State offset
+                movea.w MapObjectDescriptor_type(a0), a5
+                movea.l MapObjectType_init(a5), a5
+                move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0         ; d0 = State offset
                 lea     (a3, d0), a1                                            ; a1 = State address
                 jsr     (a5)
 
@@ -386,8 +383,8 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             lea     (a4, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
 
             ; Call Object.update(MapObjectDescriptor*, ObjectState*)
-            move.w  MapObjectDescriptor_type(a0), d0
-            movea.l MapObjectType_update(a2, d0), a5
+            move.w  MapObjectDescriptor_type(a0), a5
+            movea.l MapObjectType_update(a5), a5
             jsr     (a5)
 
             ; Process next transferable object
@@ -406,7 +403,6 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
     .activeGroups:
 
         ; Load addresses
-        OBJECT_TYPE_TABLE_GET a2                                                ; a2 = Type table base address
         lea     mapActiveObjectGroups, a3
         movea.w mapStateAddress, a4
 
@@ -445,8 +441,8 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
                 movea.l a5, a0                                                  ; a0 = Current object descriptor
                 move.w  MapStatefulObjectDescriptor_stateOffset(a5), d0
                 lea     (a4, d0), a1                                            ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
-                move.w  MapObjectDescriptor_type(a5), d0
-                movea.l MapObjectType_update(a2, d0), a6
+                movea.w MapObjectDescriptor_type(a0), a6
+                movea.l MapObjectType_update(a6), a6
                 jsr     (a6)
 
                 ; Process next object
