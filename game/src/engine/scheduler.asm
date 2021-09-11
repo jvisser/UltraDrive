@@ -18,7 +18,7 @@ SCHEDULER_ALL              Equ SCHEDULER_TILESET
 ;-------------------------------------------------
 ; Scheduler state
 ; ----------------
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l       engineSchedulerCallbacks,    SCHEDULER_COUNT
         VAR.b       engineSchedulerFlags                             ; Flag set by subsystem to indicate scheduler is enabled
         VAR.b       engineSchedulerMask                              ; Mask set by program to mask which subsystems can execute

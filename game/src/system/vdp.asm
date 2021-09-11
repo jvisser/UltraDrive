@@ -114,7 +114,7 @@ PATTERN_MASK        Equ 7
     DEFINE_STRUCT_END
 
     ; Allocate VDPContext
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.VDPContext  vdpContext
         VAR.VDPMetrics  vdpMetrics
     DEFINE_VAR_END

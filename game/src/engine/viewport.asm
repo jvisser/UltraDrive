@@ -29,7 +29,7 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.w         trackingEntity                                  ; Entity to keep in view
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.Viewport viewport
     DEFINE_VAR_END
 

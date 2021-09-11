@@ -13,7 +13,7 @@
         STRUCT_MEMBER.w lockCount
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.OSContext osContext
     DEFINE_VAR_END
 

@@ -19,7 +19,7 @@ tilingBackgroundViewportConfiguration:
 rotatingBackgroundViewportConfiguration:
     DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG rotateScrollConfiguration
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.w                           currentRotationAngle
         VAR.RotateScrollPosition        rotationPosition
     DEFINE_VAR_END

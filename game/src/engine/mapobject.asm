@@ -68,7 +68,7 @@ MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjec
 ;-------------------------------------------------
 ; Map object state
 ; ----------------
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.w                   mapTransferableStateChangeQueueAddress
         VAR.w                   mapTransferableStateChangeQueueCount
         VAR.w                   mapStateAddress

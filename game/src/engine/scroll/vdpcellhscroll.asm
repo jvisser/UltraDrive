@@ -9,7 +9,7 @@
         STRUCT_MEMBER.w     hcsuCellHorizontalScroll, 28        ; NB: Horizontal scroll values must be negated by the ScrollValueUpdater for performance reasons
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l chsPlaneBScrollDMATransferCommandListAddress
         VAR.l chsPlaneAScrollDMATransferCommandListAddress
     DEFINE_VAR_END

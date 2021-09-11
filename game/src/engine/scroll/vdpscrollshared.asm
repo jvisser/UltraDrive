@@ -29,7 +29,7 @@
         STRUCT_MEMBER.b   updateFlags
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.VDPScrollUpdaterState   vsusHorizontalVDPScrollUpdaterState
         VAR.VDPScrollUpdaterState   vsusVerticalVDPScrollUpdaterState
     DEFINE_VAR_END

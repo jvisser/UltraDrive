@@ -51,7 +51,7 @@ VDP_SPRITE_SIZE_H4 Equ                      $0c
     DEFINE_STRUCT_END
 
     ; RAM shadow attribute table
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.VDPSprite       vdpSpriteAttrTable,             VDP_MAX_SPRITES
         VAR.w               vdpSpriteAttrTableTail
         VAR.w               vdpSpriteCount
