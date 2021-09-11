@@ -86,7 +86,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
         MapObjectGroupsBase[(${mapName})]:
             [# th:each="objectGroup : ${objectGroupMap.objectGroups}"]
-                [# th:with="objectsByTransferable=${#collection.ensureGroups({{true}, {false}}, #collection.groupBy({'objectTypeTransferable'}, objectGroup.objects))},
+                [# th:with="objectsByTransferable=${#collection.ensureGroups({{true}, {false}}, #collection.groupBy({'objectTypeTransferable'}, #lists.sort(objectGroup.objects)))},
                             staticObjects=${objectsByTransferable[#sets.toSet({false})]},
                             transferableObjects=${objectsByTransferable[#sets.toSet({true})]},
                             objects=${@com.google.common.collect.Iterables@concat(staticObjects, transferableObjects)}"]
