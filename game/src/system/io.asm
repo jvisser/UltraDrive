@@ -113,7 +113,7 @@ IO_PORT_2                           Equ 2
         STRUCT_MEMBER.b deviceType
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.IODeviceState ioDeviceState1
         VAR.IODeviceState ioDeviceState2
     DEFINE_VAR_END

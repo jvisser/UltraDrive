@@ -12,7 +12,7 @@
     ;-------------------------------------------------
     ; Actual water level
     ; ----------------
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.w waterLevel
         VAR.w waterLevelBase
         VAR.w waterLevelSineOffset

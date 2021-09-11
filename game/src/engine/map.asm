@@ -51,7 +51,7 @@
         STRUCT_MEMBER.b rowOffsetTable                          ; Marker
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l               mapLoadedMap                        ; MapHeader
     DEFINE_VAR_END
 

@@ -26,8 +26,8 @@ MEM_RAM_STACK_SIZE  Equ 512
 ;-------------------------------------------------
 ; RAM allocation pointers. Grow upward by the size of each defined variable (Auto align according to OPT ae+).
 ; ----------------
-__FAST_RAM_ALLOCATION_PTR = MEM_RAM_MID     ; Can use absolute short addressing (OPT ow+)
-__SLOW_RAM_ALLOCATION_PTR = MEM_RAM_START   ; Can not use absolute short addressing
+__SHORT_RAM_ALLOCATION_PTR = MEM_RAM_MID     ; Absolute long addressing (OPT ow+)
+__LONG_RAM_ALLOCATION_PTR  = MEM_RAM_START   ; Absolute short addressing
 
 
 ;-------------------------------------------------
@@ -93,8 +93,8 @@ DEFINE_STRUCT_END Macro
 ; Start creation of variables
 ; ----------------
 DEFINE_VAR Macro allocationType
-        If ~(strcmp('\allocationType', 'FAST') | strcmp('\allocationType', 'SLOW'))
-            Inform 3, 'Invalid allocation type \allocationType\. Use either FAST or SLOW'
+        If ~(strcmp('\allocationType', 'SHORT') | strcmp('\allocationType', 'LONG'))
+            Inform 3, 'Invalid allocation type \allocationType\. Use either SHORT or LONG'
         EndIf
         Pushp '\allocationType'
         RsSet __\allocationType\_RAM_ALLOCATION_PTR
@@ -147,11 +147,11 @@ DEFINE_VAR_END Macro
         Popp  ALLOCATION_TYPE
 
 __\ALLOCATION_TYPE\_RAM_ALLOCATION_PTR = __rs
-        If (__FAST_RAM_ALLOCATION_PTR > 0)
-            Inform 3, 'Absolute short addressable RAM allocation overflow at $%h', __FAST_RAM_ALLOCATION_PTR
+        If (__SHORT_RAM_ALLOCATION_PTR > 0)
+            Inform 3, 'Absolute short addressable RAM allocation overflow at $%h', __SHORT_RAM_ALLOCATION_PTR
         EndIf
-        If (__SLOW_RAM_ALLOCATION_PTR > MEM_RAM_MID)
-            Inform 3, 'Absolute long addressable RAM allocation overflow at $%h', __SLOW_RAM_ALLOCATION_PTR
+        If (__LONG_RAM_ALLOCATION_PTR > MEM_RAM_MID)
+            Inform 3, 'Absolute long addressable RAM allocation overflow at $%h', __LONG_RAM_ALLOCATION_PTR
         EndIf
         RsReset
     Endm
@@ -249,18 +249,18 @@ INIT_STRUCT_END Macro
 ; ----------------
 MEMORY_ALLOCATION_REPORT Macro
         Local SHORT_MEM_BYTES, LONG_MEM_BYTES
-_SHORT_MEM_BYTES Equ __FAST_RAM_ALLOCATION_PTR - MEM_RAM_MID
-_LONG_MEM_BYTES  Equ __SLOW_RAM_ALLOCATION_PTR - MEM_RAM_START
+_SHORT_MEM_BYTES Equ __SHORT_RAM_ALLOCATION_PTR - MEM_RAM_MID
+_LONG_MEM_BYTES  Equ __LONG_RAM_ALLOCATION_PTR  - MEM_RAM_START
         Inform 0, '-----------------'
         Inform 0, 'Memory allocation'
         Inform 0, '-----------------'
-        Inform 0, 'Absolute short addressable allocation $%h-$%h (%d bytes)', MEM_RAM_MID, __FAST_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES
-        Inform 0, 'Absolute long addressable allocation  $%h-$%h (%d bytes)', MEM_RAM_START, __SLOW_RAM_ALLOCATION_PTR, _LONG_MEM_BYTES
+        Inform 0, 'Absolute short addressable allocation $%h-$%h (%d bytes)', MEM_RAM_MID, __SHORT_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES
+        Inform 0, 'Absolute long addressable allocation  $%h-$%h (%d bytes)', MEM_RAM_START, __LONG_RAM_ALLOCATION_PTR, _LONG_MEM_BYTES
         Inform 0, ''
     Endm
 
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.w   memAllocationPointer
     DEFINE_VAR_END
 

@@ -15,7 +15,7 @@
         STRUCT_MEMBER.b lockY
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.w rbtXScale                                                 ; Ratios fractional part (16:16 fixedpoint)
         VAR.w rbtYScale
     DEFINE_VAR_END

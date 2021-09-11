@@ -13,7 +13,7 @@ VDP_DMA_QUEUE_SIZE Equ 32
 ;-------------------------------------------------
 ; DMA queue data
 ; ----------------
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.VDPDMATransferCommandList   vdpDMAQueue,                VDP_DMA_QUEUE_SIZE
         VAR.w                           vdpDMAQueueCurrentEntry
     DEFINE_VAR_END

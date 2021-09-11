@@ -16,7 +16,7 @@ VDP_TASK_QUEUE_SIZE Equ 32
         STRUCT_MEMBER.l taskData
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.VDPTask vdpTaskQueue,                VDP_TASK_QUEUE_SIZE
         VAR.w       vdpTaskQueueCurrentEntry
     DEFINE_VAR_END

@@ -27,7 +27,7 @@
     ;-------------------------------------------------
     ; Variables
     ; ----------------
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l                       rasterEffect
         VAR.l                       rasterEffectData
         VAR.w                       rasterEffectPrepared

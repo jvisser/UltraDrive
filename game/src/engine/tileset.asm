@@ -150,12 +150,12 @@ tilesetPatternDecompressionBuffer       Equ blockTable
 ;-------------------------------------------------
 ; Tileset variables
 ; ----------------
-    DEFINE_VAR SLOW
+    DEFINE_VAR LONG
         VAR.Block   blockTable,     BLOCK_TABLE_SIZE
         VAR.Chunk   chunkTable,     CHUNK_TABLE_SIZE
     DEFINE_VAR_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l                           loadedTileset
         VAR.l                           tilesetCollisionData
         VAR.l                           tilesetAngleData

@@ -5,7 +5,7 @@
 ;-------------------------------------------------
 ; Map render buffers
 ; ----------------
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.w               mapRenderBuffer,            128 * 2 * 2  ; Reserve one 64 pattern name table entry buffer per plane per side
         VAR.w               mapCurrentRenderBuffer
         VAR.VDPDMATransfer  mapRowBufferDMATransfer

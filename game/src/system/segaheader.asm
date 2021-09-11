@@ -33,7 +33,7 @@ RomHeaderRomStart:
 RomHeaderRomEnd:
     dc.l  RomImageEnd                                               ; End address of ROM
 RomHeaderRamStart:
-    dc.l  ((__FAST_RAM_ALLOCATION_PTR + 1) & -2)                    ; Start address of RAM (Used to indicate free RAM in this case, not sure what the original purpose of these fields was (for debugger maybe?))
+    dc.l  ((__SHORT_RAM_ALLOCATION_PTR + 1) & -2)                   ; Start address of RAM (Used to indicate free RAM in this case, not sure what the original purpose of these fields was (for debugger maybe?))
 RomHeaderRamEnd:
     dc.l  MEM_RAM_END - MEM_RAM_STACK_SIZE + 1                      ; End address of RAM
 RomHeaderSRAMDescriptor:

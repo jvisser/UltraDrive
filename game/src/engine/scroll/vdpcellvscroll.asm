@@ -10,7 +10,7 @@
         STRUCT_MEMBER.w     vcsuCellVerticalScroll, 20
     DEFINE_STRUCT_END
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l cvsPlaneBScrollDMATransferCommandListAddress
         VAR.l cvsPlaneAScrollDMATransferCommandListAddress
     DEFINE_VAR_END
