@@ -21,7 +21,7 @@ ANGLE_MASK      Equ ((ANGLE_180 * 2) - 1)
 ;-------------------------------------------------
 ; Sine/Cosine tables
 ; ----------------
-    SECTION_START S_FASTDATA
+    SECTION_START S_RODATA_SHORT
 
         Sin:
             dc.w 0, 6, 12, 18, 24, 31, 37, 43, 49, 55, 61, 68, 74, 79, 85, 91

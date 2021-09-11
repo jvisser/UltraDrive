@@ -117,8 +117,8 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
 
                             ; struct MapObjectDescriptor (type = [(${object.name})])
                             MapObject[(${object.id})][(${mapName})]:
-                                ; .typeOffset
-                                dc.w [(${object.name})]ObjectTypeOffset
+                                ; .type
+                                dc.w [(${object.name})]ObjectType
                                 ; .size
                                 dc.b MapObject[(${object.id})][(${mapName})]_End - MapObject[(${object.id})][(${mapName})]
                                 ; .flags
