@@ -4,15 +4,15 @@ import com.ultradrive.mapconvert.common.PropertySource;
 import java.util.Map;
 
 
-public class MapObject implements PropertySource
+public class MapObject implements PropertySource, Comparable<MapObject>
 {
-    private final String name;
+    private final boolean horizontalFlip;
     private final int id;
+    private final String name;
     private final Map<String, Object> properties;
+    private final boolean verticalFlip;
     private final int x;
     private final int y;
-    private final boolean horizontalFlip;
-    private final boolean verticalFlip;
 
     public MapObject(String name, int id,
                      Map<String, Object> properties,
@@ -28,9 +28,16 @@ public class MapObject implements PropertySource
         this.verticalFlip = verticalFlip;
     }
 
-    public String getName()
+    @Override
+    public int compareTo(MapObject o)
     {
-        return name;
+        return name.compareTo(o.name);
+    }
+
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        return properties;
     }
 
     public int getId()
@@ -38,10 +45,9 @@ public class MapObject implements PropertySource
         return id;
     }
 
-    @Override
-    public Map<String, Object> getProperties()
+    public String getName()
     {
-        return properties;
+        return name;
     }
 
     public int getX()
