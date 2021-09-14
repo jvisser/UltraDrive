@@ -19,9 +19,7 @@ BLOB_EXTENTS Equ 8
     DEFINE_STRUCT_END
 
     ; State
-    DEFINE_STRUCT BlobState
-        STRUCT_MEMBER.w x
-        STRUCT_MEMBER.w y
+    DEFINE_STRUCT BlobState, Entity
     DEFINE_STRUCT_END
 
     ; Type (MapObjectType)
@@ -86,8 +84,8 @@ BlobLoad:
 ; - a0: BlobDescriptor address
 ; - a1: BlobState address
 BlobInit:
-        move.w  BlobDescriptor_position + MapObjectPosition_x(a0), BlobState_x(a1)
-        move.w  BlobDescriptor_position + MapObjectPosition_y(a0), BlobState_y(a1)
+        move.w  BlobDescriptor_position + MapObjectPosition_x(a0), Entity_x(a1)
+        move.w  BlobDescriptor_position + MapObjectPosition_y(a0), Entity_y(a1)
         rts
 
 
@@ -101,7 +99,7 @@ BlobInit:
 BlobUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  BlobState_x(a1), d3
+        move.w  Entity_x(a1), d3
         sub.w   d0, d3
         subq.w  #BLOB_EXTENTS, d3
 
@@ -115,7 +113,7 @@ BlobUpdate:
 
         ; Convert vertical map coordinates to screen coordinates
         VIEWPORT_GET_Y d1
-        move.w  BlobState_y(a1), d4
+        move.w  Entity_y(a1), d4
         sub.w   d1, d4
         subq.w  #BLOB_EXTENTS, d4
 

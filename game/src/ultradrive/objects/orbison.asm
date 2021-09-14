@@ -19,9 +19,7 @@ ORBISON_EXTENTS Equ 8
     DEFINE_STRUCT_END
 
     ; State
-    DEFINE_STRUCT OrbisonState
-        STRUCT_MEMBER.w x
-        STRUCT_MEMBER.w y
+    DEFINE_STRUCT OrbisonState, Entity
     DEFINE_STRUCT_END
 
     ; Type (MapObjectType)
@@ -86,8 +84,8 @@ OrbisonLoad:
 ; - a0: OrbisonDescriptor address
 ; - a1: OrbisonState address
 OrbisonInit:
-        move.w  OrbisonDescriptor_position + MapObjectPosition_x(a0), OrbisonState_x(a1)
-        move.w  OrbisonDescriptor_position + MapObjectPosition_y(a0), OrbisonState_y(a1)
+        move.w  OrbisonDescriptor_position + MapObjectPosition_x(a0), Entity_x(a1)
+        move.w  OrbisonDescriptor_position + MapObjectPosition_y(a0), Entity_y(a1)
         rts
 
 
@@ -101,7 +99,7 @@ OrbisonInit:
 OrbisonUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  OrbisonState_x(a1), d3
+        move.w  Entity_x(a1), d3
         sub.w   d0, d3
         subq.w  #ORBISON_EXTENTS, d3
 
@@ -115,7 +113,7 @@ OrbisonUpdate:
 
         ; Convert vertical map coordinates to screen coordinates
         VIEWPORT_GET_Y d1
-        move.w  OrbisonState_y(a1), d4
+        move.w  Entity_y(a1), d4
         sub.w   d1, d4
         subq.w  #ORBISON_EXTENTS, d4
 

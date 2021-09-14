@@ -33,10 +33,8 @@ PLAYER_EXTENTS_WALL_Y   Equ     7
 ; - d1: y position
 PlayerInit:
         ; Convert position to 16.16 fixed point
-        INT_TO_FP16 d0
-        INT_TO_FP16 d1
-        move.l  d0, Entity_x(a0)
-        move.l  d1, Entity_y(a0)
+        move.w  d0, Entity_x(a0)
+        move.w  d1, Entity_y(a0)
 
         ; TODO: Check ground sensors to find floor if any: walk, else air
         move.l  #PlayerStateWalk, Player_stateHandler(a0)
