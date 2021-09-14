@@ -6,6 +6,6 @@
 ; Entity structure
 ; ----------------
     DEFINE_STRUCT Entity
-        STRUCT_MEMBER.l x           ; In 16.16 fixed point format
-        STRUCT_MEMBER.l y
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
