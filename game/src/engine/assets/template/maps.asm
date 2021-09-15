@@ -196,7 +196,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
     Even
 
     Map[(${mapName})]Data:
-    [# th:each="chunkReferences : ${#format.formatArray('dc.w ', ', ', map.width, '$%04x', map)}"]
+    [# th:each="chunkReferences : ${#format.formatArray('dc.w ', ', ', 16, '$%04x', map)}"]
         [(${chunkReferences})]
     [/]
 
