@@ -4,3 +4,5 @@ ultradrive/assets/**/*
 *.sym
 *.sym.txt
 *.srm
+*.mdp
+ultradrive-tracelog.json
