@@ -2,7 +2,7 @@
 ; Main entry point.
 ;------------------------------------------------------------------------------------------
 
-    DEFINE_VAR FAST
+    DEFINE_VAR SHORT
         VAR.l spriteAddr
         VAR.Player player
     DEFINE_VAR_END
@@ -70,9 +70,11 @@ _UpdateManualTilesetAnimations:
 
         btst    #MD_PAD_A, d2
         bne     .noPadA
-        PUSHM   d0-d1
+        PUSHW   d0
+        PUSHW   d1
         jsr     TilesetScheduleManualAnimations
-        POPM    d0-d1
+        POPW    d1
+        POPW    d0
     .noPadA:
         rts
 
@@ -122,10 +124,13 @@ Main:
             DEBUG_MSG 'Water effects enabled'
         EndIf
 
-
-        DEBUG_MSG 'UltraDrive Started!'
+        ; Allocate 1280 byte buffer for collision elements
+        move.w  #1280, d0
+        jsr     CollisionInit
 
         jsr     OSResetStatistics
+
+        DEBUG_MSG 'UltraDrive Started!'
 
     .mainLoop:
             If ~def(MapHeaderCastle_map4)
@@ -134,8 +139,10 @@ Main:
 
             ;PROFILE_CPU_START
 
+            ; Reset
             moveq   #0, d0
             jsr     VDPSpriteUnlinkAfter
+            jsr     CollisionReset
 
             ; Only update angle for specialized test map
             If def(MapHeaderCastle_map3)
