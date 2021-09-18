@@ -73,7 +73,9 @@ COLLISION_ELEMENT_TYPE_POINT    Equ 1                                   ; TODO: 
         STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT AABBCollisionElement, PointCollisionElement
+    DEFINE_STRUCT AABBCollisionElement, CollisionElement
+        STRUCT_MEMBER.w minX
+        STRUCT_MEMBER.w minY
         STRUCT_MEMBER.w maxX
         STRUCT_MEMBER.w maxY
     DEFINE_STRUCT_END
@@ -363,7 +365,7 @@ CollisionCheck:
 
                     ; Do AABB collision check
                     lea     CollisionElementLink_Size(a5), a6       ; a6 = related element
-                    move.l  PointCollisionElement_x(a6), d4         ; d4 = (minX, minY) of related element
+                    move.l  AABBCollisionElement_minX(a6), d4       ; d4 = (minX, minY) of related element
                     move.l  AABBCollisionElement_maxX(a6), d5       ; d5 = (maxX, maxY) of related element
 
                     ; If this.minY > related.maxY: no intersection
