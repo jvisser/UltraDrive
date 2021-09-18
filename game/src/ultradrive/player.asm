@@ -115,7 +115,8 @@ _MOVE_IF Macro up, down, var, disp, speed
         ; Right wall collision detection
         tst.w   d2
         bmi .skipRight
-            PUSHM   d2-d3
+            PUSHW   d2
+            PUSHW   d3
             add.w   #PLAYER_EXTENTS_WALL_X, d0
             sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindRightWall
@@ -124,13 +125,15 @@ _MOVE_IF Macro up, down, var, disp, speed
             sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindRightWall
             sub.w   #PLAYER_EXTENTS_WALL_X,  d0
-            POPM    d2-d3
+            POPW    d3
+            POPW    d2
             bra     .wallDone
     .skipRight:
 
         ; Left wall collision detection
         beq .skipLeft
-            PUSHM   d2-d3
+            PUSHW   d2
+            PUSHW   d3
             sub.w   #PLAYER_EXTENTS_WALL_X, d0
             sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindLeftWall
@@ -139,7 +142,8 @@ _MOVE_IF Macro up, down, var, disp, speed
             sub.w   #PLAYER_EXTENTS_WALL_Y, d1
             jsr     MapCollisionFindLeftWall
             add.w   #PLAYER_EXTENTS_WALL_X,  d0
-            POPM    d2-d3
+            POPW    d3
+            POPW    d2
     .skipLeft:
 
     .wallDone:

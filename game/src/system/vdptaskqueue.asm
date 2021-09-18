@@ -95,9 +95,11 @@ VDPTaskQueueProcess:
         move.l  (a1)+, a3
         move.l  (a1)+, a0
 
-        PUSHM   a1-a2
+        PUSHL   a1
+        PUSHL   a2
         jsr     (a3)
-        POPM    a1-a2
+        POPL    a2
+        POPL    a1
 
         cmpa    a1, a2
         bne .vdpTaskLoop

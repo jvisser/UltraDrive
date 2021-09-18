@@ -296,10 +296,12 @@ _MAP_UPDATE Macro renderer, size
         ; Check if there was movement. If so call movement callback
         tst.l   d4
         beq     .noMovement
-            PUSHM   d1/a0
+            PUSHL   d1
+            PUSHL   a0
             movea.l Camera_moveCallback(a0), a1
             jsr     (a1)
-            POPM    d1/a0
+            POPL    a0
+            POPL    d1
         .noMovement:
 
         ; Update min max for both dimensions
@@ -315,24 +317,28 @@ _MAP_UPDATE Macro renderer, size
         beq     .done
             btst    #2, d5
             beq     .checkMaxY
-                    PUSHM   d5/d7
+                    PUSHW   d5
+                    PUSHL   d7
                         swap    d6
                         move.w  d6, d0
                         move.w  Camera_minX(a0), d1
 
                         _MAP_UPDATE MapRenderRow, Camera_widthPatterns
-                    POPM    d5/d7
+                    POPL    d7
+                    POPW    d5
                 bra     .checkBackgroundYDone
             .checkMaxY:
                 btst    #3, d5
                 beq     .checkBackgroundYDone
-                    PUSHM   d5/d7
+                    PUSHW   d5
+                    PUSHL   d7
                         move.w  d6, d0
                         add.w   (vdpMetrics + VDPMetrics_screenHeight), d0
                         move.w  Camera_minX(a0), d1
 
                         _MAP_UPDATE MapRenderRow, Camera_widthPatterns
-                    POPM    d5/d7
+                    POPL    d7
+                    POPW    d5
             .checkBackgroundYDone:
 
             btst    #0, d5

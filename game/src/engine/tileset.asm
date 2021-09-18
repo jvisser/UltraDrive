@@ -394,9 +394,11 @@ TilesetSchedule:
     .triggerAnimation:
         ; Call animation trigger
         movea.l TilesetAnimationSchedule_triggerCallback(a0), a1
-        PUSHM    d0/a0
+        PUSHW   d0
+        PUSHL   a0
         jsr     (a1)
-        POPM    d0/a0
+        POPL    a0
+        POPW    d0
 
     .nextAnimationTrigger:
         adda.w  #TilesetAnimationSchedule_Size, a0

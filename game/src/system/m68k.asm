@@ -82,18 +82,18 @@ PEEKL Macro value
 
 
 ;-------------------------------------------------
-; Push multiple full registers onto the stack
+; Push multiple registers onto the stack
 ; ----------------
 PUSHM Macro reglist
-        movem.l \_, -(sp)
+        movem.\0\ \_, -(sp)
     Endm
 
 
 ;-------------------------------------------------
-; Pop multiple full registers from the stack
+; Pop multiple registers from the stack
 ; ----------------
 POPM Macro reglist
-        movem.l (sp)+, \_
+        movem.\0\ (sp)+, \_
     Endm
 
 
@@ -101,7 +101,7 @@ POPM Macro reglist
 ; Push full user mode CPU context from exception handler
 ; ----------------
 PUSH_USER_CONTEXT Macro
-        PUSHM   d0-d7/a0-a6
+        PUSHM.l d0-d7/a0-a6
     Endm
 
 
@@ -109,7 +109,7 @@ PUSH_USER_CONTEXT Macro
 ; Pop full user mode CPU context from exception handler
 ; ----------------
 POP_USER_CONTEXT Macro
-        POPM   d0-d7/a0-a6
+        POPM.l  d0-d7/a0-a6
     Endm
 
 
@@ -118,7 +118,7 @@ POP_USER_CONTEXT Macro
 ; ----------------
 PUSH_CONTEXT Macro
         PUSHW   sr
-        PUSHM   d0-d7/a0-a6
+        PUSHM.l d0-d7/a0-a6
     Endm
 
 
@@ -126,7 +126,7 @@ PUSH_CONTEXT Macro
 ; Pop full CPU context from the stack
 ; ----------------
 POP_CONTEXT Macro
-        POPM   d0-d7/a0-a6
+        POPM.l d0-d7/a0-a6
         POPW   sr
     Endm
 
