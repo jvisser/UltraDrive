@@ -364,7 +364,9 @@ MapInitObjects:
 
 
 ;-------------------------------------------------
-; Update all currently active objects
+; Update all currently active objects.
+; Tests collisions against the current/caller collision state.
+; Restores the collisions state to that of the caller. This means collision elements added after the call to MapUpdateObjects will not interact with map objects.
 ; ----------------
 ; Uses: d0-d7/a0-a6
 MapUpdateObjects:
@@ -395,12 +397,15 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         ;-------------------------------------------------
         ; Start of MapUpdateObjects
         ; ----------------
-
         move.w  mapActiveObjectGroupCount, d7
         bne     .activeGroups
             rts
 
     .activeGroups:
+
+        ; Create collision snapshot of caller collision state and store snapshot ptr on the stack
+        jsr     CollisionCreateSnapshotBefore
+        PUSHW   a0
 
         ; Load addresses
         lea     mapActiveObjectGroups, a3
@@ -413,6 +418,12 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             _PROCESS_TRANSFERABLE_OBJECTS
 
     .noGlobalTransferableObjects:
+
+        ; Create collision snapshot containing all global objects and store snapshot pointer on the stack
+        PUSHW   a4
+        jsr     CollisionCreateSnapshotAfter
+        POPW    a4
+        PUSHW   a0
 
         ; Update group local objects
         subq.w  #1, d7
@@ -454,7 +465,18 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 
         .noObjects:
 
+            ; Restore global object collision state for next group to test against
+            PEEKW   a0
+            jsr     CollisionRestoreSnapshot
+
         dbra    d7, .activeGroupLoop
+
+        ; Free global object collision state snapshot ptr stack space
+        POPW
+
+        ; Restore collision state to caller state
+        POPW    a0
+        jsr     CollisionRestoreSnapshot
 
         Purge _PROCESS_TRANSFERABLE_OBJECTS
 
