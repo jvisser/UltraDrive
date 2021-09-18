@@ -50,7 +50,8 @@ VDP_SCROLL_UPDATER_GET_TABLE_ADDRESS Macros orientation, config, target
 ; - a1: ScrollConfiguration
 ; Uses: Uses: d0-d7/a2-a6
 VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
-        PUSHM   a0-a1
+        PUSHL   a0
+        PUSHL   a1
 
         lea     ScrollConfiguration_\config\ScrollUpdaterConfiguration(a1), a3                                                      ; a3 = Scroll updater configuration address
 
@@ -83,7 +84,8 @@ VDP_SCROLL_UPDATER_INIT Macro orientation, config, scrollTableType
         ; Store address of scroll value updater allocated memory for later use
         move.l  a0, vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\ScrollValueStateAddress
 
-        POPM    a0-a1
+        POPL   a1
+        POPL   a0
     Endm
 
 

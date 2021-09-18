@@ -88,10 +88,14 @@ EngineSchedule:
         add.b   d1, d1
         bcc     .subSystemDisabled
 
-        PUSHM   d0-d1/a0
+        PUSHW   d0
+        PUSHW   d1
+        PUSHL   a0
         movea.l (a0), a0
         jsr     (a0)
-        POPM    d0-d1/a0
+        POPL    a0
+        POPW    d1
+        POPW    d0
 
     .subSystemDisabled:
         addq.l  #SIZE_LONG, a0

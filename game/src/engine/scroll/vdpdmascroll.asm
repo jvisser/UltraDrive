@@ -9,7 +9,8 @@
 ; - a0: Viewport
 ; - a1: ScrollConfiguration
 VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTemplate, dmaTransferAddress
-        PUSHM   a0-a1   ; Preserve inputs
+        PUSHL   a0   ; Preserve inputs
+        PUSHL   a1
 
         ; Initialize scroll tables
         VDP_SCROLL_UPDATER_INIT \orientation\, \config\, \stateType
@@ -31,7 +32,8 @@ VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTem
         ; Transfer initial scroll values to the VDP
         VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT \dmaTransferAddress
 
-        POPM   a0-a1
+        POPL   a1
+        POPL   a0
     Endm
 
 

@@ -62,12 +62,16 @@ MapRender:
         subq.w  #1, d3
 
     .rowLoop:
-            PUSHM   d0-d4/a0
+            PUSHM.w d0-d3
+            PUSHL   d4
+            PUSHL   a0
             MAP_RENDER_RESET
             move.l  d4, d3
             bsr     MapRenderRow
             jsr     VDPDMAQueueFlush        ; TODO: Use CPU/direct transfer
-            POPM    d0-d4/a0
+            POPL    a0
+            POPL    d4
+            POPM.w  d0-d3
 
             addq.w  #1, d0
         dbra    d3, .rowLoop

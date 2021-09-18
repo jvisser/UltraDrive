@@ -274,7 +274,7 @@ _PaletteSwapRasterEffectColorTransitionHblank:
             ; Disable hint after the next occurence
             VDP_REG_SET vdpRegHRate, $ff
 
-            PUSHM   d0-d1/a0-a4
+            PUSHM.l  d0-d1/a0-a4
 
             ; Request Z80 as z80->68000 accesses could mess up the timing (actually just waiting for BUS_REQ could also do that :/)
             Z80_GET_BUS
@@ -326,7 +326,7 @@ _PaletteSwapRasterEffectColorTransitionHblank:
 
             Z80_RELEASE
 
-            POPM   d0-d1/a0-a4
+            POPM.l  d0-d1/a0-a4
 
     .handled:
         rte
@@ -344,13 +344,15 @@ _PaletteSwapRasterEffectDMAHblank:
             ; Disable hint after the next occurence
             VDP_REG_SET vdpRegHRate, $ff
 
-            PUSHM a0-a1
+            PUSHL a0
+            PUSHL a1
 
                 TILESET_GET a0
 
                 VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Tileset_alternativePaletteAddress(a0)
 
-            POPM a0-a1
+            POPL a1
+            POPL a0
 
     .handled:
         rte
