@@ -26,6 +26,7 @@ MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjec
     BIT_CONST.MODF_ENABLED       0
     BIT_CONST.MODF_ACTIVE        1
     BIT_CONST.MODF_TRANSFERABLE  2
+    BIT_MASK.MODF_ORIENTATION    6, 2
     BIT_CONST.MODF_HFLIP         6
     BIT_CONST.MODF_VFLIP         7
 
@@ -385,7 +386,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             lea     (a4, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
 
             ; Call Object.update(MapObjectDescriptor*, ObjectState*)
-            move.w  MapObjectDescriptor_type(a0), a5
+            movea.w MapObjectDescriptor_type(a0), a5
             movea.l MapObjectType_update(a5), a5
             jsr     (a5)
 
@@ -489,13 +490,14 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 _MapProcessTransferableObjectStateChangeQueue:
         move.w  mapTransferableStateChangeQueueCount, d4
         beq     .noStateChanges
-            move.w  mapTransferableStateChangeQueueAddress, a5
+            movea.w  mapTransferableStateChangeQueueAddress, a5
             subq.w  #1, d4
         .stateChangeLoop:
             move.w  -(a5), d0
             movea.w -(a5), a0
             jsr     _MapProcessObjectStateChangesBaseOffset(pc, d0)
             dbra    d4, .stateChangeLoop
+        move.w  a5, mapTransferableStateChangeQueueAddress
         clr.w   mapTransferableStateChangeQueueCount
     .noStateChanges:
         rts

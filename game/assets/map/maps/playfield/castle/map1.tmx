@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="185">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="250">
  <properties>
   <property name="background" type="file" value="../../background/castle/dungeon.tmx"/>
  </properties>
@@ -264,5 +264,66 @@
     <property name="enabled" type="bool" value="false"/>
    </properties>
   </object>
+  <object id="186" template="../../../objects/Blob.tx" x="320" y="320"/>
+  <object id="187" template="../../../objects/Blob.tx" x="537" y="576"/>
+  <object id="188" template="../../../objects/Blob.tx" x="204" y="960"/>
+  <object id="190" template="../../../objects/Blob.tx" x="420" y="896"/>
+  <object id="192" template="../../../objects/Blob.tx" x="3243" y="2496"/>
+  <object id="193" template="../../../objects/Blob.tx" x="3304" y="2496"/>
+  <object id="194" template="../../../objects/Blob.tx" x="3518" y="2496"/>
+  <object id="195" template="../../../objects/Blob.tx" x="3611" y="2496"/>
+  <object id="196" template="../../../objects/Blob.tx" x="3758" y="2496"/>
+  <object id="197" template="../../../objects/Blob.tx" x="3992" y="2496"/>
+  <object id="198" template="../../../objects/Blob.tx" x="3079" y="2432"/>
+  <object id="199" template="../../../objects/Blob.tx" x="1239" y="192"/>
+  <object id="200" template="../../../objects/Blob.tx" x="1356" y="192"/>
+  <object id="201" template="../../../objects/Blob.tx" x="1768" y="128"/>
+  <object id="202" template="../../../objects/Blob.tx" x="1996" y="192"/>
+  <object id="203" template="../../../objects/Blob.tx" x="2234" y="384"/>
+  <object id="204" template="../../../objects/Blob.tx" x="1807" y="624"/>
+  <object id="205" template="../../../objects/Blob.tx" x="3346" y="832"/>
+  <object id="206" template="../../../objects/Blob.tx" x="3592" y="832"/>
+  <object id="207" template="../../../objects/Blob.tx" x="2738" y="640"/>
+  <object id="208" template="../../../objects/Blob.tx" x="3929" y="960"/>
+  <object id="209" template="../../../objects/Blob.tx" x="3423" y="1536"/>
+  <object id="210" template="../../../objects/Blob.tx" x="611" y="2432"/>
+  <object id="211" template="../../../objects/Blob.tx" x="719" y="2432"/>
+  <object id="212" template="../../../objects/Blob.tx" x="746" y="1984"/>
+  <object id="213" template="../../../objects/Blob.tx" x="281" y="1856"/>
+  <object id="214" template="../../../objects/Blob.tx" x="233" y="1776"/>
+  <object id="215" template="../../../objects/Blob.tx" x="416" y="1728"/>
+  <object id="216" template="../../../objects/Blob.tx" x="1538" y="1856"/>
+  <object id="217" template="../../../objects/Blob.tx" x="1983" y="1792"/>
+  <object id="219" template="../../../objects/Blob.tx" x="4304" y="1664"/>
+  <object id="220" template="../../../objects/Blob.tx" x="4509" y="1920"/>
+  <object id="221" template="../../../objects/Blob.tx" x="4895" y="1344"/>
+  <object id="222" template="../../../objects/Blob.tx" x="4417" y="1088"/>
+  <object id="223" template="../../../objects/Blob.tx" x="4670" y="2416"/>
+  <object id="224" template="../../../objects/Blob.tx" x="4767" y="1984"/>
+  <object id="225" template="../../../objects/Blob.tx" x="5018" y="2112"/>
+  <object id="226" template="../../../objects/Blob.tx" x="1415" y="2432"/>
+  <object id="227" template="../../../objects/Blob.tx" x="2072" y="2496"/>
+  <object id="228" template="../../../objects/Blob.tx" x="1599" y="2048"/>
+  <object id="229" template="../../../objects/Blob.tx" x="4114" y="512"/>
+  <object id="230" template="../../../objects/Blob.tx" x="4216" y="512"/>
+  <object id="231" template="../../../objects/Blob.tx" x="4772" y="320"/>
+  <object id="232" template="../../../objects/Blob.tx" x="4939" y="192"/>
+  <object id="233" template="../../../objects/Blob.tx" x="4972" y="768"/>
+  <object id="234" template="../../../objects/Blob.tx" x="3415" y="1792"/>
+  <object id="235" template="../../../objects/Blob.tx" x="3757" y="1792"/>
+  <object id="236" template="../../../objects/Blob.tx" x="3519" y="2048"/>
+  <object id="237" template="../../../objects/Blob.tx" x="3345" y="2048"/>
+  <object id="238" template="../../../objects/Blob.tx" x="2586" y="1856"/>
+  <object id="239" template="../../../objects/Blob.tx" x="3834" y="2240"/>
+  <object id="240" template="../../../objects/Blob.tx" x="4365" y="2496"/>
+  <object id="241" template="../../../objects/Blob.tx" x="2745" y="2416"/>
+  <object id="242" template="../../../objects/Blob.tx" x="1465" y="1344"/>
+  <object id="243" template="../../../objects/Blob.tx" x="786" y="1472"/>
+  <object id="244" template="../../../objects/Blob.tx" x="1082" y="1408"/>
+  <object id="245" template="../../../objects/Blob.tx" x="962" y="1088"/>
+  <object id="246" template="../../../objects/Blob.tx" x="590" y="1184"/>
+  <object id="247" template="../../../objects/Blob.tx" x="2324" y="1472"/>
+  <object id="248" template="../../../objects/Blob.tx" x="2591" y="1216"/>
+  <object id="249" template="../../../objects/Blob.tx" x="3495" y="192"/>
  </objectgroup>
 </map>

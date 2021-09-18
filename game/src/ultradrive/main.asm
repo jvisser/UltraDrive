@@ -53,8 +53,8 @@ _UpdatePlayer:
         move.w  (player + Entity_y), d1
         sub.w   (viewport + Viewport_foreground + Camera_x), d0
         sub.w   (viewport + Viewport_foreground + Camera_y), d1
-        add.w   #128 - 7, d0
-        add.w   #128 - 15, d1
+        add.w   #128 - PLAYER_EXTENTS_X, d0
+        add.w   #128 - PLAYER_EXTENTS_Y, d1
 
         movea.l  spriteAddr, a1
         move.w  d0, VDPSprite_x(a1)

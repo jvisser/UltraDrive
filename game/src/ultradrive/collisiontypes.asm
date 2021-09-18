@@ -42,7 +42,7 @@
 ; ----------------
     DEFINE_STRUCT HandlerCollisionElement, AABBCollisionElement
         STRUCT_MEMBER.w data
-        STRUCT_MEMBER.l handler         ; Must preserve a0-a5
+        STRUCT_MEMBER.l handlerAddress  ; Must preserve d6-d7/a0-a5
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT HurtCollisionElement, AABBCollisionElement
@@ -60,7 +60,7 @@
 ; - a0-a3
 _HandleCollision:
     PUSHL   a6
-    movea.l HandlerCollisionElement_handler(a0), a6
+    movea.l HandlerCollisionElement_handlerAddress(a0), a6
     jsr     (a6)
     POPL   a6
     rts
