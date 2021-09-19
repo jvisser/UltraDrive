@@ -49,14 +49,14 @@ VDP_SCROLL_DMA_UPDATER_UPDATE Macro orientation, backgroundDMATransferAddress, f
             move.w  d0, d1
 
             btst    #VDP_SCROLL_UPDATE_BACKGROUND, d1
-            beq     .noBackgroundScroll\@
+            beq.s   .noBackgroundScroll\@
 
                 VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT \backgroundDMATransferAddress
 
         .noBackgroundScroll\@:
 
             btst    #VDP_SCROLL_UPDATE_FOREGROUND, d1
-            beq     .noForegroundScroll\@
+            beq.s   .noForegroundScroll\@
 
                 VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT \foregroundDMATransferAddress
 

@@ -73,7 +73,7 @@ MapLoadDirectoryIndex:
             lea     MapDirectory, a0
             move.w  MapDirectory_count(a0), d1
             cmp.w   d1, d0
-            bge     .invalidMapIndex
+            bge.s   .invalidMapIndex
 
             add.w   d0, d0
             add.w   d0, d0
@@ -93,7 +93,7 @@ MapLoadDirectoryIndex:
 ; Uses: d0-d7/a0-a6
 MapLoad:
         cmpa.l  mapLoadedMap, a0
-        bne     .loadMap
+        bne.s   .loadMap
         rts ; Map already loaded
 
     .loadMap:

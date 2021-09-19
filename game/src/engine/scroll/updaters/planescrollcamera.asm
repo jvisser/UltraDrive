@@ -108,7 +108,7 @@ _PlaneScrollCameraUpdate:
         move.b  PlaneScrollCameraConfiguration_cameraValueShift(a2), d2
         lsr.w   d2, d1
         cmp.w   (a1), d1
-        beq     .noMovement
+        beq.s   .noMovement
 
             move.w  d1, (a1)
             moveq   #1, d0

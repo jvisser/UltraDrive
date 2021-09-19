@@ -24,7 +24,7 @@ REG_VERSION_MODE        Equ $80    ; 1 = Domestic model, 0 = Overseas model
 ; ----------------
 TMSSUnlock:
         andi.b  #REG_VERSION_TMSS_MASK, MEM_REG_VERSION
-        beq     .noTMSS
+        beq.s   .noTMSS
         move.l  #'SEGA', MEM_TMSS
 
     .noTMSS:

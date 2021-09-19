@@ -69,7 +69,7 @@ _UpdateManualTilesetAnimations:
         IO_GET_DEVICE_STATE IO_PORT_1, d2
 
         btst    #MD_PAD_A, d2
-        bne     .noPadA
+        bne.s   .noPadA
         PUSHW   d0
         PUSHW   d1
         jsr     TilesetScheduleManualAnimations

@@ -28,7 +28,7 @@ _VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
 
             movea.w vdpDMAQueueCurrentEntry, a1
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
-            beq     .dmaQueueFull\@
+            beq.s   .dmaQueueFull\@
 
             _LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS \dmaTransferCommandList
 
@@ -40,7 +40,7 @@ _VDP_DMA_QUEUE_ADD_COMMAND_LIST Macro dmaTransferCommandList
             move.w  a1, vdpDMAQueueCurrentEntry
 
             If def(debug)
-                    bra .dmaQueueDone\@
+                    bra.s .dmaQueueDone\@
 
                 .dmaQueueFull\@:
                     DEBUG_MSG 'VDP_DMA_QUEUE_ADD_CMD_LIST: DMA Queue full'
@@ -93,7 +93,7 @@ _VDP_DMA_QUEUE_ADD Macro dmaTransfer
 
             movea.w vdpDMAQueueCurrentEntry, a1
             cmpa.w  #vdpDMAQueue + vdpDMAQueue_Size, a1
-            beq     .dmaQueueFull\@
+            beq.s   .dmaQueueFull\@
 
             _LOAD_DMA_TRANSFER_ADDRESS \dmaTransfer
 
@@ -116,7 +116,7 @@ _VDP_DMA_QUEUE_ADD Macro dmaTransfer
             move.w  a1, vdpDMAQueueCurrentEntry
 
             If def(debug)
-                    bra .dmaQueueDone\@
+                    bra.s .dmaQueueDone\@
 
                 .dmaQueueFull\@:
                     DEBUG_MSG 'VDP_DMA_QUEUE_ADD: DMA Queue full'
@@ -215,7 +215,7 @@ VDPDMAQueueFlush:
         lea     vdpDMAQueue, a0
         move.w  vdpDMAQueueCurrentEntry, a2
         cmpa    a0, a2
-        beq     .dmaTransferComplete        ; Nothing to transfer
+        beq.s   .dmaTransferComplete        ; Nothing to transfer
 
         move.w  a0, vdpDMAQueueCurrentEntry
 

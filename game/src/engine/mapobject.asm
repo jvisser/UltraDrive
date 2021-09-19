@@ -145,7 +145,7 @@ MapInitActiveObjectGroups:
     _CALCULATE_SUB_CHUNK_ID d2, d3
 
     move.w  d2, mapActiveObjectGroupSubChunkId
-    bra     _MapUpdateActiveObjectGroups
+    bra.s   _MapUpdateActiveObjectGroups
 
 
 ;-------------------------------------------------
@@ -160,7 +160,7 @@ MapUpdateActiveObjectGroups:
 
         move.w  mapActiveObjectGroupSubChunkId, d3
         eor.w   d2, d3
-        bne     .updateActiveObjectGroups
+        bne.s   .updateActiveObjectGroups
             rts
 
     .updateActiveObjectGroups:
@@ -243,7 +243,7 @@ _MapUpdateActiveObjectGroups:
             move.w  (a0)+, d7                                                   ; d7 = chunk ref
             andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
             rol.w   #3, d7                                                      ; d7 = container group id
-            beq     .emptyObjectGroup
+            beq.s   .emptyObjectGroup
 
                 subq.w  #1, d7                                                  ; d7 = container group index
                 add.w   d7, d7
@@ -253,7 +253,7 @@ _MapUpdateActiveObjectGroups:
                 ; Check if new group
                 move.b  MapObjectGroup_flagNumber(a6), d7
                 bset    d7, d6
-                bne     .objectGroupAlreadyActive
+                bne.s   .objectGroupAlreadyActive
 
                     addq.w #1, mapActiveObjectGroupCount
 
@@ -312,14 +312,14 @@ MapInitObjects:
 
             move.b  MapObjectGroup_totalObjectCount(a0), d6
             addq.w  #MapObjectGroup_objectDescriptors, a0                       ; a0 = Current MapObjectDescriptor address for current group
-            beq     .emptyGroup
+            beq.s   .emptyGroup
             ext.w   d6                                                          ; d6 = Object counter
 
             subq.w  #1, d6
         .objectLoop:
 
                 btst    #MODF_TRANSFERABLE, MapObjectDescriptor_flags(a0)
-                beq     .notTransferable
+                beq.s   .notTransferable
 
                     move.w  MapStatefulObjectDescriptor_stateOffset(a0), d1
                     lea     -MapObjectLink_Size(a3, d1), a5                     ; a5 = MapObjectLink address for current transferable object
@@ -328,11 +328,11 @@ MapInitObjects:
                     move.w  a4, MapObjectLink_objectGroupStateAddress(a5)
 
                     btst    #MODF_ENABLED, MapObjectDescriptor_flags(a0)
-                    beq     .notEnabled
+                    beq.s   .notEnabled
 
                         ; Link enabled
-                        lea MapObjectGroupState_activeObjectsHead(a4), a2       ; a2 = Active transferable object list head
-                        bra     .linkObject
+                        lea     MapObjectGroupState_activeObjectsHead(a4), a2   ; a2 = Active transferable object list head
+                        bra.s   .linkObject
                 .notEnabled:
 
                         ; Link disabled
@@ -399,7 +399,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         ; Start of MapUpdateObjects
         ; ----------------
         move.w  mapActiveObjectGroupCount, d7
-        bne     .activeGroups
+        bne.s   .activeGroups
             rts
 
     .activeGroups:
@@ -414,7 +414,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 
         ; Update global objects
         move.w  mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, d0
-        beq     .noGlobalTransferableObjects
+        beq.s   .noGlobalTransferableObjects
 
             _PROCESS_TRANSFERABLE_OBJECTS
 
@@ -434,7 +434,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 
             move.w  MapObjectGroup_stateOffset(a5), d0
             move.w  MapObjectGroupState_activeObjectsHead(a4, d0), d0           ; d0 = address of transferable object's MapObjectLink
-            beq     .noTransferableObjects
+            beq.s   .noTransferableObjects
 
                 _PROCESS_TRANSFERABLE_OBJECTS
 
@@ -442,7 +442,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             movea.l (a3)+, a5                                                   ; a5 = Current active group
 
             move.b  MapObjectGroup_objectCount(a5), d6
-            beq .noObjects
+            beq.s   .noObjects
                 addq.w  #MapObjectGroup_objectDescriptors, a5                   ; a5 = Current non transferable object descriptor
 
                 ext.w   d6
@@ -489,7 +489,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 ; ----------------
 _MapProcessTransferableObjectStateChangeQueue:
         move.w  mapTransferableStateChangeQueueCount, d4
-        beq     .noStateChanges
+        beq.s   .noStateChanges
             movea.w  mapTransferableStateChangeQueueAddress, a5
             subq.w  #1, d4
         .stateChangeLoop:
@@ -538,25 +538,25 @@ _MAP_ATTACH_OBJECT Macro
         ; Read chunk ref object group id
         move.w  (a3, d2), d3
         andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                            ; d3 = chunk object group id
-        bne     .objectGroupFound\@
+        bne.s   .objectGroupFound\@
 
             If (narg=1)
 
                 ; No object group found, look one chunk up (slope case)
                 tst.w   d1
-                beq     .linkToGlobalGroup\@
+                beq.s   .linkToGlobalGroup\@
 
                     sub.w   Map_stride(a2), d2                                  ; d2 = chunk offset
                     move.w  (a3, d2), d3
                     andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                ; d3 = chunk object group id
-                    bne     .objectGroupFound\@
+                    bne.s   .objectGroupFound\@
 
             EndIf
 
         .linkToGlobalGroup\@:
             ; Link to global group
             lea     (mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead), a2
-            bra    .linkObjectToGroup\@
+            bra.s   .linkObjectToGroup\@
 
     .objectGroupFound\@:
         rol.w   #4, d3                                                          ; d3 = container local group offset
@@ -587,7 +587,7 @@ _MAP_ATTACH_OBJECT Macro
         ; Transfer object from its current group to the found group if different (unlink/link)
         suba.w  #MapObjectLink_Size, a0
         cmpa.w  MapObjectLink_objectGroupStateAddress(a0), a2
-        beq     .sameGroup\@
+        beq.s   .sameGroup\@
 
             move.w  a2, MapObjectLink_objectGroupStateAddress(a0)
 

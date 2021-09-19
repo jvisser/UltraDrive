@@ -49,7 +49,7 @@ _PlaneHorizontalVDPScrollUpdaterUpdate:
         VDP_SCROLL_UPDATER_UPDATE Horizontal
 
         ; Update VDP if any scroll values have changed
-        beq .noMovement
+        beq.s .noMovement
 
             ; Update VDP scroll values
             VDP_TASK_QUEUE_ADD #_HPlaneVDPScrollUpdaterCommit, a0

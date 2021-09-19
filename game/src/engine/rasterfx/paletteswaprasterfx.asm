@@ -54,21 +54,21 @@ paletteSwapRasterEffectState Equ rasterEffectMemoryPool
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectInit:
         TILESET_GET d0
-        bne .tileSetOk
+        bne.s .tileSetOk
 
             OS_KILL 'No tileset loaded!'
 
     .tileSetOk:
         movea.l d0, a1                                                  ; a1 = tileset address
         tst.l   Tileset_alternativePaletteAddress(a1)
-        bne     .paletteOk
+        bne.s   .paletteOk
 
             OS_KILL 'No alternative palette available in tileset!'
 
     .paletteOk:
 
         tst.l   Tileset_colorTransitionTableAddress(a1)
-        beq     .useDMA
+        beq.s   .useDMA
 
             DEBUG_MSG 'Palette swap raster effect using color transition table'
 
@@ -87,7 +87,7 @@ _PaletteSwapRasterEffectInit:
 
             ; Return interrupt handler address in a3
             lea _PaletteSwapRasterEffectColorTransitionHblank, a3
-        bra     .setupPaletteSwapMethodDone
+        bra.s   .setupPaletteSwapMethodDone
 
     .useDMA:
 
@@ -122,9 +122,9 @@ _PaletteSwapRasterEffectInit:
 
             ; startPalette = (screenLine < minScreenLine) ? Tileset_alternativePaletteAddress : Tileset_paletteAddress
             cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine), d0
-            bge     .normalPalette
+            bge.s   .normalPalette
                 move.l  Tileset_alternativePaletteAddress(a1), (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
-            bra .paletteSelectDone
+            bra.s   .paletteSelectDone
         .normalPalette:
                 move.l  Tileset_paletteAddress(a1), (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
         .paletteSelectDone:
@@ -166,12 +166,12 @@ _PaletteSwapRasterEffectPrepareNextFrame:
 
         ; if (screenline < minScreenLine)
         cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine), d0
-        bge     .checkMaxScreenLine
+        bge.s   .checkMaxScreenLine
 
             ; if (screenLine >= minScreenLine)
             move.w  (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_screenLine), d1
             cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_minScreenLine), d1
-            blt .skipTopPaletteDMA
+            blt.s   .skipTopPaletteDMA
 
                 TILESET_GET a0
 
@@ -187,16 +187,16 @@ _PaletteSwapRasterEffectPrepareNextFrame:
             ; Disable hint
             move.w  #$ff, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition)
 
-        bra     .screenLineCheckDone
+        bra.s   .screenLineCheckDone
     .checkMaxScreenLine:
         ; else if (screenline > maxScreenLine)
         cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_maxScreenLine), d0
-        ble     .midScreenLine
+        ble.s   .midScreenLine
 
             ; if (screenLine <= maxScreenLine)
             move.w  (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_screenLine), d1
             cmp.w   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_maxScreenLine), d1
-            bgt .skipBottomPaletteDMA
+            bgt.s   .skipBottomPaletteDMA
 
                 TILESET_GET a0
 
@@ -212,7 +212,7 @@ _PaletteSwapRasterEffectPrepareNextFrame:
             ; Disable hint
             move.w  #$ff, (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntPosition)
 
-        bra     .screenLineCheckDone
+        bra.s   .screenLineCheckDone
         ; else
     .midScreenLine:
 
@@ -337,7 +337,7 @@ _PaletteSwapRasterEffectColorTransitionHblank:
 ; ----------------
 _PaletteSwapRasterEffectDMAHblank:
         tst.b   (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
-        bne     .handled
+        bne.s   .handled
 
             seq     (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_hIntHandled)
 

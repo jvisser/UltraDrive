@@ -91,7 +91,7 @@ RasterEffectInstall:
 ; ----------------
 RasterEffectUninstall:
         tst.l   rasterEffect
-        beq     .noRasterEffect
+        beq.s   .noRasterEffect
 
             VDP_TASK_QUEUE_ADD #_RasterEffectUninstallHBlank
 
@@ -104,7 +104,7 @@ RasterEffectUninstall:
 ; ----------------
 _RASTEREFFECT_CALL Macro func
         tst.l   rasterEffect
-        beq     .noRasterEffect\@
+        beq.s   .noRasterEffect\@
 
             movea.l rasterEffect, a1
             movea.l \func(a1), a1
@@ -174,7 +174,7 @@ _RasterEffectPrepareNextFrame:
 ; ----------------
 _RasterEffectSetupFrame:
         tst.w   rasterEffectPrepared
-        bne     .framePrepared
+        bne.s   .framePrepared
 
         ; If prepareNextFrame was not called before setupFrame call resetFrame first
         _RASTEREFFECT_CALL RasterEffect_resetFrame

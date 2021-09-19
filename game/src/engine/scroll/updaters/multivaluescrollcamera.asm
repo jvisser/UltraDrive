@@ -92,7 +92,7 @@ _MultiScrollCameraUpdate:
         moveq   #0, d1
         move.b  MultiScrollCameraConfiguration_cameraChangeProperty(a2), d1
         tst.w   (a0, d1)
-        beq     .noMovement
+        beq.s   .noMovement
 
             ; Update  multi buffer
             move.b  MultiScrollCameraConfiguration_cameraProperty(a2), d1

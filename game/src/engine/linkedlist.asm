@@ -25,7 +25,7 @@ LINKED_LIST_INIT Macro node
 LINKED_LIST_INSERT_BEFORE Macro existingNode, newNode, scratch
         movea.w LinkedList_previous(\existingNode), \scratch
         cmpa.w  #NULL, \scratch
-        beq     .noPrevious\@
+        beq.s   .noPrevious\@
             move.w  \newNode, LinkedList_next(\scratch)
     .noPrevious\@:
         move.w  \newNode, LinkedList_previous(\existingNode)
@@ -40,7 +40,7 @@ LINKED_LIST_INSERT_BEFORE Macro existingNode, newNode, scratch
 LINKED_LIST_INSERT_AFTER Macro existingNode, newNode, scratch
         movea.w LinkedList_next(\existingNode), \scratch
         cmpa.w  #NULL, \scratch
-        beq     .noNext\@
+        beq.s   .noNext\@
             move.w  \newNode, LinkedList_previous(\scratch)
     .noNext\@:
         move.w  \newNode, LinkedList_next(\existingNode)
@@ -55,13 +55,13 @@ LINKED_LIST_INSERT_AFTER Macro existingNode, newNode, scratch
 LINKED_LIST_REMOVE Macro node, scratch
         movea.w LinkedList_next(\node), \scratch
         cmpa.w  #NULL, \scratch
-        beq     .noNext\@
+        beq.s   .noNext\@
             move.w  LinkedList_previous(\node), LinkedList_previous(\scratch)
     .noNext\@:
 
         movea.w LinkedList_previous(\node), \scratch
         cmpa.w  #NULL, \scratch
-        beq     .noPrevious\@
+        beq.s   .noPrevious\@
             move.w  LinkedList_next(\node), LinkedList_next(\scratch)
     .noPrevious\@:
     Endm
