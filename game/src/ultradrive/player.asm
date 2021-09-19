@@ -75,13 +75,13 @@ PlayerStateTestCollision:
 _MOVE_IF Macro up, down, var, disp, speed
                 moveq   #0, \disp
                 btst    #\down, d6
-                bne     .noDown\@
+                bne.s   .noDown\@
                 move.w  \speed, \disp
-                bra     .done\@
+                bra.s   .done\@
             .noDown\@:
 
                 btst    #\up, d6
-                bne     .done\@
+                bne.s   .done\@
                 move.w  \speed, \disp
                 neg.w   \disp
 
@@ -100,7 +100,7 @@ _MOVE_IF Macro up, down, var, disp, speed
         btst    #MD_PAD_C, d6
         beq     .moveFast
         moveq   #1, d4
-        bra     .moveSpeedDone
+        bra.s   .moveSpeedDone
     .moveFast:
         moveq   #8, d4
     .moveSpeedDone:
@@ -114,7 +114,7 @@ _MOVE_IF Macro up, down, var, disp, speed
 
         ; Right wall collision detection
         tst.w   d2
-        bmi .skipRight
+        bmi.s .skipRight
             PUSHW   d2
             PUSHW   d3
             add.w   #PLAYER_EXTENTS_WALL_X, d0
@@ -127,7 +127,7 @@ _MOVE_IF Macro up, down, var, disp, speed
             sub.w   #PLAYER_EXTENTS_WALL_X,  d0
             POPW    d3
             POPW    d2
-            bra     .wallDone
+            bra.s   .wallDone
     .skipRight:
 
         ; Left wall collision detection
@@ -150,7 +150,7 @@ _MOVE_IF Macro up, down, var, disp, speed
 
         ; Floor collision detection
         tst.w   d3
-        bmi     .skipFloor
+        bmi.s   .skipFloor
         PUSHW   d3
         sub.w   #PLAYER_EXTENTS_X, d0
         add.w   #PLAYER_EXTENTS_Y, d1

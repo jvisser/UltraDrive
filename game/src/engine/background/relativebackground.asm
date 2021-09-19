@@ -103,26 +103,26 @@ _RelativeBackgroundTrackerInit:
         ; Update initial camera position
         moveq   #0, d0
         tst.b   RelativeBackgroundTrackerConfiguration_lockX(a3)
-        bne     .horizontallyLocked
+        bne.s   .horizontallyLocked
         move.w  Camera_x(a2), d0
         mulu    d2, d0
         swap    d0                                                      ; Camera expects non fixed point result
         move.w  (vdpMetrics + VDPMetrics_screenWidth), d2               ; If not locked: set camera width to screen width + 1 pattern for scrolling
         addq.w  #8, d2
-        bra     .horizontalSetupDone
+        bra.s   .horizontalSetupDone
     .horizontallyLocked:
         move.w  (vdpMetrics + VDPMetrics_planeWidth), d2                ; If locked: set camera width to plane width (= render full plane) to allow for custom scrolling (parallax)
     .horizontalSetupDone:
 
         moveq   #0, d1
         tst.b   RelativeBackgroundTrackerConfiguration_lockY(a3)
-        bne     .verticallyLocked
+        bne.s   .verticallyLocked
         move.w  Camera_y(a2), d1
         mulu    d3, d1
         swap    d1                                                      ; Camera expects non fixed point result
         move.w  (vdpMetrics + VDPMetrics_screenHeight), d3              ; If not locked: set camera height to screen height + 1 pattern for scrolling
         addq.w  #8, d3
-        bra     .verticalSetupDone
+        bra.s   .verticalSetupDone
     .verticallyLocked:
         move.w  (vdpMetrics + VDPMetrics_planeHeight), d3               ; If locked: set camera width to plane height (= render full plane) to allow for custom scrolling (parallax)
     .verticalSetupDone:
@@ -145,7 +145,7 @@ _RelativeBackgroundTrackerSync:
 _MOVE_CAMERA_COMPONENT Macro result, position, displacement, scale, lock
                 moveq   #0, \result
                 tst.b   \lock(a2)
-                bne     .noMovement\@
+                bne.s   .noMovement\@
                 move.w  \scale, \result
                 muls    \position(a1), \result
                 swap    \result

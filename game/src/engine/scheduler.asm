@@ -86,7 +86,7 @@ EngineSchedule:
 
     .updateSubSystemLoop:
         add.b   d1, d1
-        bcc     .subSystemDisabled
+        bcc.s   .subSystemDisabled
 
         PUSHW   d0
         PUSHW   d1

@@ -188,11 +188,11 @@ _BlobRender:
 
         ; Check left screen bounds
         cmpi.w  #-BLOB_EXTENTS * 2, d3
-        ble     .notVisible
+        ble.s   .notVisible
 
         ; Check right screen bounds
         cmpi.w  #320, d3
-        bge     .notVisible
+        bge.s   .notVisible
 
         ; Convert vertical map coordinates to screen coordinates
         VIEWPORT_GET_Y d1
@@ -202,11 +202,11 @@ _BlobRender:
 
         ; Check top screen bounds
         cmpi.w  #-BLOB_EXTENTS * 2, d4
-        bmi     .notVisible
+        bmi.s   .notVisible
 
         ; Check bottom screen bounds
         cmpi.w  #224, d4
-        bge     .notVisible
+        bge.s   .notVisible
 
             ; Convert to sprite coordinates
             addi.w  #128, d3

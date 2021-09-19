@@ -146,7 +146,7 @@ _RENDER_PARTIAL_CHUNK_FIXED Macro patternNumber, value
 _RENDER_PARTIAL_CHUNK Macro start, patternNumber
             If (strcmp('\start', 'START'))
                 btst    #0, \patternNumber
-                beq     .fullBlocks\@
+                beq.s   .fullBlocks\@
 
                 _RENDER_BLOCK END                                   ; Only render the last pattern of the first block
 
@@ -171,7 +171,7 @@ _RENDER_PARTIAL_CHUNK Macro start, patternNumber
             POPW   \patternNumber
 
             btst    #0, \patternNumber
-            beq     .chunkDone\@
+            beq.s   .chunkDone\@
 
             _RENDER_BLOCK START                                     ; Only render the first pattern of the last block
 
@@ -238,7 +238,7 @@ _RENDER_BUFFER Macro
             PUSHW d2                                                ; Store for later use
 
             lsr.w   #4, d2                                          ; d2 = number of full chunks
-            beq .lastChunk\@
+            beq     .lastChunk\@
 
             subq.w  #1, d2
         .fullChunkLoop\@:
@@ -363,7 +363,7 @@ _START_CHUNK Macro colOffset
             swap    d6                                              ; d6 = chunk row offset
             move.w  d6, d5
             btst    #CHUNK_REF_VFLIP, d7
-            beq     .chunkNotVFlipped\@
+            beq.s   .chunkNotVFlipped\@
             eor.w   #$0070, d5                                      ; Flip chunk row offset
 
         .chunkNotVFlipped\@:
@@ -372,7 +372,7 @@ _START_CHUNK Macro colOffset
             EndIf
             moveq   #SIZE_WORD, d4
             btst    #CHUNK_REF_HFLIP, d7
-            beq     .chunkNotHFlipped\@
+            beq.s   .chunkNotHFlipped\@
             neg.w   d4
             eor.w   #$000e, d5                                      ; Flip chunk column offset
 
@@ -387,7 +387,7 @@ _RENDER_BLOCK Macro position
             move.w  (a5), d3                                        ; d3 = block ref
             adda.w  d7, a5
             btst    #BLOCK_REF_EMPTY, d3
-            bne     .blockEmpty\@
+            bne.s   .blockEmpty\@
             move.w  d3, d4
             andi.w  #BLOCK_REF_PRIORITY_MASK, d3
             swap    d3
@@ -399,13 +399,13 @@ _RENDER_BLOCK Macro position
             lsl.w   #3, d4
             add.w   d6, d4
             btst    #BLOCK_REF_VFLIP, d3
-            beq     .blockNotVFlipped\@
+            beq.s   .blockNotVFlipped\@
             eor.w   #$04, d4                                        ; Flip block row offset
 
         .blockNotVFlipped\@:
             move.l  (a3, d4), d4                                    ; d4 = 2 row pattern refs
             btst    #BLOCK_REF_HFLIP, d3
-            bne     .blockHFlipped\@
+            bne.s   .blockHFlipped\@
             swap    d4                                              ; Not flipped so swap words (endianess)
 
         .blockHFlipped\@:
@@ -557,13 +557,13 @@ _START_CHUNK Macro rowOffset
 
             moveq   #CHUNK_ROW_STRIDE, d4
             btst    #CHUNK_REF_VFLIP, d7
-            beq     .chunkNotVFlipped\@
+            beq.s   .chunkNotVFlipped\@
             eor.w   #$0070, d5                                      ; Flip chunk row offset
             neg.w   d4
 
         .chunkNotVFlipped\@:
             btst    #CHUNK_REF_HFLIP, d7
-            beq     .chunkNotHFlipped\@
+            beq.s   .chunkNotHFlipped\@
             eor.w   #$000e, d5                                      ; Flip chunk column offset
 
         .chunkNotHFlipped\@:
@@ -577,7 +577,7 @@ _RENDER_BLOCK Macro position
             move.w  (a5), d3                                        ; d3 = block ref
             adda.w  d7, a5
             btst    #BLOCK_REF_EMPTY, d3
-            bne     .blockEmpty\@
+            bne.s   .blockEmpty\@
             move.w  d3, d4
             andi.w  #BLOCK_REF_PRIORITY_MASK, d3
             swap    d3
@@ -589,13 +589,13 @@ _RENDER_BLOCK Macro position
             lsl.w   #3, d4
             add.w   d6, d4
             btst    #BLOCK_REF_HFLIP, d3
-            beq     .blockNotHFlipped\@
+            beq.s   .blockNotHFlipped\@
             eor.w   #$02, d4
         .blockNotHFlipped\@:
             move.w  (a3, d4), d5
             move.w  4(a3, d4), d4
             btst    #BLOCK_REF_VFLIP, d3
-            bne     .blockVFlipped\@
+            bne.s   .blockVFlipped\@
             exg     d4, d5
 
         .blockVFlipped\@:

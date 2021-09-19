@@ -51,7 +51,7 @@ VDP_TASK_QUEUE_ADD Macro jobAddress, jobData
             move.w  a6, vdpTaskQueueCurrentEntry
 
             If def(debug)
-                    bra .vpdTaskQueueDone\@
+                    bra.s .vpdTaskQueueDone\@
 
                 .vdpTaskQueueFull\@:
                     DEBUG_MSG 'VDP Task Queue full'

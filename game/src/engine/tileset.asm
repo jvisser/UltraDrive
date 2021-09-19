@@ -201,7 +201,7 @@ TILESET_GET_ANGLE_DATA Macros target
 ; Uses: d0-d7/a0-a6
 TilesetLoad:
         cmpa.l  loadedTileset, a0
-        bne     .loadTileset
+        bne.s   .loadTileset
         rts                                 ; Already loaded
 
     .loadTileset:
@@ -232,7 +232,7 @@ TilesetLoad:
         ; Load animations
         movea.l Tileset_animationsTableAddress(a6), a5
         move.w  Tileset_animationsCount(a6), d6
-        beq     .noAnimations
+        beq.s   .noAnimations
         bsr     _TilesetLoadAnimations
     .noAnimations:
 
@@ -271,7 +271,7 @@ _TilesetLoadPatternSections:
     .loadPatternSectionLoop:
         movea.l (a5)+, a0                                                           ; a0 = Current pattern section address
         move.w  TilesetPatternSection_moduleCount(a0), d7                           ; d7 = Number of compressed modules
-        beq    .nextSection                                                         ; No modules in this section then proceed to the next
+        beq.s   .nextSection                                                        ; No modules in this section then proceed to the next
 
         lea     TilesetPatternSection_modules(a0), a3                               ; a3 = Current compressed module address
         subq.w  #1, d7
@@ -355,12 +355,12 @@ TilesetScheduleManualAnimations:
         lea     tilesetAnimationSchedules, a0
         move.l  loadedTileset, a1
         move.w  Tileset_animationsCount(a1), d0
-        beq     .noAnimations
+        beq.s   .noAnimations
         subq.w  #1, d0
 
     .animationLoop:
         move.w  TilesetAnimationSchedule_trigger(a0), d1
-        bne     .scheduledAnimation
+        bne.s   .scheduledAnimation
         move.w  #1, TilesetAnimationSchedule_trigger(a0)
 
     .scheduledAnimation:
@@ -385,11 +385,11 @@ TilesetSchedule:
         move.w  TilesetAnimationSchedule_trigger(a0), d1
 
         ; Skip unscheduled animations
-        beq     .nextAnimationTrigger
+        beq.s   .nextAnimationTrigger
         subq.w  #1, d1
-        beq     .triggerAnimation
+        beq.s   .triggerAnimation
         move.w  d1, TilesetAnimationSchedule_trigger(a0)
-        bra     .nextAnimationTrigger
+        bra.s   .nextAnimationTrigger
 
     .triggerAnimation:
         ; Call animation trigger
@@ -436,12 +436,12 @@ _TilesetAnimationFrame:
         move.w  d0, d2
         addq.w  #1, d0
         cmp.w   d1, d0
-        bge .finalAnimationFrame
+        bge.s   .finalAnimationFrame
 
         ; Schedule next frame
         move.w  TilesetAnimation_animationFrameInterval(a1), TilesetAnimationSchedule_trigger(a0)
         move.w  d0, TilesetAnimationSchedule_currentFrame(a0)
-        bra .animationFrameScheduleDone
+        bra.s   .animationFrameScheduleDone
 
     .finalAnimationFrame:
 
@@ -485,7 +485,7 @@ _TilesetCameraMove:
         move.w  TilesetViewportAnimationGroup_shift(a5), d3                         ; d3 = camera position shift
         lsr.w   d3, d2                                                              ; d2 = new group state
         cmp.w   d1, d2
-        beq     .noGroupChange
+        beq.s   .noGroupChange
         
             ; Update group state
             move.w  d2, -SIZE_WORD(a2)

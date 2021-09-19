@@ -40,7 +40,7 @@ OSPrepareNextFrame:
         PUSH_USER_CONTEXT
 
         tst.w   (osContext + OSContext_frameReady)
-        beq     .notReady
+        beq.s   .notReady
 
             clr.w   (osContext + OSContext_frameReady)
             addq.l  #1, (osContext + OSContext_framesProcessed)
@@ -59,7 +59,7 @@ OSPrepareNextFrame:
             movea.l  (osContext + OSContext_frameProcessedCallback), a0
             jsr     (a0)
 
-        bra     .done
+        bra.s   .done
 
     .notReady:
         DEBUG_MSG 'Frame skipped!'
@@ -94,8 +94,8 @@ OS_GET_FRAME_COUNTER_L Macro target
 ; Lock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_LOCK Macro
-        tst.w (osContext + OSContext_lockCount)
-        bne .alreadyLocked\@
+        tst.w   (osContext + OSContext_lockCount)
+        bne.s   .alreadyLocked\@
             M68K_DISABLE_INT
     .alreadyLocked\@:
         addq    #1, (osContext + OSContext_lockCount)
@@ -106,10 +106,10 @@ OS_LOCK Macro
 ; Unlock OS when accessing shared resources between main program and OS
 ; ----------------
 OS_UNLOCK Macro
-        tst.w (osContext + OSContext_lockCount)
-        beq .alreadyUnlocked\@
-            subq #1, (osContext + OSContext_lockCount)
-            bne .alreadyUnlocked\@
+        tst.w   (osContext + OSContext_lockCount)
+        beq.s   .alreadyUnlocked\@
+            subq    #1, (osContext + OSContext_lockCount)
+            bne.s   .alreadyUnlocked\@
                 M68K_ENABLE_INT
     .alreadyUnlocked\@:
     Endm

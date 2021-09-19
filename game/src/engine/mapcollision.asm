@@ -236,7 +236,7 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
 
                     _READ_BLOCK_REF
 
-                    bra .checkNextBlock\@
+                    bra.s .checkNextBlock\@
 
             .checkNextChunk\@:
 
@@ -260,7 +260,7 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
                     ; We have found a collision block. Update meta data id
                     _READ_BLOCK_META_DATA_ID d2
 
-                    bra .validCollisionFound\@
+                    bra.s .validCollisionFound\@
 
                 .topNoCollision\@:
 
@@ -333,7 +333,7 @@ _FIND_HORIZONTAL_COLLISION Macro
 
             _READ_BLOCK_META_DATA_ID d4
 
-            bne .noSolidCollision\@
+            bne.s .noSolidCollision\@
 
                 _COLLISION_BLOCK_FOUND
 
@@ -427,7 +427,7 @@ _NEXT_CHUNK Macro
 ; - d2: angle adjusted by horizontal orientation
 _COLLISION_BLOCK_FOUND Macro
             btst    #BLOCK_REF_HFLIP, d3
-            beq     .blockNoHFlip\@
+            beq.s   .blockNoHFlip\@
 
                 ; Negate angle
                 neg.w   d2
@@ -450,7 +450,7 @@ _COLLISION_BLOCK_FOUND Macro
                 ori.w   #$0f, d6
                 sub.w   d5, d6
                 cmp.w   d6, d1
-                ble     .noCollision\@
+                ble.s   .noCollision\@
 
                     ; Store adjusted Y position
                     move.w  d6, d1
@@ -547,7 +547,7 @@ _COLLISION_BLOCK_FOUND Macro
             neg.w   d2
 
             btst    #BLOCK_REF_HFLIP, d3
-            beq     .blockNoHFlip\@
+            beq.s   .blockNoHFlip\@
 
                 ; Negate angle
                 neg.w   d2
@@ -570,7 +570,7 @@ _COLLISION_BLOCK_FOUND Macro
                 andi.w   #~$0f, d6
                 add.w   d5, d6
                 cmp.w   d6, d1
-                bgt     .noCollision\@
+                bgt.s   .noCollision\@
 
                     ; Store adjusted Y position
                     move.w  d6, d1

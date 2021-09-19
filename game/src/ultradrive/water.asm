@@ -40,14 +40,14 @@ WaterEffectUpdate:
         move.w  waterLevelBase, d1
 
         btst    #MD_PAD_X, d0
-        bne     .noWaterLevelUp
+        bne.s   .noWaterLevelUp
 
             addq.w  #1, d1
 
-        bra     .waterLevelMoveDone
+        bra.s   .waterLevelMoveDone
     .noWaterLevelUp:
             btst    #MD_PAD_Y, d0
-            bne     .waterLevelMoveDone
+            bne.s   .waterLevelMoveDone
 
             subq.w  #1, d1
 

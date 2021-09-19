@@ -87,14 +87,14 @@ VDPSpriteAlloc:
         move.w  d1, d2
         add.w   d0, d2
         cmp.w   #VDP_MAX_SPRITES, d2
-        bge     .spriteAllocFull
+        bge.s   .spriteAllocFull
 
         move.w  vdpSpriteAttrTableTail, a0
         movea.l a0, a1
 
         ; Link previous terminal sprite to the head of newly allocated sprite list
         tst.w   d1
-        beq     .noPreviousSprite
+        beq.s   .noPreviousSprite
         move.b  d1, VDPSprite_link - VDPSprite_Size(a0)
     .noPreviousSprite:
 
@@ -114,7 +114,7 @@ VDPSpriteAlloc:
         move.w  a1, vdpSpriteAttrTableTail
 
         If (def(debug))
-                bra     .spriteAllocDone
+                bra.s   .spriteAllocDone
 
             .spriteAllocFull:
                 DEBUG_MSG   'VDP Sprite allocation overflow!'
@@ -172,7 +172,7 @@ VDPSpriteUnlinkAfter:
 ; Uses: d0/a0-a1
 VDPSpriteCommit:
         move.w  vdpSpriteCount, d0
-        bne     .nonEmpty
+        bne.s   .nonEmpty
         moveq   #1, d0                                  ; Always transfer the first sprite to reset linking
     .nonEmpty:
 

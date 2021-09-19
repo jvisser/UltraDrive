@@ -278,7 +278,7 @@ MEMORY_ALLOCATOR_RESET Macros
 _MEMORY_CHECK_OVERFLOW Macro target
         If def(debug)
             cmpa.l  RomHeaderRamEnd, \target
-            ble     .allocOk\@
+            ble.s   .allocOk\@
                 DEBUG_MSG 'RAM allocation overflow!'
                 trap #0
         .allocOk\@:

@@ -56,15 +56,15 @@ CAMERA_MOVE Macro xDisp, yDisp
 CameraInit:
 _VIEWPORT_CLAMP Macro component, mapSize, screenSize
                 tst.w   \component
-                bpl     .positive\@
+                bpl.s   .positive\@
                 moveq   #0, \component
-                bra     .clampDone\@
+                bra.s   .clampDone\@
 
             .positive\@:
                 move.w  \mapSize(a1), d7
                 sub.w   (vdpMetrics + \screenSize), d7
                 cmp.w   d7, \component
-                blt     .clampDone\@
+                blt.s   .clampDone\@
                 move.w  d7, \component
 
             .clampDone\@:
@@ -108,7 +108,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
         swap    d6
         move.w  (vdpMetrics + VDPMetrics_planeHeight), d6
         sub.l   d5, d6
-        bne     .skipMapPlaneOptimization
+        bne.s   .skipMapPlaneOptimization
             move.w  Map_widthPixels(a1), d2
             move.w  Map_heightPixels(a1), d3
     .skipMapPlaneOptimization:
@@ -177,11 +177,11 @@ CameraRenderView:
 CameraFinalize:
 _DISPLACEMENT_CLAMP Macro displacement
                 cmpi.w  #-PATTERN_DIMENSION, d0
-                blt     .clampMin\@
+                blt.s   .clampMin\@
                 cmpi.w  #PATTERN_DIMENSION, d0
-                blt     .clampOk\@
+                blt.s   .clampOk\@
                 move.w  #PATTERN_DIMENSION, d0
-                bra     .clampOk\@
+                bra.s   .clampOk\@
 
             .clampMin\@:
                 move.w  #-PATTERN_DIMENSION, d0
@@ -194,14 +194,14 @@ _DISPLACEMENT_CLAMP Macro displacement
 ; Assumes camera position in d1
 _UPDATE_POSITION Macro maxPosition, displacement
                 add.w   d0, d1                                      ; Add displacement
-                blt     .camMinOverflow\@
+                blt.s   .camMinOverflow\@
                 cmp.w   \maxPosition(a0), d1
-                ble     .camOk\@
+                ble.s   .camOk\@
 
                 ; Camera position > max: Reset displacement and set camera position to max
                 clr.w   \displacement(a0)
                 move.w  \maxPosition(a0), d1
-                bra     .camOk\@
+                bra.s   .camOk\@
 
             .camMinOverflow\@:
                 ; Camera position < 0: Reset displacement and set camera position to 0
@@ -221,23 +221,23 @@ MIN_MAX_DISPLACEMENT Equ (PATTERN_DIMENSION << 16) | PATTERN_DIMENSION
 
                 move.l  \minMax(a0), d4                             ; d4 = camMin:camMax
                 cmp.w   d4, d1                                      ; Max overflow?
-                bgt     .camMaxOverflow\@
+                bgt.s   .camMaxOverflow\@
                 swap    d4
                 cmp.w   d4, d1                                      ; Min overflow
-                bge     .camOk\@
+                bge.s   .camOk\@
 
              .camMinOverflow\@:
                 subi.l  #MIN_MAX_DISPLACEMENT, d4
                 swap    d4
                 move.l  d4, \minMax(a0)
                 ori.w   #$01, d5
-                bra     .camDone\@
+                bra.s   .camDone\@
 
             .camMaxOverflow\@:
                 addi.l  #MIN_MAX_DISPLACEMENT, d4
                 move.l  d4, \minMax(a0)
                 ori.w   #$02, d5
-                bra     .camDone\@
+                bra.s   .camDone\@
 
             .camOk\@:
                 swap    d4
@@ -262,7 +262,7 @@ _MAP_UPDATE Macro renderer, size
         ; ----------------
 
         move.l  Camera_xDisplacement(a0), d0                        ; Read xDisplacement:yDisplacement into d0
-        bne     .updatePosition
+        bne.s   .updatePosition
         ; Nothing to update, clear last displacement and return
         moveq   #0, d4
         move.l  d4, Camera_lastXDisplacement(a0)
@@ -295,7 +295,7 @@ _MAP_UPDATE Macro renderer, size
 
         ; Check if there was movement. If so call movement callback
         tst.l   d4
-        beq     .noMovement
+        beq.s   .noMovement
             PUSHL   d1
             PUSHL   a0
             movea.l Camera_moveCallback(a0), a1
@@ -316,7 +316,7 @@ _MAP_UPDATE Macro renderer, size
         tst.l   d5
         beq     .done
             btst    #2, d5
-            beq     .checkMaxY
+            beq.s   .checkMaxY
                     PUSHW   d5
                     PUSHL   d7
                         swap    d6
@@ -326,10 +326,10 @@ _MAP_UPDATE Macro renderer, size
                         _MAP_UPDATE MapRenderRow, Camera_widthPatterns
                     POPL    d7
                     POPW    d5
-                bra     .checkBackgroundYDone
+                bra.s   .checkBackgroundYDone
             .checkMaxY:
                 btst    #3, d5
-                beq     .checkBackgroundYDone
+                beq.s   .checkBackgroundYDone
                     PUSHW   d5
                     PUSHL   d7
                         move.w  d6, d0
@@ -342,16 +342,16 @@ _MAP_UPDATE Macro renderer, size
             .checkBackgroundYDone:
 
             btst    #0, d5
-            beq     .checkMaxX
+            beq.s   .checkMaxX
                     swap    d7
                     move.w  d7, d0
                     move.w  Camera_minY(a0), d1
 
                     _MAP_UPDATE MapRenderColumn, Camera_heightPatterns
-                bra     .checkBackgroundXDone
+                bra.s   .checkBackgroundXDone
             .checkMaxX:
                 btst    #1, d5
-                beq     .checkBackgroundXDone
+                beq.s   .checkBackgroundXDone
                     move.w  d7, d0
                     add.w   (vdpMetrics + VDPMetrics_screenWidth), d0
                     move.w  Camera_minY(a0), d1

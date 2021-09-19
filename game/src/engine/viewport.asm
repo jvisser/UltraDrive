@@ -111,7 +111,7 @@ _INIT_SCROLL Macro orientation
         ; Determine which viewport configuration to use and store in local variable
         MAP_GET a1
         cmpa.l  #NULL, a0
-        bne     .viewportConfigurationOk
+        bne.s   .viewportConfigurationOk
             ; Use map's default viewport configuration if non specified
             movea.l  MapHeader_viewportConfigurationAddress(a1), a0
     .viewportConfigurationOk:
@@ -190,7 +190,7 @@ _UPDATE_SCROLL Macro orientation
 
         lea     (viewport + Viewport_foreground), a0
         move.w  (viewport + Viewport_trackingEntity), d0
-        beq     .noTrackingEntity
+        beq.s   .noTrackingEntity
         movea.w d0, a1
         bsr     _ViewportEnsureEntityVisible
     .noTrackingEntity:
@@ -240,11 +240,11 @@ _ENSURE_ACTIVE_AREA Macro screenMetric, activeAreaSize, axis, result
                 sub.w   Camera_\axis(a0), \result
                 sub.w   Camera_\axis\Displacement(a0), \result
                 sub.w   d2, \result
-                ble     .done\@
+                ble.s   .done\@
                 cmp.w   d3, \result
-                ble     .ok\@
+                ble.s   .ok\@
                 sub.w   d3, \result
-                bra     .done\@
+                bra.s   .done\@
             .ok\@:
                 moveq   #0, \result
             .done\@:

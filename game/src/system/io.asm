@@ -301,9 +301,9 @@ _IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
         move.b  d0, IODeviceState_deviceId(a0)
 
         cmpi.b  #IO_DEVICE_ID_MD_PAD, d0
-        beq     .mdpad
+        beq.s   .mdpad
         _IO_SET_DEVICE_TYPE IO_DEVICE_UNSUPPORTED, NoOperation
-        bra     .done
+        bra.s   .done
 
     .mdpad:
         ; Mega Drive pad detected, now detect type (3 or 6 button)
@@ -322,11 +322,11 @@ _IO_SET_DEVICE_TYPE Macro deviceTypeId, deviceUpdateCallback
 
         _IO_Z80_UNLOCK
 
-        andi.b   #$0f, d0
-        beq     .mdpad6
+        andi.b  #$0f, d0
+        beq.s   .mdpad6
 
         _IO_SET_DEVICE_TYPE IO_DEVICE_MEGA_DRIVE_3_BUTTON, _IOUpdate3ButtonPad
-        bra     .done
+        bra.s   .done
 
     .mdpad6:
         _IO_SET_DEVICE_TYPE IO_DEVICE_MEGA_DRIVE_6_BUTTON, _IOUpdate6ButtonPad

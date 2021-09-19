@@ -25,7 +25,7 @@ Z80_GET_BUS Macro
             
         .z80WaitLoop\@:
             btst    #0, (MEM_Z80_BUS_REQUEST)
-            bne.s   .z80WaitLoop\@
+            bne     .z80WaitLoop\@
     Endm
 
 

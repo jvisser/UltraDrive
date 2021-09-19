@@ -107,7 +107,7 @@ _RotateHorizontalLineScrollUpdate:
 
         move.w  RotateScrollPosition_angle(a4), d1
         cmp.w   RotateScrollState_lastAngle(a3), d1
-        beq     .noAngleChange
+        beq.s   .noAngleChange
 
             ; Update last state
             move.w  RotateScrollPosition_horizontalOffset(a4), RotateScrollState_lastOffset(a3)
@@ -122,7 +122,7 @@ _RotateHorizontalLineScrollUpdate:
     .noAngleChange:
         move.w  RotateScrollState_lastOffset(a3), d2
         sub.w   RotateScrollPosition_horizontalOffset(a4), d2
-        beq     .noOffsetChange
+        beq.s   .noOffsetChange
 
             ; Update last state
             move.w  RotateScrollPosition_horizontalOffset(a4), RotateScrollState_lastOffset(a3)
@@ -226,7 +226,7 @@ _RotateVerticalCellScrollUpdate:
 
         move.w  RotateScrollPosition_angle(a4), d1
         cmp.w   RotateScrollState_lastAngle(a3), d1
-        beq     .noAngleChange
+        beq.s   .noAngleChange
 
             ; Update last state
             move.w  RotateScrollPosition_verticalOffset(a4), RotateScrollState_lastOffset(a3)
@@ -241,7 +241,7 @@ _RotateVerticalCellScrollUpdate:
     .noAngleChange:
         move.w  RotateScrollPosition_verticalOffset(a4), d2
         sub.w   RotateScrollState_lastOffset(a3), d2
-        beq     .noOffsetChange
+        beq.s   .noOffsetChange
 
             ; Update last state
             move.w  RotateScrollPosition_verticalOffset(a4), RotateScrollState_lastOffset(a3)

@@ -394,7 +394,7 @@ CollisionCheck:
                         move.w  CollisionTypeMetadata_typeId(a1), d4
                         move.w  CollisionTypeMetadata_dependencyMask(a4), d5
                         btst    d4, d5
-                        beq     .noDependent
+                        beq.s   .noDependent
 
                             PUSHW   a1
                             PUSHW   a6
@@ -414,7 +414,7 @@ CollisionCheck:
                         move.w  CollisionTypeMetadata_typeId(a4), d4
                         move.w  CollisionTypeMetadata_dependencyMask(a1), d5
                         btst    d4, d5
-                        beq     .noDependency
+                        beq.s   .noDependency
 
                             ; Call type handler
                             PUSHW   a1
