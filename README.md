@@ -1,39 +1,12 @@
 # UltraDrive
 
-Project to learn how and also how not to implement a game engine for the [Sega Mega Drive/Genesis](https://en.wikipedia.org/wiki/Sega_Genesis).
-The program consists of a test case for all implemented features.
-
-The following features have been implemented:
-- [Tiled](https://www.mapeditor.org/) map support
-  - Very large map support for both foreground and background
-  - Reusable tilesets
-    - 8x8 meta tiles of 2x2 pattern meta tiles
-      - Support for specifying priority at the base pattern level
-      - Support for overriding pattern priority at the block (2x2 pattern) level 
-    - Collision data (height field + angle)
-    - Animations
-        - Timer scheduled
-        - Manually scheduled
-        - Camera movement scheduled
-  - Foreground and background map coupling
-  - Uses a text template engine for Tiled data conversion
-      - As a consequence the map conversion tool can be easily plugged into any project (language independent)
-      - Meta tiles and static pattern data are compressed in ROM ([comper](https://github.com/flamewing/mdcomp/blob/master/src/asm/Comper.asm) but [slz](https://plutiedev.com/format-slz) also supported)
-- Map collision detection routines
-  - floor/ceilings
-  - walls
-- 3 and 6 button controller support on both controller ports
-- Independent camera with map streaming support for foreground and background
-    - Background behavior can be configured in the map editor (Tiled)
-- Support for raster effects
-- Support for all horizontal and vertical scroll modes
-- 2 working tilesets
+Project to learn how to implement a game engine for the [Sega Mega Drive/Genesis](https://en.wikipedia.org/wiki/Sega_Genesis).
 
 ## How to run
 ### Prerequisites
 The following tools should be on your PATH
 - [BlastEm](https://www.retrodev.com/blastem/) emulator
-- asm68k
+- ASM68K
 - java (>=11)
 - maven (>=3)
 - sh/bash to run the provided scripts
