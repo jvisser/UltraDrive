@@ -34,7 +34,33 @@ MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjec
 ;-------------------------------------------------
 ; Map object structures
 ; ----------------
+    DEFINE_STRUCT MapObjectGroupMap
+        STRUCT_MEMBER.w stride
+        STRUCT_MEMBER.w width                                   ; Granularity = 8x8 chunks or 1024x1024 pixels
+        STRUCT_MEMBER.w height
+        STRUCT_MEMBER.w groupCount
+        STRUCT_MEMBER.l containersTableAddress                  ; MapObjectGroup*[height][width] indexed by CHUNK_REF_OBJECT_GROUP_IDX
+        STRUCT_MEMBER.l containersBaseAddress
+        STRUCT_MEMBER.l groupsBaseAddress
+        STRUCT_MEMBER.l objectTypeTableAddress
+        STRUCT_MEMBER.b rowOffsetTable                          ; Marker
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT MapObjectGroup
+        STRUCT_MEMBER.b flagNumber                              ; Each object group has a unique flag number in the active viewport
+        STRUCT_MEMBER.b objectCount
+        STRUCT_MEMBER.b transferableObjectCount
+        STRUCT_MEMBER.b totalObjectCount
+        STRUCT_MEMBER.w stateOffset                             ; Offset into the map's allocated state array for this group
+        STRUCT_MEMBER.b objectDescriptors                       ; Marker
+    DEFINE_STRUCT_END
+
     DEFINE_STRUCT MapObjectType, ObjectType
+        ; Type methods (called once for each object type used in the map)
+        STRUCT_MEMBER.l loadResources                                           ; loadResources()
+        STRUCT_MEMBER.l releaseResources                                        ; releaseResources()
+
+        ; Instance methods
         STRUCT_MEMBER.l init                                                    ; init(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
         STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a3-a6
     DEFINE_STRUCT_END
@@ -271,6 +297,51 @@ _MapUpdateActiveObjectGroups:
         adda.w  d4, a0
         addq.w  #1, d1
         dbra    d3, .rowLoop
+        rts
+
+
+;-------------------------------------------------
+; Run the specified object type resource handler for all object types used in the map
+; ----------------
+; Uses: d0-d7/a0-a6
+_RUN_OBJECT_TYPE_RESOURCE_ROUTINE Macro routine
+        MAP_GET a0
+        movea.l MapHeader_objectGroupMapAddress(a0), a0                         ; a0 = MapHeader.objectGroupMapAddress
+        movea.l MapObjectGroupMap_objectTypeTableAddress(a0), a0                ; a0 = ObjectGroupMap.objectTypeTableAddress
+
+        move.w  (a0)+, d0
+        beq.s   .noObjectTypes\@
+
+    .objectTypeLoop\@:
+
+            movea.w d0, a1
+            movea.l \routine\(a1), a1
+
+            PUSHL   a0
+            jsr     (a1)
+            POPL    a0
+
+            move.w  (a0)+, d0
+            bne     .objectTypeLoop\@
+    .noObjectTypes\@:
+    Endm
+
+
+;-------------------------------------------------
+; Load resources for all object types used
+; ----------------
+; Uses: d0-d7/a0-a6
+MapLoadObjectResources:
+        _RUN_OBJECT_TYPE_RESOURCE_ROUTINE MapObjectType_loadResources
+        rts
+
+
+;-------------------------------------------------
+; Release resources for all object types used
+; ----------------
+; Uses: d0-d7/a0-a6
+MapReleaseObjectResources:
+        _RUN_OBJECT_TYPE_RESOURCE_ROUTINE MapObjectType_releaseResources
         rts
 
 
@@ -701,3 +772,4 @@ _MapDeactivateTransferableObjectGlobal:
     ; Cleanup
     Purge _RESET_GROUP_STATE
     Purge _CALCULATE_SUB_CHUNK_ID
+    Purge _RUN_OBJECT_TYPE_RESOURCE_ROUTINE

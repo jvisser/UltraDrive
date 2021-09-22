@@ -10,26 +10,6 @@
         STRUCT_MEMBER.b maps                                    ; Marker
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT MapObjectGroupMap
-        STRUCT_MEMBER.w stride
-        STRUCT_MEMBER.w width                                   ; Granularity = 8x8 chunks or 1024x1024 pixels
-        STRUCT_MEMBER.w height
-        STRUCT_MEMBER.w groupCount
-        STRUCT_MEMBER.l containersTableAddress                  ; MapObjectGroup*[height][width] indexed by CHUNK_REF_OBJECT_GROUP_IDX
-        STRUCT_MEMBER.l containersBaseAddress
-        STRUCT_MEMBER.l groupsBaseAddress
-        STRUCT_MEMBER.b rowOffsetTable                          ; Marker
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapObjectGroup
-        STRUCT_MEMBER.b flagNumber                              ; Each object group has a unique flag number in the active viewport
-        STRUCT_MEMBER.b objectCount
-        STRUCT_MEMBER.b transferableObjectCount
-        STRUCT_MEMBER.b totalObjectCount
-        STRUCT_MEMBER.w stateOffset                             ; Offset into the map's allocated state array for this group
-        STRUCT_MEMBER.b objectDescriptors                       ; Marker
-    DEFINE_STRUCT_END
-
     DEFINE_STRUCT MapHeader
         STRUCT_MEMBER.l foregroundAddress
         STRUCT_MEMBER.l backgroundAddress
@@ -104,7 +84,10 @@ MapLoad:
         movea.l MapHeader_tilesetAddress(a0), a0
         jsr     TilesetLoad
 
-        ; Init objects
+        ; Load object resources
+        jsr     MapLoadObjectResources
+
+        ; Init object instances
         jsr     MapInitObjects
         rts
 
@@ -113,7 +96,12 @@ MapLoad:
 ; Unload the map and its associated resources
 ; ----------------
 MapUnload:
+        ; Release tileset
         jsr     TilesetUnload
 
+        ; Release object resources
+        jsr     MapReleaseObjectResources
+
+        ; Reset map pointer
         move.l  #NULL, mapLoadedMap
         rts

@@ -24,6 +24,8 @@ ORBISON_EXTENTS Equ 8
 
     ; Type (MapObjectType)
     DEFINE_OBJECT_TYPE Orbison, OrbisonState
+        dc.l    OrbisonLoad                 ; MapObjectType.loadResources()
+        dc.l    NoOperation                 ; MapObjectType.releaseResources()
         dc.l    OrbisonInit                 ; MapObjectType.init()
         dc.l    OrbisonUpdate               ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END

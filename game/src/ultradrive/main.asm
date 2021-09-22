@@ -109,12 +109,6 @@ Main:
 
         DEBUG_MSG 'Player initialized'
 
-        jsr     OrbisonLoad
-        jsr     FireballLoad
-        jsr     BlobLoad
-
-        DEBUG_MSG 'Sprite tiles loaded'
-
         jsr     VDPEnableDisplay
 
         ; Only enable water effect for specialized test map
