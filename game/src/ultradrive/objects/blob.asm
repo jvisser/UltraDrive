@@ -26,6 +26,8 @@ BLOB_EXTENTS Equ 8
 
     ; Type (MapObjectType)
     DEFINE_OBJECT_TYPE Blob, BlobState
+        dc.l    BlobLoad                    ; MapObjectType.loadResources()
+        dc.l    NoOperation                 ; MapObjectType.releaseResources()
         dc.l    BlobInit                    ; MapObjectType.init()
         dc.l    BlobUpdate                  ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END

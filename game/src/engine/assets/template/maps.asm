@@ -60,6 +60,8 @@ ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectType
             dc.l MapObjectGroupContainersBase[(${mapName})]
             ; .groupsBaseAddress
             dc.l MapObjectGroupsBase[(${mapName})]
+            ; .objectTypeTableAddress
+            dc.l MapObjectTypeTable[(${mapName})]
             ; .rowOffsetTable
             dc.w [# th:each="index, iter : ${#numbers.sequence(0, objectGroupMap.height - 1)}"][(${index * objectGroupMap.width * 2})][# th:if="${!iter.last}"], [/][/]
 
@@ -149,6 +151,12 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
                 Even
             [/]
 
+        MapObjectTypeTable[(${mapName})]:
+            [# th:each="objectTypeName : ${#sets.toSet(objectGroupMap.objects.{#this.name})}"]
+                dc.w    [(${objectTypeName})]ObjectType
+            [/]
+            dc.w    NULL
+
         Even
 
         ; struct MapHeader
@@ -166,7 +174,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
             ; .viewportConfigurationAddress
             dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
 
-            Inform 0, 'Total object allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
+            Inform 0, 'Total RAM allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
 
         Even
 

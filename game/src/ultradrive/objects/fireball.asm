@@ -20,6 +20,8 @@ FIREBALL_EXTENTS Equ 8
 
     ; Type (MapObjectType)
     DEFINE_OBJECT_TYPE Fireball
+        dc.l    FireballLoad                ; MapObjectType.loadResources()
+        dc.l    NoOperation                 ; MapObjectType.releaseResources()
         dc.l    NoOperation                 ; MapObjectType.init()
         dc.l    FireballUpdate              ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END
