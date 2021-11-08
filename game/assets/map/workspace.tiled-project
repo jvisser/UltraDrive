@@ -2,7 +2,7 @@
     "automappingRulesFile": "",
     "commands": [
         {
-            "arguments": "%projectpath/../../src/build_and_run.sh %mapfile",
+            "arguments": "%projectpath/../../src/build_and_run.sh -m %mapfile",
             "command": "sh",
             "enabled": true,
             "name": "run",
@@ -12,12 +12,22 @@
             "workingDirectory": "%projectpath/../../src"
         },
         {
-            "arguments": "%projectpath/../../src/build_and_run.sh %mapfile GENS",
+            "arguments": "%projectpath/../../src/build_and_run.sh -m %mapfile -d GENS",
             "command": "sh",
             "enabled": true,
             "name": "debug",
             "saveBeforeExecute": true,
             "shortcut": "Alt+D",
+            "showOutput": true,
+            "workingDirectory": "%projectpath/../../src"
+        },
+        {
+            "arguments": "%projectpath/../../src/build_and_run.sh -m %mapfile -t everdrive",
+            "command": "sh",
+            "enabled": true,
+            "name": "everdrive",
+            "saveBeforeExecute": true,
+            "shortcut": "Alt+X",
             "showOutput": true,
             "workingDirectory": "%projectpath/../../src"
         }
