@@ -2,7 +2,18 @@
 
 set -e
 
-if [ $# -eq 0 ];
+# Parse parameters
+while getopts d:t:m: option
+do
+    case "${option}"
+        in
+        d)debug=${OPTARG};;
+        t)target=${OPTARG};;
+        m)map=${OPTARG};;
+    esac
+done
+
+if [ -z "$map" ]
     then
         echo 'No map filename provided. Exiting'
         exit 1
@@ -10,23 +21,24 @@ fi
 
 # Compile assets to source
 java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
-        -m "$1"                                             \
+        -m "$map"                                           \
         -t './engine/assets/template'                       \
         -o './ultradrive/assets'                            \
         -f '../assets/map/objecttypes.xml'                  \
         -a './ultradrive/config/allocation.yaml'            \
         -r
 
+# Clean output from previous run
 rm -f 'ultradrive-tracelog.json' 'ultradrive.sym.txt'
 
 # Compile source
-if [ $# -eq 2 ];
+if [ -z "$debug" ]
     then
-    # Debug
-    asm68k //p //e "DEBUG='$2'" ./assembly.asm,ultradrive.bin,ultradrive.sym
-else
     # Normal
     asm68k //p ./assembly.asm,ultradrive.bin,ultradrive.sym
+else
+    # Debug
+    asm68k //p //e "DEBUG='$debug'" ./assembly.asm,ultradrive.bin,ultradrive.sym
 fi
 
 # Dump symbols to text file
@@ -36,7 +48,14 @@ if command -v 'asm68kdump';
 fi
 
 # Run
-blastem -m gen ultradrive.bin
+case $target in
+    "everdrive")
+        megalink ultradrive.bin
+        ;;
+    *)
+        blastem -m gen ultradrive.bin
+        ;;
+esac
 
 # Generate trace log file
 if command -v 'md-profiler';
@@ -48,4 +67,4 @@ if command -v 'md-profiler';
     fi
 fi
 
-rm -f 'ultradrive.sym' 
+rm -f 'ultradrive.sym'
