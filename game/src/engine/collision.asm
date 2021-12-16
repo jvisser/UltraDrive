@@ -346,7 +346,7 @@ CollisionCheck:
         beq.s    .collisionCheckDone
 
         ; Store bounds in d6, d7
-        move.l  PointCollisionElement_x(a0), d6                     ; d6 = (minX, minY)
+        move.l  AABBCollisionElement_minX(a0), d6                   ; d6 = (minX, minY)
         move.l  AABBCollisionElement_maxX(a0), d7                   ; d7 = (maxX, maxY)
 
         ; Loop over related types
@@ -380,13 +380,13 @@ CollisionCheck:
                     swap    d6
                     swap    d5
                     cmp.w   d5, d6
-                    bgt.s   .noCollision
+                    bgt.s   .noCollisionMinX
 
                     ; If this.maxX < related.minX: no intersection
                     swap    d7
                     swap    d4
                     cmp.w   d4, d7
-                    blt.s   .noCollision
+                    blt.s   .noCollisionMaxX
 
                         ; We have a collision!
 
@@ -429,6 +429,10 @@ CollisionCheck:
 
                     .noDependency:
 
+                .noCollisionMaxX:
+                    swap    d7
+                .noCollisionMinX:
+                    swap    d6
                 .noCollision:
 
                     ; Next related element

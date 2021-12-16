@@ -328,7 +328,7 @@ _CLR_RAM_LOOP_UNROLL Equ 8
 
 
 ;-------------------------------------------------
-; Copy memory from source to destination
+; Allocate memory
 ; ----------------
 ; Input:
 ; - d0: Number of bytes to allocate

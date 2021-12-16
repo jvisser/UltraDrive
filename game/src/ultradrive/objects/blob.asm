@@ -5,8 +5,9 @@
 ;-------------------------------------------------
 ; Blob constants
 ; ----------------
-BLOB_TILE_ID Equ 1300
-BLOB_EXTENTS Equ 8
+BLOB_TILE_ID    Equ 1300
+BLOB_EXTENTS    Equ 8
+BLOB_SPEED      Equ 1
 
 
 ;-------------------------------------------------
@@ -22,6 +23,7 @@ BLOB_EXTENTS Equ 8
     DEFINE_STRUCT BlobState, Entity
         STRUCT_MEMBER.w deathCounter
         STRUCT_MEMBER.w spriteAttr
+        STRUCT_MEMBER.w speed
     DEFINE_STRUCT_END
 
     ; Type (MapObjectType)
@@ -93,9 +95,13 @@ BlobInit:
         move.w  BlobDescriptor_position + MapObjectPosition_y(a0), Entity_y(a1)
         clr.w   BlobState_deathCounter(a1)
 
-        ; Orientation
+        ; Orientation/Movement direction
+        move.w  #BLOB_SPEED, BlobState_speed(a1)
         move.b  MapObjectDescriptor_flags(a0), d0
         andi.w  #MODF_ORIENTATION_MASK, d0
+        beq.s   .notFlipped
+            neg.w   BlobState_speed(a1)
+    .notFlipped:
         lsl.w   #VDP_SPRITE_ATTR3_ORIENTATION_SHIFT - MODF_ORIENTATION_SHIFT, d0
         addi.w  #BLOB_TILE_ID, d0
         move.w  d0, BlobState_spriteAttr(a1)
@@ -131,18 +137,19 @@ BlobUpdate:
                 ; Death animation (blink)
                 btst    #0, d0
                 beq.s   .skipRender
-                    bra.s   _BlobRender
+                    bra     _BlobRender
             .skipRender:
                 rts
 
     .alive:
-        bsr.s   _BlobRender
-
         ;PROFILE_CPU_START
 
         PUSHW   d6
         PUSHW   d7
         PUSHM.l a3-a6
+
+        bsr.s   _BlobMove
+        bsr     _BlobRender
 
         ; Do collision check
         COLLISION_ALLOCATE_ELEMENT          &
@@ -158,6 +165,7 @@ BlobUpdate:
         move.w  d0, AABBCollisionElement_minX(a0)
         move.w  d1, AABBCollisionElement_minY(a0)
         add.w   d2, d2
+        subq.w  #1, d2  ; inclusive max
         add.w   d2, d0
         add.w   d2, d1
         move.w  d0, AABBCollisionElement_maxX(a0)
@@ -173,6 +181,70 @@ BlobUpdate:
 
         ;PROFILE_CPU_END
         rts
+
+
+;-------------------------------------------------
+; Move entity along the floor. Crude implementation...
+; ----------------
+; Input:
+; - a0: BlobDescriptor address
+; - a1: BlobState address
+; Uses: d0-d7/a2
+_BlobMove:
+        MAP_GET a0
+        movea.l MapHeader_foregroundAddress(a0), a0
+        move.w  Entity_x(a1), d0
+        move.w  Entity_y(a1), d1
+        add.w   BlobState_speed(a1), d0
+
+        ; Floor
+        add.w   #BLOB_EXTENTS * 2, d1
+        PUSHL   a1
+        jsr     MapCollisionFindFloor
+        POPL    a1
+        tst.w   d2
+        bmi.s   .noFloor
+    .floor:
+            sub.w   #BLOB_EXTENTS - 1, d1
+            bra.s   .floorDone
+    .noFloor:
+            ; Restore position
+            sub.w   #BLOB_EXTENTS * 2, d1
+            sub.w   BlobState_speed(a1), d0
+            ; Change direction
+            eori.w  #VDP_SPRITE_ATTR3_HFLIP_MASK, BlobState_spriteAttr(a1)
+            neg.w   BlobState_speed(a1)
+    .floorDone:
+
+        ; Wall
+        tst.w   BlobState_speed(a1)
+        bmi.s   .moveLeft
+    .moveRight:
+            add.w   #BLOB_EXTENTS - 1, d0
+            PUSHL   a1
+            jsr     MapCollisionFindRightWall
+            POPL    a1
+            sub.w   #BLOB_EXTENTS - 1, d0
+            bra.s   .wallDone
+    .moveLeft:
+            sub.w   #BLOB_EXTENTS, d0
+            PUSHL   a1
+            jsr     MapCollisionFindLeftWall
+            POPL    a1
+            add.w   #BLOB_EXTENTS, d0
+    .wallDone:
+        tst.w   d2
+        bmi.s   .noWall
+    .wall:
+            ; Change direction on wall collision
+            eori.w  #VDP_SPRITE_ATTR3_HFLIP_MASK, BlobState_spriteAttr(a1)
+            neg.w   BlobState_speed(a1)
+    .noWall:
+
+        ; Save position
+        move.w  d0, Entity_x(a1)
+        move.w  d1, Entity_y(a1)
+    rts
 
 
 ;-------------------------------------------------
@@ -234,19 +306,30 @@ _BlobRender:
 ; ----------------
 ; Input:
 ; - a0: HandlerCollisionElement we created
-; - a1: HurtCollisionElement
-; Uses: d0-d4/a5-a6
+; - a1: Colliding/target CollisionElement
 BlobCollision:
-        PUSHL   a2
-        movea.w HandlerCollisionElement_data(a0), a2
+        movea.w HandlerCollisionElement_data(a0), a6                            ; a6 = BlobState
+
+        cmpi.w  #EnemyCollisionTypeMetadata, CollisionElement_metadata(a1)
+        beq.s   .enemyCollision
+
+    .hurtCollision:
 
         ; Flip vertically
-        ori.w   #VDP_SPRITE_ATTR3_VFLIP_MASK, BlobState_spriteAttr(a2)
+        ori.w   #VDP_SPRITE_ATTR3_VFLIP_MASK, BlobState_spriteAttr(a6)
 
         ; Reposition
-        addi.w  #4, Entity_y(a2)
+        addi.w  #4, Entity_y(a6)
 
         ; Blink for 1,5 seconds before dying
-        move.w  #90, BlobState_deathCounter(a2)
-        POPL    a2
+        move.w  #90, BlobState_deathCounter(a6)
+
+        rts
+
+    .enemyCollision:
+
+        ; Change direction
+        eori.w  #VDP_SPRITE_ATTR3_HFLIP_MASK, BlobState_spriteAttr(a6)
+        neg.w   BlobState_speed(a6)
+
         rts
