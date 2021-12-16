@@ -171,7 +171,7 @@ _READ_BLOCK_META_DATA_ID Macro blockRef
 ; - d4: meta data id
 ; Output:
 ; - a2: collision data base address
-; - d2: angle (byte)
+; - d2: angle
 ; - d5: collision data index
 _READ_BLOCK_META_DATA Macro
         ; Load block meta data addresses
@@ -180,6 +180,7 @@ _READ_BLOCK_META_DATA Macro
 
         ; Get angle
         move.b  (a1, d4), d2
+        ext.w   d2
 
         ; Get collision field address
         lsl.w   #4, d4
@@ -362,7 +363,7 @@ _FIND_HORIZONTAL_COLLISION Macro
 ; - d0: x position
 ; - d1: y position
 ; - d2: angle
-; Uses: d1-d5/a1-a6
+; Uses: d1-d6/a1-a6
 MapCollisionFindFloor:
 ;-------------------------------------------------
 ; Verify that block is not vertically flipped. If not jump to the specified label.
@@ -479,7 +480,7 @@ _COLLISION_BLOCK_FOUND Macro
 ; - d0: x position
 ; - d1: y position
 ; - d2: angle
-; Uses: d1-d5/a1-a6
+; Uses: d1-d6/a1-a6
 MapCollisionFindCeiling:
 ;-------------------------------------------------
 ; Verify that block is vertically flipped. If not jump to the specified label.

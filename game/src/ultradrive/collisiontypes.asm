@@ -18,7 +18,8 @@
     ; Enemy collision type metadata
     DEFINE_COLLISION_TYPE_METADATA Enemy, AABB, _HandleCollision
             COLLISION_TYPE_DEPENDENCIES                             &
-                HurtEnemy
+                HurtEnemy,                                          &
+                Enemy
             COLLISION_TYPE_DEPENDENTS
     DEFINE_COLLISION_TYPE_METADATA_END
 
