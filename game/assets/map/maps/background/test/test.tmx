@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="3" nextobjectid="1">
  <tileset firstgid="1" source="../../../tilesets/test/chunks.tsx"/>
- <layer id="1" name="Chunks" width="10" height="10">
-  <data encoding="csv">
+ <group id="2" name="Base">
+  <layer id="1" name="Chunk" width="10" height="10">
+   <data encoding="csv">
 123,81,123,81,123,81,123,81,123,81,
 124,82,124,82,124,82,124,82,124,82,
 62,1073741906,62,1073741906,62,1073741906,62,1073741906,62,1073741906,
@@ -14,5 +15,6 @@
 61,1073741905,61,1073741905,61,1073741905,61,1073741905,61,1073741905,
 102,101,102,101,102,101,102,101,102,101
 </data>
- </layer>
+  </layer>
+ </group>
 </map>

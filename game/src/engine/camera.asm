@@ -24,6 +24,8 @@
         STRUCT_MEMBER.l planeId
         STRUCT_MEMBER.w widthPatterns
         STRUCT_MEMBER.w heightPatterns
+        STRUCT_MEMBER.l rowRenderer
+        STRUCT_MEMBER.l columnRenderer
         ; Externally managed
         STRUCT_MEMBER.l moveCallback                                ; Mandatory
         STRUCT_MEMBER.l data
@@ -75,6 +77,10 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
 
 		; Set plane id
 		move.l	d4, Camera_planeId(a0)
+        
+        ; Set default renderers
+        move.l  #_CameraRenderRow, Camera_rowRenderer(a0)
+        move.l  #_CameraRenderColumn, Camera_columnRenderer(a0)
 
         ; Store maximum camera bounds based on the current map
         move.w  Map_widthPixels(a1), d5
@@ -158,11 +164,24 @@ CameraRenderView:
         lsr.w   #PATTERN_SHIFT, d0
         lsr.w   #PATTERN_SHIFT, d1
         move.w  Camera_widthPatterns(a0), d2
-        move.w  Camera_heightPatterns(a0), d3
-        move.l  Camera_planeId(a0), d4
-        movea.l Camera_mapAddress(a0), a0
-        jsr     MapRender
-    rts
+        move.l  Camera_planeId(a0), d3
+        move.w  Camera_heightPatterns(a0), d4
+        movea.l Camera_rowRenderer(a0), a1
+        
+        subq.w  #1, d4
+
+    .rowLoop:
+            PUSHM.w d0-d2/d4
+            PUSHM.l d3/a0-a1
+            MAP_RENDER_RESET
+            jsr     (a1)
+            jsr     VDPDMAQueueFlush        ; TODO: Use CPU/direct transfer
+            POPM.l  d3/a0-a1
+            POPM.w  d0-d2/d4
+
+            addq.w  #1, d0
+        dbra    d4, .rowLoop
+        rts
 
 
 ;-------------------------------------------------
@@ -252,8 +271,8 @@ _MAP_UPDATE Macro renderer, size
                 lsr.w   #PATTERN_SHIFT, d1
                 move.w  \size(a0), d2
                 move.l  Camera_planeId(a0), d3
-                movea.l Camera_mapAddress(a0), a0
-                jsr     \renderer
+                movea.l Camera_\renderer(a0), a1
+                jsr     (a1)
 				POPL 	a0
         Endm
 
@@ -323,7 +342,7 @@ _MAP_UPDATE Macro renderer, size
                         move.w  d6, d0
                         move.w  Camera_minX(a0), d1
 
-                        _MAP_UPDATE MapRenderRow, Camera_widthPatterns
+                        _MAP_UPDATE rowRenderer, Camera_widthPatterns
                     POPL    d7
                     POPW    d5
                 bra.s   .checkBackgroundYDone
@@ -336,7 +355,7 @@ _MAP_UPDATE Macro renderer, size
                         add.w   (vdpMetrics + VDPMetrics_screenHeight), d0
                         move.w  Camera_minX(a0), d1
 
-                        _MAP_UPDATE MapRenderRow, Camera_widthPatterns
+                        _MAP_UPDATE rowRenderer, Camera_widthPatterns
                     POPL    d7
                     POPW    d5
             .checkBackgroundYDone:
@@ -347,7 +366,7 @@ _MAP_UPDATE Macro renderer, size
                     move.w  d7, d0
                     move.w  Camera_minY(a0), d1
 
-                    _MAP_UPDATE MapRenderColumn, Camera_heightPatterns
+                    _MAP_UPDATE columnRenderer, Camera_heightPatterns
                 bra.s   .checkBackgroundXDone
             .checkMaxX:
                 btst    #1, d5
@@ -356,7 +375,7 @@ _MAP_UPDATE Macro renderer, size
                     add.w   (vdpMetrics + VDPMetrics_screenWidth), d0
                     move.w  Camera_minY(a0), d1
 
-                    _MAP_UPDATE MapRenderColumn, Camera_heightPatterns
+                    _MAP_UPDATE columnRenderer, Camera_heightPatterns
             .checkBackgroundXDone:
 
     .done:
@@ -365,3 +384,32 @@ _MAP_UPDATE Macro renderer, size
         Purge _UPDATE_MIN_MAX
         Purge _MAP_UPDATE
         rts
+
+
+;-------------------------------------------------
+; Default camera row render implementation.
+; ----------------
+; Input:
+; - a0: Camera
+; - d0: Map row
+; - d1: Map start column
+; - d2: Width to render
+; - d3.l: VDP plane id
+; Uses: d0-d7/a0-a6
+_CameraRenderRow:
+        movea.l Camera_mapAddress(a0), a0
+        jmp     MapRenderRow
+
+
+;-------------------------------------------------
+; Default camera column render implementation.
+; ----------------
+; - d0: Map column
+; - d1: Map start row
+; - d2: Height to render
+; - d3.l: VDP plane id
+; Uses: d0-d7/a0-a6
+_CameraRenderColumn:
+        movea.l Camera_mapAddress(a0), a0
+        jmp     MapRenderColumn
+

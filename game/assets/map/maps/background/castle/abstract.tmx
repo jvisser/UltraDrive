@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="4" height="2" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="4" height="2" tilewidth="128" tileheight="128" infinite="0" nextlayerid="3" nextobjectid="1">
  <properties>
   <property name="viewportConfiguration" value="tilingBackground"/>
  </properties>
  <tileset firstgid="1" source="../../../tilesets/castle/chunks.tsx"/>
- <layer id="1" name="Chunks" width="4" height="2">
-  <data encoding="csv">
+ <group id="2" name="Base">
+  <layer id="1" name="Chunk" width="4" height="2">
+   <data encoding="csv">
 258,259,258,259,
 258,259,258,259
 </data>
- </layer>
+  </layer>
+ </group>
 </map>

@@ -251,8 +251,8 @@ TilesetUnload:
         ENGINE_SCHEDULER_DISABLE SCHEDULER_TILESET
 
         ; Uninstall foreground/background camera handlers
-        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Viewport_background
-        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Viewport_foreground
+        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK background
+        VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK foreground
 
         ; Clear tileset address
         move.l  #NULL, loadedTileset
@@ -342,8 +342,8 @@ _TilesetInstallViewportMovementHandlers:
         dbra    d0, .clrAnimationGroupStatesLoop
         
         ; Install camera movement handlers
-        VIEWPORT_INSTALL_MOVEMENT_CALLBACK Viewport_background, _TilesetCameraMove, Tileset_viewportBackgroundAnimationsAddress(a6)
-        VIEWPORT_INSTALL_MOVEMENT_CALLBACK Viewport_foreground, _TilesetCameraMove, Tileset_viewportForegroundAnimationsAddress(a6)
+        VIEWPORT_INSTALL_MOVEMENT_CALLBACK background, _TilesetCameraMove, Tileset_viewportBackgroundAnimationsAddress(a6)
+        VIEWPORT_INSTALL_MOVEMENT_CALLBACK foreground, _TilesetCameraMove, Tileset_viewportForegroundAnimationsAddress(a6)
         rts
 
 
