@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="9" nextobjectid="269">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="16" nextobjectid="273">
  <properties>
   <property name="background" type="file" value="../../background/castle/dungeon.tmx"/>
  </properties>
@@ -7,8 +7,9 @@
  <tileset firstgid="385" source="../../../tilesets/meta/objectgroupchunks.tsx"/>
  <tileset firstgid="393" source="../../../tilesets/tiled/helperchunks.tsx"/>
  <tileset firstgid="400" source="../../../objects/tileset/objects.tsx"/>
- <layer id="1" name="Chunks" width="40" height="20">
-  <data encoding="csv">
+ <group id="15" name="Base">
+  <layer id="1" name="Chunk" width="40" height="20">
+   <data encoding="csv">
 103,101,104,101,104,101,104,101,104,101,104,101,104,101,104,101,89,130,90,101,104,101,104,101,104,101,104,101,102,193,194,195,196,103,104,101,102,90,104,89,
 119,0,0,7,67,98,35,68,69,133,133,71,98,98,74,133,70,2,69,73,72,136,170,171,0,8,69,136,71,225,226,227,211,72,70,0,85,86,69,71,
 116,69,133,70,85,104,105,116,85,105,146,179,178,147,203,205,86,2,85,102,146,149,147,187,188,171,85,101,105,195,225,225,227,88,86,2147483658,61,70,85,87,
@@ -30,9 +31,9 @@
 99,171,108,171,156,157,104,89,90,101,86,0,8,8,8,0,0,2,0,7,38,8,0,8,85,86,83,84,9,49,50,0,2,0,0,108,8,8,0,118,
 195,187,124,35,98,35,74,170,109,71,98,99,4,5,6,72,71,35,99,4,39,3,98,6,74,133,136,133,136,133,136,71,35,72,136,73,4,6,72,137
 </data>
- </layer>
- <layer id="6" name="ObjectGroup" width="40" height="20" opacity="0.46">
-  <data encoding="csv">
+  </layer>
+  <layer id="6" name="ObjectGroup" width="40" height="20" opacity="0.46">
+   <data encoding="csv">
 0,0,0,0,387,387,387,387,0,0,0,389,389,389,389,389,0,0,0,388,388,0,0,0,0,0,389,389,389,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,388,388,388,388,0,0,389,389,389,390,388,388,392,392,392,392,392,0,389,389,389,0,0,0,0,390,390,0,0,0,386,386,
 0,388,388,388,388,388,0,0,0,0,0,0,0,0,0,0,390,390,390,0,0,0,0,0,392,392,392,0,0,0,0,0,0,0,0,388,388,388,0,0,
@@ -54,8 +55,328 @@
 0,390,390,390,390,390,390,390,390,391,391,391,388,388,388,0,391,391,391,0,0,389,387,390,392,0,0,0,389,387,387,391,391,391,0,389,386,386,391,388,
 0,390,390,390,390,390,390,390,390,390,391,391,388,388,388,386,386,0,0,0,0,389,0,390,392,392,392,392,392,392,392,392,0,389,389,389,386,386,388,388
 </data>
- </layer>
- <layer id="5" name="ObjectGroupContainerGrid" width="40" height="20" locked="1" opacity="0.38">
+  </layer>
+  <objectgroup id="8" name="Object">
+   <object id="1" template="../../../objects/Orbison.tx" x="215" y="320" visible="1"/>
+   <object id="3" template="../../../objects/Orbison.tx" x="354" y="320"/>
+   <object id="4" template="../../../objects/Orbison.tx" x="611" y="384"/>
+   <object id="5" template="../../../objects/Orbison.tx" x="497" y="576"/>
+   <object id="6" template="../../../objects/Orbison.tx" x="807" y="704"/>
+   <object id="7" template="../../../objects/Orbison.tx" x="1057" y="576"/>
+   <object id="8" template="../../../objects/Orbison.tx" x="1616" y="832"/>
+   <object id="9" template="../../../objects/Orbison.tx" x="647" y="128"/>
+   <object id="10" template="../../../objects/Orbison.tx" x="835" y="128"/>
+   <object id="12" template="../../../objects/Orbison.tx" x="1153" y="192"/>
+   <object id="14" template="../../../objects/Orbison.tx" x="1397" y="192"/>
+   <object id="15" template="../../../objects/Orbison.tx" x="148.063" y="960"/>
+   <object id="16" template="../../../objects/Orbison.tx" x="362.341" y="896"/>
+   <object id="17" template="../../../objects/Orbison.tx" x="732" y="1024"/>
+   <object id="18" template="../../../objects/Orbison.tx" x="546" y="960"/>
+   <object id="19" template="../../../objects/Orbison.tx" x="785" y="976"/>
+   <object id="20" template="../../../objects/Orbison.tx" x="1157" y="1024"/>
+   <object id="21" template="../../../objects/Orbison.tx" x="628" y="1344"/>
+   <object id="22" template="../../../objects/Orbison.tx" x="259" y="1216"/>
+   <object id="23" template="../../../objects/Orbison.tx" x="830" y="1472"/>
+   <object id="24" template="../../../objects/Orbison.tx" x="1194" y="1408"/>
+   <object id="25" template="../../../objects/Orbison.tx" x="165" y="1728"/>
+   <object id="26" template="../../../objects/Orbison.tx" x="640" y="1928"/>
+   <object id="27" template="../../../objects/Orbison.tx" x="860" y="1901"/>
+   <object id="28" template="../../../objects/Orbison.tx" x="995" y="1984"/>
+   <object id="29" template="../../../objects/Orbison.tx" x="1299" y="1984"/>
+   <object id="30" template="../../../objects/Orbison.tx" x="345" y="1728"/>
+   <object id="31" template="../../../objects/Orbison.tx" x="232" y="1856"/>
+   <object id="32" template="../../../objects/Orbison.tx" x="94" y="2304"/>
+   <object id="33" template="../../../objects/Orbison.tx" x="444" y="2432"/>
+   <object id="34" template="../../../objects/Orbison.tx" x="816" y="2432"/>
+   <object id="35" template="../../../objects/Orbison.tx" x="1182" y="2496"/>
+   <object id="36" template="../../../objects/Orbison.tx" x="128" y="2403"/>
+   <object id="37" template="../../../objects/Orbison.tx" x="1349" y="2432"/>
+   <object id="38" template="../../../objects/Orbison.tx" x="2005" y="2496"/>
+   <object id="39" template="../../../objects/Orbison.tx" x="2200" y="2432"/>
+   <object id="40" template="../../../objects/Orbison.tx" x="2292" y="2432"/>
+   <object id="41" template="../../../objects/Orbison.tx" x="2408" y="2112"/>
+   <object id="42" template="../../../objects/Orbison.tx" x="2601" y="2304"/>
+   <object id="43" template="../../../objects/Orbison.tx" x="1438" y="1856"/>
+   <object id="44" template="../../../objects/Orbison.tx" x="1746" y="1792"/>
+   <object id="45" template="../../../objects/Orbison.tx" x="2064" y="1792"/>
+   <object id="46" template="../../../objects/Orbison.tx" x="1497" y="2112"/>
+   <object id="47" template="../../../objects/Orbison.tx" x="2850" y="2432"/>
+   <object id="48" template="../../../objects/Orbison.tx" x="3165" y="2240"/>
+   <object id="49" template="../../../objects/Orbison.tx" x="1973" y="2032"/>
+   <object id="50" template="../../../objects/Orbison.tx" x="3105" y="2432"/>
+   <object id="51" template="../../../objects/Orbison.tx" x="3431" y="2496"/>
+   <object id="52" template="../../../objects/Orbison.tx" x="3656" y="2368"/>
+   <object id="53" template="../../../objects/Orbison.tx" x="3735" y="2240"/>
+   <object id="54" template="../../../objects/Orbison.tx" x="3916" y="2240"/>
+   <object id="55" template="../../../objects/Orbison.tx" x="3913" y="2496"/>
+   <object id="56" template="../../../objects/Orbison.tx" x="3423" y="2048"/>
+   <object id="57" template="../../../objects/Orbison.tx" x="3678" y="2048"/>
+   <object id="58" template="../../../objects/Orbison.tx" x="3816" y="2048"/>
+   <object id="59" template="../../../objects/Orbison.tx" x="4312" y="2496"/>
+   <object id="60" template="../../../objects/Orbison.tx" x="4464" y="2496"/>
+   <object id="61" template="../../../objects/Orbison.tx" x="4954" y="2496"/>
+   <object id="62" template="../../../objects/Orbison.tx" x="4893" y="2432"/>
+   <object id="63" template="../../../objects/Orbison.tx" x="2532" y="1856"/>
+   <object id="64" template="../../../objects/Orbison.tx" x="2661" y="1792"/>
+   <object id="65" template="../../../objects/Orbison.tx" x="2957" y="1856"/>
+   <object id="66" template="../../../objects/Orbison.tx" x="2812" y="1761"/>
+   <object id="67" template="../../../objects/Orbison.tx" x="4949" y="2112"/>
+   <object id="68" template="../../../objects/Orbison.tx" x="4678" y="1984"/>
+   <object id="69" template="../../../objects/Orbison.tx" x="4415" y="1920"/>
+   <object id="70" template="../../../objects/Orbison.tx" x="4559" y="1920"/>
+   <object id="71" template="../../../objects/Orbison.tx" x="4495" y="1728"/>
+   <object id="72" template="../../../objects/Orbison.tx" x="4247" y="1616"/>
+   <object id="73" template="../../../objects/Orbison.tx" x="4294" y="1568"/>
+   <object id="74" template="../../../objects/Orbison.tx" x="4447" y="1472"/>
+   <object id="75" template="../../../objects/Orbison.tx" x="4818" y="1344"/>
+   <object id="76" template="../../../objects/Orbison.tx" x="4301" y="1088"/>
+   <object id="77" template="../../../objects/Orbison.tx" x="4482" y="1088"/>
+   <object id="78" template="../../../objects/Orbison.tx" x="4886" y="960"/>
+   <object id="79" template="../../../objects/Orbison.tx" x="4921" y="832"/>
+   <object id="80" template="../../../objects/Orbison.tx" x="4921" y="448"/>
+   <object id="81" template="../../../objects/Orbison.tx" x="4822" y="413"/>
+   <object id="82" template="../../../objects/Orbison.tx" x="4992" y="192"/>
+   <object id="83" template="../../../objects/Orbison.tx" x="4358" y="192"/>
+   <object id="84" template="../../../objects/Orbison.tx" x="4742" y="320"/>
+   <object id="85" template="../../../objects/Orbison.tx" x="4372" y="576"/>
+   <object id="86" template="../../../objects/Orbison.tx" x="3995" y="512"/>
+   <object id="87" template="../../../objects/Orbison.tx" x="4253" y="512"/>
+   <object id="88" template="../../../objects/Orbison.tx" x="3680" y="576"/>
+   <object id="89" template="../../../objects/Orbison.tx" x="3546" y="192"/>
+   <object id="90" template="../../../objects/Orbison.tx" x="2733" y="192"/>
+   <object id="91" template="../../../objects/Orbison.tx" x="2869" y="192"/>
+   <object id="92" template="../../../objects/Orbison.tx" x="3174" y="342"/>
+   <object id="93" template="../../../objects/Orbison.tx" x="3437" y="474"/>
+   <object id="94" template="../../../objects/Orbison.tx" x="2502" y="128"/>
+   <object id="95" template="../../../objects/Orbison.tx" x="2379" y="192"/>
+   <object id="96" template="../../../objects/Orbison.tx" x="2152" y="384"/>
+   <object id="97" template="../../../objects/Orbison.tx" x="2304" y="384"/>
+   <object id="98" template="../../../objects/Orbison.tx" x="1983" y="448"/>
+   <object id="99" template="../../../objects/Orbison.tx" x="1567" y="128"/>
+   <object id="100" template="../../../objects/Orbison.tx" x="1673" y="128"/>
+   <object id="101" template="../../../objects/Orbison.tx" x="1919" y="192"/>
+   <object id="102" template="../../../objects/Orbison.tx" x="2067" y="192"/>
+   <object id="103" template="../../../objects/Orbison.tx" x="1851" y="576"/>
+   <object id="104" template="../../../objects/Orbison.tx" x="1772" y="704"/>
+   <object id="105" template="../../../objects/Orbison.tx" x="1886" y="832"/>
+   <object id="106" template="../../../objects/Orbison.tx" x="1394" y="732"/>
+   <object id="107" template="../../../objects/Orbison.tx" x="959" y="1408"/>
+   <object id="108" template="../../../objects/Orbison.tx" x="1347" y="1344"/>
+   <object id="109" template="../../../objects/Orbison.tx" x="1550" y="1344"/>
+   <object id="110" template="../../../objects/Orbison.tx" x="1913" y="1472"/>
+   <object id="111" template="../../../objects/Orbison.tx" x="2206" y="1472"/>
+   <object id="112" template="../../../objects/Orbison.tx" x="2419" y="1472"/>
+   <object id="113" template="../../../objects/Orbison.tx" x="2263" y="1088"/>
+   <object id="114" template="../../../objects/Orbison.tx" x="2500" y="1216"/>
+   <object id="115" template="../../../objects/Orbison.tx" x="2883" y="1088"/>
+   <object id="116" template="../../../objects/Orbison.tx" x="2374" y="704"/>
+   <object id="117" template="../../../objects/Orbison.tx" x="2578" y="640"/>
+   <object id="118" template="../../../objects/Orbison.tx" x="2860" y="640"/>
+   <object id="119" template="../../../objects/Orbison.tx" x="2884" y="704"/>
+   <object id="120" template="../../../objects/Orbison.tx" x="3071" y="640"/>
+   <object id="121" template="../../../objects/Orbison.tx" x="3172" y="832"/>
+   <object id="122" template="../../../objects/Orbison.tx" x="3465" y="832"/>
+   <object id="123" template="../../../objects/Orbison.tx" x="3860" y="960"/>
+   <object id="124" template="../../../objects/Orbison.tx" x="3993" y="960"/>
+   <object id="125" template="../../../objects/Orbison.tx" x="3881" y="1280"/>
+   <object id="126" template="../../../objects/Orbison.tx" x="3711" y="1280"/>
+   <object id="127" template="../../../objects/Orbison.tx" x="3787" y="1232"/>
+   <object id="128" template="../../../objects/Orbison.tx" x="3758" y="1184"/>
+   <object id="129" template="../../../objects/Orbison.tx" x="3731" y="1104"/>
+   <object id="130" template="../../../objects/Orbison.tx" x="3787" y="1056"/>
+   <object id="131" template="../../../objects/Orbison.tx" x="3788" y="976"/>
+   <object id="132" template="../../../objects/Orbison.tx" x="3753" y="928"/>
+   <object id="133" template="../../../objects/Orbison.tx" x="3731" y="1488"/>
+   <object id="134" template="../../../objects/Orbison.tx" x="3780" y="1440"/>
+   <object id="135" template="../../../objects/Orbison.tx" x="3653" y="1536"/>
+   <object id="136" template="../../../objects/Orbison.tx" x="3302" y="1536"/>
+   <object id="137" template="../../../objects/Orbison.tx" x="3937" y="1536"/>
+   <object id="138" template="../../../objects/Orbison.tx" x="3164" y="1280"/>
+   <object id="139" template="../../../objects/Orbison.tx" x="3232" y="1792"/>
+   <object id="140" template="../../../objects/Orbison.tx" x="3505" y="1792"/>
+   <object id="141" template="../../../objects/Orbison.tx" x="3645" y="1792"/>
+   <object id="142" template="../../../objects/Orbison.tx" x="3915" y="1792"/>
+   <object id="143" template="../../../objects/Orbison.tx" x="3862" y="1792"/>
+   <object id="144" template="../../../objects/Orbison.tx" x="2967" y="1472"/>
+   <object id="145" template="../../../objects/Orbison.tx" x="3389" y="192"/>
+   <object id="146" template="../../../objects/Orbison.tx" x="1644" y="2048"/>
+   <object id="147" template="../../../objects/Orbison.tx" x="1719" y="2416"/>
+   <object id="148" template="../../../objects/Orbison.tx" x="1494" y="2432"/>
+   <object id="149" template="../../../objects/Orbison.tx" x="813" y="1984"/>
+   <object id="150" template="../../../objects/Orbison.tx" x="536" y="1232"/>
+   <object id="151" template="../../../objects/Orbison.tx" x="258" y="960"/>
+   <object id="152" template="../../../objects/Orbison.tx" x="1333" y="1904"/>
+   <object id="153" template="../../../objects/Orbison.tx" x="4670" y="1404"/>
+   <object id="154" template="../../../objects/Fireball.tx" x="1551" y="2462"/>
+   <object id="155" template="../../../objects/Fireball.tx" x="1656" y="2462"/>
+   <object id="156" template="../../../objects/Fireball.tx" x="1784" y="2462"/>
+   <object id="157" template="../../../objects/Fireball.tx" x="1889" y="2462"/>
+   <object id="158" template="../../../objects/Fireball.tx" x="1680" y="2078"/>
+   <object id="159" template="../../../objects/Fireball.tx" x="1784" y="2078"/>
+   <object id="160" template="../../../objects/Fireball.tx" x="1912" y="2078"/>
+   <object id="161" template="../../../objects/Fireball.tx" x="2016" y="2078"/>
+   <object id="162" template="../../../objects/Fireball.tx" x="2704" y="2462"/>
+   <object id="163" template="../../../objects/Fireball.tx" x="2784" y="2462"/>
+   <object id="164" template="../../../objects/Fireball.tx" x="2959" y="2462"/>
+   <object id="165" template="../../../objects/Fireball.tx" x="3040" y="2462"/>
+   <object id="166" template="../../../objects/Fireball.tx" x="4624" y="2462"/>
+   <object id="167" template="../../../objects/Fireball.tx" x="4728" y="2462"/>
+   <object id="168" template="../../../objects/Fireball.tx" x="4831" y="2462"/>
+   <object id="170" template="../../../objects/Fireball.tx" x="2708" y="1822"/>
+   <object id="171" template="../../../objects/Fireball.tx" x="2745" y="1822"/>
+   <object id="172" template="../../../objects/Fireball.tx" x="2781" y="1822"/>
+   <object id="175" template="../../../objects/Blob.tx" gid="2147484050" x="588" y="128"/>
+   <object id="176" template="../../../objects/Blob.tx" x="210" y="1216"/>
+   <object id="177" template="../../../objects/Blob.tx" gid="402" x="275" y="320"/>
+   <object id="178" template="../../../objects/Blob.tx" x="133" y="1728"/>
+   <object id="180" template="../../../objects/Blob.tx" x="914" y="128"/>
+   <object id="182" template="../../../objects/Blob.tx" gid="2147484050" x="677" y="384"/>
+   <object id="183" template="../../../objects/Blob.tx" gid="2147484050" x="412" y="320">
+    <properties>
+     <property name="active" type="bool" value="true"/>
+    </properties>
+   </object>
+   <object id="184" template="../../../objects/Blob.tx" x="737" y="128">
+    <properties>
+     <property name="enabled" type="bool" value="false"/>
+    </properties>
+   </object>
+   <object id="186" template="../../../objects/Blob.tx" x="320" y="320"/>
+   <object id="187" template="../../../objects/Blob.tx" x="537" y="576"/>
+   <object id="188" template="../../../objects/Blob.tx" x="204" y="960"/>
+   <object id="190" template="../../../objects/Blob.tx" x="420" y="896"/>
+   <object id="192" template="../../../objects/Blob.tx" x="3243" y="2496"/>
+   <object id="193" template="../../../objects/Blob.tx" x="3304" y="2496"/>
+   <object id="194" template="../../../objects/Blob.tx" x="3518" y="2496"/>
+   <object id="195" template="../../../objects/Blob.tx" x="3611" y="2496"/>
+   <object id="196" template="../../../objects/Blob.tx" x="3758" y="2496"/>
+   <object id="197" template="../../../objects/Blob.tx" x="3992" y="2496"/>
+   <object id="198" template="../../../objects/Blob.tx" x="3079" y="2432"/>
+   <object id="199" template="../../../objects/Blob.tx" x="1239" y="192"/>
+   <object id="200" template="../../../objects/Blob.tx" x="1356" y="192"/>
+   <object id="201" template="../../../objects/Blob.tx" x="1768" y="128"/>
+   <object id="202" template="../../../objects/Blob.tx" x="1996" y="192"/>
+   <object id="203" template="../../../objects/Blob.tx" x="2234" y="384"/>
+   <object id="204" template="../../../objects/Blob.tx" x="1807" y="624"/>
+   <object id="205" template="../../../objects/Blob.tx" x="3346" y="832"/>
+   <object id="206" template="../../../objects/Blob.tx" x="3592" y="832"/>
+   <object id="207" template="../../../objects/Blob.tx" x="2738" y="640"/>
+   <object id="208" template="../../../objects/Blob.tx" x="3929" y="960"/>
+   <object id="209" template="../../../objects/Blob.tx" x="3423" y="1536"/>
+   <object id="210" template="../../../objects/Blob.tx" x="611" y="2432"/>
+   <object id="211" template="../../../objects/Blob.tx" x="719" y="2432"/>
+   <object id="212" template="../../../objects/Blob.tx" x="746" y="1984"/>
+   <object id="213" template="../../../objects/Blob.tx" x="281" y="1856"/>
+   <object id="214" template="../../../objects/Blob.tx" x="233" y="1776"/>
+   <object id="215" template="../../../objects/Blob.tx" x="416" y="1728"/>
+   <object id="216" template="../../../objects/Blob.tx" x="1538" y="1856"/>
+   <object id="217" template="../../../objects/Blob.tx" x="1983" y="1792"/>
+   <object id="219" template="../../../objects/Blob.tx" x="4304" y="1664"/>
+   <object id="220" template="../../../objects/Blob.tx" x="4509" y="1920"/>
+   <object id="221" template="../../../objects/Blob.tx" x="4895" y="1344"/>
+   <object id="222" template="../../../objects/Blob.tx" x="4417" y="1088"/>
+   <object id="223" template="../../../objects/Blob.tx" x="4670" y="2416"/>
+   <object id="224" template="../../../objects/Blob.tx" x="4767" y="1984"/>
+   <object id="225" template="../../../objects/Blob.tx" x="5018" y="2112"/>
+   <object id="226" template="../../../objects/Blob.tx" x="1415" y="2432"/>
+   <object id="227" template="../../../objects/Blob.tx" x="2072" y="2496"/>
+   <object id="228" template="../../../objects/Blob.tx" x="1599" y="2048"/>
+   <object id="229" template="../../../objects/Blob.tx" x="4114" y="512"/>
+   <object id="230" template="../../../objects/Blob.tx" x="4216" y="512"/>
+   <object id="231" template="../../../objects/Blob.tx" x="4772" y="320"/>
+   <object id="232" template="../../../objects/Blob.tx" x="4939" y="192"/>
+   <object id="233" template="../../../objects/Blob.tx" x="4972" y="768"/>
+   <object id="234" template="../../../objects/Blob.tx" x="3415" y="1792"/>
+   <object id="235" template="../../../objects/Blob.tx" x="3757" y="1792"/>
+   <object id="236" template="../../../objects/Blob.tx" x="3519" y="2048"/>
+   <object id="237" template="../../../objects/Blob.tx" x="3345" y="2048"/>
+   <object id="238" template="../../../objects/Blob.tx" x="2586" y="1856"/>
+   <object id="239" template="../../../objects/Blob.tx" x="3834" y="2240"/>
+   <object id="240" template="../../../objects/Blob.tx" x="4365" y="2496"/>
+   <object id="241" template="../../../objects/Blob.tx" x="2745" y="2416"/>
+   <object id="242" template="../../../objects/Blob.tx" x="1465" y="1344"/>
+   <object id="243" template="../../../objects/Blob.tx" x="786" y="1472"/>
+   <object id="244" template="../../../objects/Blob.tx" x="1082" y="1408"/>
+   <object id="245" template="../../../objects/Blob.tx" x="962" y="1088"/>
+   <object id="246" template="../../../objects/Blob.tx" x="590" y="1184"/>
+   <object id="247" template="../../../objects/Blob.tx" x="2324" y="1472"/>
+   <object id="248" template="../../../objects/Blob.tx" x="2591" y="1216"/>
+   <object id="249" template="../../../objects/Blob.tx" x="3495" y="192"/>
+   <object id="250" template="../../../objects/Blob.tx" x="1160" y="616"/>
+   <object id="251" template="../../../objects/Blob.tx" x="1284" y="678"/>
+   <object id="252" template="../../../objects/Blob.tx" x="991" y="576"/>
+   <object id="253" template="../../../objects/Blob.tx" x="1481" y="776"/>
+   <object id="255" template="../../../objects/Blob.tx" gid="402" x="1329" y="701"/>
+   <object id="256" template="../../../objects/Blob.tx" x="840" y="704"/>
+   <object id="258" template="../../../objects/Blob.tx" gid="2147484050" x="895" y="704" rotation="0"/>
+   <object id="259" template="../../../objects/Blob.tx" x="2819" y="192"/>
+   <object id="260" template="../../../objects/Blob.tx" gid="2147484050" x="2984" y="249"/>
+   <object id="261" template="../../../objects/Blob.tx" x="3013" y="263"/>
+   <object id="262" template="../../../objects/Blob.tx" x="3342" y="428"/>
+   <object id="263" template="../../../objects/Blob.tx" x="3654" y="576"/>
+   <object id="264" template="../../../objects/Blob.tx" gid="2147484050" x="3492" y="502"/>
+   <object id="265" template="../../../objects/Blob.tx" x="2627" y="192"/>
+   <object id="266" template="../../../objects/Blob.tx" gid="2147484050" x="2763" y="192"/>
+   <object id="267" template="../../../objects/Blob.tx" x="3206" y="359"/>
+   <object id="268" template="../../../objects/Blob.tx" x="3091" y="302"/>
+  </objectgroup>
+ </group>
+ <group id="11" name="Overlay">
+  <layer id="9" name="Chunk" width="40" height="20">
+   <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,113,228,226,194,229,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+  </layer>
+  <layer id="13" name="ObjectGroup" width="40" height="20" opacity="0.45">
+   <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,391,391,391,391,391,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+  </layer>
+  <objectgroup id="12" name="Object">
+   <object id="269" template="../../../objects/Orbison.tx" x="3454.55" y="1969.7"/>
+   <object id="270" template="../../../objects/Orbison.tx" x="3618.18" y="1987.88"/>
+   <object id="272" template="../../../objects/Orbison.tx" x="3272" y="1980"/>
+  </objectgroup>
+ </group>
+ <layer id="5" name="MetadataContainerGrid" width="40" height="20" locked="1" opacity="0.38">
   <data encoding="csv">
 393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
 393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
@@ -79,268 +400,4 @@
 393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393
 </data>
  </layer>
- <objectgroup id="8" name="Object">
-  <object id="1" template="../../../objects/Orbison.tx" x="215" y="320" visible="1"/>
-  <object id="3" template="../../../objects/Orbison.tx" x="354" y="320"/>
-  <object id="4" template="../../../objects/Orbison.tx" x="611" y="384"/>
-  <object id="5" template="../../../objects/Orbison.tx" x="497" y="576"/>
-  <object id="6" template="../../../objects/Orbison.tx" x="807" y="704"/>
-  <object id="7" template="../../../objects/Orbison.tx" x="1057" y="576"/>
-  <object id="8" template="../../../objects/Orbison.tx" x="1616" y="832"/>
-  <object id="9" template="../../../objects/Orbison.tx" x="647" y="128"/>
-  <object id="10" template="../../../objects/Orbison.tx" x="835" y="128"/>
-  <object id="12" template="../../../objects/Orbison.tx" x="1153" y="192"/>
-  <object id="14" template="../../../objects/Orbison.tx" x="1397" y="192"/>
-  <object id="15" template="../../../objects/Orbison.tx" x="148.063" y="960"/>
-  <object id="16" template="../../../objects/Orbison.tx" x="362.341" y="896"/>
-  <object id="17" template="../../../objects/Orbison.tx" x="732" y="1024"/>
-  <object id="18" template="../../../objects/Orbison.tx" x="546" y="960"/>
-  <object id="19" template="../../../objects/Orbison.tx" x="785" y="976"/>
-  <object id="20" template="../../../objects/Orbison.tx" x="1157" y="1024"/>
-  <object id="21" template="../../../objects/Orbison.tx" x="628" y="1344"/>
-  <object id="22" template="../../../objects/Orbison.tx" x="259" y="1216"/>
-  <object id="23" template="../../../objects/Orbison.tx" x="830" y="1472"/>
-  <object id="24" template="../../../objects/Orbison.tx" x="1194" y="1408"/>
-  <object id="25" template="../../../objects/Orbison.tx" x="165" y="1728"/>
-  <object id="26" template="../../../objects/Orbison.tx" x="640" y="1928"/>
-  <object id="27" template="../../../objects/Orbison.tx" x="860" y="1901"/>
-  <object id="28" template="../../../objects/Orbison.tx" x="995" y="1984"/>
-  <object id="29" template="../../../objects/Orbison.tx" x="1299" y="1984"/>
-  <object id="30" template="../../../objects/Orbison.tx" x="345" y="1728"/>
-  <object id="31" template="../../../objects/Orbison.tx" x="232" y="1856"/>
-  <object id="32" template="../../../objects/Orbison.tx" x="94" y="2304"/>
-  <object id="33" template="../../../objects/Orbison.tx" x="444" y="2432"/>
-  <object id="34" template="../../../objects/Orbison.tx" x="816" y="2432"/>
-  <object id="35" template="../../../objects/Orbison.tx" x="1182" y="2496"/>
-  <object id="36" template="../../../objects/Orbison.tx" x="128" y="2403"/>
-  <object id="37" template="../../../objects/Orbison.tx" x="1349" y="2432"/>
-  <object id="38" template="../../../objects/Orbison.tx" x="2005" y="2496"/>
-  <object id="39" template="../../../objects/Orbison.tx" x="2200" y="2432"/>
-  <object id="40" template="../../../objects/Orbison.tx" x="2292" y="2432"/>
-  <object id="41" template="../../../objects/Orbison.tx" x="2408" y="2112"/>
-  <object id="42" template="../../../objects/Orbison.tx" x="2601" y="2304"/>
-  <object id="43" template="../../../objects/Orbison.tx" x="1438" y="1856"/>
-  <object id="44" template="../../../objects/Orbison.tx" x="1746" y="1792"/>
-  <object id="45" template="../../../objects/Orbison.tx" x="2064" y="1792"/>
-  <object id="46" template="../../../objects/Orbison.tx" x="1497" y="2112"/>
-  <object id="47" template="../../../objects/Orbison.tx" x="2850" y="2432"/>
-  <object id="48" template="../../../objects/Orbison.tx" x="3165" y="2240"/>
-  <object id="49" template="../../../objects/Orbison.tx" x="1973" y="2032"/>
-  <object id="50" template="../../../objects/Orbison.tx" x="3105" y="2432"/>
-  <object id="51" template="../../../objects/Orbison.tx" x="3431" y="2496"/>
-  <object id="52" template="../../../objects/Orbison.tx" x="3656" y="2368"/>
-  <object id="53" template="../../../objects/Orbison.tx" x="3735" y="2240"/>
-  <object id="54" template="../../../objects/Orbison.tx" x="3916" y="2240"/>
-  <object id="55" template="../../../objects/Orbison.tx" x="3913" y="2496"/>
-  <object id="56" template="../../../objects/Orbison.tx" x="3423" y="2048"/>
-  <object id="57" template="../../../objects/Orbison.tx" x="3678" y="2048"/>
-  <object id="58" template="../../../objects/Orbison.tx" x="3816" y="2048"/>
-  <object id="59" template="../../../objects/Orbison.tx" x="4312" y="2496"/>
-  <object id="60" template="../../../objects/Orbison.tx" x="4464" y="2496"/>
-  <object id="61" template="../../../objects/Orbison.tx" x="4954" y="2496"/>
-  <object id="62" template="../../../objects/Orbison.tx" x="4893" y="2432"/>
-  <object id="63" template="../../../objects/Orbison.tx" x="2532" y="1856"/>
-  <object id="64" template="../../../objects/Orbison.tx" x="2661" y="1792"/>
-  <object id="65" template="../../../objects/Orbison.tx" x="2957" y="1856"/>
-  <object id="66" template="../../../objects/Orbison.tx" x="2812" y="1761"/>
-  <object id="67" template="../../../objects/Orbison.tx" x="4949" y="2112"/>
-  <object id="68" template="../../../objects/Orbison.tx" x="4678" y="1984"/>
-  <object id="69" template="../../../objects/Orbison.tx" x="4415" y="1920"/>
-  <object id="70" template="../../../objects/Orbison.tx" x="4559" y="1920"/>
-  <object id="71" template="../../../objects/Orbison.tx" x="4495" y="1728"/>
-  <object id="72" template="../../../objects/Orbison.tx" x="4247" y="1616"/>
-  <object id="73" template="../../../objects/Orbison.tx" x="4294" y="1568"/>
-  <object id="74" template="../../../objects/Orbison.tx" x="4447" y="1472"/>
-  <object id="75" template="../../../objects/Orbison.tx" x="4818" y="1344"/>
-  <object id="76" template="../../../objects/Orbison.tx" x="4301" y="1088"/>
-  <object id="77" template="../../../objects/Orbison.tx" x="4482" y="1088"/>
-  <object id="78" template="../../../objects/Orbison.tx" x="4886" y="960"/>
-  <object id="79" template="../../../objects/Orbison.tx" x="4921" y="832"/>
-  <object id="80" template="../../../objects/Orbison.tx" x="4921" y="448"/>
-  <object id="81" template="../../../objects/Orbison.tx" x="4822" y="413"/>
-  <object id="82" template="../../../objects/Orbison.tx" x="4992" y="192"/>
-  <object id="83" template="../../../objects/Orbison.tx" x="4358" y="192"/>
-  <object id="84" template="../../../objects/Orbison.tx" x="4742" y="320"/>
-  <object id="85" template="../../../objects/Orbison.tx" x="4372" y="576"/>
-  <object id="86" template="../../../objects/Orbison.tx" x="3995" y="512"/>
-  <object id="87" template="../../../objects/Orbison.tx" x="4253" y="512"/>
-  <object id="88" template="../../../objects/Orbison.tx" x="3680" y="576"/>
-  <object id="89" template="../../../objects/Orbison.tx" x="3546" y="192"/>
-  <object id="90" template="../../../objects/Orbison.tx" x="2733" y="192"/>
-  <object id="91" template="../../../objects/Orbison.tx" x="2869" y="192"/>
-  <object id="92" template="../../../objects/Orbison.tx" x="3174" y="342"/>
-  <object id="93" template="../../../objects/Orbison.tx" x="3437" y="474"/>
-  <object id="94" template="../../../objects/Orbison.tx" x="2502" y="128"/>
-  <object id="95" template="../../../objects/Orbison.tx" x="2379" y="192"/>
-  <object id="96" template="../../../objects/Orbison.tx" x="2152" y="384"/>
-  <object id="97" template="../../../objects/Orbison.tx" x="2304" y="384"/>
-  <object id="98" template="../../../objects/Orbison.tx" x="1983" y="448"/>
-  <object id="99" template="../../../objects/Orbison.tx" x="1567" y="128"/>
-  <object id="100" template="../../../objects/Orbison.tx" x="1673" y="128"/>
-  <object id="101" template="../../../objects/Orbison.tx" x="1919" y="192"/>
-  <object id="102" template="../../../objects/Orbison.tx" x="2067" y="192"/>
-  <object id="103" template="../../../objects/Orbison.tx" x="1851" y="576"/>
-  <object id="104" template="../../../objects/Orbison.tx" x="1772" y="704"/>
-  <object id="105" template="../../../objects/Orbison.tx" x="1886" y="832"/>
-  <object id="106" template="../../../objects/Orbison.tx" x="1394" y="732"/>
-  <object id="107" template="../../../objects/Orbison.tx" x="959" y="1408"/>
-  <object id="108" template="../../../objects/Orbison.tx" x="1347" y="1344"/>
-  <object id="109" template="../../../objects/Orbison.tx" x="1550" y="1344"/>
-  <object id="110" template="../../../objects/Orbison.tx" x="1913" y="1472"/>
-  <object id="111" template="../../../objects/Orbison.tx" x="2206" y="1472"/>
-  <object id="112" template="../../../objects/Orbison.tx" x="2419" y="1472"/>
-  <object id="113" template="../../../objects/Orbison.tx" x="2263" y="1088"/>
-  <object id="114" template="../../../objects/Orbison.tx" x="2500" y="1216"/>
-  <object id="115" template="../../../objects/Orbison.tx" x="2883" y="1088"/>
-  <object id="116" template="../../../objects/Orbison.tx" x="2374" y="704"/>
-  <object id="117" template="../../../objects/Orbison.tx" x="2578" y="640"/>
-  <object id="118" template="../../../objects/Orbison.tx" x="2860" y="640"/>
-  <object id="119" template="../../../objects/Orbison.tx" x="2884" y="704"/>
-  <object id="120" template="../../../objects/Orbison.tx" x="3071" y="640"/>
-  <object id="121" template="../../../objects/Orbison.tx" x="3172" y="832"/>
-  <object id="122" template="../../../objects/Orbison.tx" x="3465" y="832"/>
-  <object id="123" template="../../../objects/Orbison.tx" x="3860" y="960"/>
-  <object id="124" template="../../../objects/Orbison.tx" x="3993" y="960"/>
-  <object id="125" template="../../../objects/Orbison.tx" x="3881" y="1280"/>
-  <object id="126" template="../../../objects/Orbison.tx" x="3711" y="1280"/>
-  <object id="127" template="../../../objects/Orbison.tx" x="3787" y="1232"/>
-  <object id="128" template="../../../objects/Orbison.tx" x="3758" y="1184"/>
-  <object id="129" template="../../../objects/Orbison.tx" x="3731" y="1104"/>
-  <object id="130" template="../../../objects/Orbison.tx" x="3787" y="1056"/>
-  <object id="131" template="../../../objects/Orbison.tx" x="3788" y="976"/>
-  <object id="132" template="../../../objects/Orbison.tx" x="3753" y="928"/>
-  <object id="133" template="../../../objects/Orbison.tx" x="3731" y="1488"/>
-  <object id="134" template="../../../objects/Orbison.tx" x="3780" y="1440"/>
-  <object id="135" template="../../../objects/Orbison.tx" x="3653" y="1536"/>
-  <object id="136" template="../../../objects/Orbison.tx" x="3302" y="1536"/>
-  <object id="137" template="../../../objects/Orbison.tx" x="3937" y="1536"/>
-  <object id="138" template="../../../objects/Orbison.tx" x="3164" y="1280"/>
-  <object id="139" template="../../../objects/Orbison.tx" x="3232" y="1792"/>
-  <object id="140" template="../../../objects/Orbison.tx" x="3505" y="1792"/>
-  <object id="141" template="../../../objects/Orbison.tx" x="3645" y="1792"/>
-  <object id="142" template="../../../objects/Orbison.tx" x="3915" y="1792"/>
-  <object id="143" template="../../../objects/Orbison.tx" x="3862" y="1792"/>
-  <object id="144" template="../../../objects/Orbison.tx" x="2967" y="1472"/>
-  <object id="145" template="../../../objects/Orbison.tx" x="3389" y="192"/>
-  <object id="146" template="../../../objects/Orbison.tx" x="1644" y="2048"/>
-  <object id="147" template="../../../objects/Orbison.tx" x="1719" y="2416"/>
-  <object id="148" template="../../../objects/Orbison.tx" x="1494" y="2432"/>
-  <object id="149" template="../../../objects/Orbison.tx" x="813" y="1984"/>
-  <object id="150" template="../../../objects/Orbison.tx" x="536" y="1232"/>
-  <object id="151" template="../../../objects/Orbison.tx" x="258" y="960"/>
-  <object id="152" template="../../../objects/Orbison.tx" x="1333" y="1904"/>
-  <object id="153" template="../../../objects/Orbison.tx" x="4670" y="1404"/>
-  <object id="154" template="../../../objects/Fireball.tx" x="1551" y="2462"/>
-  <object id="155" template="../../../objects/Fireball.tx" x="1656" y="2462"/>
-  <object id="156" template="../../../objects/Fireball.tx" x="1784" y="2462"/>
-  <object id="157" template="../../../objects/Fireball.tx" x="1889" y="2462"/>
-  <object id="158" template="../../../objects/Fireball.tx" x="1680" y="2078"/>
-  <object id="159" template="../../../objects/Fireball.tx" x="1784" y="2078"/>
-  <object id="160" template="../../../objects/Fireball.tx" x="1912" y="2078"/>
-  <object id="161" template="../../../objects/Fireball.tx" x="2016" y="2078"/>
-  <object id="162" template="../../../objects/Fireball.tx" x="2704" y="2462"/>
-  <object id="163" template="../../../objects/Fireball.tx" x="2784" y="2462"/>
-  <object id="164" template="../../../objects/Fireball.tx" x="2959" y="2462"/>
-  <object id="165" template="../../../objects/Fireball.tx" x="3040" y="2462"/>
-  <object id="166" template="../../../objects/Fireball.tx" x="4624" y="2462"/>
-  <object id="167" template="../../../objects/Fireball.tx" x="4728" y="2462"/>
-  <object id="168" template="../../../objects/Fireball.tx" x="4831" y="2462"/>
-  <object id="170" template="../../../objects/Fireball.tx" x="2708" y="1822"/>
-  <object id="171" template="../../../objects/Fireball.tx" x="2745" y="1822"/>
-  <object id="172" template="../../../objects/Fireball.tx" x="2781" y="1822"/>
-  <object id="175" template="../../../objects/Blob.tx" gid="2147484050" x="588" y="128"/>
-  <object id="176" template="../../../objects/Blob.tx" x="210" y="1216"/>
-  <object id="177" template="../../../objects/Blob.tx" gid="402" x="275" y="320"/>
-  <object id="178" template="../../../objects/Blob.tx" x="133" y="1728"/>
-  <object id="180" template="../../../objects/Blob.tx" x="914" y="128"/>
-  <object id="182" template="../../../objects/Blob.tx" gid="2147484050" x="677" y="384"/>
-  <object id="183" template="../../../objects/Blob.tx" gid="2147484050" x="412" y="320">
-   <properties>
-    <property name="active" type="bool" value="true"/>
-   </properties>
-  </object>
-  <object id="184" template="../../../objects/Blob.tx" x="737" y="128">
-   <properties>
-    <property name="enabled" type="bool" value="false"/>
-   </properties>
-  </object>
-  <object id="186" template="../../../objects/Blob.tx" x="320" y="320"/>
-  <object id="187" template="../../../objects/Blob.tx" x="537" y="576"/>
-  <object id="188" template="../../../objects/Blob.tx" x="204" y="960"/>
-  <object id="190" template="../../../objects/Blob.tx" x="420" y="896"/>
-  <object id="192" template="../../../objects/Blob.tx" x="3243" y="2496"/>
-  <object id="193" template="../../../objects/Blob.tx" x="3304" y="2496"/>
-  <object id="194" template="../../../objects/Blob.tx" x="3518" y="2496"/>
-  <object id="195" template="../../../objects/Blob.tx" x="3611" y="2496"/>
-  <object id="196" template="../../../objects/Blob.tx" x="3758" y="2496"/>
-  <object id="197" template="../../../objects/Blob.tx" x="3992" y="2496"/>
-  <object id="198" template="../../../objects/Blob.tx" x="3079" y="2432"/>
-  <object id="199" template="../../../objects/Blob.tx" x="1239" y="192"/>
-  <object id="200" template="../../../objects/Blob.tx" x="1356" y="192"/>
-  <object id="201" template="../../../objects/Blob.tx" x="1768" y="128"/>
-  <object id="202" template="../../../objects/Blob.tx" x="1996" y="192"/>
-  <object id="203" template="../../../objects/Blob.tx" x="2234" y="384"/>
-  <object id="204" template="../../../objects/Blob.tx" x="1807" y="624"/>
-  <object id="205" template="../../../objects/Blob.tx" x="3346" y="832"/>
-  <object id="206" template="../../../objects/Blob.tx" x="3592" y="832"/>
-  <object id="207" template="../../../objects/Blob.tx" x="2738" y="640"/>
-  <object id="208" template="../../../objects/Blob.tx" x="3929" y="960"/>
-  <object id="209" template="../../../objects/Blob.tx" x="3423" y="1536"/>
-  <object id="210" template="../../../objects/Blob.tx" x="611" y="2432"/>
-  <object id="211" template="../../../objects/Blob.tx" x="719" y="2432"/>
-  <object id="212" template="../../../objects/Blob.tx" x="746" y="1984"/>
-  <object id="213" template="../../../objects/Blob.tx" x="281" y="1856"/>
-  <object id="214" template="../../../objects/Blob.tx" x="233" y="1776"/>
-  <object id="215" template="../../../objects/Blob.tx" x="416" y="1728"/>
-  <object id="216" template="../../../objects/Blob.tx" x="1538" y="1856"/>
-  <object id="217" template="../../../objects/Blob.tx" x="1983" y="1792"/>
-  <object id="219" template="../../../objects/Blob.tx" x="4304" y="1664"/>
-  <object id="220" template="../../../objects/Blob.tx" x="4509" y="1920"/>
-  <object id="221" template="../../../objects/Blob.tx" x="4895" y="1344"/>
-  <object id="222" template="../../../objects/Blob.tx" x="4417" y="1088"/>
-  <object id="223" template="../../../objects/Blob.tx" x="4670" y="2416"/>
-  <object id="224" template="../../../objects/Blob.tx" x="4767" y="1984"/>
-  <object id="225" template="../../../objects/Blob.tx" x="5018" y="2112"/>
-  <object id="226" template="../../../objects/Blob.tx" x="1415" y="2432"/>
-  <object id="227" template="../../../objects/Blob.tx" x="2072" y="2496"/>
-  <object id="228" template="../../../objects/Blob.tx" x="1599" y="2048"/>
-  <object id="229" template="../../../objects/Blob.tx" x="4114" y="512"/>
-  <object id="230" template="../../../objects/Blob.tx" x="4216" y="512"/>
-  <object id="231" template="../../../objects/Blob.tx" x="4772" y="320"/>
-  <object id="232" template="../../../objects/Blob.tx" x="4939" y="192"/>
-  <object id="233" template="../../../objects/Blob.tx" x="4972" y="768"/>
-  <object id="234" template="../../../objects/Blob.tx" x="3415" y="1792"/>
-  <object id="235" template="../../../objects/Blob.tx" x="3757" y="1792"/>
-  <object id="236" template="../../../objects/Blob.tx" x="3519" y="2048"/>
-  <object id="237" template="../../../objects/Blob.tx" x="3345" y="2048"/>
-  <object id="238" template="../../../objects/Blob.tx" x="2586" y="1856"/>
-  <object id="239" template="../../../objects/Blob.tx" x="3834" y="2240"/>
-  <object id="240" template="../../../objects/Blob.tx" x="4365" y="2496"/>
-  <object id="241" template="../../../objects/Blob.tx" x="2745" y="2416"/>
-  <object id="242" template="../../../objects/Blob.tx" x="1465" y="1344"/>
-  <object id="243" template="../../../objects/Blob.tx" x="786" y="1472"/>
-  <object id="244" template="../../../objects/Blob.tx" x="1082" y="1408"/>
-  <object id="245" template="../../../objects/Blob.tx" x="962" y="1088"/>
-  <object id="246" template="../../../objects/Blob.tx" x="590" y="1184"/>
-  <object id="247" template="../../../objects/Blob.tx" x="2324" y="1472"/>
-  <object id="248" template="../../../objects/Blob.tx" x="2591" y="1216"/>
-  <object id="249" template="../../../objects/Blob.tx" x="3495" y="192"/>
-  <object id="250" template="../../../objects/Blob.tx" x="1160" y="616"/>
-  <object id="251" template="../../../objects/Blob.tx" x="1284" y="678"/>
-  <object id="252" template="../../../objects/Blob.tx" x="991" y="576"/>
-  <object id="253" template="../../../objects/Blob.tx" x="1481" y="776"/>
-  <object id="255" template="../../../objects/Blob.tx" gid="402" x="1329" y="701"/>
-  <object id="256" template="../../../objects/Blob.tx" x="840" y="704"/>
-  <object id="258" template="../../../objects/Blob.tx" gid="2147484050" x="895" y="704" rotation="0"/>
-  <object id="259" template="../../../objects/Blob.tx" x="2819" y="192"/>
-  <object id="260" template="../../../objects/Blob.tx" gid="2147484050" x="2984" y="249"/>
-  <object id="261" template="../../../objects/Blob.tx" x="3013" y="263"/>
-  <object id="262" template="../../../objects/Blob.tx" x="3342" y="428"/>
-  <object id="263" template="../../../objects/Blob.tx" x="3654" y="576"/>
-  <object id="264" template="../../../objects/Blob.tx" gid="2147484050" x="3492" y="502"/>
-  <object id="265" template="../../../objects/Blob.tx" x="2627" y="192"/>
-  <object id="266" template="../../../objects/Blob.tx" gid="2147484050" x="2763" y="192"/>
-  <object id="267" template="../../../objects/Blob.tx" x="3206" y="359"/>
-  <object id="268" template="../../../objects/Blob.tx" x="3091" y="302"/>
- </objectgroup>
 </map>

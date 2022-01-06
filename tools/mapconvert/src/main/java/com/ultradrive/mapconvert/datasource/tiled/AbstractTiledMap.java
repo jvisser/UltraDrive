@@ -4,6 +4,8 @@ import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.datasource.model.ResourceReference;
 import java.util.Objects;
 import java.util.Optional;
+import org.tiledreader.TiledGroupLayer;
+import org.tiledreader.TiledLayer;
 import org.tiledreader.TiledMap;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
@@ -61,10 +63,28 @@ abstract class AbstractTiledMap
 
     protected Optional<TiledTileLayer> getLayerOptional(String layerName)
     {
-        return map.getTopLevelLayers().stream()
+        return map.getNonGroupLayers().stream()
+                .filter(TiledTileLayer.class::isInstance) // This seems to be a bug in TiledReader...
                 .map(TiledTileLayer.class::cast)
-                .filter(tiledLayer -> tiledLayer.getName().equalsIgnoreCase(layerName))
+                .filter(tiledLayer -> getFullLayerName(tiledLayer).equalsIgnoreCase(layerName))
                 .findAny();
+    }
+
+    protected String getFullLayerName(TiledLayer tiledLayer)
+    {
+        StringBuilder fullLayerName = new StringBuilder();
+
+        TiledGroupLayer parent = tiledLayer.getParent();
+        while (parent != null)
+        {
+            fullLayerName.insert(0, "_");
+            fullLayerName.insert(0, parent.getName());
+
+            parent = parent.getParent();
+        }
+        fullLayerName.append(tiledLayer.getName());
+
+        return fullLayerName.toString();
     }
 
     protected ResourceReference getResourceReference(TiledTileLayer layer, int x, int y)

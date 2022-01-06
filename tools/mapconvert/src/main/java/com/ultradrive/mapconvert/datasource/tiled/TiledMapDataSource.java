@@ -24,9 +24,9 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
 {
     private static final String CHUNK_TILESET_NAME = "chunks";
 
-    private static final String CHUNK_LAYER_NAME = "Chunks";
-    private static final String OBJECT_GROUP_LAYER_NAME = "ObjectGroup";
-    private static final String OBJECT_LAYER_NAME = "Object";
+    private static final String CHUNK_LAYER_NAME = "Base_Chunk";
+    private static final String OBJECT_GROUP_LAYER_NAME = "Base_ObjectGroup";
+    private static final String OBJECT_LAYER_NAME = "Base_Object";
 
     private final TiledObjectFactory tiledObjectFactory;
     private final TiledPropertyTransformer propertyTransformer;
@@ -102,9 +102,9 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
     @Override
     public List<MapObject> getObjects()
     {
-        return map.getTopLevelLayers().stream()
+        return map.getNonGroupLayers().stream()
                 .filter(tiledLayer -> tiledLayer instanceof TiledObjectLayer &&
-                                      tiledLayer.getName().equalsIgnoreCase(OBJECT_LAYER_NAME))
+                                      getFullLayerName(tiledLayer).equalsIgnoreCase(OBJECT_LAYER_NAME))
                 .map(TiledObjectLayer.class::cast)
                 .flatMap(tiledObjectLayer -> tiledObjectLayer.getObjects().stream())
                 .map(tiledObject -> new

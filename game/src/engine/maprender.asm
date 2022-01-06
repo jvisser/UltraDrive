@@ -48,37 +48,6 @@ MapRenderReset:
 
 
 ;-------------------------------------------------
-; Render the map to the specified VDP background plane VRAM address.
-; ----------------
-; Input:
-; - a0: Map address
-; - d0: Top map coorinate (in 8 pixel rows)
-; - d1: Left map coordinate (in 8 pixel columns)
-; - d2: Width (in 8 pixel columns)
-; - d3: Height (in 8 pixel rows)
-; - d4: Plane id
-; Uses: d0-d7/a0-a6
-MapRender:
-        subq.w  #1, d3
-
-    .rowLoop:
-            PUSHM.w d0-d3
-            PUSHL   d4
-            PUSHL   a0
-            MAP_RENDER_RESET
-            move.l  d4, d3
-            bsr     MapRenderRow
-            jsr     VDPDMAQueueFlush        ; TODO: Use CPU/direct transfer
-            POPL    a0
-            POPL    d4
-            POPM.w  d0-d3
-
-            addq.w  #1, d0
-        dbra    d3, .rowLoop
-        rts
-
-
-;-------------------------------------------------
 ; Shared macros between row/column renderer
 ; ----------------
 

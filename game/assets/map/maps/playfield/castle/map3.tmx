@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="2" nextobjectid="1">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="128" tileheight="128" infinite="0" nextlayerid="3" nextobjectid="1">
  <properties>
   <property name="background" type="file" value="../../background/castle/wall.tmx"/>
   <property name="viewportConfiguration" value="rotatingBackground"/>
  </properties>
  <tileset firstgid="1" source="../../../tilesets/castle/chunks.tsx"/>
- <layer id="1" name="Chunks" width="10" height="10">
-  <data encoding="csv">
+ <group id="2" name="Base">
+  <layer id="1" name="Chunk" width="10" height="10">
+   <data encoding="csv">
 51,130,51,130,51,130,51,130,51,99,
 116,47,48,47,48,47,48,47,48,113,
 99,47,48,47,48,47,48,47,48,113,
@@ -18,5 +19,6 @@
 115,47,48,47,48,47,48,47,48,113,
 129,35,98,35,98,35,98,35,98,131
 </data>
- </layer>
+  </layer>
+ </group>
 </map>
