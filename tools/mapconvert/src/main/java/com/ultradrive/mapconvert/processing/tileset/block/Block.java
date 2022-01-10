@@ -11,10 +11,10 @@ import java.util.Objects;
 public class Block extends MetaTile<Block, BlockReference, PatternReference>
 {
     private final int collisionId;
-    private final BlockAnimationMetaData animationMetaData;
+    private final BlockAnimationMetadata animationMetaData;
     private final boolean empty;
 
-    public Block(int collisionId, BlockAnimationMetaData animationMetaData,
+    public Block(int collisionId, BlockAnimationMetadata animationMetaData,
                  List<PatternReference> patternReferences)
     {
         super(patternReferences);
@@ -25,7 +25,7 @@ public class Block extends MetaTile<Block, BlockReference, PatternReference>
                 .reduce(true, (result, patternReference) -> result && patternReference.isEmpty(), (a, b) -> a && b);
     }
 
-    private Block(int collisionId, BlockAnimationMetaData animationMetaData,
+    private Block(int collisionId, BlockAnimationMetadata animationMetaData,
                   OrientableGrid<PatternReference> patternReferences, boolean empty)
     {
         super(patternReferences);
@@ -90,7 +90,7 @@ public class Block extends MetaTile<Block, BlockReference, PatternReference>
         return !animationMetaData.isEmpty();
     }
 
-    public BlockAnimationMetaData getAnimationMetaData()
+    public BlockAnimationMetadata getAnimationMetaData()
     {
         return animationMetaData;
     }

@@ -27,9 +27,13 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.l         horizontalVDPScrollUpdater                      ; Used to update the horizontal VDP scroll values
         STRUCT_MEMBER.l         verticalVDPScrollUpdater                        ; Used to update the vertical VDP scroll values
         STRUCT_MEMBER.w         trackingEntity                                  ; Entity to keep in view
-        STRUCT_MEMBER.w         subChunkId                                      ; Used to detect viewport chunk changes on movement
         STRUCT_MEMBER.l         foregroundMovementCallback
-        STRUCT_MEMBER.l         objectGroupConfigurationId                      ; Current object group configuration (combined object group flags)
+        STRUCT_MEMBER.w         subChunkId                                      ; Used to detect viewport chunk changes on movement
+        STRUCT_MEMBER.l         activeObjectGroupConfigurationId                ; Current object group configuration used to detect object group configuration changes
+        STRUCT_MEMBER.w         activeObjectGroupCount
+        STRUCT_MEMBER.l         activeObjectGroups, 12
+        STRUCT_MEMBER.w         chunkRefCache, 12                               ; Cache of all chunks references in view (foreground). Used as the basis for rendering the foreground. Can be dynamically patched to alter the appearance of the map.
+        STRUCT_MEMBER.w         chunkRefCacheStride                             ; Number of bytes per row in the chunk reference cache
     DEFINE_STRUCT_END
 
     DEFINE_VAR SHORT
@@ -91,12 +95,28 @@ VIEWPORT_GET_Y Macros target
 
 
 ;-------------------------------------------------
+; Get the active object group count in the viewport
+; ----------------
+; Output:
+; - ccr using move semantics
+VIEWPORT_GET_ACTIVE_OBJECT_GROUP_COUNT Macros target
+    move.w  (viewport + Viewport_activeObjectGroupCount), \target
+
+
+;-------------------------------------------------
+; Get the active object groups in the viewport
+; ----------------
+VIEWPORT_GET_ACTIVE_OBJECT_GROUPS Macros target
+    lea     (viewport + Viewport_activeObjectGroups), \target
+
+
+;-------------------------------------------------
 ; Initialize the viewport library with defaults. Called on engine init.
 ; ----------------
 ViewportEngineInit:
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK background
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK foreground
-        
+
         move.l  #_ViewportCameraChanged, (viewport + Viewport_foreground + Camera_moveCallback)
         rts
 
@@ -278,7 +298,7 @@ _ViewportCameraChanged
         PUSHL   a0
         bsr     _ViewportUpdateActiveViewportData
         POPL    a0
-        
+
         movea.l  (viewport + Viewport_foregroundMovementCallback), a1
         jmp     (a1)
 
@@ -307,7 +327,7 @@ _CALCULATE_SUB_CHUNK_ID Macro result, scratch
 ; ----------------
 ; Uses: d0-d7/a0-a6
 _ViewportInitActiveViewportData:
-    clr.l   (viewport + Viewport_objectGroupConfigurationId)
+    clr.l   (viewport + Viewport_activeObjectGroupConfigurationId)
 
     VIEWPORT_GET_X d0
     VIEWPORT_GET_Y d1
@@ -325,7 +345,7 @@ _ViewportInitActiveViewportData:
 _ViewportUpdateActiveViewportData:
         VIEWPORT_GET_X d0
         VIEWPORT_GET_Y d1
-        
+
         _CALCULATE_SUB_CHUNK_ID d2, d3
 
         move.w  (viewport + Viewport_subChunkId), d3
@@ -340,9 +360,10 @@ _ViewportUpdateActiveViewportData:
 
 
 ;-------------------------------------------------
-; Update viewport data:
+; Update/collect viewport data for the current viewport:
 ; - Viewport chunk cache
 ; - Active object groups
+; - Shared object resource update routines
 ; ----------------
 ; Input:
 ; - d0: Left coordinate of view
@@ -351,15 +372,19 @@ _ViewportUpdateActiveViewportData:
 __ViewportUpdateActiveViewportData:
         VIEWPORT_GET_X d0
         VIEWPORT_GET_Y d1
-        
-        clr.w   mapActiveObjectGroupCount
+
+        clr.w   (viewport + Viewport_activeObjectGroupCount)
 
         ; Get number of columns in view
-        moveq   #3, d2
+        moveq   #4, d2
         btst    #6, d0
         seq     d3
         ext.w   d3
-        add.w   d3, d2                                                          ; d2 = number of columns - 1
+        add.w   d3, d2
+        move.w  d2, d3
+        add.w   d3, d3
+        move.w  d3, (viewport + Viewport_chunkRefCacheStride)
+        subq.w  #1, d2                                                          ; d2 = number of columns - 1
 
         ; Get number of rows in view
         moveq   #2, d3
@@ -375,11 +400,11 @@ __ViewportUpdateActiveViewportData:
 
         ; Get pointers
         MAP_GET a0
-        movea.l MapHeader_objectGroupMapAddress(a0), a1                         ; a1 = objectGroupMapAddress
-        movea.l MapObjectGroupMap_containersTableAddress(a1), a2                ; a2 = containersTableAddress
-        movea.l MapObjectGroupMap_containersBaseAddress(a1), a3                 ; a3 = containersBaseAddress
-        movea.l MapObjectGroupMap_groupsBaseAddress(a1), a4                     ; a4 = groupsBaseAddress
-        lea     mapActiveObjectGroups, a5                                       ; a5 = mapActiveObjectGroups
+        movea.l MapHeader_metadataMapAddress(a0), a1                            ; a1 = metadataMapAddress
+        movea.l MapMetadataMap_containersTableAddress(a1), a2                   ; a2 = containersTableAddress
+        lea     (viewport + Viewport_chunkRefCache), a3                         ; a3 = current chunk ref cache address
+        movea.l MapMetadataMap_objectGroupsBaseAddress(a1), a4                  ; a4 = objectGroupsBaseAddress
+        lea     (viewport + Viewport_activeObjectGroups), a5                    ; a5 = activeObjectGroups
         movea.l MapHeader_foregroundAddress(a0), a0
         move.w  Map_stride(a0), d4
         subq.w  #SIZE_WORD, d4
@@ -406,23 +431,27 @@ __ViewportUpdateActiveViewportData:
             move.w  d1, d7
             lsr.w   #3, d7
             add.w   d7, d7
-            move.w  MapObjectGroupMap_rowOffsetTable(a1, d7), a6                ; a6 = container table vertical offset
+            move.w  MapMetadataMap_rowOffsetTable(a1, d7), a6                   ; a6 = container table vertical offset
             move.w  d5, d7
             lsr.w   #3, d7
             add.w   d7, d7
+            add.w   d7, d7
             add.w   a6, d7                                                      ; d7 = container offset
-            move.w  (a2, d7), d7                                                ; d7 = containersTableAddress[d7] (= container offset into containersBaseAddress)
-            lea     (a3, d7), a6                                                ; a6 = containersBaseAddress[d7] (= container address)
+            movea.l (a2, d7), a6                                                ; a6 = containersBaseAddress[d7] (= container address)
 
             ; Load object group from container
             move.w  (a0)+, d7                                                   ; d7 = chunk ref
+
+            ; Update chunk ref cache
+            move.w  d7, (a3)+
+
             andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
-            rol.w   #3, d7                                                      ; d7 = container group id
             beq.s   .emptyObjectGroup
+                rol.w   #3, d7                                                  ; d7 = container group id
 
                 subq.w  #1, d7                                                  ; d7 = container group index
                 add.w   d7, d7
-                move.w  (a6, d7), d7                                            ; d7 = object group offset
+                move.w  MapMetadataContainer_objectGroupOffsetTable(a6, d7), d7 ; d7 = object group offset
                 lea     (a4, d7), a6                                            ; a6 = object group address
 
                 ; Check if new group
@@ -430,7 +459,7 @@ __ViewportUpdateActiveViewportData:
                 bset    d7, d6
                 bne.s   .objectGroupAlreadyActive
 
-                    addq.w #1, mapActiveObjectGroupCount
+                    addq.w #1, (viewport + Viewport_activeObjectGroupCount)
 
                     ; Add to active group list
                     move.l  a6, (a5)+
@@ -448,11 +477,11 @@ __ViewportUpdateActiveViewportData:
         dbra    d3, .rowLoop
 
         ; Check if the viewport's object group configuration changed (d6 == viewport object group configuration == all found object group flags combined)
-        cmp.l   (viewport + Viewport_objectGroupConfigurationId), d6
+        cmp.l   (viewport + Viewport_activeObjectGroupConfigurationId), d6
         beq     .viewportObjectGroupConfigurationChangeDone
 
             ; Store new viewport object group configuration id
-            move.l  d6, (viewport + Viewport_objectGroupConfigurationId)
+            move.l  d6, (viewport + Viewport_activeObjectGroupConfigurationId)
 
             ; TODO: If so update shared resource updaters for objects in the active groups
                 ; TODO: using k-way set merge where each set element is an rle element into the map's object type array

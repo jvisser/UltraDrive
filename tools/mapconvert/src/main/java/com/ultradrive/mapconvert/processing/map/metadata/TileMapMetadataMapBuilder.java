@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.processing.map.object;
+package com.ultradrive.mapconvert.processing.map.metadata;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 
 
-class ObjectGroupMapBuilder
+class TileMapMetadataMapBuilder
 {
     private final MapModel mapModel;
     private final int objectGroupMapWidth;
@@ -27,9 +27,9 @@ class ObjectGroupMapBuilder
 
     private final ObjectGroupBuilder[][] chunkObjectGroupBuilderMap;
     private final Set<ObjectGroupBuilder> objectGroupBuilders;
-    private final List<ObjectGroupContainerBuilder> objectGroupContainerBuilders;
+    private final List<TileMapMetadataContainerBuilder> metadataContainerBuilders;
 
-    public ObjectGroupMapBuilder(MapModel mapModel, int screenWidth, int screenHeight)
+    public TileMapMetadataMapBuilder(MapModel mapModel, int screenWidth, int screenHeight)
     {
         this.mapModel = mapModel;
         this.objectGroupMapWidth = ((mapModel.getWidth() + 7) >> 3);
@@ -39,16 +39,16 @@ class ObjectGroupMapBuilder
 
         this.chunkObjectGroupBuilderMap = new ObjectGroupBuilder[mapModel.getHeight()][mapModel.getWidth()];
         this.objectGroupBuilders = new LinkedHashSet<>();
-        this.objectGroupContainerBuilders = new ArrayList<>();
+        this.metadataContainerBuilders = new ArrayList<>();
     }
 
-    public ObjectGroupMap build()
+    public TileMapMetadataMap build()
     {
         createGroupMap();
 
         addObjects();
 
-        createObjectGroupContainers();
+        createMetadataContainers();
 
         linkObjectGroupsBasedOnScreenSpace();
 
@@ -118,9 +118,9 @@ class ObjectGroupMapBuilder
                          });
     }
 
-    private void createObjectGroupContainers()
+    private void createMetadataContainers()
     {
-        Map<Integer, ObjectGroupContainerBuilder> containers = new LinkedHashMap<>();
+        Map<Integer, TileMapMetadataContainerBuilder> containers = new LinkedHashMap<>();
         for (int rowIndex = 0; rowIndex < chunkObjectGroupBuilderMap.length; rowIndex++)
         {
             ObjectGroupBuilder[] row = chunkObjectGroupBuilderMap[rowIndex];
@@ -128,18 +128,18 @@ class ObjectGroupMapBuilder
             {
                 int groupId = (rowIndex >> 3) * objectGroupMapWidth + (columnIndex >> 3);
 
-                ObjectGroupContainerBuilder objectGroupContainerBuilder =
-                        containers.computeIfAbsent(groupId, id -> new ObjectGroupContainerBuilder());
+                TileMapMetadataContainerBuilder metadataContainerBuilder =
+                        containers.computeIfAbsent(groupId, id -> new TileMapMetadataContainerBuilder());
 
                 ObjectGroupBuilder objectGroupBuilder = row[columnIndex];
                 if (!objectGroupBuilder.isZeroGroup())
                 {
-                    objectGroupContainerBuilder.add(objectGroupBuilder);
+                    metadataContainerBuilder.add(objectGroupBuilder);
                 }
             }
         }
 
-        objectGroupContainerBuilders.addAll(containers.values());
+        metadataContainerBuilders.addAll(containers.values());
     }
 
     private void linkObjectGroupsBasedOnScreenSpace()
@@ -181,9 +181,9 @@ class ObjectGroupMapBuilder
                 .forEach(ObjectGroupBuilder::calculateFlag);
     }
 
-    private ObjectGroupMap createObjectGroupMap()
+    private TileMapMetadataMap createObjectGroupMap()
     {
-        List<Integer> chunkLocalObjectGroupContainerIndicesBuilder = new ArrayList<>();
+        List<Integer> chunkLocalObjectGroupContainerIndices = new ArrayList<>();
         for (int rowIndex = 0; rowIndex < chunkObjectGroupBuilderMap.length; rowIndex++)
         {
             ObjectGroupBuilder[] row = chunkObjectGroupBuilderMap[rowIndex];
@@ -192,10 +192,10 @@ class ObjectGroupMapBuilder
             {
                 int containerPosition = (rowIndex >> 3) * objectGroupMapWidth + (columnIndex >> 3);
 
-                int groupIndex = objectGroupContainerBuilders.get(containerPosition)
+                int groupIndex = metadataContainerBuilders.get(containerPosition)
                         .getGroupIndex(chunkObjectGroupBuilderMap[rowIndex][columnIndex]);
 
-                chunkLocalObjectGroupContainerIndicesBuilder.add(groupIndex);
+                chunkLocalObjectGroupContainerIndices.add(groupIndex);
             }
         }
 
@@ -203,14 +203,14 @@ class ObjectGroupMapBuilder
                 .map(ObjectGroupBuilder::build)
                 .collect(toMap(ObjectGroup::getId, objectGroup -> objectGroup));
 
-        return new ObjectGroupMap(objectGroupContainerBuilders.stream()
-                                          .map(objectGroupContainerBuilder ->
-                                                       objectGroupContainerBuilder.build(objectGroupsById))
+        return new TileMapMetadataMap(metadataContainerBuilders.stream()
+                                          .map(metadataContainerBuilder ->
+                                                       metadataContainerBuilder.build(objectGroupsById))
                                           .collect(Collectors.toList()),
-                                  ImmutableList.copyOf(objectGroupsById.values()),
-                                  chunkLocalObjectGroupContainerIndicesBuilder,
-                                  mapModel.getWidth(),
-                                  objectGroupMapWidth, objectGroupMapHeight);
+                                      ImmutableList.copyOf(objectGroupsById.values()),
+                                      chunkLocalObjectGroupContainerIndices,
+                                      mapModel.getWidth(),
+                                      objectGroupMapWidth, objectGroupMapHeight);
     }
 
     public ObjectGroupBuilder addGroup()

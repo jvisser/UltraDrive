@@ -2,7 +2,7 @@ package com.ultradrive.mapconvert.datasource.tiled;
 
 import com.ultradrive.mapconvert.common.PropertySource;
 import com.ultradrive.mapconvert.datasource.CollisionBlockDataSource;
-import com.ultradrive.mapconvert.datasource.model.CollisionBlockMetaData;
+import com.ultradrive.mapconvert.datasource.model.CollisionBlockMetadata;
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
@@ -52,20 +52,20 @@ class TiledCollisionBlockDataSource implements CollisionBlockDataSource, Propert
     }
 
     @Override
-    public CollisionBlockMetaData getCollisionBlockMetaData(int collisionId)
+    public CollisionBlockMetadata getCollisionBlockMetaData(int collisionId)
     {
         TiledTile collisionTile = collisionTileset.getTile(collisionId);
         if (collisionTile == null)
         {
-            return CollisionBlockMetaData.empty();
+            return CollisionBlockMetadata.empty();
         }
 
         Float collisionAngle = (Float) collisionTile.getProperty(COLLISION_ANGLE_PROPERTY_NAME);
         if (collisionAngle == null)
         {
-            return CollisionBlockMetaData.empty();
+            return CollisionBlockMetadata.empty();
         }
 
-        return new CollisionBlockMetaData(collisionAngle);
+        return new CollisionBlockMetadata(collisionAngle);
     }
 }

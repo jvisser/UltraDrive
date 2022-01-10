@@ -21,87 +21,11 @@ MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjec
 
 
 ;-------------------------------------------------
-; Map object descriptor flags
-; ----------------
-    BIT_CONST.MODF_ENABLED       0
-    BIT_CONST.MODF_ACTIVE        1
-    BIT_CONST.MODF_TRANSFERABLE  2
-    BIT_MASK.MODF_ORIENTATION    6, 2
-    BIT_CONST.MODF_HFLIP         6
-    BIT_CONST.MODF_VFLIP         7
-
-
-;-------------------------------------------------
-; Map object structures
-; ----------------
-    DEFINE_STRUCT MapObjectGroupMap
-        STRUCT_MEMBER.w stride
-        STRUCT_MEMBER.w width                                                   ; Granularity = 8x8 chunks or 1024x1024 pixels
-        STRUCT_MEMBER.w height
-        STRUCT_MEMBER.w groupCount
-        STRUCT_MEMBER.l containersTableAddress                                  ; MapObjectGroup*[height][width] indexed by CHUNK_REF_OBJECT_GROUP_IDX
-        STRUCT_MEMBER.l containersBaseAddress
-        STRUCT_MEMBER.l groupsBaseAddress
-        STRUCT_MEMBER.l objectTypeTableAddress
-        STRUCT_MEMBER.b rowOffsetTable                                          ; Marker
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapObjectGroup
-        STRUCT_MEMBER.b flagNumber                                              ; Each object group has a unique flag number in the active viewport
-        STRUCT_MEMBER.b objectCount
-        STRUCT_MEMBER.b transferableObjectCount
-        STRUCT_MEMBER.b totalObjectCount
-        STRUCT_MEMBER.w stateOffset                                             ; Offset into the map's allocated state array for this group
-        STRUCT_MEMBER.b objectDescriptors                                       ; Marker
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapObjectType, ObjectType
-        ; Type methods (called once for each object type used in the map)
-        STRUCT_MEMBER.l loadResources                                           ; loadResources()
-        STRUCT_MEMBER.l releaseResources                                        ; releaseResources()
-
-        ; Instance methods
-        STRUCT_MEMBER.l init                                                    ; init(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
-        STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a3-a6
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapObjectDescriptor
-        STRUCT_MEMBER.w type                                                    ; Address of object type
-        STRUCT_MEMBER.b size                                                    ; Size of the descriptor in bytes
-        STRUCT_MEMBER.b flags
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapStatefulObjectDescriptor, MapObjectDescriptor
-        STRUCT_MEMBER.w stateOffset                                             ; Offset into the maps state area
-    DEFINE_STRUCT_END
-
-    ; Appended after the object descriptor if the object type is marked as positional (in the map editor)
-    DEFINE_STRUCT MapObjectPosition
-        STRUCT_MEMBER.w x
-        STRUCT_MEMBER.w y
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapObjectLink, LinkedList
-        STRUCT_MEMBER.l objectDescriptorAddress                                 ; Address of the linked objects MapObjectDescriptor
-        STRUCT_MEMBER.w objectGroupStateAddress                                 ; Address of the MapObjectGroupState state this link is part of
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT MapObjectGroupState
-        STRUCT_MEMBER.w activeObjectsHead                                       ; LinkedList.next ptr
-        STRUCT_MEMBER.w inactiveObjectsHead                                     ; LinkedList.next ptr
-    DEFINE_STRUCT_END
-
-
-;-------------------------------------------------
 ; Map object state
 ; ----------------
     DEFINE_VAR SHORT
         VAR.w                   mapTransferableStateChangeQueueAddress
         VAR.w                   mapTransferableStateChangeQueueCount
-        VAR.w                   mapStateAddress
-        VAR.w                   mapActiveObjectGroupCount
-        VAR.l                   mapActiveObjectGroups, 12
-        VAR.MapObjectGroupState mapGlobalObjectGroupState
     DEFINE_VAR_END
 
 
@@ -146,8 +70,7 @@ _RESET_GROUP_STATE Macro state
 ; Uses: d0-d7/a0-a6
 _RUN_OBJECT_TYPE_RESOURCE_ROUTINE Macro routine
         MAP_GET a0
-        movea.l MapHeader_objectGroupMapAddress(a0), a0                         ; a0 = MapHeader.objectGroupMapAddress
-        movea.l MapObjectGroupMap_objectTypeTableAddress(a0), a0                ; a0 = ObjectGroupMap.objectTypeTableAddress
+        movea.l MapHeader_objectTypeTableAddress(a0), a0                        ; a0 = MapHeader.objectTypeTableAddress
 
         move.w  (a0)+, d0
         beq.s   .noObjectTypes\@
@@ -199,17 +122,12 @@ MapInitObjects:
         ; Clear global group state
         _RESET_GROUP_STATE mapGlobalObjectGroupState
 
-        ; Allocate object state area
-        MAP_GET a4
-        move.w  MapHeader_stateSize(a4), d0
-        jsr     MemoryAllocate
-        move.w  a0, mapStateAddress
-
         ; Init addresses and loop counters
-        movea.l a0, a3                                                          ; a3 = Map state base
-        movea.l MapHeader_objectGroupMapAddress(a4), a4
-        movea.l MapObjectGroupMap_groupsBaseAddress(a4), a0                     ; a0 = Current group/object ObjectDescriptor
-        move.w  MapObjectGroupMap_groupCount(a4), d7                            ; d7 = Object group counter
+        MAP_GET a4
+        movea.w mapStateAddress, a3                                             ; a3 = Map state base
+        movea.l MapHeader_metadataMapAddress(a4), a4
+        movea.l MapMetadataMap_objectGroupsBaseAddress(a4), a0                  ; a0 = Current group/object ObjectDescriptor
+        move.w  MapMetadataMap_groupCount(a4), d7                               ; d7 = Object group counter
         beq     .noObjects
 
         ; Loop over all groups and objects and call Object.init()
@@ -276,7 +194,7 @@ MapInitObjects:
 
 
 ;-------------------------------------------------
-; Update all currently active objects.
+; Update all currently active objects in the viewport.
 ; Tests collisions against the current/caller collision state.
 ; Restores the collisions state to that of the caller. This means collision elements added after the call to MapUpdateObjects will not interact with map objects.
 ; ----------------
@@ -309,7 +227,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         ;-------------------------------------------------
         ; Start of MapUpdateObjects
         ; ----------------
-        move.w  mapActiveObjectGroupCount, d7
+        VIEWPORT_GET_ACTIVE_OBJECT_GROUP_COUNT d7
         bne.s   .activeGroups
             rts
 
@@ -320,7 +238,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         PUSHW   a0
 
         ; Load addresses
-        lea     mapActiveObjectGroups, a3
+        VIEWPORT_GET_ACTIVE_OBJECT_GROUPS a3
         movea.w mapStateAddress, a4
 
         ; Update global objects
@@ -473,22 +391,21 @@ _MAP_ATTACH_OBJECT Macro
         rol.w   #4, d3                                                          ; d3 = container local group offset
         subq.w  #2, d3
 
-        movea.l MapHeader_objectGroupMapAddress(a1), a2                         ; a2 = object group map
-        movea.l MapObjectGroupMap_containersTableAddress(a2), a1
-        movea.l MapObjectGroupMap_containersBaseAddress(a2), a3
-        movea.l MapObjectGroupMap_groupsBaseAddress(a2), a4
+        movea.l MapHeader_metadataMapAddress(a1), a2                            ; a2 = object group map
+        movea.l MapMetadataMap_containersTableAddress(a2), a1
+        movea.l MapMetadataMap_objectGroupsBaseAddress(a2), a3
 
         ; Get MapObjectGroup
         lsr.w   #3, d0
         add.w   d0, d0
+        add.w   d0, d0
         lsr.w   #4, d1
         add.w   d1, d1
-        move.w  MapObjectGroupMap_rowOffsetTable(a2, d1), d1
+        move.w  MapMetadataMap_rowOffsetTable(a2, d1), d1
         add.w   d0, d1                                                          ; d1 = container table offset
-        move.w  (a1, d1), d0                                                    ; d0 = container offset
-        add.w   d3, d0                                                          ; d0 = container group offset
-        move.w  (a3, d0), d0                                                    ; d0 = object group offset
-        move.w  MapObjectGroup_stateOffset(a4, d0), d0                          ; d0 = MapObjectGroup.stateOffset
+        movea.l (a1, d1), a1                                                    ; a1 = container address
+        move.w  MapMetadataContainer_objectGroupOffsetTable(a1, d3), d0         ; d0 = object group offset
+        move.w  MapObjectGroup_stateOffset(a3, d0), d0                          ; d0 = MapObjectGroup.stateOffset
 
         ; Get group state address
         movea.w mapStateAddress, a2

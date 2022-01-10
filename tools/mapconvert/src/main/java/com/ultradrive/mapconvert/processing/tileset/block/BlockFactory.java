@@ -26,7 +26,7 @@ class BlockFactory
         ResourceReference collisionReference = blockModel.getCollisionReference();
 
         return new Block(collisionReference.getId(),
-                         new BlockAnimationMetaData(blockModel.getAnimation()),
+                         new BlockAnimationMetadata(blockModel.getAnimation()),
                          getPatternReferences(
                                  blockPatternReferenceProducerFactory.getBlockPatternReferenceProducer(blockModel),
                                  graphicReference,

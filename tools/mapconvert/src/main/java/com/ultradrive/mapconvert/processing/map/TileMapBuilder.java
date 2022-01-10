@@ -2,7 +2,7 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;
 import com.ultradrive.mapconvert.datasource.model.MapModel;
-import com.ultradrive.mapconvert.processing.map.object.ObjectGroupMap;
+import com.ultradrive.mapconvert.processing.map.metadata.TileMapMetadataMap;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.TilesetReferenceBuilderSource;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
@@ -16,7 +16,7 @@ class TileMapBuilder
     private final MapModel mapModel;
 
     private final List<ChunkReference> chunkReferences;
-    private ObjectGroupMap objectGroupMap;
+    private TileMapMetadataMap tileMapMetadataMap;
 
     TileMapBuilder(TilesetReferenceBuilderSource tilesetReferenceBuilder, MapModel mapModel)
     {
@@ -28,7 +28,7 @@ class TileMapBuilder
 
     public void collectReferences()
     {
-        objectGroupMap = ObjectGroupMap.fromMapModel(mapModel);
+        tileMapMetadataMap = TileMapMetadataMap.fromMapModel(mapModel);
 
         for (int row = 0; row < mapModel.getHeight(); row++)
         {
@@ -39,7 +39,7 @@ class TileMapBuilder
                 ChunkReference.Builder chunkReferenceBuilder =
                         tilesetReferenceBuilder.getTileReference(chunkReferenceModel.getChunkId());
                 chunkReferenceBuilder.setObjectContainerGroupIndex(
-                        objectGroupMap.getChunkObjectGroupContainerIndex(row, column));
+                        tileMapMetadataMap.getChunkObjectGroupContainerIndex(row, column));
                 chunkReferenceBuilder.reorient(chunkReferenceModel.getOrientation());
                 chunkReferences.add(chunkReferenceBuilder.build());
             }
@@ -48,7 +48,7 @@ class TileMapBuilder
 
     public TileMap build(Tileset tileset)
     {
-        return new TileMap(tileset, chunkReferences, objectGroupMap,
+        return new TileMap(tileset, chunkReferences, tileMapMetadataMap,
                            mapModel.getName(),
                            mapModel.getWidth(),
                            mapModel.getHeight(),

@@ -27,7 +27,7 @@ class BlockTest
 
     private Block block(int collisionId, List<PatternReference> patternReferences)
     {
-        return new Block(collisionId, new BlockAnimationMetaData(BlockAnimationModel.empty()), patternReferences);
+        return new Block(collisionId, new BlockAnimationMetadata(BlockAnimationModel.empty()), patternReferences);
     }
 
     private List<PatternReference> createPatternReferences()

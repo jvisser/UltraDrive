@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.processing.map.object;
+package com.ultradrive.mapconvert.processing.map.metadata;
 
 import com.google.common.collect.ImmutableList;
 import com.ultradrive.mapconvert.datasource.model.MapObject;

@@ -9,13 +9,13 @@ import java.util.Objects;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 
-public class BlockAnimationMetaData
+public class BlockAnimationMetadata
 {
     private final String animationId;
     private final List<AnimationFrame> animationFrames;
     private final Map<String, Object> properties;
 
-    public BlockAnimationMetaData(BlockAnimationModel animationModel)
+    public BlockAnimationMetadata(BlockAnimationModel animationModel)
     {
         this.animationId = animationModel.getAnimationId();
         this.properties = animationModel.getProperties();
@@ -35,7 +35,7 @@ public class BlockAnimationMetaData
         {
             return false;
         }
-        final BlockAnimationMetaData that = (BlockAnimationMetaData) o;
+        final BlockAnimationMetadata that = (BlockAnimationMetadata) o;
         return animationId.equals(that.animationId) &&
                animationFrames.equals(that.animationFrames);
     }

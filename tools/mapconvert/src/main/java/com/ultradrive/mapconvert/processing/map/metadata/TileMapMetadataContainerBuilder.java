@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.processing.map.object;
+package com.ultradrive.mapconvert.processing.map.metadata;
 
 import com.google.common.collect.Iterables;
 import com.ultradrive.mapconvert.common.UID;
@@ -9,14 +9,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-class ObjectGroupContainerBuilder
+class TileMapMetadataContainerBuilder
 {
     private final int id;
     private final Set<ObjectGroupBuilder> objectGroupBuilders;
 
     private int assignedFlags;
 
-    public ObjectGroupContainerBuilder()
+    public TileMapMetadataContainerBuilder()
     {
         this.id = UID.create();
         this.objectGroupBuilders = new LinkedHashSet<>();
@@ -49,9 +49,9 @@ class ObjectGroupContainerBuilder
         return Iterables.indexOf(objectGroupBuilders, input -> Objects.equals(input, objectGroupBuilder)) + 1;
     }
 
-    public ObjectGroupContainer build(Map<Integer, ObjectGroup> objectGroupsById)
+    public TileMapMetadataContainer build(Map<Integer, ObjectGroup> objectGroupsById)
     {
-        return new ObjectGroupContainer(id, objectGroupBuilders.stream()
+        return new TileMapMetadataContainer(id, objectGroupBuilders.stream()
                 .map(objectGroupBuilder -> objectGroupsById.get(objectGroupBuilder.getId()))
                 .collect(Collectors.toList()));
     }
