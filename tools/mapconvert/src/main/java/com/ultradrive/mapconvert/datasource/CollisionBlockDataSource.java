@@ -1,7 +1,7 @@
 package com.ultradrive.mapconvert.datasource;
 
 import com.ultradrive.mapconvert.common.PropertySource;
-import com.ultradrive.mapconvert.datasource.model.CollisionBlockMetaData;
+import com.ultradrive.mapconvert.datasource.model.CollisionBlockMetadata;
 import java.net.URL;
 
 
@@ -13,5 +13,5 @@ public interface CollisionBlockDataSource extends PropertySource
 
     URL getCollisionBlockImageSource();
 
-    CollisionBlockMetaData getCollisionBlockMetaData(int collisionId);
+    CollisionBlockMetadata getCollisionBlockMetaData(int collisionId);
 }

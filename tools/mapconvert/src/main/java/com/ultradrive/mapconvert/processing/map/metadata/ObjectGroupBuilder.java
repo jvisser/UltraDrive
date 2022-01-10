@@ -1,4 +1,4 @@
-package com.ultradrive.mapconvert.processing.map.object;
+package com.ultradrive.mapconvert.processing.map.metadata;
 
 import com.ultradrive.mapconvert.common.UID;
 import com.ultradrive.mapconvert.datasource.model.MapObject;
@@ -14,7 +14,7 @@ class ObjectGroupBuilder
     public static ObjectGroupBuilder ZERO = new ObjectGroupBuilder();
 
     private final int id = UID.create();
-    private final Set<ObjectGroupContainerBuilder> containers = new HashSet<>();
+    private final Set<TileMapMetadataContainerBuilder> containers = new HashSet<>();
     private final Set<ObjectGroupBuilder> potentiallyVisibleNonLocalGroups = new HashSet<>();
     private final Set<MapObject> objects = new HashSet<>();
 
@@ -25,9 +25,9 @@ class ObjectGroupBuilder
         return containers.size() * 1000 + potentiallyVisibleNonLocalGroups.size();
     }
 
-    public void addContainer(ObjectGroupContainerBuilder objectGroupContainerBuilder)
+    public void addContainer(TileMapMetadataContainerBuilder metadataContainerBuilder)
     {
-        containers.add(objectGroupContainerBuilder);
+        containers.add(metadataContainerBuilder);
     }
 
     public void associateGroup(ObjectGroupBuilder objectGroupBuilder)
@@ -41,7 +41,7 @@ class ObjectGroupBuilder
 
     public void calculateFlag()
     {
-        Set<ObjectGroupContainerBuilder> associatedContainers = getAssociatedContainers();
+        Set<TileMapMetadataContainerBuilder> associatedContainers = getAssociatedContainers();
 
         int freeFlags = ~associatedContainers.stream()
                 .reduce(0, (i, c) -> i | c.getAssignedFlags(), (i, i2) -> i | i2);
@@ -53,10 +53,10 @@ class ObjectGroupBuilder
 
         assignedFlag = Integer.lowestOneBit(freeFlags);
 
-        associatedContainers.forEach(objectGroupContainerBuilder -> objectGroupContainerBuilder.addFlag(assignedFlag));
+        associatedContainers.forEach(metadataContainerBuilder -> metadataContainerBuilder.addFlag(assignedFlag));
     }
 
-    private Set<ObjectGroupContainerBuilder> getAssociatedContainers()
+    private Set<TileMapMetadataContainerBuilder> getAssociatedContainers()
     {
         return Stream.concat(containers.stream(),
                              potentiallyVisibleNonLocalGroups.stream()

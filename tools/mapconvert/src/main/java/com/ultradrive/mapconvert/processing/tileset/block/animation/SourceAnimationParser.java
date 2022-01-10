@@ -1,7 +1,7 @@
 package com.ultradrive.mapconvert.processing.tileset.block.animation;
 
 import com.ultradrive.mapconvert.processing.tileset.block.Block;
-import com.ultradrive.mapconvert.processing.tileset.block.BlockAnimationMetaData;
+import com.ultradrive.mapconvert.processing.tileset.block.BlockAnimationMetadata;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileMetrics;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -160,7 +160,7 @@ class SourceAnimationParser
         List<Integer> frameGraphicIds = new ArrayList<>(animationBlocks.size());
         for (Block block : animationBlocks)
         {
-            BlockAnimationMetaData.AnimationFrame sourceFrame = block.getAnimationMetaData().getFrame(frameId);
+            BlockAnimationMetadata.AnimationFrame sourceFrame = block.getAnimationMetaData().getFrame(frameId);
 
             frameGraphicIds.add(sourceFrame.getGraphicsId());
             frameTime = Math.max(frameTime, sourceFrame.getFrameTime());

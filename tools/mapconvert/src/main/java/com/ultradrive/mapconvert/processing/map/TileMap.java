@@ -2,7 +2,7 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.common.PropertySource;
 import com.ultradrive.mapconvert.config.PreAllocatedPattern;
-import com.ultradrive.mapconvert.processing.map.object.ObjectGroupMap;
+import com.ultradrive.mapconvert.processing.map.metadata.TileMapMetadataMap;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
 {
     private final Tileset tileset;
     private final List<ChunkReference> chunkReferences;
-    private final ObjectGroupMap objectGroupMap;
+    private final TileMapMetadataMap metadataMap;
     private final Map<String, Object> properties;
 
     private final String name;
@@ -24,13 +24,13 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
     private final int height;
 
     TileMap(Tileset tileset, List<ChunkReference> chunkReferences,
-            ObjectGroupMap objectGroupMap,
+            TileMapMetadataMap metadataMap,
             String name, int width, int height,
             Map<String, Object> properties)
     {
         this.tileset = tileset;
         this.chunkReferences = chunkReferences;
-        this.objectGroupMap = objectGroupMap;
+        this.metadataMap = metadataMap;
         this.properties = properties;
         this.name = name;
         this.width = width;
@@ -41,7 +41,7 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
     {
         this.tileset = source.tileset;
         this.chunkReferences = source.chunkReferences;
-        this.objectGroupMap = source.objectGroupMap;
+        this.metadataMap = source.metadataMap;
         this.properties = new HashMap<>(source.properties);
         this.name = source.name;
         this.width = source.width;
@@ -73,9 +73,9 @@ public class TileMap implements PropertySource, Iterable<ChunkReference>
         return tileset;
     }
 
-    public ObjectGroupMap getObjectGroupMap()
+    public TileMapMetadataMap getMetadataMap()
     {
-        return objectGroupMap;
+        return metadataMap;
     }
 
     public String getName()
