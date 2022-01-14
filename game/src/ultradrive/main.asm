@@ -2,6 +2,9 @@
 ; Main entry point.
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/debug.inc'
+    Include './common/include/profile.inc'
+
     DEFINE_VAR SHORT
         VAR.l spriteAddr
         VAR.Player player
@@ -151,7 +154,7 @@ Main:
             bsr     _UpdatePlayer
             bsr     _UpdateManualTilesetAnimations
 
-            jsr     MapUpdateObjects
+            jsr     ViewportUpdateObjects
 
             jsr     VDPSpriteCommit
 

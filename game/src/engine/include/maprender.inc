@@ -1,13 +1,14 @@
 ;------------------------------------------------------------------------------------------
-; Engine initialization
+; Map rendering macros
 ;------------------------------------------------------------------------------------------
 
-    Include './engine/include/engine.inc'
+    If (~def(__ENGINE_MAPRENDER_INC))
+__ENGINE_MAPRENDER_INC Equ 1
 
 ;-------------------------------------------------
-; Initialize engine components
+; Reset the renderer (inline)
 ; ----------------
-EngineInit:
-        jsr ViewportEngineInit
-        jsr EngineSchedulerInit
-        rts
+MAP_RENDER_RESET Macros
+    move.w  #mapRenderBuffer, mapCurrentRenderBuffer
+
+    EndIf

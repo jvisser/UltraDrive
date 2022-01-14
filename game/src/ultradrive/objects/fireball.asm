@@ -2,6 +2,10 @@
 ; Fireball "AI"
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/object.inc'
+    Include './engine/include/map.inc'
+    Include './engine/include/angle.inc'
+
 ;-------------------------------------------------
 ; Fireball constants
 ; ----------------

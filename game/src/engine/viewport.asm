@@ -1,113 +1,63 @@
 ;------------------------------------------------------------------------------------------
-; Viewport. Manages background and foreground plane
+; Viewport. Manages background and foreground plane etc...
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/debug.inc'
+    
+    Include './engine/include/viewport.inc'
+    Include './engine/include/background.inc'
+    Include './engine/include/map.inc'
+    Include './engine/include/scroll.inc'
+
 ;-------------------------------------------------
-; Viewport constants
+; Viewport variables
 ; ----------------
-VIEWPORT_ACTIVE_AREA_SIZE_H     Equ 320/4
-VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
-
-
-;-------------------------------------------------
-; Viewport structures
-; ----------------
-    DEFINE_STRUCT ViewportConfiguration
-        STRUCT_MEMBER.l                     backgroundTracker                   ; Used to update the background camera position
-        STRUCT_MEMBER.l                     backgroundTrackerConfiguration      ; Background tracker configuration address (if any)
-        STRUCT_MEMBER.ScrollConfiguration   horizontalScrollConfiguration       ; Used to update horizontal VDP scroll values
-        STRUCT_MEMBER.ScrollConfiguration   verticalScrollConfiguration         ; Used to update vertical VDP scroll values
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT Viewport
-        STRUCT_MEMBER.Camera    background
-        STRUCT_MEMBER.Camera    foreground
-        STRUCT_MEMBER.l         backgroundTracker                               ; Used to update the background camera
-        STRUCT_MEMBER.l         backgroundTrackerConfiguration
-        STRUCT_MEMBER.l         horizontalVDPScrollUpdater                      ; Used to update the horizontal VDP scroll values
-        STRUCT_MEMBER.l         verticalVDPScrollUpdater                        ; Used to update the vertical VDP scroll values
-        STRUCT_MEMBER.w         trackingEntity                                  ; Entity to keep in view
-        STRUCT_MEMBER.l         foregroundMovementCallback
-        STRUCT_MEMBER.w         subChunkId                                      ; Used to detect viewport chunk changes on movement
-        STRUCT_MEMBER.l         activeObjectGroupConfigurationId                ; Current object group configuration used to detect object group configuration changes
-        STRUCT_MEMBER.w         activeObjectGroupCount
-        STRUCT_MEMBER.l         activeObjectGroups, 12
-        STRUCT_MEMBER.w         chunkRefCache, 12                               ; Cache of all chunks references in view (foreground). Used as the basis for rendering the foreground. Can be dynamically patched to alter the appearance of the map.
-        STRUCT_MEMBER.w         chunkRefCacheStride                             ; Number of bytes per row in the chunk reference cache
-    DEFINE_STRUCT_END
-
     DEFINE_VAR SHORT
         VAR.Viewport viewport
     DEFINE_VAR_END
 
-
-;-------------------------------------------------
-; Install movement callback and camera data for the specified camera
-; ----------------
-VIEWPORT_INSTALL_MOVEMENT_CALLBACK Macro camera, callback, cameraData
-        If (strcmp('\camera', 'foreground'))
-            move.l  #\callback, (viewport + Viewport_foregroundMovementCallback)
-        Else
-            move.l  #\callback, (viewport + Viewport_\camera + Camera_moveCallback)
-        EndIf
-        move.l  \cameraData, (viewport + Viewport_\camera + Camera_data)
-    Endm
-
-
-;-------------------------------------------------
-; Restore the default movement callback for the specified camera
-; ----------------
-VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK Macro camera
-        If (strcmp('\camera', 'foreground'))
-            move.l  #NoOperation, (viewport + Viewport_foregroundMovementCallback)
-        Else
-            move.l  #NoOperation, (viewport + Viewport_\camera + Camera_moveCallback)
-        EndIf
-    Endm
-
-
-;-------------------------------------------------
-; Start tracking the specified entity
-; ----------------
-VIEWPORT_TRACK_ENTITY Macros entity
-        move.w  \entity, (viewport + Viewport_trackingEntity)
-
-
-;-------------------------------------------------
-; Stop entity tracking
-; ----------------
-VIEWPORT_TRACK_ENTITY_END Macros
-        clr.w  (viewport + Viewport_trackingEntity)
-
-
-;-------------------------------------------------
-; Get viewport X position
-; ----------------
-VIEWPORT_GET_X Macros target
-    move.w  (viewport + Viewport_foreground + Camera_x), \target
-
-
-;-------------------------------------------------
-; Get viewport Y position
-; ----------------
-VIEWPORT_GET_Y Macros target
-    move.w  (viewport + Viewport_foreground + Camera_y), \target
-
-
-;-------------------------------------------------
-; Get the active object group count in the viewport
-; ----------------
-; Output:
-; - ccr using move semantics
-VIEWPORT_GET_ACTIVE_OBJECT_GROUP_COUNT Macros target
-    move.w  (viewport + Viewport_activeObjectGroupCount), \target
-
-
-;-------------------------------------------------
-; Get the active object groups in the viewport
-; ----------------
-VIEWPORT_GET_ACTIVE_OBJECT_GROUPS Macros target
-    lea     (viewport + Viewport_activeObjectGroups), \target
+    ;-------------------------------------------------
+    ; Default viewport configuration. Relative background using plane based scrolling based on the camera
+    ; ----------------
+    defaultViewportConfiguration:
+        ; .backgroundTracker
+        dc.l relativeBackgroundTracker
+        ; .backgroundTrackerConfiguration
+        dc.l relativeHorizontalVerticalBackgroundTrackerConfiguration
+        ; .horizontalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
+            dc.l planeHorizontalVDPScrollUpdater
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
+                dc.l planeHorizontalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
+                dc.l planeHorizontalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+        ; .verticalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
+            dc.l planeVerticalVDPScrollUpdater
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
+                dc.l planeVerticalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
+                dc.l planeVerticalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
 
 
 ;-------------------------------------------------
@@ -251,6 +201,16 @@ _UPDATE_SCROLL Macro orientation
         rts
 
         Purge _UPDATE_SCROLL
+
+
+;-------------------------------------------------
+; Update all objects in the viewport
+; ----------------
+; Uses: d0/d7/a0/a3-a6
+ViewportUpdateObjects:
+        lea     (viewport + Viewport_activeObjectGroups), a3
+        move.w  (viewport + Viewport_activeObjectGroupCount), d7
+        jmp     MapUpdateObjects
 
 
 ;-------------------------------------------------

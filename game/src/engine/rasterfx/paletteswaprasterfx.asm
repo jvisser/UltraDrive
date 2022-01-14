@@ -8,6 +8,8 @@
 ; TODO: Remove direct Tileset dependency (Move required data to PaletteSwapRasterEffectConfiguration)
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/debug.inc'
+
 ;-------------------------------------------------
 ; Palette swap raster effect structs
 ; ----------------

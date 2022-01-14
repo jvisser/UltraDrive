@@ -2,18 +2,7 @@
 ; Main engine scheduler. Calls subsystem schedulers if enabled.
 ;------------------------------------------------------------------------------------------
 
-;-------------------------------------------------
-; Generic scheduler constants
-; ----------------
-SCHEDULER_COUNT            Equ 1
-
-
-;-------------------------------------------------
-; Subsystem scheduler identifiers
-; ----------------
-SCHEDULER_TILESET          Equ $80
-SCHEDULER_ALL              Equ SCHEDULER_TILESET
-
+    Include './engine/include/scheduler.inc'
 
 ;-------------------------------------------------
 ; Scheduler state
@@ -29,36 +18,6 @@ SCHEDULER_ALL              Equ SCHEDULER_TILESET
         dc.b        0
         dc.b        SCHEDULER_ALL
     EngineSchedulersEnd:
-
-
-;-------------------------------------------------
-; Enable the specified scheduler
-; NB: Should only be used by engine subsystems. Use the mask macros to temporarily disable subsystems
-; ----------------
-ENGINE_SCHEDULER_ENABLE Macros schedulerId
-    ori.b  #\schedulerId, engineSchedulerFlags
-
-
-;-------------------------------------------------
-; Disable the specified scheduler.
-; NB: Should only be used by engine subsystems. Use the mask macros to temporarily disable subsystems
-; ----------------
-ENGINE_SCHEDULER_DISABLE Macros schedulerId
-    andi.b  #~\schedulerId & $ff, engineSchedulerFlags
-
-
-;-------------------------------------------------
-; Mask the specified scheduler (disable it)
-; ----------------
-ENGINE_SCHEDULER_MASK Macros schedulerId
-    andi.b   #~\schedulerId & $ff, engineSchedulerMask
-
-
-;-------------------------------------------------
-; Unmask the specified scheduler
-; ----------------
-ENGINE_SCHEDULER_UNMASK Macros schedulerId
-    ori.b    #\schedulerId, engineSchedulerMask
 
 
 ;-------------------------------------------------

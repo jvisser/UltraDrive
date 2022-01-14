@@ -2,6 +2,8 @@
 ; VDP Low level sprite handling routines/macros
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/debug.inc'
+
 ;-------------------------------------------------
 ; Sprite attribute table constants
 ; ----------------

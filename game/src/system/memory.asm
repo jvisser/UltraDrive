@@ -2,6 +2,8 @@
 ; Random Access Memory (ROM/RAM) functions and variable allocation macros
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/debug.inc'
+
 ;-------------------------------------------------
 ; ROM address ranges
 ; ----------------

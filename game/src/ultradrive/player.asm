@@ -2,6 +2,9 @@
 ; Player state machine
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/entity.inc'
+    Include './engine/include/collision.inc'
+
 ;-------------------------------------------------
 ; Player constants
 ; ----------------

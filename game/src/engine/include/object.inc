@@ -2,6 +2,9 @@
 ; Object stuff
 ;------------------------------------------------------------------------------------------
 
+    If (~def(__ENGINE_OBJECT_INC))
+__ENGINE_OBJECT_INC Equ 1
+
 ;-------------------------------------------------
 ; Object structures
 ; ----------------
@@ -37,3 +40,5 @@ DEFINE_OBJECT_TYPE Macro name, stateName
 DEFINE_OBJECT_TYPE_END Macro
         SECTION_END
     Endm
+
+    EndIf

@@ -1,6 +1,11 @@
 ;------------------------------------------------------------------------------------------
-; Debug log
+; Debug log.
+;
+; TODO: Split into separate implementation modules (genskmod+everdrive)
 ;------------------------------------------------------------------------------------------
+
+    If (~def(__COMMON_DEBUG_INC))
+__COMMON_DEBUG_INC Equ 1
 
     If strcmp('\debug', 'gens')
 
@@ -88,5 +93,7 @@ DEBUG_STOP_TIMER Macro
 
 DEBUG_BREAK Macro
     Endm
+
+    EndIf
 
     EndIf

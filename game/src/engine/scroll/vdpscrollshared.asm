@@ -2,6 +2,8 @@
 ; VDP Scroll updater shared memory/macros (since only one is active at a time)
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/constants.inc'
+
 ;-------------------------------------------------
 ; Update flags
 ; ----------------
