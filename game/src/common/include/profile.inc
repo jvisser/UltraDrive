@@ -2,6 +2,9 @@
 ; Simple profiling macros using the VDP background color to show cruding percentage of frametime
 ;------------------------------------------------------------------------------------------
 
+    If (~def(__COMMON_PROFILE_INC))
+__COMMON_PROFILE_INC Equ 1
+
 ;-------------------------------------------------
 ; Show frame time slice by changing the background color
 ; ----------------
@@ -38,3 +41,5 @@ PROFILE_CPU_START Macro
 PROFILE_CPU_END Macro
     DEBUG_STOP_TIMER
     Endm
+
+    EndIf

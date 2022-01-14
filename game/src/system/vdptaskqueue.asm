@@ -2,6 +2,8 @@
 ; VDP Task queue. Tasks that need to be executed during vertical blanking period
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/debug.inc'
+
 ;-------------------------------------------------
 ; VDP Task queue constants
 ; ----------------

@@ -2,6 +2,9 @@
 ; System wide constants and support macros
 ;------------------------------------------------------------------------------------------
 
+    If (~def(__COMMON_CONSTANTS_INC))
+__COMMON_CONSTANTS_INC Equ 1
+
 ;-------------------------------------------------
 ; Constants
 ; ----------------
@@ -23,3 +26,5 @@ BIT_MASK  Macro bitNumber, numberOfBits
 \0\_SHIFT   Equ     \bitNumber
 \0\_MASK    Equ     (((1 << \numberOfBits) - 1) << bitNumber)
     Endm
+
+    EndIf

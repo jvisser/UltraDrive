@@ -6,6 +6,9 @@
 ; - relativeVerticalBackgroundTracker: Scrolls only vertically
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/camera.inc'
+    Include './engine/include/map.inc'
+
 ;-------------------------------------------------
 ; Relative background tracker structures
 ; ----------------

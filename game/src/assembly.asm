@@ -2,18 +2,19 @@
 ; Main binary assembly
 ;------------------------------------------------------------------------------------------
 
-; TODO: Move macros to separate files due to M68K expanding macros in a single pass :/ (or just switch to a better/modern assembler)
-
     Include 'asmopts.asm'
     Include 'layout.asm'
 
     ;-------------------------------------------------
+    ; Common
+    ; ----------------
+    Include './common/include/common.inc'
+
+
+    ;-------------------------------------------------
     ; System
     ; ----------------
-    Include './system/constants.asm'
     Include './system/m68k.asm'
-    Include './system/debug.asm'
-    Include './system/profile.asm'
     Include './system/system.asm'
     Include './system/memory.asm'
     Include './system/z80.asm'
@@ -33,22 +34,22 @@
     ;-------------------------------------------------
     ; Engine
     ; ----------------
+    Include './engine/include/engine.inc'
+
     Include './engine/engine.asm'
-    Include './engine/linkedlist.asm'
-    Include './engine/fp16.asm'
     Include './engine/scheduler.asm'
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
-    Include './engine/entity.asm'
-    Include './engine/object.asm'
-    Include './engine/collision.asm'
+    Include './engine/tileset.asm'
     Include './engine/map.asm'
     Include './engine/maprender.asm'
+    Include './engine/mapobject.asm'
+    Include './engine/mapcollision.asm'
     Include './engine/camera.asm'
-    Include './engine/background.asm'
+    Include './engine/viewport.asm'
+    Include './engine/collision.asm'
     Include './engine/background/relativebackground.asm'
     Include './engine/background/staticbackground.asm'
-    Include './engine/scroll.asm'
     Include './engine/scroll/vdpscrollshared.asm'
     Include './engine/scroll/vdpplanehscroll.asm'
     Include './engine/scroll/vdpplanevscroll.asm'
@@ -59,12 +60,7 @@
     Include './engine/scroll/updaters/planescrollcamera.asm'
     Include './engine/scroll/updaters/multivaluescrollcamera.asm'
     Include './engine/scroll/updaters/rotatescroll.asm'
-    Include './engine/viewport.asm'
-    Include './engine/viewportconfig.asm'
-    Include './engine/mapobject.asm'
-    Include './engine/tileset.asm'
     Include './engine/rasterfx/paletteswaprasterfx.asm'
-    Include './engine/mapcollision.asm'
 
 
     ;-------------------------------------------------

@@ -2,6 +2,8 @@
 ; Collision types
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/collision.inc'
+
     DEFINE_COLLISION_TYPES &
         Player,            &
         Enemy,             &

@@ -2,6 +2,11 @@
 ; Blob "AI"
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/object.inc'
+    Include './engine/include/entity.inc'
+    Include './engine/include/map.inc'
+    Include './engine/include/collision.inc'
+
 ;-------------------------------------------------
 ; Blob constants
 ; ----------------

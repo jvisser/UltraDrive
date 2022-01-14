@@ -5,19 +5,13 @@
 ; - MapUpdateObjects
 ; - MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE
 
+    Include './engine/include/mapobject.inc'
+    Include './engine/include/map.inc'
 
 ;-------------------------------------------------
-; Map object constants
+; Constants
 ; ----------------
 MAP_TRANSFERABLE_STATE_CHANGE_QUEUE_ALLOCATION_SIZE Equ (64*SIZE_WORD)
-
-; MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE state change parameters
-MAP_OBJECT_STATE_CHANGE_ATTACH              Equ (_MapAttachTransferableObject - _MapProcessObjectStateChangesBaseOffset)
-MAP_OBJECT_STATE_CHANGE_ATTACH_FLOOR        Equ (_MapAttachTransferableObjectFloor - _MapProcessObjectStateChangesBaseOffset)
-MAP_OBJECT_STATE_CHANGE_ACTIVATE            Equ (_MapActivateTransferableObject - _MapProcessObjectStateChangesBaseOffset)
-MAP_OBJECT_STATE_CHANGE_DEACTIVATE          Equ (_MapDeactivateTransferableObject - _MapProcessObjectStateChangesBaseOffset)
-MAP_OBJECT_STATE_CHANGE_ACTIVATE_GLOBAL     Equ (_MapActivateTransferableObjectGlobal - _MapProcessObjectStateChangesBaseOffset)
-MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjectGlobal - _MapProcessObjectStateChangesBaseOffset)
 
 
 ;-------------------------------------------------
@@ -27,33 +21,6 @@ MAP_OBJECT_STATE_CHANGE_DEACTIVATE_GLOBAL   Equ (_MapDeactivateTransferableObjec
         VAR.w                   mapTransferableStateChangeQueueAddress
         VAR.w                   mapTransferableStateChangeQueueCount
     DEFINE_VAR_END
-
-
-;-------------------------------------------------
-; Queue object state change.
-; This macros is to be used within MapObjectType.update() to prevent concurrent modifications to the object update list while updating;
-;
-; TODO: Add bounds check
-; ----------------
-; Input:
-; - stateChange: MAP_OBJECT_STATE_CHANGE_* representing the change requested
-; - objectStateAddress: Object state address
-; - scratch: Address register to use as scratch register
-; - param1: Optional state change specific parameter 1
-; - param2: Optional state change specific parameter 2
-MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE Macro stateChange, objectStateAddress, scratch, param1, param2
-        movea.w mapTransferableStateChangeQueueAddress, \scratch
-        If (narg>4)
-            move.w  \param2, (\scratch)+
-        EndIf
-        If (narg>3)
-            move.w  \param1, (\scratch)+
-        EndIf
-        move.w  \objectStateAddress, (\scratch)+
-        move.w  #\stateChange, (\scratch)+
-        move.w  \scratch, mapTransferableStateChangeQueueAddress
-        addq.w  #1, mapTransferableStateChangeQueueCount
-    Endm
 
 
 ;-------------------------------------------------
@@ -198,6 +165,9 @@ MapInitObjects:
 ; Tests collisions against the current/caller collision state.
 ; Restores the collisions state to that of the caller. This means collision elements added after the call to MapUpdateObjects will not interact with map objects.
 ; ----------------
+; Input: (TODO: Rearange register allocation to align with calling convention)
+; - d7: Number of object groups
+; - a3: Address of array of MapObjectGroup pointers
 ; Uses: d0-d7/a0-a6
 MapUpdateObjects:
 
@@ -206,7 +176,7 @@ MapUpdateObjects:
 ; Input:
 ; - d0: MapObjectLink address
 ; ----------------
-; Uses: d0/d7/a0/a5-a6
+; Uses: d0/d7/a0/a3-a6
 _PROCESS_TRANSFERABLE_OBJECTS Macro
         .transferableObjectLoop\@:
             movea.w d0, a6                                                      ; a6 = address of transferable object's MapObjectLink
@@ -227,7 +197,6 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         ;-------------------------------------------------
         ; Start of MapUpdateObjects
         ; ----------------
-        VIEWPORT_GET_ACTIVE_OBJECT_GROUP_COUNT d7
         bne.s   .activeGroups
             rts
 
@@ -238,7 +207,6 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         PUSHW   a0
 
         ; Load addresses
-        VIEWPORT_GET_ACTIVE_OBJECT_GROUPS a3
         movea.w mapStateAddress, a4
 
         ; Update global objects

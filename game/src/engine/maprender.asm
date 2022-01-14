@@ -2,6 +2,10 @@
 ; Map rendering routines
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/maprender.inc'
+    Include './engine/include/map.inc'
+    Include './engine/include/tileset.inc'
+
 ;-------------------------------------------------
 ; Map render buffers
 ; ----------------
@@ -30,13 +34,6 @@ MapRenderInit:
         move.w  #$007f, (mapColumnBufferDMATransfer + VDPDMATransfer_source)
 
         ; NB: Fall through to MapRenderReset
-
-
-;-------------------------------------------------
-; Reset the renderer (inline)
-; ----------------
-MAP_RENDER_RESET Macros
-    move.w  #mapRenderBuffer, mapCurrentRenderBuffer
 
 
 ;-------------------------------------------------

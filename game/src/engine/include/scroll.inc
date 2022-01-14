@@ -1,6 +1,9 @@
 ;------------------------------------------------------------------------------------------
-; Scroll support code.
+; Scroll structures.
 ;------------------------------------------------------------------------------------------
+
+    If (~def(__ENGINE_SCROLL_INC))
+__ENGINE_SCROLL_INC Equ 1
 
 ;-------------------------------------------------
 ; Handles transfering the scroll values to the VDP
@@ -38,3 +41,5 @@
         STRUCT_MEMBER.ScrollValueUpdaterConfiguration   backgroundScrollUpdaterConfiguration
         STRUCT_MEMBER.ScrollValueUpdaterConfiguration   foregroundScrollUpdaterConfiguration
     DEFINE_STRUCT_END
+
+    EndIf

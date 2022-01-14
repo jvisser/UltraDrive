@@ -2,6 +2,8 @@
 ; Configurable plane scroll value updater applicable to both horizontal and vertical vdp plane scroll updaters depending on the configuration used.
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/camera.inc'
+
 ;-------------------------------------------------
 ; Plane scroll camera ScrollValueUpdater structs
 ; ----------------
