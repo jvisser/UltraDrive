@@ -2,6 +2,8 @@
 ; Configurable multivalue scroll updater used for horizontal cell/line and vertical cell scroll modes depending on the used MultiScrollCameraConfiguration.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+
     Include './engine/include/camera.inc'
 
 ;-------------------------------------------------

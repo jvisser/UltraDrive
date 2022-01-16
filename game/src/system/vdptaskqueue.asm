@@ -4,6 +4,10 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/vdptaskqueue.inc'
+    Include './system/include/m68k.inc'
+    Include './system/include/os.inc'
+
 ;-------------------------------------------------
 ; VDP Task queue constants
 ; ----------------
@@ -11,13 +15,8 @@ VDP_TASK_QUEUE_SIZE Equ 32
 
 
 ;-------------------------------------------------
-; VDP Task queue structures
+; VDP Task queue state
 ; ----------------
-    DEFINE_STRUCT VDPTask
-        STRUCT_MEMBER.l task
-        STRUCT_MEMBER.l taskData
-    DEFINE_STRUCT_END
-
     DEFINE_VAR SHORT
         VAR.VDPTask vdpTaskQueue,                VDP_TASK_QUEUE_SIZE
         VAR.w       vdpTaskQueueCurrentEntry
@@ -31,40 +30,6 @@ VDP_TASK_QUEUE_SIZE Equ 32
 VDPTaskQueueInit:
     move.w  #vdpTaskQueue, vdpTaskQueueCurrentEntry
     rts
-
-
-;-------------------------------------------------
-; Queue VDP Task (inline)
-; ----------------
-; Uses: a6
-VDP_TASK_QUEUE_ADD Macro jobAddress, jobData
-            OS_LOCK
-
-            movea.w vdpTaskQueueCurrentEntry, a6
-            cmpa.w  #vdpTaskQueue + vdpTaskQueue_Size, a6
-            beq     .vdpTaskQueueFull\@
-
-            move.l  \jobAddress, (a6)+
-            If (narg = 1)
-                addq.l  #SIZE_LONG, a6
-            Else
-                move.l  \jobData, (a6)+
-            EndIf
-            move.w  a6, vdpTaskQueueCurrentEntry
-
-            If def(debug)
-                    bra.s .vpdTaskQueueDone\@
-
-                .vdpTaskQueueFull\@:
-                    DEBUG_MSG 'VDP Task Queue full'
-
-                .vpdTaskQueueDone\@:
-            Else
-                .vdpTaskQueueFull\@:
-            Endif
-
-            OS_UNLOCK
-    Endm
 
 
 ;-------------------------------------------------

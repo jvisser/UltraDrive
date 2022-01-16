@@ -5,6 +5,8 @@
     If (~def(__ENGINE_VIEW_PORT_INC))
 __ENGINE_VIEW_PORT_INC Equ 1
 
+    Include './system/include/memory.inc'
+
     Include './engine/include/camera.inc'
 
 ;-------------------------------------------------

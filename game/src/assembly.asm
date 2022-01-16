@@ -14,22 +14,21 @@
     ;-------------------------------------------------
     ; System
     ; ----------------
-    Include './system/m68k.asm'
-    Include './system/system.asm'
+    Include './system/include/system.inc'
+
+
     Include './system/memory.asm'
     Include './system/z80.asm'
-    Include './system/io.asm'
-    Include './system/vdpcmd.asm'
-    Include './system/vdp.asm'
     Include './system/exception.asm'
-    Include './system/os.asm'
+    Include './system/tmss.asm'
+    Include './system/io.asm'
+    Include './system/vdp.asm'
     Include './system/vdptaskqueue.asm'
     Include './system/rasterfx.asm'
-    Include './system/vdpdma.asm'
     Include './system/vdpdmaqueue.asm'
     Include './system/vdpsprite.asm'
+    Include './system/os.asm'
     Include './system/init.asm'
-
 
     ;-------------------------------------------------
     ; Engine

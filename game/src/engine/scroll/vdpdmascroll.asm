@@ -2,6 +2,8 @@
 ; Support macros for building DMA based VDP scroll updaters for multi value scroll modes
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/vdpdmaqueue.inc'
+
 ;-------------------------------------------------
 ; Setup scroll tables and DMA
 ; ----------------

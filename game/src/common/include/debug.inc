@@ -7,7 +7,14 @@
     If (~def(__COMMON_DEBUG_INC))
 __COMMON_DEBUG_INC Equ 1
 
+    Include './system/include/vdp.inc'
+
+    ;-------------------------------------------------
+    ; Gens KMOD debug mode
+    ; ----------------
     If strcmp('\debug', 'gens')
+
+    Include './system/include/m68k.inc'
 
 ;-------------------------------------------------
 ; Write debug message to console (GensKMod implementation)
@@ -78,9 +85,10 @@ GensKModDebugAlert:
         rts
 
 
+    ;-------------------------------------------------
+    ; Undefined debug mode
+    ; ----------------
     Else
-
-; NOOP Default
 
 DEBUG_MSG Macro
     Endm

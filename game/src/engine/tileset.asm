@@ -2,6 +2,9 @@
 ; Tileset
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/vdp.inc'
+    Include './system/include/vdpdmaqueue.inc'
+
     Include './engine/include/tileset.inc'
     Include './engine/include/scheduler.inc'
 

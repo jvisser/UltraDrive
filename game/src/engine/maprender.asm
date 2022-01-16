@@ -2,6 +2,10 @@
 ; Map rendering routines
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/m68k.inc'
+    Include './system/include/vdp.inc'
+    Include './system/include/vdpdmaqueue.inc'
+
     Include './engine/include/maprender.inc'
     Include './engine/include/map.inc'
     Include './engine/include/tileset.inc'

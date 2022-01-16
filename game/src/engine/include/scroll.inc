@@ -5,6 +5,8 @@
     If (~def(__ENGINE_SCROLL_INC))
 __ENGINE_SCROLL_INC Equ 1
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Handles transfering the scroll values to the VDP
 ; ----------------

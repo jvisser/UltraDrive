@@ -2,6 +2,8 @@
 ; Static background tracker implementation. Initializes the camera once to the background plane size and never updates the camera position.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/vdp.inc'
+
 ;-------------------------------------------------
 ; Static background tracker structures
 ; ----------------

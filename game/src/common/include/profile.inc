@@ -5,6 +5,8 @@
     If (~def(__COMMON_PROFILE_INC))
 __COMMON_PROFILE_INC Equ 1
 
+    Include './system/include/vdp.inc'
+
 ;-------------------------------------------------
 ; Show frame time slice by changing the background color
 ; ----------------

@@ -1,6 +1,9 @@
 ;------------------------------------------------------------------------------------------
-; Mega Drive system details
+; Mega Drive TradeMark Security System (TMSS) constants / macros
 ;------------------------------------------------------------------------------------------
+
+    If (~def(__SYSTEM_TMSS_INC))
+__SYSTEM_TMSS_INC Equ 1
 
 ;-------------------------------------------------
 ; System related 68000 memory addresses
@@ -18,16 +21,4 @@ REG_VERSION_TMSS_MASK   Equ $0f    ; No specifics known about version field than
 REG_VERSION_VIDEO_MODE  Equ $40    ; 1 = NTSC (7.67 Mhz clock), 0 = PAL (7.60 Mhz clock)
 REG_VERSION_MODE        Equ $80    ; 1 = Domestic model, 0 = Overseas model
 
-
-;-------------------------------------------------
-; Unlock system by TradeMark Security System (TMSS) protocol
-; ----------------
-; Uses: d0
-TMSSUnlock:
-        move.b  MEM_REG_VERSION, d0
-        andi.b  #REG_VERSION_TMSS_MASK, d0
-        beq.s   .noTMSS
-        move.l  #'SEGA', MEM_TMSS
-
-    .noTMSS:
-        rts
+    EndIf

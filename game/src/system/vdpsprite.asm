@@ -4,6 +4,9 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/vdp.inc'
+    Include './system/include/vdpdmaqueue.inc'
+
 ;-------------------------------------------------
 ; Sprite attribute table constants
 ; ----------------
@@ -11,46 +14,8 @@ VDP_MAX_SPRITES Equ 80
 
 
 ;-------------------------------------------------
-; Sprite attribute constants
-; ----------------
-
-; Vertical sizes
-VDP_SPRITE_SIZE_V1 Equ                      $00
-VDP_SPRITE_SIZE_V2 Equ                      $01
-VDP_SPRITE_SIZE_V3 Equ                      $02
-VDP_SPRITE_SIZE_V4 Equ                      $03
-
-; Horizontal sizes
-VDP_SPRITE_SIZE_H1 Equ                      $00
-VDP_SPRITE_SIZE_H2 Equ                      $04
-VDP_SPRITE_SIZE_H3 Equ                      $08
-VDP_SPRITE_SIZE_H4 Equ                      $0c
-
-    ; Size bit masks
-    BIT_MASK.VDP_SPRITE_VSIZE               0, 2
-    BIT_MASK.VDP_SPRITE_HSIZE               2, 2
-    BIT_MASK.VDP_SPRITE_SIZE                0, 4
-
-    ; Sprite content reference. Same structure as pattern name table ref
-    BIT_MASK.VDP_SPRITE_ATTR3_ORIENTATION   11, 2
-    BIT_CONST.VDP_SPRITE_ATTR3_HFLIP        11
-    BIT_CONST.VDP_SPRITE_ATTR3_VFLIP        12
-    BIT_MASK.VDP_SPRITE_ATTR3_PALETTE       13, 2
-    BIT_CONST.VDP_SPRITE_ATTR3_PRIORITY     15
-
-
-;-------------------------------------------------
 ; VDP sprite structures
 ; ----------------
-
-    ; VDP hardware sprite attribute struct (8 bytes)
-    DEFINE_STRUCT VDPSprite
-        STRUCT_MEMBER.w y
-        STRUCT_MEMBER.b size
-        STRUCT_MEMBER.b link
-        STRUCT_MEMBER.w attr
-        STRUCT_MEMBER.w x
-    DEFINE_STRUCT_END
 
     ; RAM shadow attribute table
     DEFINE_VAR SHORT

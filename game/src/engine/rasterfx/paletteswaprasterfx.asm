@@ -10,6 +10,11 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/m68k.inc'
+    Include './system/include/z80.inc'
+    Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
+
 ;-------------------------------------------------
 ; Palette swap raster effect structs
 ; ----------------

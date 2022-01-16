@@ -5,6 +5,8 @@
     Include './common/include/debug.inc'
     Include './common/include/profile.inc'
 
+    Include './system/include/io.inc'
+
     DEFINE_VAR SHORT
         VAR.l spriteAddr
         VAR.Player player

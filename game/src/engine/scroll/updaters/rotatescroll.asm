@@ -11,6 +11,8 @@
 ; - DEFINE_ROTATE_SCROLL_CENTER_VERTICAL_ANGLE_TABLE
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Rotate  ScrollValueUpdater
 ; ----------------
