@@ -4,6 +4,8 @@
 ; NB: Managed by Viewport. API should not be used directly
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/m68k.inc'
+
     Include './engine/include/camera.inc'
     Include './engine/include/map.inc'
 

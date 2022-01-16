@@ -3,6 +3,9 @@
 ; NB: There is a bug in older hardware revisions that causes the first column to have a random scroll value in h40 mode. (0 in h32)
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
+
 ;-------------------------------------------------
 ; Line scroll structures
 ; ----------------

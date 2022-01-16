@@ -5,6 +5,8 @@
     If (~def(__ENGINE_CAMERA_INC))
 __ENGINE_CAMERA_INC Equ 1
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Camera structure
 ; ----------------

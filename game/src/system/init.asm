@@ -18,7 +18,9 @@ SysInit:
 
         ; Prepare cpu for processing once all sub systems have been initialized (ie proper handlers are setup)
         jsr Z80Init
-        jsr M68KInit
+
+        ; Allow all interrupts
+        move #M68k_SR_SUPERVISOR, sr
 
         ; Start main program
         jmp Main

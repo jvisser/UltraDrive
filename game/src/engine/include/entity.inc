@@ -5,6 +5,8 @@
     If (~def(__ENGINE_ENTITY_INC))
 __ENGINE_ENTITY_INC Equ 1
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Entity structure
 ; ----------------

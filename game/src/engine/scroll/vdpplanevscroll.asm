@@ -2,6 +2,10 @@
 ; Vertical plane scroll updater. Updates the horizontal VDP scroll values for both cameras.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
+    Include './system/include/vdptaskqueue.inc'
+
 ;-------------------------------------------------
 ; VPlane VDPScrollUpdater state structure
 ; ----------------

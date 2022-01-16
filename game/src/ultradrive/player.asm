@@ -2,6 +2,9 @@
 ; Player state machine
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+    Include './system/include/io.inc'
+
     Include './engine/include/entity.inc'
     Include './engine/include/collision.inc'
 

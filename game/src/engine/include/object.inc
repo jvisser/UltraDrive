@@ -5,6 +5,8 @@
     If (~def(__ENGINE_OBJECT_INC))
 __ENGINE_OBJECT_INC Equ 1
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Object structures
 ; ----------------

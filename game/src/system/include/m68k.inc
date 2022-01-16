@@ -1,6 +1,9 @@
 ;------------------------------------------------------------------------------------------
-; 68000 specific code/macros
+; 68000 specific constants / macros
 ;------------------------------------------------------------------------------------------
+
+    If (~def(__SYSTEM_M68K_INC))
+__SYSTEM_M68K_INC Equ 1
 
 ;-------------------------------------------------
 ; Native data types
@@ -156,10 +159,4 @@ M68K_HALT Macro
         stop #M68k_SR_SUPERVISOR | M68k_SR_INTERRUPT_MASK
     Endm
 
-
-;-------------------------------------------------
-; Init 68000 state
-; ----------------
-M68KInit:
-        move #M68k_SR_SUPERVISOR, sr    ; Allow all interrupts by default
-        rts
+    EndIf

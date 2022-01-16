@@ -6,6 +6,10 @@
 ; - relativeVerticalBackgroundTracker: Scrolls only vertically
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/m68k.inc'
+    Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
+
     Include './engine/include/camera.inc'
     Include './engine/include/map.inc'
 

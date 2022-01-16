@@ -1,8 +1,11 @@
 ;------------------------------------------------------------------------------------------
-; VDP DMA structures/subroutines and macros
-;
-; NB: Length is specified in words
+; VDP DMA transfer macros (VDP)
 ;------------------------------------------------------------------------------------------
+
+    If (~def(__SYSTEM_VDP_DMA_INC))
+__SYSTEM_VDP_DMA_INC Equ 1
+
+    Include './system/include/vdpcmd.inc'
 
 ;-------------------------------------------------
 ; DMA structures
@@ -209,3 +212,5 @@ VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Macro vdpDMATransferCommandList
         move.w  (a0)+, -(sp)
         move.w  (sp)+, (a1)
     Endm
+
+    EndIf

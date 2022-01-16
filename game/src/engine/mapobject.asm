@@ -1,9 +1,12 @@
 ;------------------------------------------------------------------------------------------
 ; Map object handling
-;------------------------------------------------------------------------------------------
+;
 ; Public API's:
 ; - MapUpdateObjects
 ; - MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE
+;------------------------------------------------------------------------------------------
+
+    Include './system/include/m68k.inc'
 
     Include './engine/include/mapobject.inc'
     Include './engine/include/map.inc'

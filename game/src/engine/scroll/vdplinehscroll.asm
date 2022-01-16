@@ -2,6 +2,9 @@
 ; Horizontal line scroll updater. Updates the horizontal VDP scroll values for both cameras.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
+
 ;-------------------------------------------------
 ; Line scroll structures
 ; ----------------

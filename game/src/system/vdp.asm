@@ -2,117 +2,13 @@
 ; Video Display Processor (VDP)
 ;------------------------------------------------------------------------------------------
 
-;-------------------------------------------------
-; VDP 68000 interface
-; ----------------
-
-MEM_VDP_DATA        Equ $00c00000
-MEM_VDP_CTRL        Equ $00c00004
-MEM_VDP_HVCOUNTER   Equ $00c00008
-
+    Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
+    Include './system/include/memory.inc'
 
 ;-------------------------------------------------
-; VRAM Related contants
+; VDP state
 ; ----------------
-VRAM_SIZE_BYTE      Equ $10000
-VRAM_SIZE_WORD      Equ (VRAM_SIZE_BYTE / SIZE_WORD)
-VRAM_SIZE_LONG      Equ (VRAM_SIZE_BYTE / SIZE_LONG)
-
-VSRAM_SIZE_BYTE     Equ 80
-VSRAM_SIZE_WORD     Equ (VSRAM_SIZE_BYTE / SIZE_WORD)
-VSRAM_SIZE_LONG     Equ (VSRAM_SIZE_BYTE / SIZE_LONG)
-
-CRAM_SIZE_BYTE      Equ 128
-CRAM_SIZE_WORD      Equ (CRAM_SIZE_BYTE / SIZE_WORD)
-CRAM_SIZE_LONG      Equ (CRAM_SIZE_BYTE / SIZE_LONG)
-
-
-; Default VDP object addresses
-VDP_PLANE_A_ADDR        Equ $c000
-VDP_PLANE_B_ADDR        Equ $e000
-VDP_WINDOW_ADDR         Equ $b000
-VDP_SPRITE_ADDR         Equ $bc00
-VDP_HSCROLL_ADDR        Equ $b800
-
-
-    ; Plane identifiers (double as address set commands)
-    VDP_ADDR_SET_CONST.VDP_WINDOW   WRITE, VRAM, VDP_WINDOW_ADDR
-    VDP_ADDR_SET_CONST.VDP_PLANE_A  WRITE, VRAM, VDP_PLANE_A_ADDR
-    VDP_ADDR_SET_CONST.VDP_PLANE_B  WRITE, VRAM, VDP_PLANE_B_ADDR
-
-
-;-------------------------------------------------
-; VDP Status register bits
-; ----------------
-    BIT_CONST.VDP_STATUS_PAL          0   ; PAL, 0 = NTSC
-    BIT_CONST.VDP_STATUS_DMA          1   ; DMA Busy
-    BIT_CONST.VDP_STATUS_HBLANK       2   ; HBlank active
-    BIT_CONST.VDP_STATUS_VBLANK       3   ; VBlank active
-    BIT_CONST.VDP_STATUS_ODD          4   ; Odd frame in interlace mode
-    BIT_CONST.VDP_STATUS_COLLISION    5   ; Sprite collision happened between non zero sprite pixels
-    BIT_CONST.VDP_STATUS_SOVERLFLOW   6   ; Sprite overflow happened
-    BIT_CONST.VDP_STATUS_VINT         7   ; Vertical interrup happened
-    BIT_CONST.VDP_STATUS_FIFO_FULL    8   ; Write FIFO full
-    BIT_CONST.VDP_STATUS_FIFO_EMPTY   9   ; Write FIFO empty
-
-
-;-------------------------------------------------
-; VDP plane pattern reference structure (16 bit)
-; ----------------
-    BIT_MASK.PATTERN_REF_INDEX        0,    11
-    BIT_MASK.PATTERN_REF_ORIENTATION  11,   2
-    BIT_CONST.PATTERN_REF_HFLIP       11
-    BIT_CONST.PATTERN_REF_VFLIP       12
-    BIT_MASK.PATTERN_REF_PALETTE      13,   2
-    BIT_CONST.PATTERN_REF_PRIORITY    15
-
-
-;-------------------------------------------------
-; VDP Pattern metrics
-; ----------------
-PATTERN_DIMENSION   Equ 8
-PATTERN_SIZE        Equ (PATTERN_DIMENSION * SIZE_LONG)
-PATTERN_SHIFT       Equ 3
-PATTERN_MASK        Equ 7
-
-
-;-------------------------------------------------
-; VDP register shadow variables
-; ----------------
-
-    ; VDPContext structure
-    DEFINE_STRUCT VDPContext
-        STRUCT_MEMBER.w vdpRegMode1
-        STRUCT_MEMBER.w vdpRegMode2
-        STRUCT_MEMBER.w vdpRegMode3
-        STRUCT_MEMBER.w vdpRegMode4
-        STRUCT_MEMBER.w vdpRegPlaneA
-        STRUCT_MEMBER.w vdpRegPlaneB
-        STRUCT_MEMBER.w vdpRegSprite
-        STRUCT_MEMBER.w vdpRegWindow
-        STRUCT_MEMBER.w vdpRegHScroll
-        STRUCT_MEMBER.w vdpRegPlaneSize
-        STRUCT_MEMBER.w vdpRegWinX
-        STRUCT_MEMBER.w vdpRegWinY
-        STRUCT_MEMBER.w vdpRegIncr
-        STRUCT_MEMBER.w vdpRegBGCol
-        STRUCT_MEMBER.w vdpRegHRate
-    DEFINE_STRUCT_END
-
-    ; VDP metrics structure
-    DEFINE_STRUCT VDPMetrics
-        STRUCT_MEMBER.w screenWidth
-        STRUCT_MEMBER.w screenHeight
-        STRUCT_MEMBER.w screenWidthPatterns
-        STRUCT_MEMBER.w screenHeightPatterns
-        STRUCT_MEMBER.w planeWidth
-        STRUCT_MEMBER.w planeHeight
-        STRUCT_MEMBER.w planeWidthPatterns
-        STRUCT_MEMBER.w planeHeightPatterns
-        STRUCT_MEMBER.w planeWidthShift
-        STRUCT_MEMBER.w planeHeightShift
-    DEFINE_STRUCT_END
-
     ; Allocate VDPContext
     DEFINE_VAR SHORT
         VAR.VDPContext  vdpContext
@@ -150,69 +46,6 @@ PATTERN_MASK        Equ 7
         INIT_STRUCT_MEMBER.planeWidthShift       7       ; Adjusted for word sized shift
         INIT_STRUCT_MEMBER.planeHeightShift      6
     INIT_STRUCT_END
-
-
-;-------------------------------------------------
-; Write cached register value to VDP
-; ----------------
-_VDP_REG_SYNC Macro vdpReg
-        move.w  (vdpContext + VDPContext_\vdpReg), MEM_VDP_CTRL
-    Endm
-
-
-;-------------------------------------------------
-; Set register value
-; ----------------
-VDP_REG_SET Macro vdpReg, value
-        move.b   #\value, (vdpContext + VDPContext_\vdpReg + 1)
-
-        _VDP_REG_SYNC \vdpReg
-    Endm
-
-
-;-------------------------------------------------
-; Enable a VDP flag in the specified register
-; ----------------
-VDP_REG_SET_BITS Macro vdpReg, flag
-        ori.b   #\flag, (vdpContext + VDPContext_\vdpReg + 1)
-
-        _VDP_REG_SYNC \vdpReg
-    Endm
-
-
-;-------------------------------------------------
-; Disable a VDP flag in the specified register
-; ----------------
-VDP_REG_RESET_BITS Macro vdpReg, flag
-        andi.b   #~\flag & $ff, (vdpContext + VDPContext_\vdpReg + 1)
-
-        _VDP_REG_SYNC \vdpReg
-    Endm
-
-
-;-------------------------------------------------
-; Set bit field
-; ----------------
-VDP_REG_SET_BIT_FIELD Macro vdpReg, bitFieldMask, bitFieldValue
-        andi.b  #~\bitFieldMask, (vdpContext + VDPContext_\vdpReg + 1)
-        ori.b   #\bitFieldValue, (vdpContext + VDPContext_\vdpReg + 1)
-
-        _VDP_REG_SYNC \vdpReg
-    Endm
-
-
-;----------------------------------------------
-; Set vram address, access type and data stride
-; ----------------
-VDP_ADDR_SET Macro accessType, ramType, address, dataStride
-        If (narg = 4)
-            VDP_REG_SET vdpRegIncr, \dataStride
-        EndIf
-
-        Local __AS
-        VDP_ADDR_SET_CONST.__AS  \accessType, \ramType, \address
-        move.l #__AS, (MEM_VDP_CTRL)
-    Endm
 
 
 ;----------------------------------------------

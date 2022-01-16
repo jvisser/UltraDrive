@@ -2,6 +2,8 @@
 ; Main engine scheduler. Calls subsystem schedulers if enabled.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/m68k.inc'
+
     Include './engine/include/scheduler.inc'
 
 ;-------------------------------------------------

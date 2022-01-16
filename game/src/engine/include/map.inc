@@ -7,6 +7,8 @@ __ENGINE_MAP_INC Equ 1
 
     Include './common/include/constants.inc'
 
+    Include './system/include/memory.inc'
+
     Include './engine/include/linkedlist.inc'
     Include './engine/include/object.inc'
 

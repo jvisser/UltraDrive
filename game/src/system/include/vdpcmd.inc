@@ -1,6 +1,9 @@
 ;------------------------------------------------------------------------------------------
-; Video Display Processor control port commands (VDP)
+; VDP control port commands
 ;------------------------------------------------------------------------------------------
+
+    If (~def(__SYSTEM_VDP_CMD_INC))
+__SYSTEM_VDP_CMD_INC Equ 1
 
 ;-------------------------------------------------
 ; VDP address set commands
@@ -43,18 +46,6 @@ VDP_CMD_RS_DMA_SRC_H        Equ $9700        ; DMA source (high)
 VDP_CMD_RS_DBG_LOG          Equ $9e00        ; Virtual register used for debug logging (GensKMod/Exodus emulator)
 VDP_CMD_RS_DBG_BP           Equ $9d00        ; Virtual register used for software breakpoint  (GensKMod/Exodus emulator)
 VDP_CMD_RS_DBG_TIMER        Equ $9f00        ; Virtual register used for starting/stopping a timer  (GensKMod/Exodus emulator)
-
-
-;----------------------------------------------
-; Create address set constant
-; ----------------
-VDP_ADDR_SET_CONST Macro accessType, ramType, address
-        If (strcmp('\ramType', 'VRAM'))
-\0  Equ (VDP_CMD_AS_VRAM_\accessType | (((\address) & $3fff) << 16) | (((\address) & $c000) >> 14))
-        Else
-\0  Equ (VDP_CMD_AS_\ramType\_\accessType | ((\address) << 16))
-        EndIf
-    Endm
 
 
 ;-------------------------------------------------
@@ -275,3 +266,5 @@ HSCROLL_ADDR_F000           Equ ($f000 >> 10)
 HSCROLL_ADDR_F400           Equ ($f400 >> 10)
 HSCROLL_ADDR_F800           Equ ($f800 >> 10)
 HSCROLL_ADDR_FC00           Equ ($fc00 >> 10)
+
+    EndIf

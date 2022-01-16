@@ -2,6 +2,8 @@
 ; Orbison "AI"
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+
     Include './engine/include/object.inc'
     Include './engine/include/map.inc'
 

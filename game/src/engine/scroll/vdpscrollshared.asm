@@ -4,6 +4,8 @@
 
     Include './common/include/constants.inc'
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Update flags
 ; ----------------

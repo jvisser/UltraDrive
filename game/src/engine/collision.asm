@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------------------
 ; General collision detection system.
-;------------------------------------------------------------------------------------------
+;
 ; Public API:
 ;   - CollisionInit
 ;   - CollisionReset
@@ -9,6 +9,9 @@
 ;   - CollisionCreateSnapshotBefore
 ;   - CollisionCreateSnapshotAfter
 ;   - CollisionRestoreSnapshot
+;------------------------------------------------------------------------------------------
+
+    Include './system/include/m68k.inc'
 
     Include './engine/include/collision.inc'
 

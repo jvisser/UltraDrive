@@ -2,6 +2,9 @@
 ; Fireball "AI"
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+    Include './system/include/os.inc'
+
     Include './engine/include/object.inc'
     Include './engine/include/map.inc'
     Include './engine/include/angle.inc'

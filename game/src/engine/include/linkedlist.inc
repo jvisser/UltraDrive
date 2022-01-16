@@ -5,6 +5,8 @@
     If (~def(__ENGINE_LINKEDLIST_INC))
 __ENGINE_LINKEDLIST_INC Equ 1
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Linked list/node structure. Uses short pointers so only works for addresses >= $ff8000
 ; ----------------

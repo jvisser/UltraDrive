@@ -2,6 +2,8 @@
 ; Configurable plane scroll value updater applicable to both horizontal and vertical vdp plane scroll updaters depending on the configuration used.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/memory.inc'
+
     Include './engine/include/camera.inc'
 
 ;-------------------------------------------------

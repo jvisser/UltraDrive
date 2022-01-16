@@ -25,8 +25,7 @@
 ;   Insertion order does have an impact on performance.
 ;   For example:
 ;       There is one instance of player that interacts with many bullets. Adding all the bullets first will have more opportunities for loop optimizations.
-;------------------------------------------------------------------------------------------
-
+;
 ; Public API:
 ;   Setup macros:
 ;   - DEFINE_COLLISION_TYPES
@@ -43,9 +42,12 @@
 ;   - CollisionCreateSnapshotBefore
 ;   - CollisionCreateSnapshotAfter
 ;   - CollisionRestoreSnapshot
+;------------------------------------------------------------------------------------------
 
     If (~def(__ENGINE_COLLISION_INC))
 __ENGINE_COLLISION_INC Equ 1
+
+    Include './system/include/memory.inc'
 
 ;-------------------------------------------------
 ; Collision detection constants

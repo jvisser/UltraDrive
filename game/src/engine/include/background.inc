@@ -5,6 +5,8 @@
     If (~def(__ENGINE_BACKGROUND_INC))
 __ENGINE_BACKGROUND_INC Equ 1
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Responsible for updating the background camera for the viewport.
 ; ----------------

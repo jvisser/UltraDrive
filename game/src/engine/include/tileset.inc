@@ -7,6 +7,8 @@ __ENGINE_TILESET_INC Equ 1
 
     Include './common/include/constants.inc'
 
+    Include './system/include/memory.inc'
+
 ;-------------------------------------------------
 ; Tileset constants
 ; ----------------
