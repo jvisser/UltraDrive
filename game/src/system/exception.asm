@@ -4,6 +4,8 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/vdp.inc'
+
 ;-------------------------------------------------
 ; Generic exception handler
 ; ----------------

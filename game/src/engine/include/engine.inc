@@ -20,5 +20,7 @@ __ENGINE_INC Equ 1
     Include './engine/include/tileset.inc'
     Include './engine/include/angle.inc'
     Include './engine/include/viewport.inc'
+    Include './engine/include/viewport.inc'
+    Include './engine/include/vdpscroll.inc'
 
     EndIf

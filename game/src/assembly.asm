@@ -52,7 +52,6 @@
     Include './engine/scroll/vdpscrollshared.asm'
     Include './engine/scroll/vdpplanehscroll.asm'
     Include './engine/scroll/vdpplanevscroll.asm'
-    Include './engine/scroll/vdpdmascroll.asm'
     Include './engine/scroll/vdplinehscroll.asm'
     Include './engine/scroll/vdpcellhscroll.asm'
     Include './engine/scroll/vdpcellvscroll.asm'

@@ -20,44 +20,7 @@
     ; Default viewport configuration. Relative background using plane based scrolling based on the camera
     ; ----------------
     defaultViewportConfiguration:
-        ; .backgroundTracker
-        dc.l relativeBackgroundTracker
-        ; .backgroundTrackerConfiguration
-        dc.l relativeHorizontalVerticalBackgroundTrackerConfiguration
-        ; .horizontalScrollConfiguration
-            ; .vdpScrollUpdaterAddress
-            dc.l planeHorizontalVDPScrollUpdater
-            ; .backgroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_background
-                ; .updaterData
-                dc.l planeHorizontalScrollCameraConfig
-                ; .updater
-                dc.l planeScrollCamera
-            ; .foregroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_foreground
-                ; .updaterData
-                dc.l planeHorizontalScrollCameraConfig
-                ; .updater
-                dc.l planeScrollCamera
-        ; .verticalScrollConfiguration
-            ; .vdpScrollUpdaterAddress
-            dc.l planeVerticalVDPScrollUpdater
-            ; .backgroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_background
-                ; .updaterData
-                dc.l planeVerticalScrollCameraConfig
-                ; .updater
-                dc.l planeScrollCamera
-            ; .foregroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_foreground
-                ; .updaterData
-                dc.l planeVerticalScrollCameraConfig
-                ; .updater
-                dc.l planeScrollCamera
+        DEFINE_DEFAULT_VIEWPORT_CONFIG
 
 
 ;-------------------------------------------------
@@ -253,7 +216,7 @@ _ENSURE_ACTIVE_AREA Macro screenMetric, activeAreaSize, axis, result
 ; Called whenever the foreground camera changes
 ; ----------------
 ; Input:
-; - d0: Left coordinate of view
+; - a0: Camera
 _ViewportCameraChanged
         PUSHL   a0
         bsr     _ViewportUpdateActiveViewportData
