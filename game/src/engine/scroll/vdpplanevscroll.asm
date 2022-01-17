@@ -6,6 +6,8 @@
     Include './system/include/vdp.inc'
     Include './system/include/vdptaskqueue.inc'
 
+    Include './engine/include/vdpscroll.inc'
+
 ;-------------------------------------------------
 ; VPlane VDPScrollUpdater state structure
 ; ----------------

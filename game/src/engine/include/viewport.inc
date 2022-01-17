@@ -98,6 +98,51 @@ VIEWPORT_GET_Y Macros target
 
 
 ;-------------------------------------------------
+; Create default viewport configuration using plane based scrolling and relative background implementation
+; ----------------
+DEFINE_DEFAULT_VIEWPORT_CONFIG Macro
+        ; .backgroundTracker
+        dc.l relativeBackgroundTracker
+        ; .backgroundTrackerConfiguration
+        dc.l relativeHorizontalVerticalBackgroundTrackerConfiguration
+        ; .horizontalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
+            dc.l planeHorizontalVDPScrollUpdater
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
+                dc.l planeHorizontalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
+                dc.l planeHorizontalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+        ; .verticalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
+            dc.l planeVerticalVDPScrollUpdater
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
+                dc.l planeVerticalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
+                dc.l planeVerticalScrollCameraConfig
+                ; .updater
+                dc.l planeScrollCamera
+    Endm
+
+
+;-------------------------------------------------
 ; Create a viewport configuration with a static background that scrolls as a rate relative to the foreground camera. Effectively making the background repeat infinitely.
 ; Speed can be ommitted to scroll at the same speed as the foreground or have one of the following values:
 ; - HalfSpeed: Half speed of the foreground camera movement.

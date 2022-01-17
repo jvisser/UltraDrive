@@ -16,16 +16,16 @@ SIZE_LONG   Equ 4
 ;-------------------------------------------------
 ; Status register bits/bitfields
 ; ----------------
-M68k_SR_CARRY           Equ 0x0001
-M68k_SR_OVERFLOW        Equ 0x0002
-M68k_SR_ZERO            Equ 0x0004
-M68k_SR_NEGATIVE        Equ 0x0008
-M68k_SR_EXTEND          Equ 0x0010
+M68k_SR_CARRY           Equ $0001
+M68k_SR_OVERFLOW        Equ $0002
+M68k_SR_ZERO            Equ $0004
+M68k_SR_NEGATIVE        Equ $0008
+M68k_SR_EXTEND          Equ $0010
 
-M68k_SR_INTERRUPT_MASK  Equ 0x0700
+M68k_SR_INTERRUPT_MASK  Equ $0700
 
-M68k_SR_SUPERVISOR      Equ 0x2000
-M68k_SR_TRACE_MODE      Equ 0x8000
+M68k_SR_SUPERVISOR      Equ $2000
+M68k_SR_TRACE_MODE      Equ $8000
 
 
 ;-------------------------------------------------

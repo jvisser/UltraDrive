@@ -6,6 +6,8 @@
     Include './system/include/memory.inc'
     Include './system/include/vdp.inc'
 
+    Include './engine/include/vdpscroll.inc'
+
 ;-------------------------------------------------
 ; Line scroll structures
 ; ----------------
