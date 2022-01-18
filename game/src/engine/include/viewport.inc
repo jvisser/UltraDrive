@@ -100,7 +100,7 @@ VIEWPORT_GET_Y Macros target
 ;-------------------------------------------------
 ; Create default viewport configuration using plane based scrolling and relative background implementation
 ; ----------------
-DEFINE_DEFAULT_VIEWPORT_CONFIG Macro
+DEFINE_RELATIVE_BACKGROUND_VIEWPORT_CONFIG Macro
         ; .backgroundTracker
         dc.l relativeBackgroundTracker
         ; .backgroundTrackerConfiguration

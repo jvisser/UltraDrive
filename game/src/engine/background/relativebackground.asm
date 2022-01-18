@@ -115,7 +115,7 @@ _RelativeBackgroundTrackerInit:
         mulu    d2, d0
         swap    d0                                                      ; Camera expects non fixed point result
         move.w  (vdpMetrics + VDPMetrics_screenWidth), d2               ; If not locked: set camera width to screen width + 1 pattern for scrolling
-        addq.w  #8, d2
+        addq.w  #PATTERN_DIMENSION, d2
         bra.s   .horizontalSetupDone
     .horizontallyLocked:
         move.w  (vdpMetrics + VDPMetrics_planeWidth), d2                ; If locked: set camera width to plane width (= render full plane) to allow for custom scrolling (parallax)
@@ -128,7 +128,7 @@ _RelativeBackgroundTrackerInit:
         mulu    d3, d1
         swap    d1                                                      ; Camera expects non fixed point result
         move.w  (vdpMetrics + VDPMetrics_screenHeight), d3              ; If not locked: set camera height to screen height + 1 pattern for scrolling
-        addq.w  #8, d3
+        addq.w  #PATTERN_DIMENSION, d3
         bra.s   .verticalSetupDone
     .verticallyLocked:
         move.w  (vdpMetrics + VDPMetrics_planeHeight), d3               ; If locked: set camera width to plane height (= render full plane) to allow for custom scrolling (parallax)
