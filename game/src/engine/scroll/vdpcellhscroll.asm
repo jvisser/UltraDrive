@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Horizontal cell scroll updater. Updates the horizontal VDP scroll values for both cameras.
+; Horizontal cell VDPScrollUpdater implementation. Updates the horizontal VDP scroll values for both cameras.
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/memory.inc'
@@ -8,19 +8,18 @@
     Include './engine/include/vdpscroll.inc'
 
 ;-------------------------------------------------
-; Line scroll structures
+; Horizontal cell/pattern VDPScrollUpdater structures
 ; ----------------
+
+    ;-------------------------------------------------
+    ; Horizontal cell/pattern scroll table/state structure
+    ; ----------------
     DEFINE_STRUCT CellHorizontalVDPScrollUpdaterPlaneState
         STRUCT_MEMBER.w     hcsuCellHorizontalScroll, 28        ; NB: Horizontal scroll values must be negated by the ScrollValueUpdater for performance reasons
     DEFINE_STRUCT_END
 
-    DEFINE_VAR SHORT
-        VAR.l chsPlaneBScrollDMATransferCommandListAddress
-        VAR.l chsPlaneAScrollDMATransferCommandListAddress
-    DEFINE_VAR_END
-
     ;-------------------------------------------------
-    ; Horizontal cell VDPScrollUpdater
+    ; Horizontal cell/pattern VDPScrollUpdater definition
     ; ----------------
     ; struct VDPScrollUpdater
     cellHorizontalVDPScrollUpdater:
@@ -29,13 +28,14 @@
         ; .update
         dc.l _CellHorizontalVDPScrollUpdaterUpdate
 
-CHS_LINE_BUFFER_SIZE Equ CellHorizontalVDPScrollUpdaterPlaneState_Size
-
+    ;-------------------------------------------------
+    ; Horizontal cell/pattern DMA command list templates
+    ; ----------------
     chsPlaneBScrollDMATransferCommandListTemplate:
-        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR + SIZE_WORD, CHS_LINE_BUFFER_SIZE / SIZE_WORD, SIZE_WORD * 16
+        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR + SIZE_WORD, CellHorizontalVDPScrollUpdaterPlaneState_Size / SIZE_WORD, SIZE_WORD * 16
 
     chsPlaneAScrollDMATransferCommandListTemplate:
-        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR, CHS_LINE_BUFFER_SIZE / SIZE_WORD, SIZE_WORD * 16
+        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR, CellHorizontalVDPScrollUpdaterPlaneState_Size / SIZE_WORD, SIZE_WORD * 16
 
 
 ;-------------------------------------------------
@@ -53,16 +53,14 @@ _CellHorizontalVDPScrollUpdaterInit:
             Horizontal,                                     &
             background,                                     &
             CellHorizontalVDPScrollUpdaterPlaneState,       &
-            chsPlaneBScrollDMATransferCommandListTemplate,  &
-            chsPlaneBScrollDMATransferCommandListAddress
+            chsPlaneBScrollDMATransferCommandListTemplate
 
         ; Initialize foreground
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Horizontal,                                     &
             foreground,                                     &
             CellHorizontalVDPScrollUpdaterPlaneState,       &
-            chsPlaneAScrollDMATransferCommandListTemplate,  &
-            chsPlaneAScrollDMATransferCommandListAddress
+            chsPlaneAScrollDMATransferCommandListTemplate
         rts
 
 
@@ -73,9 +71,6 @@ _CellHorizontalVDPScrollUpdaterInit:
 ; - a0: Viewport
 ; Uses: d0-d1/a0-a6
 _CellHorizontalVDPScrollUpdaterUpdate:
-        VDP_SCROLL_DMA_UPDATER_UPDATE                       &
-            Horizontal,                                     &
-            chsPlaneBScrollDMATransferCommandListAddress,   &
-            chsPlaneAScrollDMATransferCommandListAddress
+        VDP_SCROLL_DMA_UPDATER_UPDATE Horizontal
         rts
 

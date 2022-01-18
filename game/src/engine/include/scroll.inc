@@ -8,20 +8,35 @@ __ENGINE_SCROLL_INC Equ 1
     Include './system/include/memory.inc'
 
 ;-------------------------------------------------
-; Handles transfering the scroll values to the VDP
+; Handles updating (through ScrollValueUpdater's) and transfering the scroll values to the VDP for both cameras of the viewport
 ; ----------------
     DEFINE_STRUCT VDPScrollUpdater
+        ; Input:
+        ; - a0: Viewport
+        ; - a1: ScrollConfiguration address
         STRUCT_MEMBER.l     init                                    ; Init VDP scroll mode
+        ; Input:
+        ; - a0: Viewport
         STRUCT_MEMBER.l     update                                  ; Update VDP scroll values
     DEFINE_STRUCT_END
 
 
 ;-------------------------------------------------
-; Handles updating the plane/cell/line scroll tables for the viewport
+; Handles updating the plane/cell/line scroll tables for a specific camera
 ; ----------------
     DEFINE_STRUCT ScrollValueUpdater
-        STRUCT_MEMBER.l     init                                    ; Init scroll table
-        STRUCT_MEMBER.l     update                                  ; Update scroll table (returns non zero if the table data has been updated)
+        ; Input:
+        ; - a0: Camera address
+        ; - a1: Scroll table address provided by the underlying VDPScrollUpdater
+        ; - a2: Address of ScrollValueUpdater specific configuration (From ScrollValueUpdaterConfiguration.updaterData)
+        STRUCT_MEMBER.l     init
+        ; Input:
+        ; - a0: Camera address
+        ; - a1: Scroll table address provided by the underlying VDPScrollUpdater
+        ; - a2: Address of ScrollValueUpdater specific configuration (From ScrollValueUpdaterConfiguration.updaterData)
+        ; Output:
+        ; - d0: 1 if values have been updated, 0 otherwise
+        STRUCT_MEMBER.l     update
     DEFINE_STRUCT_END
 
 

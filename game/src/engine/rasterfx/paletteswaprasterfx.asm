@@ -155,7 +155,7 @@ _PaletteSwapRasterEffectInit:
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectDestroy:
         TILESET_GET a1
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Tileset_paletteAddress(a1)
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE.l Tileset_paletteAddress(a1)
         rts
 
 
@@ -249,7 +249,7 @@ _PaletteSwapRasterEffectPrepareNextFrame:
 ; Input:
 ; - a0: PaletteSwapRasterEffectConfiguration
 _PaletteSwapRasterEffectResetFrame:
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE.l (paletteSwapRasterEffectState + PaletteSwapRasterEffectState_startPalette)
         rts
 
 
@@ -356,7 +356,7 @@ _PaletteSwapRasterEffectDMAHblank:
 
                 TILESET_GET a0
 
-                VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Tileset_alternativePaletteAddress(a0)
+                VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE.l Tileset_alternativePaletteAddress(a0)
 
             POPL a1
             POPL a0

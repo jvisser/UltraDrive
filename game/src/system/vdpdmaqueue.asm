@@ -54,7 +54,7 @@ VDPDMAQueueInit:
 ; - a0: Address of the VDPDMATransferCommandList instance to queue
 ; Uses: a0-a1
 VDPDMAQueueAddCommandList:
-        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT a0
+        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT.l a0
         rts
 
 
@@ -65,7 +65,7 @@ VDPDMAQueueAddCommandList:
 ; - a0: Address of the VDPDMATransfer instance to queue
 ; Uses: d0/a0-a1
 VDPDMAQueueAdd:
-        VDP_DMA_QUEUE_ADD_INDIRECT a0
+        VDP_DMA_QUEUE_ADD_INDIRECT.l a0
         rts
 
 

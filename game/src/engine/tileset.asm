@@ -73,7 +73,7 @@ TilesetLoad:
 
         ; Load palette
         movea.l Tileset_paletteAddress(a6), a0
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE a0
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE.l a0
         
         ; Install viewport movement handlers last
         jmp _TilesetInstallViewportMovementHandlers
@@ -153,7 +153,7 @@ _TilesetLoadAnimations:
         movea.l TilesetAnimationBase_animationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
         movea.l (a0), a0                                                            ; a0 = VDPDMATransferCommandList address for first animation frame
 
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE a0
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE.l a0
 
         dbra    d6, .loadAnimationFrameLoop
 
@@ -292,7 +292,7 @@ _TilesetAnimationFrame:
         add.w   d2, d2
         movea.l (a1, d2), a0                                                        ; a0 = VDPDMATransferCommandList address for animation frame
 
-        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT a0
+        VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT.l a0
         rts
 
 
@@ -341,7 +341,7 @@ _TilesetCameraMove:
             add.w   d4, d4
             movea.l (a0, d4), a0                                                    ; a0 = VDPDMATransferCommandList address for animation frame
 
-            VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT a0
+            VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT.l a0
 
             addq.l  #TilesetAnimationBase_Size, a4
             dbra    d3, .animationLoop
