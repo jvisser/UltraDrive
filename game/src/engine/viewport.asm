@@ -3,7 +3,9 @@
 ;------------------------------------------------------------------------------------------
 
     Include './common/include/debug.inc'
-    
+
+    Include './system/include/vdp.inc'
+
     Include './engine/include/viewport.inc'
     Include './engine/include/background.inc'
     Include './engine/include/map.inc'
@@ -15,12 +17,6 @@
     DEFINE_VAR SHORT
         VAR.Viewport viewport
     DEFINE_VAR_END
-
-    ;-------------------------------------------------
-    ; Default viewport configuration. Relative background using plane based scrolling based on the camera
-    ; ----------------
-    defaultViewportConfiguration:
-        DEFINE_DEFAULT_VIEWPORT_CONFIG
 
 
 ;-------------------------------------------------
@@ -68,11 +64,10 @@ _INIT_SCROLL Macro orientation
         lea     (viewport + Viewport_foreground), a0
         movea.l MapHeader_foregroundAddress(a1), a1
         move.w  (vdpMetrics + VDPMetrics_screenWidth), d2
-        addq.w  #8, d2                                  ; Foreground camera width = screen width + 1 pattern for scrolling
+        addq.w  #PATTERN_DIMENSION, d2                                  ; Foreground camera width = screen width + 1 pattern for scrolling
         move.w  (vdpMetrics + VDPMetrics_screenHeight), d3
-        addq.w  #8, d3                                  ; Foreground camera height = screen height + 1 pattern for scrolling
+        addq.w  #PATTERN_DIMENSION, d3                                  ; Foreground camera height = screen height + 1 pattern for scrolling
         move.l  #VDP_PLANE_A, d4
-
         jsr     CameraInit
 
         ; Let background tracker initialize the background camera
@@ -250,15 +245,15 @@ _CALCULATE_SUB_CHUNK_ID Macro result, scratch
 ; ----------------
 ; Uses: d0-d7/a0-a6
 _ViewportInitActiveViewportData:
-    clr.l   (viewport + Viewport_activeObjectGroupConfigurationId)
+        clr.l   (viewport + Viewport_activeObjectGroupConfigurationId)
 
-    VIEWPORT_GET_X d0
-    VIEWPORT_GET_Y d1
+        VIEWPORT_GET_X d0
+        VIEWPORT_GET_Y d1
 
-    _CALCULATE_SUB_CHUNK_ID d2, d3
+        _CALCULATE_SUB_CHUNK_ID d2, d3
 
-    move.w  d2, (viewport + Viewport_subChunkId)
-    bra.s   __ViewportUpdateActiveViewportData
+        move.w  d2, (viewport + Viewport_subChunkId)
+        bra.s   __ViewportUpdateActiveViewportData
 
 
 ;-------------------------------------------------
@@ -293,8 +288,6 @@ _ViewportUpdateActiveViewportData:
 ; - d1: Top coordinate of view
 ; Uses: d0-d7/a0-a6
 __ViewportUpdateActiveViewportData:
-        VIEWPORT_GET_X d0
-        VIEWPORT_GET_Y d1
 
         clr.w   (viewport + Viewport_activeObjectGroupCount)
 
@@ -360,14 +353,15 @@ __ViewportUpdateActiveViewportData:
             add.w   d7, d7
             add.w   d7, d7
             add.w   a6, d7                                                      ; d7 = container offset
-            movea.l (a2, d7), a6                                                ; a6 = containersBaseAddress[d7] (= container address)
+            movea.l (a2, d7), a6                                                ; a6 = containersTableAddress[d7] (= container address)
 
-            ; Load object group from container
+            ; Load chunk ref
             move.w  (a0)+, d7                                                   ; d7 = chunk ref
 
             ; Update chunk ref cache
             move.w  d7, (a3)+
 
+            ; Load object group from container if any
             andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
             beq.s   .emptyObjectGroup
                 rol.w   #3, d7                                                  ; d7 = container group id

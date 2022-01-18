@@ -7,6 +7,13 @@
 ; ----------------
 
 ;-------------------------------------------------
+; Default viewport configuration.
+; ----------------
+defaultViewportConfiguration:
+    DEFINE_RELATIVE_BACKGROUND_VIEWPORT_CONFIG
+
+
+;-------------------------------------------------
 ; Static background scrolls at 1/4 the rate of the foreground
 ; ----------------
 tilingBackgroundViewportConfiguration:
