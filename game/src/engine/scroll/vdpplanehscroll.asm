@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Horizontal plane scroll updater. Updates the horizontal VDP scroll values for both cameras.
+; Horizontal plane VDPScrollUpdater implementation. Updates the horizontal VDP scroll values for both cameras.
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/memory.inc'
@@ -9,14 +9,18 @@
     Include './engine/include/vdpscroll.inc'
 
 ;-------------------------------------------------
-; HPlane VDPScrollUpdater state structure
+; Horizontal plane VDPScrollUpdater structures
 ; ----------------
+
+    ;-------------------------------------------------
+    ; Horizontal plane scroll table/state structure
+    ; ----------------
     DEFINE_STRUCT PlaneHorizontalVDPScrollUpdaterState
         STRUCT_MEMBER.w scrollValue
     DEFINE_STRUCT_END
 
     ;-------------------------------------------------
-    ; Horizontal plane VDPScrollUpdater
+    ; Horizontal plane VDPScrollUpdater definition
     ; ----------------
     ; struct VDPScrollUpdater
     planeHorizontalVDPScrollUpdater:

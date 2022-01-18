@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Vertical cell scroll updater. Updates the vertical VDP scroll values for both cameras.
+; Vertical cell VDPScrollUpdater implementation. Updates the vertical VDP scroll values for both cameras.
 ; NB: There is a bug in older hardware revisions that causes the first column to have a random scroll value in h40 mode. (0 in h32)
 ;------------------------------------------------------------------------------------------
 
@@ -9,8 +9,12 @@
     Include './engine/include/vdpscroll.inc'
 
 ;-------------------------------------------------
-; Line scroll structures
+; Vertical cell/pattern VDPScrollUpdater structures
 ; ----------------
+
+    ;-------------------------------------------------
+    ; Vertical cell/pattern scroll table/state structure
+    ; ----------------
     DEFINE_STRUCT CellVerticalVDPScrollUpdaterPlaneState
         STRUCT_MEMBER.w     vcsuCellVerticalScroll, 20
     DEFINE_STRUCT_END
@@ -21,7 +25,7 @@
     DEFINE_VAR_END
 
     ;-------------------------------------------------
-    ; Vertical cell VDPScrollUpdater
+    ; Vertical cell/pattern VDPScrollUpdater definition
     ; ----------------
     ; struct VDPScrollUpdater
     cellVerticalVDPScrollUpdater:
@@ -30,13 +34,14 @@
         ; .update
         dc.l _CellVerticalVDPScrollUpdaterUpdate
 
-CVS_LINE_BUFFER_SIZE Equ CellVerticalVDPScrollUpdaterPlaneState_Size
-
+    ;-------------------------------------------------
+    ; Vertical cell/pattern DMA command list templates
+    ; ----------------
     cvsPlaneBScrollDMATransferCommandListTemplate:
-        VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST 0, SIZE_WORD, CVS_LINE_BUFFER_SIZE / SIZE_WORD, SIZE_WORD * 2
+        VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST 0, SIZE_WORD, CellVerticalVDPScrollUpdaterPlaneState_Size / SIZE_WORD, SIZE_WORD * 2
 
     cvsPlaneAScrollDMATransferCommandListTemplate:
-        VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST 0, 0, CVS_LINE_BUFFER_SIZE / SIZE_WORD, SIZE_WORD * 2
+        VDP_DMA_DEFINE_VSRAM_TRANSFER_COMMAND_LIST 0, 0, CellVerticalVDPScrollUpdaterPlaneState_Size / SIZE_WORD, SIZE_WORD * 2
 
 
 ;-------------------------------------------------
@@ -57,16 +62,14 @@ _CellVerticalVDPScrollUpdaterInit:
             Vertical,                                       &
             background,                                     &
             CellVerticalVDPScrollUpdaterPlaneState,         &
-            cvsPlaneBScrollDMATransferCommandListTemplate,  &
-            cvsPlaneBScrollDMATransferCommandListAddress
+            cvsPlaneBScrollDMATransferCommandListTemplate
 
         ; Initialize foreground
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Vertical,                                       &
             foreground,                                     &
             CellVerticalVDPScrollUpdaterPlaneState,         &
-            cvsPlaneAScrollDMATransferCommandListTemplate,  &
-            cvsPlaneAScrollDMATransferCommandListAddress
+            cvsPlaneAScrollDMATransferCommandListTemplate
         rts
 
 
@@ -77,9 +80,6 @@ _CellVerticalVDPScrollUpdaterInit:
 ; - a0: Viewport
 ; Uses: d0-d1/a0-a6
 _CellVerticalVDPScrollUpdaterUpdate:
-        VDP_SCROLL_DMA_UPDATER_UPDATE                       &
-            Vertical,                                       &
-            cvsPlaneBScrollDMATransferCommandListAddress,   &
-            cvsPlaneAScrollDMATransferCommandListAddress
+        VDP_SCROLL_DMA_UPDATER_UPDATE Vertical
         rts
 

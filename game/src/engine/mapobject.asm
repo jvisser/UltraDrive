@@ -164,7 +164,7 @@ MapInitObjects:
 
 
 ;-------------------------------------------------
-; Update all currently active objects in the viewport.
+; Update all objects in the specified object groups
 ; Tests collisions against the current/caller collision state.
 ; Restores the collisions state to that of the caller. This means collision elements added after the call to MapUpdateObjects will not interact with map objects.
 ; ----------------

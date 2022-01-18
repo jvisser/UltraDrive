@@ -167,7 +167,7 @@ VDP_DMA_TRANSFER_COMMAND_LIST Macro vdpDMATransferCommandList
 ; ----------------
 VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT Macro vdpDMATransferCommandList
         If (~strcmp('\vdpDMATransferCommandList', 'a0'))
-            movea.l \vdpDMATransferCommandList, a0
+            movea.\0\ \vdpDMATransferCommandList, a0
         EndIf
 
         lea     MEM_VDP_CTRL, a1
@@ -201,7 +201,7 @@ VDP_DMA_TRANSFER_COMMAND_LIST_ROM_SAFE Macro vdpDMATransferCommandList
 ; ----------------
 VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT_ROM_SAFE Macro vdpDMATransferCommandList
         If (~strcmp('\vdpDMATransferCommandList', 'a0'))
-            movea.l \vdpDMATransferCommandList, a0
+            movea.\0\ \vdpDMATransferCommandList, a0
         EndIf
 
         lea     MEM_VDP_CTRL, a1

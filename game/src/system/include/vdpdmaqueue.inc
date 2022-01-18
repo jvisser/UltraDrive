@@ -69,7 +69,7 @@ __LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS Macro dmaTransferCommandList
 VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT Macro dmaTransferCommandList
 __LOAD_DMA_TRANSFER_COMMAND_LIST_ADDRESS Macro dmaTransferCommandList
             If (~strcmp('\dmaTransferCommandList', 'a0'))
-                movea.l \dmaTransferCommandList, a0
+                movea.\0\ \dmaTransferCommandList, a0
             EndIf
         Endm
 
@@ -145,7 +145,7 @@ __LOAD_DMA_TRANSFER_ADDRESS Macro dmaTransfer
 VDP_DMA_QUEUE_ADD_INDIRECT Macro dmaTransfer
 __LOAD_DMA_TRANSFER_ADDRESS Macro dmaTransfer
             If (~strcmp('\dmaTransfer', 'a0'))
-                movea.l \dmaTransfer, a0
+                movea.\0\ \dmaTransfer, a0
             EndIf
         Endm
 

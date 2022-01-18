@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Horizontal line scroll updater. Updates the horizontal VDP scroll values for both cameras.
+; Horizontal line VDPScrollUpdater implementation. Updates the horizontal VDP scroll values for both cameras.
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/memory.inc'
@@ -8,19 +8,18 @@
     Include './engine/include/vdpscroll.inc'
 
 ;-------------------------------------------------
-; Line scroll structures
+; Horizontal line VDPScrollUpdater structures
 ; ----------------
+
+    ;-------------------------------------------------
+    ; Horizontal line scroll table/state structure
+    ; ----------------
     DEFINE_STRUCT LineHorizontalVDPScrollUpdaterPlaneState
         STRUCT_MEMBER.w     hlsuLineHorizontalScroll, 224            ; NB: Horizontal scroll values must be negated by the ScrollValueUpdater for performance reasons
     DEFINE_STRUCT_END
 
-    DEFINE_VAR SHORT
-        VAR.l lsPlaneBScrollDMATransferCommandListAddress
-        VAR.l lsPlaneAScrollDMATransferCommandListAddress
-    DEFINE_VAR_END
-
     ;-------------------------------------------------
-    ; VPlane VDPScrollUpdater
+    ; Horizontal line VDPScrollUpdater definition
     ; ----------------
     ; struct VDPScrollUpdater
     lineHorizontalVDPScrollUpdater:
@@ -29,13 +28,14 @@
         ; .update
         dc.l _LineHorizontalVDPScrollUpdaterUpdate
 
-LS_LINE_BUFFER_SIZE Equ LineHorizontalVDPScrollUpdaterPlaneState_Size
-
+    ;-------------------------------------------------
+    ; Horizontal line DMA command list templates
+    ; ----------------
     lsPlaneBScrollDMATransferCommandListTemplate:
-        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR + SIZE_WORD, LS_LINE_BUFFER_SIZE / SIZE_WORD, SIZE_WORD * 2
+        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR + SIZE_WORD, LineHorizontalVDPScrollUpdaterPlaneState_Size / SIZE_WORD, SIZE_WORD * 2
 
     lsPlaneAScrollDMATransferCommandListTemplate:
-        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR, LS_LINE_BUFFER_SIZE / SIZE_WORD, SIZE_WORD * 2
+        VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST 0, VDP_HSCROLL_ADDR, LineHorizontalVDPScrollUpdaterPlaneState_Size / SIZE_WORD, SIZE_WORD * 2
 
 
 ;-------------------------------------------------
@@ -53,16 +53,14 @@ _LineHorizontalVDPScrollUpdaterInit:
             Horizontal,                                     &
             background,                                     &
             LineHorizontalVDPScrollUpdaterPlaneState,       &
-            lsPlaneBScrollDMATransferCommandListTemplate,   &
-            lsPlaneBScrollDMATransferCommandListAddress
+            lsPlaneBScrollDMATransferCommandListTemplate
 
         ; Initialize foreground
         VDP_SCROLL_DMA_UPDATER_INIT                         &
             Horizontal,                                     &
             foreground,                                     &
             LineHorizontalVDPScrollUpdaterPlaneState,       &
-            lsPlaneAScrollDMATransferCommandListTemplate,   &
-            lsPlaneAScrollDMATransferCommandListAddress
+            lsPlaneAScrollDMATransferCommandListTemplate
         rts
 
 
@@ -73,9 +71,6 @@ _LineHorizontalVDPScrollUpdaterInit:
 ; - a0: Viewport
 ; Uses: d0-d1/a0-a6
 _LineHorizontalVDPScrollUpdaterUpdate:
-        VDP_SCROLL_DMA_UPDATER_UPDATE                       &
-            Horizontal,                                     &
-            lsPlaneBScrollDMATransferCommandListAddress,    &
-            lsPlaneAScrollDMATransferCommandListAddress
+        VDP_SCROLL_DMA_UPDATER_UPDATE Horizontal
         rts
 

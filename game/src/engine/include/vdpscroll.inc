@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; Engine internal: Hardware level scroll update constants / macros /structs based on cameras.
+; Engine internal stuff for VDPScrollUpdater implementations and state management
 ;
 ; User facing side is implemented by ScrollValueUpdater. See file scroll.inc and ./updaters/*.
 ;------------------------------------------------------------------------------------------
@@ -28,12 +28,14 @@ __ENGINE_VDP_SCROLL_INC Equ 1
         STRUCT_MEMBER.l   backgroundScrollValueStateAddress
         STRUCT_MEMBER.l   backgroundScrollValueConfigurationAddress
         STRUCT_MEMBER.w   backgroundScrollValueCameraOffset
+        STRUCT_MEMBER.w   backgroundDMATransferCommandListAddress
 
         STRUCT_MEMBER.l   foregroundScrollValueUpdateAddress
         STRUCT_MEMBER.l   foregroundScrollValueTableAddress
         STRUCT_MEMBER.l   foregroundScrollValueStateAddress
         STRUCT_MEMBER.l   foregroundScrollValueConfigurationAddress
         STRUCT_MEMBER.w   foregroundScrollValueCameraOffset
+        STRUCT_MEMBER.w   foregroundDMATransferCommandListAddress
 
         STRUCT_MEMBER.b   updateFlags
     DEFINE_STRUCT_END
@@ -152,9 +154,9 @@ VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTem
 
         ; Setup DMA
 
-        ; Copy DMA transfer command list template to RAM to its source address can be patched with the address of the dynamically allocated scroll table
+        ; Copy DMA transfer command list template to RAM so its source address can be patched with the address of the dynamically allocated scroll table
         MEMORY_ALLOCATE VDPDMATransferCommandList_Size, a2, a3
-        move.l  a2, \dmaTransferAddress
+        move.w  a2, (vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_\config\DMATransferCommandListAddress)
         movea.l a2, a1
         lea     \dmaTransferTemplate, a0
         move.w  #VDPDMATransferCommandList_Size, d0
@@ -165,7 +167,7 @@ VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTem
         VDP_DMA_TRANSFER_COMMAND_LIST_PATCH_SOURCE a2, d0
 
         ; Transfer initial scroll values to the VDP
-        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT \dmaTransferAddress
+        VDP_DMA_TRANSFER_COMMAND_LIST_INDIRECT.l a2
 
         POPL   a1
         POPL   a0
@@ -178,7 +180,7 @@ VDP_SCROLL_DMA_UPDATER_INIT Macro orientation, config, stateType, dmaTransferTem
 ; Input:
 ; - a0: Viewport
 ; Uses: d0-d1/a0-a6
-VDP_SCROLL_DMA_UPDATER_UPDATE Macro orientation, backgroundDMATransferAddress, foregroundDMATransferAddress
+VDP_SCROLL_DMA_UPDATER_UPDATE Macro orientation
             VDP_SCROLL_UPDATER_UPDATE \orientation
 
             move.w  d0, d1
@@ -186,14 +188,14 @@ VDP_SCROLL_DMA_UPDATER_UPDATE Macro orientation, backgroundDMATransferAddress, f
             btst    #VDP_SCROLL_UPDATE_BACKGROUND, d1
             beq.s   .noBackgroundScroll\@
 
-                VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT \backgroundDMATransferAddress
+                VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT.w (vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_backgroundDMATransferCommandListAddress)
 
         .noBackgroundScroll\@:
 
             btst    #VDP_SCROLL_UPDATE_FOREGROUND, d1
             beq.s   .noForegroundScroll\@
 
-                VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT \foregroundDMATransferAddress
+                VDP_DMA_QUEUE_ADD_COMMAND_LIST_INDIRECT.w (vsus\orientation\VDPScrollUpdaterState + VDPScrollUpdaterState_foregroundDMATransferCommandListAddress)
 
         .noForegroundScroll\@:
     Endm
