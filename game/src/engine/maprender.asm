@@ -1,12 +1,11 @@
 ;------------------------------------------------------------------------------------------
-; Map rendering routines
+; Map rendering routines (Needs a serious rewrite at some point)
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/m68k.inc'
     Include './system/include/vdp.inc'
     Include './system/include/vdpdmaqueue.inc'
 
-    Include './engine/include/maprender.inc'
     Include './engine/include/map.inc'
     Include './engine/include/tileset.inc'
 
@@ -14,8 +13,6 @@
 ; Map render buffers
 ; ----------------
     DEFINE_VAR SHORT
-        VAR.w               mapRenderBuffer,            128 * 2 * 2  ; Reserve one 64 pattern name table entry buffer per plane per side
-        VAR.w               mapCurrentRenderBuffer
         VAR.VDPDMATransfer  mapRowBufferDMATransfer
         VAR.VDPDMATransfer  mapColumnBufferDMATransfer
     DEFINE_VAR_END
@@ -36,15 +33,6 @@ MapRenderInit:
         move.w  d1, (mapColumnBufferDMATransfer + VDPDMATransfer_dataStride)
         move.w  d0, (mapColumnBufferDMATransfer + VDPDMATransfer_length)
         move.w  #$007f, (mapColumnBufferDMATransfer + VDPDMATransfer_source)
-
-        ; NB: Fall through to MapRenderReset
-
-
-;-------------------------------------------------
-; Reset the renderer
-; ----------------
-MapRenderReset:
-        MAP_RENDER_RESET
         rts
 
 
@@ -156,6 +144,7 @@ _RENDER_PARTIAL_CHUNK Macro start, patternNumber
 ; ----------------
 ; Input:
 ; - a0: Number of patterns to render
+; - a4: Render buffer
 ; - d2: Map start row/column (Opposite of rendered dimension)
 ; Reserved registers: a2-a4
 ; Required macros:
@@ -166,7 +155,6 @@ _RENDER_BUFFER Macro
             ; Load address registers
             lea     chunkTable, a2
             lea     blockTable, a3
-            movea.w mapCurrentRenderBuffer, a4
 
             moveq   #0, d3
             andi.w  #$0f, d2
@@ -222,11 +210,12 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_CONTINUOUS
                     bne     .fullChunkEmpty\@
 
                     _START_CHUNK
+                        PUSHW   a4
                         lea     (a4, d1), a4
                         Rept 8
                             _RENDER_BLOCK
                         Endr
-                        movea.w mapCurrentRenderBuffer, a4
+                        POPW    a4
                         bra     .fullChunkDone\@
 
                 .fullChunkEmpty\@:
@@ -262,9 +251,7 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
                 .endChunkEmpty\@:
                     moveq   #0, d4
                     _RENDER_PARTIAL_CHUNK_FIXED d2, d4
-
-        .done\@:
-            add.w   #128, mapCurrentRenderBuffer
+    .done\@:
     Endm
 
 
@@ -282,7 +269,7 @@ MapRenderRow:
         move.w d0, d6
         movea.l a0, a6
 
-        ; Calculate DMA target
+        ; Calculate and set DMA target
         move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d4
         subq.w  #1, d4
         and.w   d4, d0
@@ -298,12 +285,18 @@ MapRenderRow:
         add.l   d3, d5
         move.l  d5, (mapRowBufferDMATransfer + VDPDMATransfer_target)
 
-        ; Calculate DMA source
-        move.w  mapCurrentRenderBuffer, d5
+        ; Allocate buffer memory
+        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d0
+        add.w   d0, d0
+        jsr     MemoryDMAAllocate
+        movea.l a0, a4  ; Store buffer address parameter for _MapRenderRowBuffer
+
+        ; Calculate and set DMA source to allocated buffer
+        move.w  a0, d5
         asr.w   #1, d5
         move.w  d5, (mapRowBufferDMATransfer + VDPDMATransfer_source + 2)
 
-        ; Queue DMA job
+        ; Queue buffer for transfer
         VDP_DMA_QUEUE_ADD mapRowBufferDMATransfer
 
         movea.l a6, a0
@@ -317,6 +310,7 @@ MapRenderRow:
 ; ----------------
 ; Input:
 ; - a0: Map address
+; - a4: Render buffer address
 ; - d0: Map row
 ; - d1: Map start column
 ; - d2: Width to render
@@ -472,7 +466,7 @@ MapRenderColumn:
         movea.l a0, a6
         move.w d0, d6
 
-        ; Queue DMA target
+        ; Calculate and set DMA target
         moveq   #0, d5
         move.w  d0, d5
         move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d4
@@ -484,12 +478,18 @@ MapRenderColumn:
         add.l   d3, d5
         move.l  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_target)
 
-        ; Calculate DMA source
-        move.w  mapCurrentRenderBuffer, d5
+        ; Allocate buffer memory
+        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d0
+        add.w   d0, d0
+        jsr     MemoryDMAAllocate
+        movea.l a0, a4  ; Store buffer address parameter for _MapRenderColumnBuffer
+
+        ; Calculate and set DMA source to allocated buffer
+        move.w  a0, d5
         asr.w   #1, d5
         move.w  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_source + 2)
 
-        ; Calculate DMA target
+        ; Queue buffer for transfer
         VDP_DMA_QUEUE_ADD mapColumnBufferDMATransfer
 
         movea.l a6, a0
@@ -503,6 +503,7 @@ MapRenderColumn:
 ; ----------------
 ; Input:
 ; - a0: Map address
+; - a4: Render buffer address
 ; - d0: Map column
 ; - d1: Map start row
 ; - d2: Height to render

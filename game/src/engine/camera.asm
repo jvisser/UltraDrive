@@ -43,7 +43,7 @@ _VIEWPORT_CLAMP Macro component, mapSize, screenSize
 
 		; Set plane id
 		move.l	d4, Camera_planeId(a0)
-        
+
         ; Set default renderers
         move.l  #_CameraRenderRow, Camera_rowRenderer(a0)
         move.l  #_CameraRenderColumn, Camera_columnRenderer(a0)
@@ -133,15 +133,13 @@ CameraRenderView:
         move.l  Camera_planeId(a0), d3
         move.w  Camera_heightPatterns(a0), d4
         movea.l Camera_rowRenderer(a0), a1
-        
+
         subq.w  #1, d4
 
     .rowLoop:
             PUSHM.w d0-d2/d4
             PUSHM.l d3/a0-a1
-            MAP_RENDER_RESET
             jsr     (a1)
-            jsr     VDPDMAQueueFlush        ; TODO: Use CPU/direct transfer
             POPM.l  d3/a0-a1
             POPM.w  d0-d2/d4
 
