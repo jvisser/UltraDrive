@@ -96,9 +96,13 @@ _INIT_SCROLL Macro orientation
         VIEWPORT_GET_Y d1
         bsr     _ViewportInitActiveViewportData
 
-        ; Render views
+        ; Render background
+        jsr     VDPDMAQueueFlush        ; Causes at least 28 DMA queue entries, so flush first
         lea     (viewport + Viewport_background), a0
         jsr     CameraRenderView
+
+        ; Render foreground
+        jsr     VDPDMAQueueFlush
         lea     (viewport + Viewport_foreground), a0
         jmp     CameraRenderView
 
@@ -127,8 +131,6 @@ _UPDATE_SCROLL Macro orientation
             lea     viewport, a0
             jsr     (a2)
         Endm
-
-        MAP_RENDER_RESET
 
         lea     (viewport + Viewport_foreground), a0
         move.w  (viewport + Viewport_trackingEntity), d0

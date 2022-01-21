@@ -13,7 +13,6 @@ __ENGINE_INC Equ 1
     Include './engine/include/linkedlist.inc'
     Include './engine/include/map.inc'
     Include './engine/include/mapobject.inc'
-    Include './engine/include/maprender.inc'
     Include './engine/include/object.inc'
     Include './engine/include/scheduler.inc'
     Include './engine/include/scroll.inc'

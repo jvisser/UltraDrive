@@ -248,20 +248,14 @@ INIT_STRUCT_END Macro
 
 
 ;-------------------------------------------------
-; Reset the allocator to the start of free RAM
-; ----------------
-MEMORY_ALLOCATOR_RESET Macros
-    move.w  RomHeaderRamStart + SIZE_WORD, memAllocationPointer
-
-
-;-------------------------------------------------
 ; Check for memory allocation overflow OS_KILL (trap 0) if so
 ; ----------------
     Include './system/include/os.inc'   ; Workaround: include here to prevent circular dep order issues...
-__MEMORY_CHECK_OVERFLOW Macro target
+__MEMORY_CHECK_OVERFLOW Macro scratch
         If def(debug)
-            cmpa.l  RomHeaderRamEnd, \target
-            ble.s   .allocOk\@
+            movea.w memAllocationPointer, \scratch
+            cmpa.l  memDMAAllocationPointer, \scratch
+            bge.s   .allocOk\@
                 OS_KILL 'RAM allocation overflow!'
         .allocOk\@:
         EndIf
@@ -275,10 +269,10 @@ MEMORY_ALLOCATE Macro bytes, target, scratch
         movea.w  memAllocationPointer, \target
         movea.l \target, \scratch
         adda.w  #(((\bytes) + 1) & $fffe), \scratch
+        move.w  \scratch, memAllocationPointer
 
         __MEMORY_CHECK_OVERFLOW \scratch
 
-        move.w  \scratch, memAllocationPointer
     Endm
 
 

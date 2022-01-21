@@ -96,5 +96,7 @@ VDPDMAQueueFlush:
 
     .dmaTransferComplete:
 
+        jsr MemoryDMAAllocatorReset
+
         OS_UNLOCK
         rts
