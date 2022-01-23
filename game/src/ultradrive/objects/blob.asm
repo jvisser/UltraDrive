@@ -23,7 +23,8 @@ BLOB_SPEED      Equ 1
 
     ; MapObjectDescriptor
     DEFINE_STRUCT BlobDescriptor, MapStatefulObjectDescriptor
-        STRUCT_MEMBER.MapObjectPosition position
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
     ; State
@@ -98,8 +99,8 @@ BlobLoad:
 ; - a1: BlobState address
 BlobInit:
         ; Position
-        move.w  BlobDescriptor_position + MapObjectPosition_x(a0), Entity_x(a1)
-        move.w  BlobDescriptor_position + MapObjectPosition_y(a0), Entity_y(a1)
+        move.w  BlobDescriptor_x(a0), Entity_x(a1)
+        move.w  BlobDescriptor_y(a0), Entity_y(a1)
         clr.w   BlobState_deathCounter(a1)
 
         ; Orientation/Movement direction

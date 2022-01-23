@@ -1,0 +1,28 @@
+; /*[-
+;   Produces MapObjectDescriptor or MapStatefulObjectDescriptor if the state size of the specified object type is non zero
+;
+;   Required inputs:
+;   - type: Object type as specified by DEFINE_OBJECT_TYPE
+;   Implicit inputs:
+;   - object
+;   - mapName
+; -]*/
+
+[# th:if="${object.properties['objectTypeTransferable']}"]
+    ALLOC_OBJECT_LINK_STATE
+[/]
+
+; struct MapObjectDescriptor:
+    ; .type
+    dc.w [(${type})]ObjectType
+    ; .size
+    dc.b MapObject[(${object.id})][(${mapName})]_End - MapObject[(${object.id})][(${mapName})]
+    ; .flags
+    dc.b [# th:if="${object.properties['objectTypeTransferable']}"]MODF_TRANSFERABLE_MASK|[/][# th:if="${object.properties['enabled']}"]MODF_ENABLED_MASK|[/][# th:if="${object.properties['active']}"]MODF_ACTIVE_MASK|[/][# th:if="${object.horizontalFlip}"]MODF_HFLIP_MASK|[/][# th:if="${object.verticalFlip}"]MODF_VFLIP_MASK|[/]0
+    ; If state assume MapStatefulObjectDescriptor
+    If ([(${type})]ObjectTypeSize > 0)
+        ; stateOffset
+        dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+    EndIf
+
+    ALLOC_OBJECT_STATE [(${type})]

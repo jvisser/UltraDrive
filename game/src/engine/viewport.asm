@@ -108,7 +108,10 @@ _INIT_SCROLL Macro orientation
         ; Render foreground
         jsr     VDPDMAQueueFlush
         lea     (viewport + Viewport_foreground), a0
-        jmp     CameraRenderView
+        jsr     CameraRenderView
+
+        ; One final DMA queue flush for a fresh start
+        jmp     VDPDMAQueueFlush
 
         Purge _INIT_SCROLL
 

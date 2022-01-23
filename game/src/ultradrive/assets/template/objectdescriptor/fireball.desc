@@ -1,0 +1,6 @@
+; struct FireballDescriptor
+    [# th:with="type=Fireball"][# th:block th:replace="objectdescriptor/objectdescriptor.desc"][/][/]
+    ; .x
+    dc.w [(${object.x})]
+    ; .y
+    dc.w [(${object.y})]

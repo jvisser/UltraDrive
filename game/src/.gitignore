@@ -1,4 +1,4 @@
-ultradrive/assets/**/*
+ultradrive/assets/generated/**/*
 *.bin
 *.lst
 *.sym

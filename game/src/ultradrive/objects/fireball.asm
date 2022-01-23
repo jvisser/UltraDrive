@@ -22,7 +22,8 @@ FIREBALL_EXTENTS Equ 8
 
     ; MapObjectDescriptor
     DEFINE_STRUCT FireballDescriptor, MapObjectDescriptor
-        STRUCT_MEMBER.MapObjectPosition position
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
     ; Type (MapObjectType)
@@ -91,7 +92,7 @@ FireballLoad:
 FireballUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  FireballDescriptor_position + MapObjectPosition_x(a0), d3
+        move.w  FireballDescriptor_x(a0), d3
         move.w  d3, d5
         sub.w   d0, d3
         subq.w  #FIREBALL_EXTENTS, d3
@@ -106,7 +107,7 @@ FireballUpdate:
 
             ; Convert vertical map coordinates to screen coordinates
             VIEWPORT_GET_Y d1
-            move.w  FireballDescriptor_position + MapObjectPosition_y(a0), d4
+            move.w  FireballDescriptor_y(a0), d4
             sub.w   d1, d4
             subq.w  #FIREBALL_EXTENTS, d4
 

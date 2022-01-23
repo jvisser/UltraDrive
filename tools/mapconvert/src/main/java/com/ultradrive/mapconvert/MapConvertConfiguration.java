@@ -19,23 +19,23 @@ class MapConvertConfiguration
 {
     private static final String OPTION_MAP_FILE = "m";
     private static final String OPTION_TEMPLATE_DIR = "t";
+    private static final String OPTION_ADDITIONAL_TEMPLATE_SEARCH_DIR = "s";
     private static final String OPTION_OUTPUT_DIR = "o";
     private static final String OPTION_IMAGE_OUTPUT_DIR = "p";
     private static final String OPTION_IMAGE = "i";
     private static final String OPTION_OBJECT_TYPES_FILE = "f";
     private static final String OPTION_PATTERN_ALLOCATION_CONFIG_FILE = "a";
     private static final String OPTION_RECURSIVE = "r";
-
-    private final Options options;
-
-    private String mapFile;
-    private String templateDirectory;
-    private String outputDirectory;
+    private String additionalTemplateDirectory;
     private String imageOutputDirectory;
+    private String mapFile;
     private String objectTypesFile;
+    private final Options options;
+    private String outputDirectory;
     private String patternAllocationConfigurationFile;
     private boolean recursive;
     private boolean saveImages;
+    private String templateDirectory;
 
     MapConvertConfiguration()
     {
@@ -43,11 +43,18 @@ class MapConvertConfiguration
         options.addRequiredOption(OPTION_MAP_FILE, "map", true, "Map file or directory containing the maps to compile");
         options.addRequiredOption(OPTION_OUTPUT_DIR, "output-dir", true, "Output directory.");
         options.addOption(OPTION_TEMPLATE_DIR, "template-dir", true, "Thymeleaf template directory.");
-        options.addOption(OPTION_IMAGE_OUTPUT_DIR, "image-output-dir", true, ".png image output directory (uses output-dir if not specified).");
-        options.addOption(OPTION_OBJECT_TYPES_FILE, "object-types-file", true, "Location of the tiled objecttypes.xml file.");
-        options.addOption(OPTION_PATTERN_ALLOCATION_CONFIG_FILE, "pattern-alloc", true, "Location of the pattern allocation configuration file");
-        options.addOption(OPTION_RECURSIVE, "recursive", false, "Search for maps recursively from the map base directory.");
-        options.addOption(OPTION_IMAGE, "image", false, "Save .png images of the maps in the directory specified by image-output-dir.");
+        options.addOption(OPTION_ADDITIONAL_TEMPLATE_SEARCH_DIR, "template-search-dir", true,
+                          "Additional Thymeleaf template search directory.");
+        options.addOption(OPTION_IMAGE_OUTPUT_DIR, "image-output-dir", true,
+                          ".png image output directory (uses output-dir if not specified).");
+        options.addOption(OPTION_OBJECT_TYPES_FILE, "object-types-file", true,
+                          "Location of the tiled objecttypes.xml file.");
+        options.addOption(OPTION_PATTERN_ALLOCATION_CONFIG_FILE, "pattern-alloc", true,
+                          "Location of the pattern allocation configuration file");
+        options.addOption(OPTION_RECURSIVE, "recursive", false,
+                          "Search for maps recursively from the map base directory.");
+        options.addOption(OPTION_IMAGE, "image", false,
+                          "Save .png images of the maps in the directory specified by image-output-dir.");
     }
 
     public boolean parseCommandLine(String[] args)
@@ -60,6 +67,7 @@ class MapConvertConfiguration
 
             mapFile = cmd.getOptionValue(OPTION_MAP_FILE);
             templateDirectory = cmd.getOptionValue(OPTION_TEMPLATE_DIR);
+            additionalTemplateDirectory = cmd.getOptionValue(OPTION_ADDITIONAL_TEMPLATE_SEARCH_DIR);
             outputDirectory = cmd.getOptionValue(OPTION_OUTPUT_DIR);
             imageOutputDirectory = cmd.getOptionValue(OPTION_IMAGE_OUTPUT_DIR);
             if (imageOutputDirectory == null)
@@ -85,19 +93,14 @@ class MapConvertConfiguration
         formatter.printHelp(appName, options, true);
     }
 
-    public String getMapFile()
+    public String getAdditionalTemplateDirectory()
     {
-        return mapFile;
+        return additionalTemplateDirectory;
     }
 
-    public String getTemplateDirectory()
+    public int getDirectorySearchDepth()
     {
-        return templateDirectory;
-    }
-
-    public String getOutputDirectory()
-    {
-        return outputDirectory;
+        return recursive ? Integer.MAX_VALUE : 1;
     }
 
     public String getImageOutputDirectory()
@@ -105,29 +108,19 @@ class MapConvertConfiguration
         return imageOutputDirectory;
     }
 
+    public String getMapFile()
+    {
+        return mapFile;
+    }
+
     public String getObjectTypesFile()
     {
         return objectTypesFile;
     }
 
-    public boolean isRecursive()
+    public String getOutputDirectory()
     {
-        return recursive;
-    }
-
-    public boolean isSaveImages()
-    {
-        return saveImages;
-    }
-
-    public boolean isProcessTemplates()
-    {
-        return templateDirectory != null;
-    }
-
-    public int getDirectorySearchDepth()
-    {
-        return recursive ? Integer.MAX_VALUE : 1;
+        return outputDirectory;
     }
 
     public PatternAllocationConfiguration getPatternAllocationConfiguration() throws IOException
@@ -142,5 +135,25 @@ class MapConvertConfiguration
         {
             return PatternAllocationConfiguration.read(new File(patternAllocationConfigurationFile));
         }
+    }
+
+    public String getTemplateDirectory()
+    {
+        return templateDirectory;
+    }
+
+    public boolean isProcessTemplates()
+    {
+        return templateDirectory != null;
+    }
+
+    public boolean isRecursive()
+    {
+        return recursive;
+    }
+
+    public boolean isSaveImages()
+    {
+        return saveImages;
     }
 }

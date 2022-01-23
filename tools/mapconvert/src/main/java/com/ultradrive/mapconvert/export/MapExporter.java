@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.ITemplateEngine;
@@ -24,12 +26,15 @@ import static java.util.stream.Collectors.toList;
 public class MapExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapExporter.class.getName());
-
+    private final File additionalTemplatePath;
     private final File templatePath;
 
-    public MapExporter(String templatePath)
+    public MapExporter(String templatePath, String additionalTemplatePath)
     {
         this.templatePath = new File(templatePath);
+        this.additionalTemplatePath = Optional.ofNullable(additionalTemplatePath)
+                .map(File::new)
+                .orElse(null);
     }
 
     public void export(TileMapCompilation mapCompilation, String outputDirectory) throws IOException
@@ -56,23 +61,6 @@ public class MapExporter
         }
     }
 
-    private void writeFile(File outputFile, String fileContent) throws IOException
-    {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, false)))
-        {
-            writer.append(fileContent);
-        }
-    }
-
-    private List<String> getTemplateFileNames() throws IOException
-    {
-        return Files.walk(templatePath.toPath(), 1)
-                .map(Path::toFile)
-                .filter(File::isFile)
-                .map(File::getName)
-                .collect(toList());
-    }
-
     public ITemplateEngine createTemplateEngine()
     {
         FileTemplateResolver templateResolver = new FileTemplateResolver();
@@ -81,8 +69,14 @@ public class MapExporter
         templateResolver.setCheckExistence(true);
 
         TemplateEngine templateEngine = new TemplateEngine();
-        templateEngine.addTemplateResolver(templateResolver);
         templateEngine.addDialect(new MapExporterDialect());
+
+        templateEngine.addTemplateResolver(createFileTemplateResolver(templatePath));
+        if (additionalTemplatePath != null)
+        {
+            templateEngine.addTemplateResolver(createFileTemplateResolver(additionalTemplatePath));
+        }
+
         return templateEngine;
     }
 
@@ -94,5 +88,35 @@ public class MapExporter
         context.setVariable("maps", compilation.getMaps());
         context.setVariable("collisionblocklists", compilation.getCollisionBlockLists());
         return context;
+    }
+
+    private List<String> getTemplateFileNames() throws IOException
+    {
+        try (Stream<Path> pathStream = Files.walk(templatePath.toPath(), 1))
+        {
+            return pathStream
+                    .map(Path::toFile)
+                    .filter(File::isFile)
+                    .map(File::getName)
+                    .collect(toList());
+        }
+    }
+
+    private void writeFile(File outputFile, String fileContent) throws IOException
+    {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, false)))
+        {
+            writer.append(fileContent);
+        }
+    }
+
+    private FileTemplateResolver createFileTemplateResolver(File path)
+    {
+        FileTemplateResolver templateResolver = new FileTemplateResolver();
+        templateResolver.setPrefix(path.getAbsolutePath() + File.separator);
+        templateResolver.setTemplateMode(TemplateMode.TEXT);
+        templateResolver.setCheckExistence(true);
+
+        return templateResolver;
     }
 }

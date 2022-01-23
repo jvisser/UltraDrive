@@ -1,0 +1,6 @@
+; struct OrbisonDescriptor
+    [# th:with="type=Orbison"][# th:block th:replace="objectdescriptor/objectdescriptor.desc"][/][/]
+    ; .x
+    dc.w [(${object.x})]
+    ; .y
+    dc.w [(${object.y})]

@@ -23,9 +23,10 @@ fi
 java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
         -m "$map"                                           \
         -t './engine/assets/template'                       \
-        -o './ultradrive/assets'                            \
+        -s './ultradrive/assets/template'                   \
+        -o './ultradrive/assets/generated'                  \
         -f '../assets/map/objecttypes.xml'                  \
-        -a './ultradrive/config/allocation.yaml'            \
+        -a './ultradrive/config/vram.yaml'                  \
         -r
 
 # Clean output from previous run
