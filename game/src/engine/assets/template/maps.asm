@@ -111,35 +111,12 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
                         ; .objectDescriptors
                         [# th:each="object : ${objects}"]
 
-                            [# th:if="${object.properties['objectTypeTransferable']}"]
-                                ALLOC_OBJECT_LINK_STATE
-                            [/]
-
-                            ; struct MapObjectDescriptor (type = [(${object.name})])
+                            ; Object type = [(${object.name})]
                             MapObject[(${object.id})][(${mapName})]:
-                                ; .type
-                                dc.w [(${object.name})]ObjectType
-                                ; .size
-                                dc.b MapObject[(${object.id})][(${mapName})]_End - MapObject[(${object.id})][(${mapName})]
-                                ; .flags
-                                dc.b [# th:if="${object.properties['objectTypeTransferable']}"]MODF_TRANSFERABLE_MASK|[/][# th:if="${object.properties['enabled']}"]MODF_ENABLED_MASK|[/][# th:if="${object.properties['active']}"]MODF_ACTIVE_MASK|[/][# th:if="${object.horizontalFlip}"]MODF_HFLIP_MASK|[/][# th:if="${object.verticalFlip}"]MODF_VFLIP_MASK|[/]0
 
-                                ; struct MapStatefulObjectDescriptor
-                                If ([(${object.name})]ObjectTypeSize > 0)
-                                    ; .stateOffset
-                                    dc.w $\$ALLOC_OBJECT_STATE_OFFSET
-                                EndIf
+                                [# th:block th:replace="objectdescriptor/__${#strings.toLowerCase(object.name)}__.desc"][/]
 
-                                [# th:if="${object.properties['objectTypePositional']}"]
-                                    ; struct MapObjectPosition
-                                        ; .x
-                                        dc.w [(${object.x})]
-                                        ; .y
-                                        dc.w [(${object.y})]
-                                [/]
                             MapObject[(${object.id})][(${mapName})]_End:
-
-                            ALLOC_OBJECT_STATE [(${object.name})]
 
                             Even
                         [/]

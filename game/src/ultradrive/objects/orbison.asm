@@ -20,7 +20,8 @@ ORBISON_EXTENTS Equ 8
 
     ; MapObjectDescriptor
     DEFINE_STRUCT OrbisonDescriptor, MapObjectDescriptor
-        STRUCT_MEMBER.MapObjectPosition position
+        STRUCT_MEMBER.w x
+        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
     ; Type (MapObjectType)
@@ -89,7 +90,7 @@ OrbisonLoad:
 OrbisonUpdate:
         ; Convert horizontal map coordinates to screen coordinates
         VIEWPORT_GET_X d0
-        move.w  OrbisonDescriptor_position + MapObjectPosition_x(a0), d3
+        move.w  OrbisonDescriptor_x(a0), d3
         sub.w   d0, d3
         subq.w  #ORBISON_EXTENTS, d3
 
@@ -103,7 +104,7 @@ OrbisonUpdate:
 
         ; Convert vertical map coordinates to screen coordinates
         VIEWPORT_GET_Y d1
-        move.w  OrbisonDescriptor_position + MapObjectPosition_y(a0), d4
+        move.w  OrbisonDescriptor_y(a0), d4
         sub.w   d1, d4
         subq.w  #ORBISON_EXTENTS, d4
 

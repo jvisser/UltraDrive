@@ -104,7 +104,7 @@ __ENGINE_MAP_INC Equ 1
     ; Map object structures
     ; ----------------
     DEFINE_STRUCT MapObjectType, ObjectType
-        ; Type methods (called once for each object type used in the map)
+        ; Type methods (called once at load time for each object type used in the map)
         STRUCT_MEMBER.l loadResources                                           ; loadResources()
         STRUCT_MEMBER.l releaseResources                                        ; releaseResources()
 
@@ -121,12 +121,6 @@ __ENGINE_MAP_INC Equ 1
 
     DEFINE_STRUCT MapStatefulObjectDescriptor, MapObjectDescriptor
         STRUCT_MEMBER.w stateOffset                                             ; Offset into the maps state area
-    DEFINE_STRUCT_END
-
-    ; Appended after the object descriptor if the object type is marked as positional (in the map editor)
-    DEFINE_STRUCT MapObjectPosition
-        STRUCT_MEMBER.w x
-        STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
 

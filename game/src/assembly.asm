@@ -77,8 +77,8 @@
     Include 'ultradrive/objects/blob.asm'
 
     ; Assets
-    Include 'ultradrive/assets/tilesets.asm'
-    Include 'ultradrive/assets/maps.asm'
+    Include 'ultradrive/assets/generated/tilesets.asm'
+    Include 'ultradrive/assets/generated/maps.asm'
 
     ; Main
     Include 'ultradrive/main.asm'

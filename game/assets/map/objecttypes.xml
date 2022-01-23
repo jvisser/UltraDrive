@@ -17,7 +17,6 @@
   <property name="active" type="bool" default="true"/>
   <property name="enabled" type="bool" default="true"/>
   <property name="objectTypeTransferable" type="bool" default="false"/>
-  <property name="objectTypePositional" type="bool" default="true"/>
   <property name="objectTypeXCompensation" type="int" default="0"/>
   <property name="objectTypeYCompensation" type="int" default="0"/>
  </objecttype>

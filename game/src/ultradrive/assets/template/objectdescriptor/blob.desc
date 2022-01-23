@@ -1,0 +1,6 @@
+; struct BlobDescriptor
+    [# th:with="type=Blob"][# th:block th:replace="objectdescriptor/objectdescriptor.desc"][/][/]
+    ; .x
+    dc.w [(${object.x})]
+    ; .y
+    dc.w [(${object.y})]

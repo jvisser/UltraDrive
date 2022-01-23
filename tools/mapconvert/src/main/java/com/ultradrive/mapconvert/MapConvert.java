@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,13 @@ public final class MapConvert
 
     private static final String TILED_MAP_FILE_EXTENSION = ".tmx";
     private static final String PNG_FILE_EXTENSION = ".png";
+
+    public static void main(String[] args) throws IOException
+    {
+        MapConvert mapConvert = new MapConvert();
+
+        mapConvert.run(args);
+    }
 
     private void run(String[] commandLineArguments) throws IOException
     {
@@ -42,18 +50,6 @@ public final class MapConvert
         if (config.isSaveImages())
         {
             exportPNG(config, mapCompilation);
-        }
-    }
-
-    private void logTilesetStatistics(TileMapCompilation mapCompilation)
-    {
-        for (Tileset tileset : mapCompilation.getTilesets())
-        {
-            LOGGER.info("Tileset '{}' = Chunks = {}, Blocks = {}, Patterns = {}",
-                        tileset.getName(),
-                        tileset.getChunkTileset().getSize(),
-                        tileset.getBlockTileset().getSize(),
-                        tileset.getPatternAllocation().getSize());
         }
     }
 
@@ -85,19 +81,35 @@ public final class MapConvert
             }
             else
             {
-                Files.walk(Path.of(mapFile.getAbsolutePath()), config.getDirectorySearchDepth())
-                        .filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))
-                        .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
-                        .forEach(mapCompiler::addMapDataSource);
+                try (Stream<Path> pathStream = Files.walk(Path.of(mapFile.getAbsolutePath()),
+                                                          config.getDirectorySearchDepth()))
+                {
+                    pathStream.filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))
+                            .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
+                            .forEach(mapCompiler::addMapDataSource);
+                }
             }
         }
 
         return mapCompiler.compile();
     }
 
+    private void logTilesetStatistics(TileMapCompilation mapCompilation)
+    {
+        for (Tileset tileset : mapCompilation.getTilesets())
+        {
+            LOGGER.info("Tileset '{}' = Chunks = {}, Blocks = {}, Patterns = {}",
+                        tileset.getName(),
+                        tileset.getChunkTileset().getSize(),
+                        tileset.getBlockTileset().getSize(),
+                        tileset.getPatternAllocation().getSize());
+        }
+    }
+
     private void export(MapConvertConfiguration config, TileMapCompilation compile) throws IOException
     {
-        MapExporter mapExporter = new MapExporter(config.getTemplateDirectory());
+        MapExporter mapExporter =
+                new MapExporter(config.getTemplateDirectory(), config.getAdditionalTemplateDirectory());
 
         mapExporter.export(compile, config.getOutputDirectory());
     }
@@ -125,12 +137,5 @@ public final class MapConvert
             LOGGER.warn(
                     format("Unable to create image export output directory '%s'", imageDirectory.getAbsolutePath()));
         }
-    }
-
-    public static void main(String[] args) throws IOException
-    {
-        MapConvert mapConvert = new MapConvert();
-
-        mapConvert.run(args);
     }
 }
