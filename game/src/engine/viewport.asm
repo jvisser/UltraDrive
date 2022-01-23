@@ -70,6 +70,10 @@ _INIT_SCROLL Macro orientation
         move.l  #VDP_PLANE_A, d4
         jsr     CameraInit
 
+        ; Replace foreground camera renderers to render from the chunkRefCache
+        move.l  #_ViewportRenderRow, Camera_rowRenderer(a0)
+        move.l  #_ViewportRenderColumn, Camera_columnRenderer(a0)
+
         ; Let background tracker initialize the background camera
         MAP_GET a1
         PEEKL   a4                                      ; a4 = current viewport configuration address
@@ -410,5 +414,68 @@ __ViewportUpdateActiveViewportData:
 
     .viewportObjectGroupConfigurationChangeDone:
         rts
+
+
+;-------------------------------------------------
+; Render a row from the chunk ref cache
+; ----------------
+; Input:
+; - a0: Camera
+; - d0: Map row
+; - d1: Map start column
+; - d2: Width to render
+; - d3.l: VDP plane id
+; Uses: d0-d7/a0-a6
+_ViewportRenderRow:
+        move.w  Camera_y(a0), d4
+        lsr.w   #PATTERN_SHIFT, d4                                              ; d4 = viewport absolute x position in 8 pixel columns
+        andi.w  #~$0f, d4                                                       ; Align with map
+        move.w  d0, d5
+        sub.w   d4, d5                                                          ; d5 = viewport relative row number
+        lsr.w   #4, d5                                                          ; d5 = chunkRefCache row number
+
+        ; For now always assume 0 for column offset as this will only be called from the camera for full rows
+
+        move.w  (viewport + Viewport_chunkRefCacheStride), d6                   ; d6 = chunk ref cache stride
+        add.w   d5, d5                                                          ; d5 = offset into .rowOffsetTable
+        moveq   #0, d4                                                          ; d4 = offset into chunkRefCache
+        jmp   .rowOffsetTable(pc, d5)
+    .rowOffsetTable:
+        bra.s   .row0
+        bra.s   .row1
+.row2:  add.w   d6, d4
+.row1:  add.w   d6, d4
+.row0:
+        lea     (viewport + Viewport_chunkRefCache), a1
+        adda.w  d4, a1                                                          ; a1 = address of first chunk in row
+        jmp     MapRenderRowBuffer                                              ; Pass the original coordinates as they are needed for VDP plane address calculations
+
+
+;-------------------------------------------------
+; Render a column from the chunk ref cache
+; ----------------
+; Input:
+; - a0: Camera
+; - d0: Map column
+; - d1: Map start row
+; - d2: Height to render
+; - d3.l: VDP plane id
+; Uses: d0-d7/a0-a6
+_ViewportRenderColumn:
+        move.w  Camera_x(a0), d4
+        lsr.w   #PATTERN_SHIFT, d4                                              ; d4 = viewport absolute y position in 8 pixel columns
+        andi.w  #~$0f, d4                                                       ; Align with map
+        move.w  d0, d5
+        sub.w   d4, d5                                                          ; d5 = viewport relative column number
+        lsr.w   #4, d5                                                          ; d5 = chunkRefCache column number
+        add.w   d5, d5                                                          ; d5 = chunkRefCache offset
+
+        ; For now always assume 0 for row offset as this will only be called from the camera for full columns
+
+        lea     (viewport + Viewport_chunkRefCache), a1
+        adda.w  d5, a1                                                          ; a1 = address of first chunk in row
+        movea.w (viewport + Viewport_chunkRefCacheStride), a6                   ; a6 = chunkRefCacheStride
+        jmp     MapRenderColumnBuffer
+
 
     Purge _CALCULATE_SUB_CHUNK_ID
