@@ -368,6 +368,8 @@ _CameraRenderRow:
 ;-------------------------------------------------
 ; Default camera column render implementation.
 ; ----------------
+; Input:
+; - a0: Camera
 ; - d0: Map column
 ; - d1: Map start row
 ; - d2: Height to render

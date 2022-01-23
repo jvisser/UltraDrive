@@ -256,7 +256,7 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 
 
 ;-------------------------------------------------
-; Render a single row of the map at the specified plane row
+; Render a single row of the specified map at the specified plane
 ; ----------------
 ; Input:
 ; - a0: Map address
@@ -266,56 +266,34 @@ _BUFFER_ACCESS_MODE = _BUFFER_ACCESS_MODE_WRAPPED
 ; - d3: Plane id
 ; Uses: d0-d7/a0-a6
 MapRenderRow:
-        move.w d0, d6
-        movea.l a0, a6
+        ; Load address registers
+        lea     Map_rowOffsetTable(a0), a1                          ; a1 = row offset table
+        movea.l Map_dataAddress(a0), a0                             ; a0 = map data
 
-        ; Calculate and set DMA target
-        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d4
-        subq.w  #1, d4
-        and.w   d4, d0
-        moveq   #0, d5
-        move.w  (vdpMetrics + VDPMetrics_planeWidthShift), d5
-        lsl.w   d5, d0
-        move.w  d0, d5
-        andi.w  #$3fff, d0
-        rol.l   #2, d5
-        move.w  d0, d5
-        swap    d5
-        or.w    #VDP_CMD_AS_DMA, d5
-        add.l   d3, d5
-        move.l  d5, (mapRowBufferDMATransfer + VDPDMATransfer_target)
+        ; Store address of first chunk in a1
+        move.w  d1, d5
+        lsr.w   #4, d5
+        move.w  d0, d6
+        lsr.w   #4, d6
+        add.w   d6, d6
+        move.w  (a1, d6), d6
+        add.w   d5, d6
+        add.w   d5, d6
+        lea     (a0, d6), a1                                        ; a1 = address of chunk reference
 
-        ; Allocate buffer memory
-        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d0
-        add.w   d0, d0
-        jsr     MemoryDMAAllocate
-        movea.l a0, a4  ; Store buffer address parameter for _MapRenderRowBuffer
-
-        ; Calculate and set DMA source to allocated buffer
-        move.w  a0, d5
-        asr.w   #1, d5
-        move.w  d5, (mapRowBufferDMATransfer + VDPDMATransfer_source + 2)
-
-        ; Queue buffer for transfer
-        VDP_DMA_QUEUE_ADD mapRowBufferDMATransfer
-
-        movea.l a6, a0
-        move.w d6, d0
-
-        ; NB: Fall through to _MapRenderRowBuffer
+        ; NB: Fall through to MapRenderRowBuffer
 
 
 ;-------------------------------------------------
-; Render a single row of the map to the row buffer
+; Render a single row of the map to a DMA buffer
 ; ----------------
-; Input:
-; - a0: Map address
-; - a4: Render buffer address
+; Input: (TODO: Rearange register allocation to align with calling convention)
+; - a1: Address of first chunk
 ; - d0: Map row
 ; - d1: Map start column
 ; - d2: Width to render
 ; Uses: d0-d7/a0-a6
-_MapRenderRowBuffer:
+MapRenderRowBuffer:
 _READ_CHUNK Macro
             move.w  (a1)+, d7                                       ; Chunk ref in d7
     Endm
@@ -412,20 +390,51 @@ _RENDER_BLOCK Macro position
         ; - a3: Base address of block table
         ; - a4: Base address of renderbuffer
 
-        ; Load address registers
-        lea     Map_rowOffsetTable(a0), a1                          ; a1 = row offset table
-        movea.l Map_dataAddress(a0), a0                             ; a0 = map data
+        ; ---------------------------------------------------------------------------------------
+        ; Setup DMA
+        ; ----------------
 
-        ; Store address of first chunk in a1
-        move.w  d1, d5
-        lsr.w   #4, d5
+        ; Save values
+        movea.l a1, a6
         move.w  d0, d6
-        lsr.w   #4, d6
-        add.w   d6, d6
-        move.w  (a1, d6), d6
-        add.w   d5, d6
-        add.w   d5, d6
-        lea     (a0, d6), a1                                        ; a1 = address of chunk reference
+
+        ; Calculate and set DMA target
+        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d4
+        subq.w  #1, d4
+        and.w   d4, d0
+        moveq   #0, d5
+        move.w  (vdpMetrics + VDPMetrics_planeWidthShift), d5
+        lsl.w   d5, d0
+        move.w  d0, d5
+        andi.w  #$3fff, d0
+        rol.l   #2, d5
+        move.w  d0, d5
+        swap    d5
+        or.w    #VDP_CMD_AS_DMA, d5
+        add.l   d3, d5
+        move.l  d5, (mapRowBufferDMATransfer + VDPDMATransfer_target)
+
+        ; Allocate buffer memory
+        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d0
+        add.w   d0, d0
+        jsr     MemoryDMAAllocate
+        movea.l a0, a4  ; Store buffer address parameter for _MapRenderRowBuffer
+
+        ; Calculate and set DMA source to allocated buffer
+        move.w  a0, d5
+        asr.w   #1, d5
+        move.w  d5, (mapRowBufferDMATransfer + VDPDMATransfer_source + 2)
+
+        ; Queue buffer for transfer
+        VDP_DMA_QUEUE_ADD mapRowBufferDMATransfer
+
+        ; Restore values
+        movea.l a6, a1
+        move.w d6, d0
+
+        ; ---------------------------------------------------------------------------------------
+        ; Calculate stuff needed for _RENDER_BUFFER
+        ; ----------------
 
         ; d6 = [chunk row offset]:[block row offset]
         move.w  d0, d6
@@ -453,7 +462,7 @@ _RENDER_BLOCK Macro position
 
 
 ;-------------------------------------------------
-; Render a single column of the map at the specified plane column for VDP plane A
+; Render a single column of the map at the specified plane
 ; ----------------
 ; Input:
 ; - a0: Map address
@@ -463,52 +472,39 @@ _RENDER_BLOCK Macro position
 ; - d3: VDP plane id
 ; Uses: d0-d7/a0-a6
 MapRenderColumn:
-        movea.l a0, a6
-        move.w d0, d6
 
-        ; Calculate and set DMA target
-        moveq   #0, d5
+        ; Load address registers
+        moveq   #0, d7
+        move.w  Map_width(a0), d7
+        lea     Map_rowOffsetTable(a0), a1                           ; a1 = row offset table
+        movea.w Map_stride(a0), a6                                   ; a6 = map stride
+        movea.l Map_dataAddress(a0), a0                              ; a0 = map data
+
+        ; Store address of first chunk in a1
         move.w  d0, d5
-        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d4
-        subq.w  #1, d4
-        and.w   d4, d5
-        add.w   d5, d5
-        swap    d5
-        or.w    #VDP_CMD_AS_DMA, d5
-        add.l   d3, d5
-        move.l  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_target)
+        lsr.w   #4, d5
+        move.w  d1, d6
+        lsr.w   #4, d6
+        add.w   d6, d6
+        move.w  (a1, d6), d6
+        add.w   d5, d6
+        add.w   d5, d6
+        lea     (a0, d6), a1                                        ; a1 = address of chunk reference
 
-        ; Allocate buffer memory
-        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d0
-        add.w   d0, d0
-        jsr     MemoryDMAAllocate
-        movea.l a0, a4  ; Store buffer address parameter for _MapRenderColumnBuffer
-
-        ; Calculate and set DMA source to allocated buffer
-        move.w  a0, d5
-        asr.w   #1, d5
-        move.w  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_source + 2)
-
-        ; Queue buffer for transfer
-        VDP_DMA_QUEUE_ADD mapColumnBufferDMATransfer
-
-        movea.l a6, a0
-        move.w d6, d0
-
-        ; NB: Fall through to _MapRenderColumnBuffer
+        ; NB: Fall through to MapRenderColumnBuffer
 
 
 ;-------------------------------------------------
-; Render a single row of the map to the row buffer
+; Render a single column of the map to a DMA buffer
 ; ----------------
-; Input:
-; - a0: Map address
-; - a4: Render buffer address
+; Input: (TODO: Rearange register allocation to align with calling convention)
+; - a1: Address of first chunk
+; - a6: Map row stride
 ; - d0: Map column
 ; - d1: Map start row
 ; - d2: Height to render
 ; Uses: d0-d7/a0-a6
-_MapRenderColumnBuffer:
+MapRenderColumnBuffer:
 _READ_CHUNK Macro
             move.w  (a1), d7                                        ; Chunk ref in d7
             adda.w  a6, a1
@@ -609,23 +605,46 @@ _RENDER_BLOCK Macro position
         ; - a3: Base address of block table
         ; - a4: Base address of renderbuffer
 
-        ; Load address registers
-        moveq   #0, d7
-        move.w  Map_width(a0), d7
-        lea     Map_rowOffsetTable(a0), a1                           ; a1 = row offset table
-        movea.w Map_stride(a0), a6                                   ; a6 = map stride
-        movea.l Map_dataAddress(a0), a0                              ; a0 = map data
+        ; ---------------------------------------------------------------------------------------
+        ; Setup DMA
+        ; ----------------
+        ; Save values
+        movea.l a1, a5
+        move.w d0, d6
 
-        ; Store address of first chunk in a1
+        ; Calculate and set DMA target
+        moveq   #0, d5
         move.w  d0, d5
-        lsr.w   #4, d5
-        move.w  d1, d6
-        lsr.w   #4, d6
-        add.w   d6, d6
-        move.w  (a1, d6), d6
-        add.w   d5, d6
-        add.w   d5, d6
-        lea     (a0, d6), a1                                        ; a1 = address of chunk reference
+        move.w  (vdpMetrics + VDPMetrics_planeWidthPatterns), d4
+        subq.w  #1, d4
+        and.w   d4, d5
+        add.w   d5, d5
+        swap    d5
+        or.w    #VDP_CMD_AS_DMA, d5
+        add.l   d3, d5
+        move.l  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_target)
+
+        ; Allocate buffer memory
+        move.w  (vdpMetrics + VDPMetrics_planeHeightPatterns), d0
+        add.w   d0, d0
+        jsr     MemoryDMAAllocate
+        movea.l a0, a4  ; Store buffer address parameter for _MapRenderColumnBuffer
+
+        ; Calculate and set DMA source to allocated buffer
+        move.w  a0, d5
+        asr.w   #1, d5
+        move.w  d5, (mapColumnBufferDMATransfer + VDPDMATransfer_source + 2)
+
+        ; Queue buffer for transfer
+        VDP_DMA_QUEUE_ADD mapColumnBufferDMATransfer
+
+        ; Restore values
+        movea.l a5, a1
+        move.w d6, d0
+
+        ; ---------------------------------------------------------------------------------------
+        ; Calculate stuff needed for _RENDER_BUFFER
+        ; ----------------
 
         ; d6 = [chunk column offset]:[block column offset]
         move.w  d0, d6
