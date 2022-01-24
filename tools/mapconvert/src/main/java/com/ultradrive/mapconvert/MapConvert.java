@@ -16,8 +16,6 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
-
 
 public final class MapConvert
 {
@@ -125,7 +123,7 @@ public final class MapConvert
             {
                 String fileName = map.getName() + PNG_FILE_EXTENSION;
 
-                LOGGER.info(format("Rendering map '%s' to file '%s'", map.getName(), fileName));
+                LOGGER.info("Rendering map '{}' to file '{}'", map.getName(), fileName);
 
                 ImageIO.write(mapRenderer.renderMap(map),
                               "png",
@@ -134,8 +132,7 @@ public final class MapConvert
         }
         else
         {
-            LOGGER.warn(
-                    format("Unable to create image export output directory '%s'", imageDirectory.getAbsolutePath()));
+            LOGGER.warn("Unable to create image export output directory '{}'", imageDirectory.getAbsolutePath());
         }
     }
 }

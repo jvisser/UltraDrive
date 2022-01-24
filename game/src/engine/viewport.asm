@@ -76,7 +76,7 @@ _INIT_SCROLL Macro orientation
 
         ; Let background tracker initialize the background camera
         MAP_GET a1
-        PEEKL   a4                                      ; a4 = current viewport configuration address
+        PEEKL   a4                                                      ; a4 = current viewport configuration address
         movea.l ViewportConfiguration_backgroundTrackerConfiguration(a4), a3
         move.l  a3, (viewport + Viewport_backgroundTrackerConfiguration)
         movea.l ViewportConfiguration_backgroundTracker(a4), a4
@@ -95,13 +95,11 @@ _INIT_SCROLL Macro orientation
         ; Restore stack (remove local used to save viewport configuration)
         POPL
 
-        ; Init active object groups
-        VIEWPORT_GET_X d0
-        VIEWPORT_GET_Y d1
+        ; Collect active viewport data
         bsr     _ViewportInitActiveViewportData
 
         ; Render background
-        jsr     VDPDMAQueueFlush        ; Causes at least 28 DMA queue entries, so flush first
+        jsr     VDPDMAQueueFlush                                        ; Causes at least 28 DMA queue entries, so flush first
         lea     (viewport + Viewport_background), a0
         jsr     CameraRenderView
 
@@ -476,7 +474,7 @@ _ViewportRenderColumn:
         ; For now always assume 0 for row offset as this will only be called from the camera for full columns
 
         lea     (viewport + Viewport_chunkRefCache), a1
-        adda.w  d5, a1                                                          ; a1 = address of first chunk in row
+        adda.w  d5, a1                                                          ; a1 = address of first chunk in column
         movea.w (viewport + Viewport_chunkRefCacheStride), a6                   ; a6 = chunkRefCacheStride
         jmp     MapRenderColumnBuffer
 

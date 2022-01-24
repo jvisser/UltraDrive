@@ -19,7 +19,6 @@ import org.thymeleaf.context.IContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 
@@ -48,7 +47,7 @@ public class MapExporter
             List<String> templateFileNames = getTemplateFileNames();
             for (String templateFileName : templateFileNames)
             {
-                LOGGER.info(format("Processing template '%s'", templateFileName));
+                LOGGER.info("Processing template '{}'", templateFileName);
 
                 String templateResult = templateEngine.process(templateFileName, context);
 
@@ -57,7 +56,7 @@ public class MapExporter
         }
         else
         {
-            LOGGER.warn(format("Unable to create export output directory '%s'", outputDirectory));
+            LOGGER.warn("Unable to create export output directory '{}'", outputDirectory);
         }
     }
 
