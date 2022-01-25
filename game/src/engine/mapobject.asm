@@ -200,6 +200,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         ;-------------------------------------------------
         ; Start of MapUpdateObjects
         ; ----------------
+        tst.w   d7
         bne.s   .activeGroups
             rts
 
