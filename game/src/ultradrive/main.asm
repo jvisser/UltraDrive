@@ -88,10 +88,6 @@ _UpdateManualTilesetAnimations:
 ; Main program entry point
 ; ----------------
 Main:
-        jsr     EngineInit
-
-        DEBUG_MSG 'Engine initialized'
-
         jsr     MapRenderInit
 
         DEBUG_MSG 'Map renderer initialized'

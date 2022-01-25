@@ -5,6 +5,8 @@
     If (~def(__SYSTEM_MEMORY_INC))
 __SYSTEM_MEMORY_INC Equ 1
 
+    Include './system/include/init.inc'
+
 ;-------------------------------------------------
 ; ROM address ranges
 ; ----------------
@@ -223,7 +225,7 @@ STRUCT_MEMBER_SIZE          Equs \STRUCT_NAME\_\0\_Size
 
 
 ;-------------------------------------------------
-; End structure initialization data. Creates a subroutine <structName>Init that can be called to copy the struct data to the target address.
+; End structure initialization data. Creates a subroutine <structName>Init that will be automatically called at startup to initialize the specified struct.
 ; ----------------
 INIT_STRUCT_END Macro
         SECTION_END
@@ -237,9 +239,9 @@ INIT_STRUCT_END Macro
         EndIf
 
         ;-------------------------------------------------
-        ; Uses: d0/a0-a1
+        ; Create constructor function. Uses: d0/a0-a1
         ; ----------------
-        \STRUCT_VAR_NAME\Init:
+        SYS_INIT \STRUCT_VAR_NAME\Init
             lea     \STRUCT_VAR_NAME\_InitData, a0
             lea     \STRUCT_VAR_NAME + __FIRST_STRUCT_INIT_MEMBER_OFFSET, a1
             move.w  #(__rs - __FIRST_STRUCT_INIT_MEMBER_OFFSET), d0

@@ -5,6 +5,7 @@
     If (~def(__SYSTEM_INC))
 __SYSTEM_INC Equ 1
 
+    Include './system/include/init.inc'
     Include './system/include/io.inc'
     Include './system/include/m68k.inc'
     Include './system/include/memory.inc'

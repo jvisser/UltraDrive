@@ -4,6 +4,7 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/init.inc'
     Include './system/include/vdp.inc'
 
     Include './engine/include/viewport.inc'
@@ -20,9 +21,9 @@
 
 
 ;-------------------------------------------------
-; Initialize the viewport library with defaults. Called on engine init.
+; Initialize the viewport library with defaults
 ; ----------------
-ViewportEngineInit:
+ INIT ViewportEngineInit
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK background
         VIEWPORT_UNINSTALL_MOVEMENT_CALLBACK foreground
 
