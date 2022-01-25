@@ -3,6 +3,7 @@
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/m68k.inc'
+    Include './system/include/init.inc'
 
     Include './engine/include/scheduler.inc'
 
@@ -25,7 +26,7 @@
 ;-------------------------------------------------
 ; Initialize the engine state scheduler
 ; ----------------
-EngineSchedulerInit:
+ INIT EngineSchedulerInit
         lea     EngineSchedulers, a0
         lea     engineSchedulerCallbacks, a1
         move.w  #EngineSchedulersEnd - EngineSchedulers, d0

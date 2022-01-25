@@ -12,12 +12,20 @@
     ; ----------------
     Section S_VECTOR_TABLE  ; 68000 vector table
     Section S_HEADER        ; Sega ROM header
-    Section S_PROGRAM_SHORT ; .text (absolute short addressable) NB: ow+ optimization does not seem to optimize this case!? so use absolute short addressing mode explicitly for data in this section)
-    Section S_RODATA_SHORT  ; .rodata (absolute short addressable)
-    Section S_PROGRAM       ; .text
-    Section S_RODATA        ; .rodata
-    Section S_DATA          ; .data
-    Section S_DEBUG         ; .debug
+    Section S_PROGRAM_SHORT ; Program code (absolute short addressable)
+    Section S_RODATA_SHORT  ; Read only data (absolute short addressable)
+    Section S_SYS_CTORS     ; Table of system init functions executed directly at boot time
+    Section S_CTORS         ; Table of init functions executed directly after system init functions
+    Section S_PROGRAM       ; Program code
+    Section S_RODATA        ; Read only data
+    Section S_DATA          ; Variable initialization data
+    Section S_DEBUG         ; Debug strings
+
+    ;-------------------------------------------------
+    ; Ctor table base addresses
+    ; ----------------
+    Section S_SYS_CTORS
+        __ctors:
 
     ;-------------------------------------------------
     ; Default section
@@ -54,6 +62,17 @@ SECTION_INFO Macro name, start
 
 
 ;-------------------------------------------------
+; Use once at at end of the assembly file
+; Terminates the ctors list
+; ----------------
+LAYOUT_FINALIZE macro
+        SECTION_START S_CTORS
+            dc.l 0
+        SECTION_END
+    Endm
+
+
+;-------------------------------------------------
 ; Print section allocation report.
 ; TODO: Get sect/sectend to work
 ; ----------------
@@ -66,6 +85,8 @@ SECTION_BASE = 0
         SECTION_INFO S_HEADER,          SECTION_BASE
         SECTION_INFO S_PROGRAM_SHORT,   SECTION_BASE
         SECTION_INFO S_RODATA_SHORT,    SECTION_BASE
+        SECTION_INFO S_SYS_CTORS,       SECTION_BASE
+        SECTION_INFO S_CTORS,           SECTION_BASE
         SECTION_INFO S_PROGRAM,         SECTION_BASE
         SECTION_INFO S_RODATA,          SECTION_BASE
         SECTION_INFO S_DATA,            SECTION_BASE

@@ -3,6 +3,7 @@
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/memory.inc'
+    Include './system/include/init.inc'
     Include './system/include/vdp.inc'
     Include './system/include/memory.inc'
 
@@ -51,10 +52,9 @@
 ;----------------------------------------------
 ; Initialize the VDP for first use
 ; ----------------
-VDPInit:
+ SYS_INIT VDPInit
         bsr _VDPUnlock
         bsr _VDPInitRegisters
-        bsr vdpMetricsInit
 
         bsr VDPClearVRAM
         bsr VDPClearVSRAM
@@ -79,8 +79,6 @@ _VDPUnlock:
 ; ----------------
 ; Uses: d0/a0-a1
 _VDPInitRegisters:
-        bsr     vdpContextInit
-
         lea     vdpContext, a0
         lea     MEM_VDP_CTRL, a1
         move.w  #(VDPContext_Size / SIZE_WORD) - 1, d0

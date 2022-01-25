@@ -4,6 +4,7 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/init.inc'
     Include './system/include/vdptaskqueue.inc'
     Include './system/include/m68k.inc'
     Include './system/include/os.inc'
@@ -27,7 +28,7 @@ VDP_TASK_QUEUE_SIZE Equ 32
 ; Initialize the VDP task queue
 ; ----------------
 ; Uses: a1
-VDPTaskQueueInit:
+ SYS_INIT VDPTaskQueueInit
     move.w  #vdpTaskQueue, vdpTaskQueueCurrentEntry
     rts
 

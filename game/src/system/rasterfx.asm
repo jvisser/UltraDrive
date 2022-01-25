@@ -2,6 +2,7 @@
 ; Raster effect support. Provides lifecycle management through struct RasterEffect.
 ;------------------------------------------------------------------------------------------
 
+    Include './system/include/init.inc'
     Include './system/include/rasterfx.inc'
     Include './system/include/m68k.inc'
     Include './system/include/os.inc'
@@ -23,7 +24,7 @@
 ;-------------------------------------------------
 ; Called by SysInit
 ; ----------------
-RasterEffectsInit:
+ SYS_INIT RasterEffectsInit
         clr.l   rasterEffect
 
         ; Write: rte

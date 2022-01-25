@@ -3,6 +3,7 @@
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/memory.inc'
+    Include './system/include/init.inc'
     Include './system/include/io.inc'
     Include './system/include/z80.inc'
 
@@ -119,9 +120,8 @@ _IO_PROBE_DATA_PORT Macro
 ;-------------------------------------------------
 ; Initialize IO hardware
 ; ----------------
-IOInit:
+ SYS_INIT IOInit
 _IO_UPDATE_DEVICE_INFO Macro deviceStateStruct
-            bsr     \deviceStateStruct\Init
             lea     \deviceStateStruct, a0
             bsr     IOUpdateDeviceInfo
         Endm

@@ -22,10 +22,9 @@ __SYSTEM_OS_INC Equ 1
 
 
 ;-------------------------------------------------
-; Aliases
+; ; Patch address for 68k vector table
 ; ----------------
-VBlankInterruptHandler  Equ OSPrepareNextFrame              ; Patch address for 68k vector table
-OSInit                  Equ osContextInit
+VBlankInterruptHandler Equ OSPrepareNextFrame
 
 
 ;-------------------------------------------------

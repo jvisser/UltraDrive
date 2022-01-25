@@ -28,14 +28,13 @@
     Include './system/vdpdmaqueue.asm'
     Include './system/vdpsprite.asm'
     Include './system/os.asm'
-    Include './system/init.asm'
+    Include './system/boot.asm'
 
     ;-------------------------------------------------
     ; Engine
     ; ----------------
     Include './engine/include/engine.inc'
 
-    Include './engine/engine.asm'
     Include './engine/scheduler.asm'
     Include './engine/trigtable.asm'
     Include './engine/comper.asm'
@@ -83,13 +82,17 @@
     ; Main
     Include 'ultradrive/main.asm'
 
-
     ;-------------------------------------------------
     ; ROM header
     ; ----------------
     ; Produce ROM header once all symbols have been resolved
     Include './system/m68kvector.asm'
     Include './system/segaheader.asm'
+
+    ;-------------------------------------------------
+    ; Finalize program/ROM layout
+    ; ----------------
+    LAYOUT_FINALIZE
 
 RomImageEnd
 

@@ -18,7 +18,7 @@ DEFAULT_EXCEPTION_HANDLER Macro handler
 
 Vector68k:
     dc.l   $00000000                        ; Initial stack pointer value
-    dc.l   SysInit                          ; Start of program
+    dc.l   Boot                             ; Start of program
     dc.l   Exception                        ; Bus error
     dc.l   Exception                        ; Address error
     dc.l   Exception                        ; Illegal instruction

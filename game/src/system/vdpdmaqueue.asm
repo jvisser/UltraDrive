@@ -6,6 +6,7 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/init.inc'
     Include './system/include/vdpdmaqueue.inc'
     Include './system/include/os.inc'
 
@@ -27,7 +28,7 @@ VDP_DMA_QUEUE_SIZE Equ 32
 ;-------------------------------------------------
 ; Initialize the DMA queue
 ; ----------------
-VDPDMAQueueInit:
+ SYS_INIT VDPDMAQueueInit
         lea     vdpDMAQueue, a0
         moveq   #VDP_DMA_QUEUE_SIZE - 1, d0
 

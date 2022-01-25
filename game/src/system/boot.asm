@@ -5,21 +5,22 @@
 ;-------------------------------------------------
 ; Start of 68000 execution (See reset vector)
 ; ----------------
-SysInit:
-        jsr MemoryInit ; Must be called first (Clears all memory)
+Boot:
+        jsr MemoryInit
 
-        jsr VDPInit
-        jsr VDPDMAQueueInit
-        jsr VDPTaskQueueInit
-        jsr VDPSpriteInit
-        jsr RasterEffectsInit
-        jsr IOInit
-        jsr OSInit
+        ; Run initializers
+        lea     __ctors, a0
+    .ctorsLoop:
+        move.l  (a0)+, d0
+        beq.s   .ctorsDone
+            movea.l d0, a1
+            PUSHL   a0
+                jsr     (a1)
+            POPL    a0
+            bra.s .ctorsLoop
+    .ctorsDone:
 
-        ; Prepare cpu for processing once all sub systems have been initialized (ie proper handlers are setup)
-        jsr Z80Init
-
-        ; Allow all interrupts
+        ; Accept all interrupts
         move #M68k_SR_SUPERVISOR, sr
 
         ; Start main program

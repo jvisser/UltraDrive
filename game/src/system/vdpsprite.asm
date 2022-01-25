@@ -4,6 +4,7 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/init.inc'
     Include './system/include/vdp.inc'
     Include './system/include/vdpdmaqueue.inc'
 
@@ -32,7 +33,7 @@ VDP_MAX_SPRITES Equ 80
 ;-------------------------------------------------
 ; Initialize the sprite system
 ; ----------------
-VDPSpriteInit
+ SYS_INIT VDPSpriteInit
         bsr     VDPSpriteClear
 
         lea     VDPSpriteAttrTableDMATransferTemplate, a0
