@@ -152,9 +152,8 @@ BlobUpdate:
     .alive:
         ;PROFILE_CPU_START
 
-        PUSHW   d6
         PUSHW   d7
-        PUSHM.l a3-a6
+        PUSHM.l a3-a5
 
         bsr.s   _BlobMove
         bsr     _BlobRender
@@ -183,9 +182,8 @@ BlobUpdate:
 
         jsr     CollisionCheck
 
-        POPM.l  a3-a6
+        POPM.l  a3-a5
         POPW    d7
-        POPW    d6
 
         ;PROFILE_CPU_END
         rts

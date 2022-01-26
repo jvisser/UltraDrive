@@ -37,8 +37,7 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.l         foregroundMovementCallback
         STRUCT_MEMBER.w         subChunkId                                      ; Used to detect viewport chunk changes on movement
         STRUCT_MEMBER.l         activeObjectGroupConfigurationId                ; Current object group configuration used to detect object group configuration changes
-        STRUCT_MEMBER.w         activeObjectGroupCount
-        STRUCT_MEMBER.l         activeObjectGroups, 12
+        STRUCT_MEMBER.l         activeObjectGroups, 13                          ; Null terminated array containing the active object groups
         STRUCT_MEMBER.w         chunkRefCache, 12                               ; Cache of all chunks references in view (foreground). Used as the basis for rendering the foreground. Can be dynamically patched to alter the appearance of the map.
         STRUCT_MEMBER.w         chunkRefCacheStride                             ; Number of bytes per row in the chunk reference cache
     DEFINE_STRUCT_END

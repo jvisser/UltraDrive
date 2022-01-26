@@ -13,12 +13,19 @@
   <property name="angle" type="float" default="0"/>
  </objecttype>
  <objecttype name="GraphicsBlock" color="#a0a0a4"/>
+ <objecttype name="MetadataContainerProperties" color="#a0a0a4">
+  <property name="overlayEnabled" type="bool" default="false"/>
+  <property name="symbol" type="string"/>
+  <property name="template" type="string"/>
+ </objecttype>
  <objecttype name="Object" color="#a0a0a4">
   <property name="active" type="bool" default="true"/>
   <property name="enabled" type="bool" default="true"/>
   <property name="objectTypeTransferable" type="bool" default="false"/>
   <property name="objectTypeXCompensation" type="int" default="0"/>
   <property name="objectTypeYCompensation" type="int" default="0"/>
+  <property name="symbol" type="string"/>
+  <property name="template" type="string"/>
  </objecttype>
  <objecttype name="ObjectGroupChunk" color="#a0a0a4"/>
  <objecttype name="PriorityBlock" color="#a0a0a4"/>

@@ -2,19 +2,21 @@
 ; Compiled map
 ;------------------------------------------------------------------------------------------
 
+    Include './engine/include/map.inc'
+
 ;-------------------------------------------------
 ; Macros
 ; ----------------
 ALLOC_OBJECT_GROUP_STATE Macro objectName
-ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + MapObjectGroupState_Size + 1) & -2)
+ALLOC_STATE_OFFSET = ((ALLOC_STATE_OFFSET + MapObjectGroupState_Size + 1) & -2)
     Endm
 
-ALLOC_OBJECT_LINK_STATE Macro objectName
-ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + MapObjectLink_Size + 1) & -2)
+ALLOC_STATE Macro stateType
+ALLOC_STATE_OFFSET = ((ALLOC_STATE_OFFSET + \stateType\_Size + 1) & -2)
     Endm
 
 ALLOC_OBJECT_STATE Macro objectName
-ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectTypeSize + 1) & -2)
+ALLOC_STATE_OFFSET = ((ALLOC_STATE_OFFSET + \objectName\ObjectTypeSize + 1) & -2)
     Endm
 
 
@@ -44,6 +46,8 @@ ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectType
         th:with="backgroundMapName=${#strings.capitalize(map.properties['background'].name)},
                 metadataMap=${map.metadataMap}"]
 
+ALLOC_STATE_OFFSET = 0;
+
         ; struct MapMetadataMap
         MapMetadataMap[(${mapName})]:
             ; .stride
@@ -54,6 +58,8 @@ ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectType
             dc.w [(${metadataMap.height})]
             ; .groupCount
             dc.w [(${metadataMap.objectGroups.size})]
+            ; .containerCount
+            dc.w [(${metadataMap.metadataContainers.size})]
             ; .containersTableAddress
             dc.l MapMetadataContainerTable[(${mapName})]
             ; .objectGroupsBaseAddress
@@ -72,17 +78,24 @@ ALLOC_OBJECT_STATE_OFFSET = ((ALLOC_OBJECT_STATE_OFFSET + \objectName\ObjectType
 
         MapMetadataContainerBase[(${mapName})]:
             [# th:each="metadataContainer : ${metadataMap.metadataContainers}"]
+
                 ; struct MapMetadataContainer
-                MapMetadataContainer[(${metadataContainer.id})][(${mapName})]:
-                    ; .objectGroupOffsetTable
-                    [# th:each="objectGroup : ${metadataContainer.objectGroups}"]
-                        dc.w MapObjectGroup[(${objectGroup.id})][(${mapName})] - MapObjectGroupsBase[(${mapName})]
+                [# th:with="template=${metadataContainer.properties.getOrDefault('template', '')}"]
+
+                    [# th:if="${template.empty}"]
+                        [# th:with="stateType=MapMetadataContainerState"]
+                            [# th:block th:replace="metadata/metadatacontainer.desc"][/]
+                        [/]
                     [/]
+
+                    [# th:if="${!template.empty}"]
+                        [# th:block th:replace="__${template}__"][/]
+                    [/]
+
+                [/]
             [/]
 
         Even
-
-ALLOC_OBJECT_STATE_OFFSET = 0;
 
         MapObjectGroupsBase[(${mapName})]:
             [# th:each="objectGroup : ${metadataMap.objectGroups}"]
@@ -102,7 +115,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
                         ; .totalObjectCount
                         dc.b [(${staticObjects.size + transferableObjects.size})]
                         ; .mapogObjectStateOffset
-                        dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+                        dc.w $\$ALLOC_STATE_OFFSET
 
                         ALLOC_OBJECT_GROUP_STATE
 
@@ -111,10 +124,24 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
                         ; .objectDescriptors
                         [# th:each="object : ${objects}"]
 
+                            [# th:with="symbol=${object.properties['symbol']}"]
+                                [# th:if="${!symbol.empty}"]
+                                    [(${symbol})]:
+                                [/]
+                            [/]
+
                             ; Object type = [(${object.name})]
                             MapObject[(${object.id})][(${mapName})]:
 
-                                [# th:block th:replace="objectdescriptor/__${#strings.toLowerCase(object.name)}__.desc"][/]
+                                [# th:with="template=${object.properties['template']},
+                                            templateFile=${
+                                                template.empty
+                                                    ? ('objectdescriptor/' + #strings.toLowerCase(object.name) + '.desc')
+                                                    : (template)}"]
+
+                                    [# th:block th:replace="__${templateFile}__"][/]
+
+                                [/]
 
                             MapObject[(${object.id})][(${mapName})]_End:
 
@@ -143,7 +170,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
             ; .tilesetAddress
             dc.l Tileset[(${#strings.capitalize(map.tileset.name)})]
             ; .stateSize
-            dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+            dc.w $\$ALLOC_STATE_OFFSET
             ; .metadataMapAddress
             dc.l MapMetadataMap[(${mapName})]
             ; .objectTypeTableAddress
@@ -151,7 +178,7 @@ ALLOC_OBJECT_STATE_OFFSET = 0;
             ; .viewportConfigurationAddress
             dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
 
-            Inform 0, 'Total RAM allocation size for map [(${mapName})] = \#ALLOC_OBJECT_STATE_OFFSET bytes'
+            Inform 0, 'Total RAM allocation size for map [(${mapName})] = \#ALLOC_STATE_OFFSET bytes'
 
         Even
 

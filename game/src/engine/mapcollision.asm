@@ -109,7 +109,8 @@ _LOAD_CHUNK Macro scratch
         lea     chunkTable, a6
 
         ; Get chunk address
-        move.w  d3, \scratch                                        ; Mask by CHUNK_REF_INDEX_MASK not needed as all bits are shifted out
+        moveq   #0, \scratch
+        move.b  d3, \scratch                                        ; Mask by CHUNK_REF_INDEX_MASK not needed as all bits are shifted out
         lsl.w   #7, \scratch
         lea     (a6, \scratch), a4                                  ; a4 = chunk base address
 

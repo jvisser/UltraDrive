@@ -9,7 +9,7 @@
 ; -]*/
 
 [# th:if="${object.properties['objectTypeTransferable']}"]
-    ALLOC_OBJECT_LINK_STATE
+    ALLOC_STATE MapObjectLink
 [/]
 
 ; struct MapObjectDescriptor:
@@ -22,7 +22,7 @@
     ; If state assume MapStatefulObjectDescriptor
     If ([(${type})]ObjectTypeSize > 0)
         ; stateOffset
-        dc.w $\$ALLOC_OBJECT_STATE_OFFSET
+        dc.w $\$ALLOC_STATE_OFFSET
     EndIf
 
     ALLOC_OBJECT_STATE [(${type})]

@@ -9,14 +9,15 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
 {
     private static final int REFERENCE_ID_BIT_COUNT = 8;
     private static final int OBJECT_CONTAINER_GROUP_INDEX_BIT_COUNT = 3;
-
-    private final int objectContainerGroupIndex;
     private final boolean hasCollision;
+    private final boolean hasOverlay;
+    private final int objectContainerGroupIndex;
 
     public static class Builder extends MetaTileReference.Builder<ChunkReference>
     {
-        private int objectContainerGroupIndex;
         private boolean hasCollision;
+        private boolean hasOverlay;
+        private int objectContainerGroupIndex;
 
         public Builder()
         {
@@ -26,13 +27,15 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
         {
             super(chunkReference);
 
-            this.objectContainerGroupIndex = chunkReference.objectContainerGroupIndex;
             this.hasCollision = chunkReference.hasCollision;
+            this.hasOverlay = chunkReference.hasOverlay;
+            this.objectContainerGroupIndex = chunkReference.objectContainerGroupIndex;
         }
 
-        public void setObjectContainerGroupIndex(int objectContainerGroupIndex)
+        @Override
+        public ChunkReference build()
         {
-            this.objectContainerGroupIndex = objectContainerGroupIndex;
+            return new ChunkReference(referenceId, orientation, objectContainerGroupIndex, hasCollision, empty, hasOverlay);
         }
 
         public void setHasCollision(boolean hasCollision)
@@ -40,19 +43,25 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
             this.hasCollision = hasCollision;
         }
 
-        @Override
-        public ChunkReference build()
+        public void setHasOverlay(boolean hasOverlay)
         {
-            return new ChunkReference(referenceId, orientation, objectContainerGroupIndex, hasCollision, empty);
+            this.hasOverlay = hasOverlay;
+        }
+
+        public void setObjectContainerGroupIndex(int objectContainerGroupIndex)
+        {
+            this.objectContainerGroupIndex = objectContainerGroupIndex;
         }
     }
 
-    public ChunkReference(int referenceId, Orientation orientation, int objectContainerGroupIndex, boolean hasCollision, boolean empty)
+    public ChunkReference(int referenceId, Orientation orientation, int objectContainerGroupIndex, boolean hasCollision,
+                          boolean empty, boolean hasOverlay)
     {
         super(referenceId, orientation, empty);
 
         this.objectContainerGroupIndex = objectContainerGroupIndex;
         this.hasCollision = hasCollision;
+        this.hasOverlay = hasOverlay;
     }
 
     @Override
@@ -66,10 +75,30 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
     {
         return new BitPacker(Short.SIZE)
                 .add(referenceId, REFERENCE_ID_BIT_COUNT)
-                .pad(1)                                            // Reserved for future expansion
+                .add(hasOverlay)
                 .add(hasCollision)
                 .add(empty)
                 .add(orientation)
                 .add(objectContainerGroupIndex, OBJECT_CONTAINER_GROUP_INDEX_BIT_COUNT);
+    }
+
+    public boolean hasCollision()
+    {
+        return hasCollision;
+    }
+
+    public boolean hasOverlay()
+    {
+        return hasOverlay;
+    }
+
+    public int getObjectContainerGroupIndex()
+    {
+        return objectContainerGroupIndex;
+    }
+
+    public boolean hasAnyInformation()
+    {
+        return !isEmpty() || hasCollision() || hasOverlay() || objectContainerGroupIndex > 0;
     }
 }

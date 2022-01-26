@@ -46,7 +46,7 @@ public class TileMapCompiler
                     .computeIfAbsent(tilesetDataSource,
                                      tsd -> TilesetBuilder.fromTilesetSource(tsd, patternAllocationConfiguration));
 
-            mapBuilders.put(mapDataSource, new TileMapBuilder(tilesetBuilder, mapDataSource));
+            mapBuilders.put(mapDataSource, new TileMapBuilder(mapDataSource, tilesetBuilder, 320, 224));
         }
 
         preCompile(mapBuilders);
@@ -90,7 +90,7 @@ public class TileMapCompiler
 
     private void preCompile(Map<MapDataSource, TileMapBuilder> mapBuilders)
     {
-        mapBuilders.values().forEach(TileMapBuilder::collectReferences);
+        mapBuilders.values().forEach(TileMapBuilder::preCompile);
     }
 
     private Map<TilesetDataSource, Tileset> compileTilesets(
