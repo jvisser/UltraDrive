@@ -22,7 +22,7 @@
 
 
 ;-------------------------------------------------
-; Called by SysInit
+; Setup default HBlank handler
 ; ----------------
  SYS_INIT RasterEffectsInit
         clr.l   rasterEffect

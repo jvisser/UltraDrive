@@ -10,12 +10,13 @@
     ; ----------------
     Include './common/include/common.inc'
 
+    Include './common/nooperation.asm'
+
 
     ;-------------------------------------------------
     ; System
     ; ----------------
     Include './system/include/system.inc'
-
 
     Include './system/memory.asm'
     Include './system/z80.asm'
@@ -29,6 +30,7 @@
     Include './system/vdpsprite.asm'
     Include './system/os.asm'
     Include './system/boot.asm'
+
 
     ;-------------------------------------------------
     ; Engine
@@ -82,12 +84,14 @@
     ; Main
     Include 'ultradrive/main.asm'
 
+
     ;-------------------------------------------------
     ; ROM header
     ; ----------------
     ; Produce ROM header once all symbols have been resolved
     Include './system/m68kvector.asm'
     Include './system/segaheader.asm'
+
 
     ;-------------------------------------------------
     ; Finalize program/ROM layout
