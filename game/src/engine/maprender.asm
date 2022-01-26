@@ -299,7 +299,8 @@ _READ_CHUNK Macro
     Endm
 
 _START_CHUNK Macro colOffset
-            move.w  d7, d5
+            moveq   #0, d5
+            move.b  d7, d5
             lsl.w   #7, d5
             lea     (a2, d5), a5
             swap    d6                                              ; d6 = chunk row offset
@@ -511,7 +512,8 @@ _READ_CHUNK Macro
     Endm
 
 _START_CHUNK Macro rowOffset
-            move.w  d7, d5
+            moveq   #0, d5
+            move.b  d7, d5
             lsl.w   #7, d5
             lea     (a2, d5), a5
             swap    d6                                              ; d6 = chunk column offset

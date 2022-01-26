@@ -175,7 +175,6 @@ _UPDATE_SCROLL Macro orientation
 ; Uses: d0/d7/a0/a3-a6
 ViewportUpdateObjects:
         lea     (viewport + Viewport_activeObjectGroups), a3
-        move.w  (viewport + Viewport_activeObjectGroupCount), d7
         jmp     MapUpdateObjects
 
 
@@ -296,8 +295,23 @@ _ViewportUpdateActiveViewportData:
 ; - d1: Top coordinate of view
 ; Uses: d0-d7/a0-a6
 __ViewportUpdateActiveViewportData:
-
-        clr.w   (viewport + Viewport_activeObjectGroupCount)
+;-------------------------------------------------
+; Load map metadata container address at current chunk
+; Uses: d7.w
+; ----------------
+_LOAD_METADATA_CONTAINER Macro target
+        ; Load map metadata container address
+        move.w  d1, d7
+        lsr.w   #3, d7
+        add.w   d7, d7
+        movea.w  MapMetadataMap_rowOffsetTable(a1, d7), \target
+        move.w  d5, d7
+        lsr.w   #3, d7
+        add.w   d7, d7
+        add.w   d7, d7
+        add.w   a6, d7                                                          ; d7 = container offset
+        movea.l (a2, d7), \target                                               ; target = containersTableAddress[d7] (= container address)
+    Endm
 
         ; Get number of columns in view
         moveq   #4, d2
@@ -317,6 +331,9 @@ __ViewportUpdateActiveViewportData:
         seq     d4
         ext.w   d4
         add.w   d4, d3                                                          ; d3 = number of rows - 1
+        move.w  d3, d4
+        swap    d3
+        move.w  d4, d3
 
         ; Convert pixel coordinates to chunk coordinates
         lsr.w   #7, d0                                                          ; d0 = horizontal chunk coordinate
@@ -327,7 +344,6 @@ __ViewportUpdateActiveViewportData:
         movea.l MapHeader_metadataMapAddress(a0), a1                            ; a1 = metadataMapAddress
         movea.l MapMetadataMap_containersTableAddress(a1), a2                   ; a2 = containersTableAddress
         lea     (viewport + Viewport_chunkRefCache), a3                         ; a3 = current chunk ref cache address
-        movea.l MapMetadataMap_objectGroupsBaseAddress(a1), a4                  ; a4 = objectGroupsBaseAddress
         lea     (viewport + Viewport_activeObjectGroups), a5                    ; a5 = activeObjectGroups
         movea.l MapHeader_foregroundAddress(a0), a0
         move.w  Map_stride(a0), d4
@@ -351,40 +367,84 @@ __ViewportUpdateActiveViewportData:
         move.w  d0, d5                                                          ; d5 = horizontal chunk coordinate
         .colLoop:
 
-            ; Load object container address
-            move.w  d1, d7
-            lsr.w   #3, d7
-            add.w   d7, d7
-            move.w  MapMetadataMap_rowOffsetTable(a1, d7), a6                   ; a6 = container table vertical offset
-            move.w  d5, d7
-            lsr.w   #3, d7
-            add.w   d7, d7
-            add.w   d7, d7
-            add.w   a6, d7                                                      ; d7 = container offset
-            movea.l (a2, d7), a6                                                ; a6 = containersTableAddress[d7] (= container address)
-
             ; Load chunk ref
             move.w  (a0)+, d7                                                   ; d7 = chunk ref
 
-            ; Update chunk ref cache
-            move.w  d7, (a3)+
+            ; Check for overlay
+            btst    #CHUNK_REF_OVERLAY,d7
+            beq.s   .noOverlay
 
-            ; Load object group from container if any
-            andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
-            beq.s   .emptyObjectGroup
-                rol.w   #3, d7                                                  ; d7 = container group id
+                swap    d7
 
-                subq.w  #1, d7                                                  ; d7 = container group index
+                _LOAD_METADATA_CONTAINER a6
+
+                ; Check if overlay state enabled
+                move.w  MapMetadataContainer_stateOffset(a6), d7
+                movea.w mapStateAddress, a4
+                btst    #MMC_OVERLAY, MapMetadataContainerState_flags + 1(a4, d7)
+                bne.s   .overlayActive
+                    swap    d7
+                    bra.s   .overlayInactive
+
+            .overlayActive:
+                    move.w  MapMetadataContainer_overlayOffset(a6), d7
+                    lea     (a6, d7), a4                                            ; a4 = MapOverlay address
+
+                    move.w  d1, d7
+                    sub.w   d3, d7
+                    swap    d3
+                    add.w   d3, d7
+                    swap    d3
+                    andi.w  #7, d7
+                    move.b  MapOverlay_rowOffsetTable(a4, d7), d7
+                    ext.w   d7
+                    lea     MapOverlay_chunkReferences(a4, d7), a4
+
+                    move.w  d0, d7
+                    sub.w   d4, d7
+                    add.w   d2, d7
+                    andi.w  #7, d7
+                    add.w   d7, d7
+                    move.w  (a4, d7), d7
+
+            .overlayInactive:
+
+                ; Update chunk ref cache
+                move.w  d7, (a3)+
+
+                ; Check if overlay chunk ref has an associated object group
+                andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
+                beq.s   .emptyObjectGroup
+                bra.s   .objectGroupFound
+        .noOverlay:
+
+                ; Update chunk ref cache
+                move.w  d7, (a3)+
+
+                ; Check if chunk ref has an associated object group
+                andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
+                beq.s   .emptyObjectGroup
+
+                    swap    d7
+
+                    _LOAD_METADATA_CONTAINER a6
+
+                    swap    d7
+
+        .objectGroupFound:
+                rol.w   #3, d7                                                      ; d7 = container group id
+
+                subq.w  #1, d7                                                      ; d7 = container group index
                 add.w   d7, d7
-                move.w  MapMetadataContainer_objectGroupOffsetTable(a6, d7), d7 ; d7 = object group offset
-                lea     (a4, d7), a6                                            ; a6 = object group address
+                adda.w  MapMetadataContainer_objectGroupOffsetTableOffset(a6), a6   ; a6 = object group offset table address
+                move.w  (a6, d7), d7                                                ; d7 = object group offset
+                movea.l MapMetadataMap_objectGroupsBaseAddress(a1), a4              ; a4 = objectGroupsBaseAddress
+                lea     (a4, d7), a6                                                ; a6 = object group address
 
                 ; Check if new group
                 move.b  MapObjectGroup_flagNumber(a6), d7
                 bset    d7, d6
                 bne.s   .objectGroupAlreadyActive
-
-                    addq.w #1, (viewport + Viewport_activeObjectGroupCount)
 
                     ; Add to active group list
                     move.l  a6, (a5)+
@@ -401,7 +461,10 @@ __ViewportUpdateActiveViewportData:
         addq.w  #1, d1
         dbra    d3, .rowLoop
 
-        ; Check if the viewport's object group configuration changed (d6 == viewport object group configuration == all found object group flags combined)
+        ; Terminate active object group list
+        move.l  #NULL, (a5)
+
+        ; Check if the viewport's object group configuration changed
         cmp.l   (viewport + Viewport_activeObjectGroupConfigurationId), d6
         beq     .viewportObjectGroupConfigurationChangeDone
 
@@ -416,6 +479,8 @@ __ViewportUpdateActiveViewportData:
 
     .viewportObjectGroupConfigurationChangeDone:
         rts
+
+        Purge _LOAD_METADATA_CONTAINER
 
 
 ;-------------------------------------------------

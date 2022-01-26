@@ -16,13 +16,19 @@ __ENGINE_MAP_INC Equ 1
 ; Chunk reference structure (16 bit)
 ; ----------------
     BIT_MASK.CHUNK_REF_INDEX            0,  8
-    BIT_CONST.CHUNK_REF_RESERVED        8
+    BIT_CONST.CHUNK_REF_OVERLAY         8
     BIT_CONST.CHUNK_REF_COLLISION       9
     BIT_CONST.CHUNK_REF_EMPTY           10                                          ; Chunk contains no graphic data
     BIT_MASK.CHUNK_REF_ORIENTATION      11, 2
     BIT_CONST.CHUNK_REF_HFLIP           11
     BIT_CONST.CHUNK_REF_VFLIP           12
     BIT_MASK.CHUNK_REF_OBJECT_GROUP_IDX 13, 3
+
+
+;-------------------------------------------------
+; Metadata container flags
+; ----------------
+    BIT_CONST.MMC_OVERLAY       0
 
 
 ;-------------------------------------------------
@@ -72,13 +78,26 @@ __ENGINE_MAP_INC Equ 1
         STRUCT_MEMBER.w width
         STRUCT_MEMBER.w height
         STRUCT_MEMBER.w groupCount
+        STRUCT_MEMBER.w containerCount
         STRUCT_MEMBER.l containersTableAddress
         STRUCT_MEMBER.l objectGroupsBaseAddress
         STRUCT_MEMBER.b rowOffsetTable                                          ; Marker
     DEFINE_STRUCT_END
 
+    DEFINE_STRUCT MapOverlay
+        STRUCT_MEMBER.b rowOffsetTable, 8
+        STRUCT_MEMBER.w chunkReferences
+    DEFINE_STRUCT_END
+
     DEFINE_STRUCT MapMetadataContainer
-        STRUCT_MEMBER.b objectGroupOffsetTable                                  ; Marker
+        STRUCT_MEMBER.w flags;                                                  ; Initial state flags
+        STRUCT_MEMBER.w stateOffset                                             ; Offset into the maps state array
+        STRUCT_MEMBER.w objectGroupOffsetTableOffset                            ; Relative offset to object group offset table
+        STRUCT_MEMBER.w overlayOffset                                           ; Relative offset to MapOverlay data
+    DEFINE_STRUCT_END
+
+    DEFINE_STRUCT MapMetadataContainerState
+        STRUCT_MEMBER.w    flags;
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectGroup
@@ -110,7 +129,7 @@ __ENGINE_MAP_INC Equ 1
 
         ; Instance methods
         STRUCT_MEMBER.l init                                                    ; init(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a0-a4
-        STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d6-d7/a3-a6
+        STRUCT_MEMBER.l update                                                  ; update(MapObjectDescriptor*, ObjectState*) must preserve d7/a3-a5
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectDescriptor

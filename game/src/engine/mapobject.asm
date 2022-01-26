@@ -164,13 +164,12 @@ MapInitObjects:
 
 
 ;-------------------------------------------------
-; Update all objects in the specified object groups
+; Update all objects in the global object group and the specified object groups
 ; Tests collisions against the current/caller collision state.
 ; Restores the collisions state to that of the caller. This means collision elements added after the call to MapUpdateObjects will not interact with map objects.
 ; ----------------
 ; Input: (TODO: Rearange register allocation to align with calling convention)
-; - d7: Number of object groups
-; - a3: Address of array of MapObjectGroup pointers
+; - a3: Address of null terminated array of MapObjectGroup pointers
 ; Uses: d0-d7/a0-a6
 MapUpdateObjects:
 
@@ -182,29 +181,24 @@ MapUpdateObjects:
 ; Uses: d0/d7/a0/a3-a6
 _PROCESS_TRANSFERABLE_OBJECTS Macro
         .transferableObjectLoop\@:
-            movea.w d0, a6                                                      ; a6 = address of transferable object's MapObjectLink
-            move.l  MapObjectLink_objectDescriptorAddress(a6), a0               ; a0 = MapStatefulObjectDescriptor address
+            movea.w d0, a5                                                      ; a5 = address of transferable object's MapObjectLink
+            move.l  MapObjectLink_objectDescriptorAddress(a5), a0               ; a0 = MapStatefulObjectDescriptor address
             move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0
             lea     (a4, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
 
             ; Call Object.update(MapObjectDescriptor*, ObjectState*)
-            movea.w MapObjectDescriptor_type(a0), a5
-            movea.l MapObjectType_update(a5), a5
-            jsr     (a5)
+            movea.w MapObjectDescriptor_type(a0), a6
+            movea.l MapObjectType_update(a6), a6
+            jsr     (a6)
 
             ; Process next transferable object
-            move.w  LinkedList_next(a6), d0
+            move.w  LinkedList_next(a5), d0
             bne     .transferableObjectLoop\@
     Endm
 
         ;-------------------------------------------------
         ; Start of MapUpdateObjects
         ; ----------------
-        tst.w   d7
-        bne.s   .activeGroups
-            rts
-
-    .activeGroups:
 
         ; Create collision snapshot of caller collision state and store snapshot ptr on the stack
         jsr     CollisionCreateSnapshotBefore
@@ -228,42 +222,45 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         PUSHW   a0
 
         ; Update group local objects
-        subq.w  #1, d7
     .activeGroupLoop:
 
-            movea.l (a3), a5                                                    ; a5 = Current active group
+            move.l  (a3), d7
+            beq.s   .done
+                movea.l d7, a5                                                  ; a5 = Current active group
 
-            move.w  MapObjectGroup_stateOffset(a5), d0
-            move.w  MapObjectGroupState_activeObjectsHead(a4, d0), d0           ; d0 = address of transferable object's MapObjectLink
-            beq.s   .noTransferableObjects
+                move.w  MapObjectGroup_stateOffset(a5), d0
+                move.w  MapObjectGroupState_activeObjectsHead(a4, d0), d0       ; d0 = address of transferable object's MapObjectLink
+                beq.s   .noTransferableObjects
 
-                _PROCESS_TRANSFERABLE_OBJECTS
+                    _PROCESS_TRANSFERABLE_OBJECTS
 
         .noTransferableObjects:
-            movea.l (a3)+, a5                                                   ; a5 = Current active group
+            move.l  (a3)+, d7
+            beq.s   .done
+                movea.l d7, a5                                                  ; a5 = Current active group
 
-            move.b  MapObjectGroup_objectCount(a5), d6
-            beq.s   .noObjects
-                addq.w  #MapObjectGroup_objectDescriptors, a5                   ; a5 = Current non transferable object descriptor
+                move.b  MapObjectGroup_objectCount(a5), d7
+                beq.s   .noObjects
+                    addq.w  #MapObjectGroup_objectDescriptors, a5               ; a5 = Current non transferable object descriptor
 
-                ext.w   d6
-                subq.w  #1, d6
-            .objectLoop:
+                    ext.w   d7
+                    subq.w  #1, d7
+                .objectLoop:
 
-                ; Call Object.update(MapObjectDescriptor*, ObjectState*)
-                movea.l a5, a0                                                  ; a0 = Current object descriptor
-                move.w  MapStatefulObjectDescriptor_stateOffset(a5), d0
-                lea     (a4, d0), a1                                            ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
-                movea.w MapObjectDescriptor_type(a0), a6
-                movea.l MapObjectType_update(a6), a6
-                jsr     (a6)
+                    ; Call Object.update(MapObjectDescriptor*, ObjectState*)
+                    movea.l a5, a0                                              ; a0 = Current object descriptor
+                    move.w  MapStatefulObjectDescriptor_stateOffset(a5), d0
+                    lea     (a4, d0), a1                                        ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
+                    movea.w MapObjectDescriptor_type(a0), a6
+                    movea.l MapObjectType_update(a6), a6
+                    jsr     (a6)
 
-                ; Process next object
-                move.b  MapObjectDescriptor_size(a5), d0
-                ext.w   d0
-                adda.w  d0, a5                                                  ; a5 = Next MapObjectDescriptor address
+                    ; Process next object
+                    move.b  MapObjectDescriptor_size(a5), d0
+                    ext.w   d0
+                    adda.w  d0, a5                                              ; a5 = Next MapObjectDescriptor address
 
-                dbra d6, .objectLoop
+                    dbra d7, .objectLoop
 
         .noObjects:
 
@@ -271,7 +268,9 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
             PEEKW   a0
             jsr     CollisionRestoreSnapshot
 
-        dbra    d7, .activeGroupLoop
+        bra .activeGroupLoop
+
+    .done:
 
         ; Free global object collision state snapshot ptr stack space
         POPW
@@ -376,7 +375,8 @@ _MAP_ATTACH_OBJECT Macro
         move.w  MapMetadataMap_rowOffsetTable(a2, d1), d1
         add.w   d0, d1                                                          ; d1 = container table offset
         movea.l (a1, d1), a1                                                    ; a1 = container address
-        move.w  MapMetadataContainer_objectGroupOffsetTable(a1, d3), d0         ; d0 = object group offset
+        adda.w  MapMetadataContainer_objectGroupOffsetTableOffset(a1), a1       ; a1 = object group offset table address
+        move.w  (a1, d3), d0                                                    ; d0 = object group offset
         move.w  MapObjectGroup_stateOffset(a3, d0), d0                          ; d0 = MapObjectGroup.stateOffset
 
         ; Get group state address

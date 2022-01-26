@@ -1,0 +1,46 @@
+; /*[-
+;   Produces MapMetadataContainer
+;
+;   Required inputs:
+;   - stateType: Container state type as specified by DEFINE_STRUCT
+;   Implicit inputs:
+;   - metadataContainer
+;   - mapName
+; -]*/
+
+    MapMetadataContainer[(${metadataContainer.id})][(${mapName})]ObjectGroupTable:
+        [# th:each="objectGroup : ${metadataContainer.objectGroups}"]
+            dc.w MapObjectGroup[(${objectGroup.id})][(${mapName})] - MapObjectGroupsBase[(${mapName})]
+        [/]
+
+    MapMetadataContainer[(${metadataContainer.id})][(${mapName})]Overlay:
+        [# th:if="${!metadataContainer.mapOverlay.empty}"]
+            ; struct MapOverlay
+                ; .rowOffsetTable
+                [# th:each="offsets : ${#format.formatArray('dc.b ', ', ', 8, '%d', metadataContainer.mapOverlay.rowOffsets.{#this * 2})}"]
+                    [(${offsets})]
+                [/]
+                ; .chunkReferences
+                [# th:each="chunkReferences : ${#format.formatArray('dc.w ', ', ', 8, '$%04x', metadataContainer.mapOverlay)}"]
+                    [(${chunkReferences})]
+                [/]
+        [/]
+
+    [# th:with="symbol=${metadataContainer.properties.getOrDefault('symbol', '')}"]
+        [# th:if="${!symbol.empty}"]
+            [(${symbol})]:
+        [/]
+    [/]
+
+    ; struct MapMetadataContainer
+    MapMetadataContainer[(${metadataContainer.id})][(${mapName})]:  ; /*[- Name referenced by MapMetadataContainerTable in main map template -]*/
+        ; .flags
+        dc.w [(${metadataContainer.properties.getOrDefault('overlayEnabled', false) ? 'MMC_OVERLAY_MASK' : '0'})]
+        ; .stateOffset
+        dc.w $\$ALLOC_STATE_OFFSET
+        ; .objectGroupOffsetTableOffset
+        dc.w (MapMetadataContainer[(${metadataContainer.id})][(${mapName})]ObjectGroupTable - MapMetadataContainer[(${metadataContainer.id})][(${mapName})])
+        ; .overlayDataOffset
+        dc.w (MapMetadataContainer[(${metadataContainer.id})][(${mapName})]Overlay - MapMetadataContainer[(${metadataContainer.id})][(${mapName})])
+
+        ALLOC_STATE [(${stateType})]

@@ -6,13 +6,13 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class ObjectGroup
+public final class ObjectGroup
 {
     private final int id;
     private final int flag;
     private final List<MapObject> objects;
 
-    ObjectGroup(int id, int flag, Collection<MapObject> objects)
+    public ObjectGroup(int id, int flag, Collection<MapObject> objects)
     {
         this.id = id;
         this.flag = flag;

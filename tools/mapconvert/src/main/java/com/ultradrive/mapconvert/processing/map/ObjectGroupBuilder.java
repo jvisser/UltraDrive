@@ -1,7 +1,8 @@
-package com.ultradrive.mapconvert.processing.map.metadata;
+package com.ultradrive.mapconvert.processing.map;
 
 import com.ultradrive.mapconvert.common.UID;
 import com.ultradrive.mapconvert.datasource.model.MapObject;
+import com.ultradrive.mapconvert.processing.map.metadata.ObjectGroup;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +12,7 @@ import java.util.stream.Stream;
 
 class ObjectGroupBuilder
 {
-    public static ObjectGroupBuilder ZERO = new ObjectGroupBuilder();
+    public static final ObjectGroupBuilder ZERO = new ObjectGroupBuilder();
 
     private final int id = UID.create();
     private final Set<TileMapMetadataContainerBuilder> containers = new HashSet<>();

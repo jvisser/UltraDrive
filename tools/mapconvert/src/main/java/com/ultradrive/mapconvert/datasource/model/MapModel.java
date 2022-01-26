@@ -12,7 +12,9 @@ public interface MapModel extends PropertySource
 
     int getHeight();
 
-    ChunkReferenceModel getChunkReference(int row, int column);
+    MapLayer getBaseLayer();
 
-    List<MapObject> getObjects();
+    MapLayer getOverlayLayer();
+
+    List<MapObject> getMetadataObjects();
 }

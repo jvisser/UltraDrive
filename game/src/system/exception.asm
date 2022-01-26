@@ -4,6 +4,7 @@
 
     Include './common/include/debug.inc'
 
+    Include './system/include/m68k.inc'
     Include './system/include/vdp.inc'
 
 ;-------------------------------------------------

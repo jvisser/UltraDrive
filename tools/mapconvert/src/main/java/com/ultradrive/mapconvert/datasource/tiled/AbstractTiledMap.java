@@ -4,9 +4,12 @@ import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.datasource.model.ResourceReference;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.tiledreader.TiledGroupLayer;
 import org.tiledreader.TiledLayer;
 import org.tiledreader.TiledMap;
+import org.tiledreader.TiledObject;
+import org.tiledreader.TiledObjectLayer;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
@@ -106,5 +109,14 @@ abstract class AbstractTiledMap
         boolean verticalFlip = layer.getTileVerticalFlip(x, y);
 
         return new ResourceReference(tile.getID(), Orientation.get(horizontalFlip, verticalFlip));
+    }
+
+    protected Stream<TiledObject> getObjectStream(String objectLayerName)
+    {
+        return map.getNonGroupLayers().stream()
+                .filter(tiledLayer -> tiledLayer instanceof TiledObjectLayer &&
+                                      getFullLayerName(tiledLayer).equalsIgnoreCase(objectLayerName))
+                .map(TiledObjectLayer.class::cast)
+                .flatMap(tiledObjectLayer -> tiledObjectLayer.getObjects().stream());
     }
 }

@@ -59,6 +59,9 @@ MapLoad:
         move.w  a0, mapStateAddress
         POPL    a0
 
+        ; Load metadata container state
+        bsr.s   _MapInitMetadataContainerState
+
         ; Load associated tileset
         movea.l MapHeader_tilesetAddress(a0), a0
         jsr     TilesetLoad
@@ -72,8 +75,29 @@ MapLoad:
 
 
 ;-------------------------------------------------
+; Initialize metadata container states to initial values
+; TODO: Support custom state loaders
+; ----------------
+; Uses: d0-d1/a1-a3
+_MapInitMetadataContainerState:
+        movea.l MapHeader_metadataMapAddress(a0), a1
+        move.w  MapMetadataMap_containerCount(a1), d0
+        movea.l MapMetadataMap_containersTableAddress(a1), a1
+        movea.w mapStateAddress, a2
+
+        subq.w  #1, d0
+    .containerLoop:
+            move.l  (a1)+, a3
+            move.w  MapMetadataContainer_stateOffset(a3), d1
+            move.w  MapMetadataContainer_flags(a3), (a2, d1)
+        dbra    d0, .containerLoop
+        rts
+
+
+;-------------------------------------------------
 ; Unload the map and its associated resources
 ; ----------------
+; Uses: d0-d7/a0-a6
 MapUnload:
         ; Release tileset
         jsr     TilesetUnload
