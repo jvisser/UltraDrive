@@ -98,15 +98,14 @@ public class PatternReference extends TileReference<PatternReference>
         {
             return false;
         }
-        final PatternReference reference = (PatternReference) o;
-        return paletteId == reference.paletteId &&
-               priority == reference.priority;
+        final PatternReference that = (PatternReference) o;
+        return empty == that.empty && paletteId == that.paletteId && priority == that.priority;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(super.hashCode(), paletteId, priority);
+        return Objects.hash(super.hashCode(), paletteId, priority, empty);
     }
 
     @Override

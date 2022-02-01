@@ -2,8 +2,10 @@ package com.ultradrive.mapconvert.processing.map.metadata;
 
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
@@ -31,6 +33,8 @@ public final class TileMapOverlay implements Iterable<ChunkReference>
         List<Integer> rowOffsets = new ArrayList<>();
         List<ChunkReference> chunkReferences = new ArrayList<>();
 
+        Map<List<ChunkReference>, Integer> rowDeduplicationMap = new HashMap<>();
+
         int rowIndex = 0;
         for (int row = 0; row < height; row++)
         {
@@ -42,10 +46,20 @@ public final class TileMapOverlay implements Iterable<ChunkReference>
 
             if (hasData)
             {
-                chunkReferences.addAll(List.of(overlayReferences[row]));
-                rowOffsets.add(rowIndex);
+                List<ChunkReference> overlayRow = List.of(overlayReferences[row]);
 
-                rowIndex += width;
+                if (rowDeduplicationMap.containsKey(overlayRow))
+                {
+                    rowOffsets.add(rowDeduplicationMap.get(overlayRow));
+                }
+                else
+                {
+                    chunkReferences.addAll(overlayRow);
+                    rowDeduplicationMap.put(overlayRow, rowIndex);
+                    rowOffsets.add(rowIndex);
+
+                    rowIndex += width;
+                }
             }
             else
             {

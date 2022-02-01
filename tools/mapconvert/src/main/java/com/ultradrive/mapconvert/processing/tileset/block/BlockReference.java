@@ -39,11 +39,7 @@ public class BlockReference extends MetaTileReference<BlockReference>
             return new BlockReference(referenceId, orientation, solidity, empty, priority);
         }
 
-        public void setSolidity(BlockSolidity solidity)
-        {
-            this.solidity = solidity;
-        }
-
+        @Override
         public void setEmpty(boolean empty)
         {
             this.empty = empty;
@@ -53,14 +49,26 @@ public class BlockReference extends MetaTileReference<BlockReference>
         {
             this.priority = priority;
         }
+
+        public void setSolidity(BlockSolidity solidity)
+        {
+            this.solidity = solidity;
+        }
     }
 
-    public BlockReference(int referenceId, Orientation orientation, BlockSolidity solidity, boolean empty, boolean priority)
+    public BlockReference(int referenceId, Orientation orientation, BlockSolidity solidity, boolean empty,
+                          boolean priority)
     {
         super(referenceId, orientation, empty);
 
         this.solidity = solidity;
         this.priority = priority;
+    }
+
+    @Override
+    public Builder builder()
+    {
+        return new Builder(this);
     }
 
     @Override
@@ -87,12 +95,6 @@ public class BlockReference extends MetaTileReference<BlockReference>
     public int hashCode()
     {
         return Objects.hash(super.hashCode(), solidity, priority);
-    }
-
-    @Override
-    public Builder builder()
-    {
-        return new Builder(this);
     }
 
     @Override

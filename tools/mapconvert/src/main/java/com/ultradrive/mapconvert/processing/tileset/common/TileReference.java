@@ -11,18 +11,18 @@ public abstract class TileReference<T extends TileReference<T>> implements Orien
     protected final int referenceId;
     protected final Orientation orientation;
 
-    public static abstract class Builder<T extends TileReference<T>> implements OrientableReference.Builder<T>
+    public abstract static class Builder<T extends TileReference<T>> implements OrientableReference.Builder<T>
     {
         protected int referenceId;
         protected Orientation orientation;
 
-        public Builder()
+        protected Builder()
         {
             referenceId = -1;
             orientation = Orientation.DEFAULT;
         }
 
-        public Builder(TileReference<T> tileReference)
+        protected Builder(TileReference<T> tileReference)
         {
             referenceId = tileReference.referenceId;
             orientation = tileReference.orientation;
@@ -51,7 +51,7 @@ public abstract class TileReference<T extends TileReference<T>> implements Orien
         }
     }
 
-    public TileReference(int referenceId, Orientation orientation)
+    protected TileReference(int referenceId, Orientation orientation)
     {
         this.referenceId = referenceId;
         this.orientation = orientation;
