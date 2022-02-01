@@ -3,6 +3,7 @@ package com.ultradrive.mapconvert.processing.tileset.chunk;
 import com.ultradrive.mapconvert.common.BitPacker;
 import com.ultradrive.mapconvert.common.orientable.Orientation;
 import com.ultradrive.mapconvert.processing.tileset.common.MetaTileReference;
+import java.util.Objects;
 
 
 public class ChunkReference extends MetaTileReference<ChunkReference>
@@ -35,7 +36,8 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
         @Override
         public ChunkReference build()
         {
-            return new ChunkReference(referenceId, orientation, objectContainerGroupIndex, hasCollision, empty, hasOverlay);
+            return new ChunkReference(referenceId, orientation, objectContainerGroupIndex, hasCollision, empty,
+                                      hasOverlay);
         }
 
         public void setHasCollision(boolean hasCollision)
@@ -71,6 +73,32 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
     }
 
     @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        if (!super.equals(o))
+        {
+            return false;
+        }
+        final ChunkReference that = (ChunkReference) o;
+        return hasCollision == that.hasCollision && hasOverlay == that.hasOverlay &&
+               objectContainerGroupIndex == that.objectContainerGroupIndex;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(super.hashCode(), hasCollision, hasOverlay, objectContainerGroupIndex);
+    }
+
+    @Override
     public BitPacker pack()
     {
         return new BitPacker(Short.SIZE)
@@ -80,6 +108,11 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
                 .add(empty)
                 .add(orientation)
                 .add(objectContainerGroupIndex, OBJECT_CONTAINER_GROUP_INDEX_BIT_COUNT);
+    }
+
+    public boolean hasAnyInformation()
+    {
+        return !isEmpty() || hasCollision() || hasOverlay() || objectContainerGroupIndex > 0;
     }
 
     public boolean hasCollision()
@@ -95,10 +128,5 @@ public class ChunkReference extends MetaTileReference<ChunkReference>
     public int getObjectContainerGroupIndex()
     {
         return objectContainerGroupIndex;
-    }
-
-    public boolean hasAnyInformation()
-    {
-        return !isEmpty() || hasCollision() || hasOverlay() || objectContainerGroupIndex > 0;
     }
 }
