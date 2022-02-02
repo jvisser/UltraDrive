@@ -11,20 +11,23 @@ import static java.util.stream.Collectors.toList;
 
 public class Animation implements PropertySource, Iterable<AnimationFrameReference>
 {
-    private final String animationId;
+    private final String id;
+    private final String type;
     private final List<AnimationFrameReference> animationFrames;
     private final Map<String, Object> properties;
     private final int patternBaseId;
 
-    Animation(String animationId, List<AnimationFrameReference> animationFrames, Map<String, Object> properties)
+    Animation(String id, String type, List<AnimationFrameReference> animationFrames, Map<String, Object> properties)
     {
-        this(animationId, animationFrames, properties, 0);
+        this(id, type, animationFrames, properties, 0);
     }
 
-    Animation(String animationId, List<AnimationFrameReference> animationFrames,
-                     Map<String, Object> properties, int patternBaseId)
+    Animation(String id, String type,
+              List<AnimationFrameReference> animationFrames,
+              Map<String, Object> properties, int patternBaseId)
     {
-        this.animationId = animationId;
+        this.id = id;
+        this.type = type;
         this.animationFrames = animationFrames;
         this.properties = properties;
         this.patternBaseId = patternBaseId;
@@ -43,9 +46,14 @@ public class Animation implements PropertySource, Iterable<AnimationFrameReferen
         return properties;
     }
 
-    public String getAnimationId()
+    public String getId()
     {
-        return animationId;
+        return id;
+    }
+
+    public String getType()
+    {
+        return type;
     }
 
     public List<AnimationFrameReference> getAnimationFrameReferences()
@@ -75,7 +83,8 @@ public class Animation implements PropertySource, Iterable<AnimationFrameReferen
 
     Animation remap(Map<AnimationFrame, AnimationFrame> newFrames, int newPatternBaseId)
     {
-        return new Animation(animationId,
+        return new Animation(id,
+                             type,
                              animationFrames.stream()
                                      .map(animationFrameReference -> new AnimationFrameReference(
                                              newFrames.get(animationFrameReference.getAnimationFrame()),

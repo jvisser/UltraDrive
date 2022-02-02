@@ -12,16 +12,67 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class BlockAnimationMetadata
 {
     private final String animationId;
+    private final String type;
     private final List<AnimationFrame> animationFrames;
     private final Map<String, Object> properties;
 
+    public static class AnimationFrame
+    {
+        private final int graphicsId;
+        private final int frameTime;
+
+        public AnimationFrame(BlockAnimationFrameModel model)
+        {
+            this.graphicsId = model.getGraphicsId();
+            this.frameTime = model.getFrameTime();
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(graphicsId);
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass())
+            {
+                return false;
+            }
+            final AnimationFrame that = (AnimationFrame) o;
+            return graphicsId == that.graphicsId;
+        }
+
+        public int getFrameTime()
+        {
+            return frameTime;
+        }
+
+        public int getGraphicsId()
+        {
+            return graphicsId;
+        }
+    }
+
     public BlockAnimationMetadata(BlockAnimationModel animationModel)
     {
-        this.animationId = animationModel.getAnimationId();
+        this.animationId = animationModel.getId();
+        this.type = animationModel.getType();
         this.properties = animationModel.getProperties();
         this.animationFrames = animationModel.getAnimationFrames().stream()
                 .map(AnimationFrame::new)
                 .collect(toUnmodifiableList());
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(animationId, animationFrames);
     }
 
     @Override
@@ -40,35 +91,9 @@ public class BlockAnimationMetadata
                animationFrames.equals(that.animationFrames);
     }
 
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(animationId, animationFrames);
-    }
-
-    public int getFrameCount()
-    {
-        return animationFrames.size();
-    }
-
     public AnimationFrame getFrame(int frameId)
     {
         return animationFrames.get(frameId);
-    }
-
-    public boolean isEmpty()
-    {
-        return animationFrames.isEmpty();
-    }
-
-    public String getAnimationId()
-    {
-        return animationId;
-    }
-
-    public Map<String, Object> getProperties()
-    {
-        return properties;
     }
 
     public List<AnimationFrame> getAnimationFrames()
@@ -76,46 +101,28 @@ public class BlockAnimationMetadata
         return animationFrames;
     }
 
-    public static class AnimationFrame
+    public String getAnimationId()
     {
-        private final int graphicsId;
-        private final int frameTime;
+        return animationId;
+    }
 
-        public AnimationFrame(BlockAnimationFrameModel model)
-        {
-            this.graphicsId = model.getGraphicsId();
-            this.frameTime = model.getFrameTime();
-        }
+    public int getFrameCount()
+    {
+        return animationFrames.size();
+    }
 
-        @Override
-        public boolean equals(Object o)
-        {
-            if (this == o)
-            {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass())
-            {
-                return false;
-            }
-            final AnimationFrame that = (AnimationFrame) o;
-            return graphicsId == that.graphicsId;
-        }
+    public Map<String, Object> getProperties()
+    {
+        return properties;
+    }
 
-        @Override
-        public int hashCode()
-        {
-            return Objects.hash(graphicsId);
-        }
+    public String getType()
+    {
+        return type;
+    }
 
-        public int getGraphicsId()
-        {
-            return graphicsId;
-        }
-
-        public int getFrameTime()
-        {
-            return frameTime;
-        }
+    public boolean isEmpty()
+    {
+        return animationFrames.isEmpty();
     }
 }

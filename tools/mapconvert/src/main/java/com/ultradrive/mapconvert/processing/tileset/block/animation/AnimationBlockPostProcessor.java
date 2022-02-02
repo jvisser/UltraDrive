@@ -108,7 +108,9 @@ public class AnimationBlockPostProcessor
                         sourceAnimationFrameReference.getFrameTime()))
                 .collect(toList());
 
-        return new Animation(sourceAnimation.getAnimationId(), animationFrames, sourceAnimation.getProperties());
+        return new Animation(sourceAnimation.getId(),
+                             sourceAnimation.getType(),
+                             animationFrames, sourceAnimation.getProperties());
     }
 
     private List<Block> patchAnimationBlockPatternReferences(AnimationOptimizationResult optimizedAnimations)

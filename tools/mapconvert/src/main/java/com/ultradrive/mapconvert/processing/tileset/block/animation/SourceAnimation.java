@@ -8,16 +8,19 @@ import java.util.Objects;
 
 class SourceAnimation
 {
-    private final String animationId;
+    private final String id;
+    private final String type;
     private final List<Block> blocks;
     private final List<SourceAnimationFrameReference> animationFrameReferences;
     private final Map<String, Object> properties;
 
-    SourceAnimation(String animationId, List<Block> blocks,
+    SourceAnimation(String id, String type,
+                    List<Block> blocks,
                     List<SourceAnimationFrameReference> animationFrameReferences,
                     Map<String, Object> properties)
     {
-        this.animationId = animationId;
+        this.id = id;
+        this.type = type;
         this.blocks = blocks;
         this.animationFrameReferences = animationFrameReferences;
         this.properties = properties;
@@ -35,18 +38,23 @@ class SourceAnimation
             return false;
         }
         final SourceAnimation sourceAnimation = (SourceAnimation) o;
-        return animationId.equals(sourceAnimation.animationId);
+        return id.equals(sourceAnimation.id);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(animationId);
+        return Objects.hash(id);
     }
 
-    public String getAnimationId()
+    public String getId()
     {
-        return animationId;
+        return id;
+    }
+
+    public String getType()
+    {
+        return type;
     }
 
     public List<Block> getBlocks()

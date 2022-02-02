@@ -4,7 +4,6 @@
   <property name="animationFrameInterval" type="int" default="1"/>
   <property name="animationId" type="string"/>
   <property name="animationInitialTrigger" type="int" default="0"/>
-  <property name="animationScheduler" type="string" default="videoRefresh"/>
   <property name="animationTriggerInterval" type="int" default="0"/>
  </objecttype>
  <objecttype name="Block" color="#a0a0a4"/>
@@ -34,7 +33,6 @@
   <property name="animationAxis" type="string" default="x"/>
   <property name="animationCamera" type="string" default="foreground"/>
   <property name="animationId" type="string"/>
-  <property name="animationScheduler" type="string" default="viewport"/>
   <property name="animationShift" type="int" default="0"/>
  </objecttype>
 </objecttypes>

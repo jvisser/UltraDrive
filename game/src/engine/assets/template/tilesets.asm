@@ -21,12 +21,10 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS 
     th:with="tilesetName=${#strings.capitalize(tileset.name)},
              maxModuleSize=${0x6c00},
              collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)},
-             animationsByScheduler=${#collection.groupBy({'animationScheduler'}, tileset.animations)},
-             videoAnimations=${#collection.groupOf({'videoRefresh'}, animationsByScheduler)},
+             videoAnimations=${tileset.animations.{? #this.type == 'AnimationBlock'}},
              viewportAnimationsByCamera=${
                 #collection.ensureGroups({{'background'}, {'foreground'}},
-                    #collection.groupBy({'animationCamera'},
-                        #collection.groupOf({'viewport'}, animationsByScheduler)))}"]
+                    #collection.groupBy({'animationCamera'}, tileset.animations.{? #this.type == 'ViewportAnimationBlock'}))}"]
 
 VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
@@ -205,19 +203,19 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     ; Timer based animations
     Tileset[(${tilesetName})]AnimationsTable:
         [# th:each="animation : ${videoAnimations}"]
-            dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]
+            dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]
         [/]
 
     Even
 
     ; Timer based animation definitions
     [# th:each="animation : ${videoAnimations}"]
-        ; struct TilesetAnimation ([(${animation.animationId})])
-        Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]:
+        ; struct TilesetAnimation ([(${animation.id})])
+        Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]:
             ; .animationFrameCount
             dc.w [(${animation.frameCount})]
             ; .animationFrameTransferListAddress
-            dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList
+            dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]FrameList
             ; .animationInitialTrigger
             dc.w [(${animation.properties['animationInitialTrigger']})]
             ; .animationTriggerInterval
@@ -258,11 +256,11 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
                     dc.w [(${animationGroup.size})]
                     ; .animationsTable
                     [# th:each="animation : ${animationGroup}"]
-                        ; struct TilesetAnimationBase ([(${animation.animationId})])
+                        ; struct TilesetAnimationBase ([(${animation.id})])
                         ; .animationFrameCount (For viewport animations this will act as the frame index mask so it will be: frameCount - 1)
                         dc.w [(${#format.format('$%02x', animation.frameCount - 1)})]
                         ; .animationFrameTransferListAddress
-                        dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList
+                        dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]FrameList
                     [/]
             [/]
     [/]
@@ -272,17 +270,17 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
 
         Even
 
-        ; [(${animation.animationId})] frame DMA transfer list
-        Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameList:
+        ; [(${animation.id})] frame DMA transfer list
+        Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]FrameList:
         [# th:each="animationFrameRef : ${animation.animationFrameReferences}"]
-            dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]
+            dc.l Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]
         [/]
 
         Even
 
-        ; [(${animation.animationId})] frame DMA transfer definitions
+        ; [(${animation.id})] frame DMA transfer definitions
         [# th:each="animationFrameRef : ${#sets.toSet(animation.animationFrameReferences)}"]
-        Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.animationId)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]:
+        Tileset[(${tilesetName})]Animation[(${#strings.capitalize(animation.id)})]FrameTransfer[(${animationFrameRef.animationFrame.frameId})]:
             VDP_DMA_DEFINE_VRAM_TRANSFER_COMMAND_LIST Tileset[(${tilesetName})]AnimationFrame[(${animationFrameRef.animationFrame.frameId})]Data, [(${animation.patternBaseId * 32})], [(${animation.size * 16})]
         [/]
     [/]
