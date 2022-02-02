@@ -89,7 +89,7 @@ _MapInitMetadataContainerState:
     .containerLoop:
             move.l  (a1)+, a3
             move.w  MapMetadataContainer_stateOffset(a3), d1
-            move.w  MapMetadataContainer_flags(a3), (a2, d1)
+            move.w  MapMetadataContainer_flags(a3), MapMetadataContainerState_flags(a2, d1)
         dbra    d0, .containerLoop
         rts
 
