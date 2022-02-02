@@ -23,8 +23,9 @@ class MapExporterDialect extends AbstractDialect implements IExpressionObjectDia
                                                                  "collection", new CollectionExpressions(),
                                                                  "byteBE", new ByteIterableFactory(Endianess.BIG),
                                                                  "byteLE", new ByteIterableFactory(Endianess.LITTLE),
-                                                                 "slz", CompressionType.SLZ,
-                                                                 "comper", CompressionType.COMPER);
+                                                                 "SLZ", CompressionType.SLZ,
+                                                                 "Comper", CompressionType.COMPER,
+                                                                 "aPLib", CompressionType.APLIB);
 
     MapExporterDialect()
     {
