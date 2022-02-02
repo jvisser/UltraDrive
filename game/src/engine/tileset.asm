@@ -9,6 +9,12 @@
     Include './engine/include/scheduler.inc'
 
 ;-------------------------------------------------
+; Compression algorithm used by tileset
+; ----------------
+TILESET_COMPRESSION_TYPE Equs 'Comper'
+
+
+;-------------------------------------------------
 ; Tileset variables
 ; ----------------
     DEFINE_VAR LONG
@@ -57,12 +63,12 @@ TilesetLoad:
         ; Decompress chunks into RAM
         movea.l Tileset_chunksAddress(a6), a0
         lea     chunkTable, a1
-        jsr     ComperDecompress
+        jsr     \TILESET_COMPRESSION_TYPE\Decompress
 
         ; Decompress blocks into RAM
         movea.l Tileset_blocksAddress(a6), a0
         lea     blockTable, a1
-        jsr     ComperDecompress
+        jsr     \TILESET_COMPRESSION_TYPE\Decompress
 
         ; Load animations
         movea.l Tileset_animationsTableAddress(a6), a5
@@ -114,7 +120,7 @@ _TilesetLoadPatternSections:
     .loadPatternModuleLoop:
         lea     TilesetPatternModule_patternData(a3), a0
         lea     blockTable, a1
-        jsr     ComperDecompress
+        jsr     \TILESET_COMPRESSION_TYPE\Decompress
 
         VDP_DMA_TRANSFER_COMMAND_LIST TilesetPatternModule_patternDMATransferCommandList(a3)
 

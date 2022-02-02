@@ -19,6 +19,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS 
 
 [# th:each="tileset : ${tilesets}"
     th:with="tilesetName=${#strings.capitalize(tileset.name)},
+             compressionType=Comper,
              maxModuleSize=${0x6c00},
              collisionBlockListName=${#strings.capitalize(tileset.collisionBlockList.name)},
              videoAnimations=${tileset.animations.{? #this.type == 'AnimationBlock'}},
@@ -134,7 +135,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     ; ----------------
 
     ; Compressed chunk data
-    [# th:with="compressionResult=${#comper.compress(#byteBE.from(#collection.flatten(tileset.chunkTileset)))}" ]
+    [# th:with="compressionResult=${#__${compressionType}__.compress(#byteBE.from(#collection.flatten(tileset.chunkTileset)))}" ]
     Tileset[(${tilesetName})]ChunkData:
         ; uncompressedSize=[(${compressionResult.uncompressedSize})], compressedSize=[(${compressionResult.compressedSize})], ratio=[(${compressionResult.compressionRatio})]
         [# th:each="compressedPatternData : ${#format.formatArray('dc.b ', ', ', 16, '$%02x', compressionResult)}" ]
@@ -145,7 +146,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
     Even
 
     ; Compressed block data
-    [# th:with="compressionResult=${#comper.compress(#byteBE.from(#collection.flatten(tileset.blockTileset)))}" ]
+    [# th:with="compressionResult=${#__${compressionType}__.compress(#byteBE.from(#collection.flatten(tileset.blockTileset)))}" ]
     Tileset[(${tilesetName})]BlockData:
         ; uncompressedSize=[(${compressionResult.uncompressedSize})], compressedSize=[(${compressionResult.compressedSize})], ratio=[(${compressionResult.compressionRatio})]
         [# th:each="compressedPatternData : ${#format.formatArray('dc.b ', ', ', 16, '$%02x', compressionResult)}" ]
@@ -179,7 +180,7 @@ VIEWPORT_ANIMATION_GROUP_STATE_ADDRESS = tilesetViewportAnimationGroupStates
             ; .modules
             [# th:if="${allocation.allocatedPatternSize > 0}" th:each="module, iter : ${#collection.group(maxModuleSize, #byteBE.from(#collection.flatten(allocation.patterns)))}"]
                 ; Module [(${iter.index})]
-                [# th:with="compressionResult=${#comper.compress(module)}, moduleOffset=${iter.index * maxModuleSize}"]
+                [# th:with="compressionResult=${#__${compressionType}__.compress(module)}, moduleOffset=${iter.index * maxModuleSize}"]
                     ; .patternCompressedSize (uncompressedSize=[(${compressionResult.uncompressedSize})], compressedSize=[(${compressionResult.compressedSize})], ratio=[(${compressionResult.compressionRatio})])
                     dc.w [(${compressionResult.compressedSize})]
 
