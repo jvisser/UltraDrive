@@ -9,8 +9,9 @@ class TiledMapObject extends MapObject
 {
     public TiledMapObject(TiledObject tiledObject)
     {
-        super(tiledObject.getName(),
-              UID.create(),
+        super(UID.create(),
+              tiledObject.getType(),
+              tiledObject.getName(),
               tiledObject.getProperties(),
               (int) (tiledObject.getX() +
                      (Integer) tiledObject.getProperties().getOrDefault("objectTypeXCompensation", 0)),

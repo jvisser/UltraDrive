@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.tiledreader.TiledMap;
-import org.tiledreader.TiledReader;
 import org.tiledreader.TiledTile;
 import org.tiledreader.TiledTileLayer;
 import org.tiledreader.TiledTileset;
@@ -37,14 +36,6 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource
         this.blockImageSource = getTilesetImageURL(BLOCK_GRAPHICS_TILESET_NAME);
     }
 
-    public TiledCollisionBlockDataSource readCollisionTileset(TiledReader reader)
-    {
-        return new TiledCollisionBlockDataSource(
-                getTileset(BLOCK_COLLISION_TILESET_NAME),
-                getTilesetImageURL(BLOCK_COLLISION_TILESET_NAME),
-                propertyTransformer);
-    }
-
     private URL getTilesetImageURL(String tilesetName)
     {
         TiledTileset graphicsTileset = getTileset(tilesetName);
@@ -56,18 +47,6 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource
         {
             throw new IllegalArgumentException("Invalid tileset image", eae);
         }
-    }
-
-    @Override
-    public int getBlockSize()
-    {
-        return tileset.getTileWidth();
-    }
-
-    @Override
-    public URL getBlockImageSource()
-    {
-        return blockImageSource;
     }
 
     @Override
@@ -110,7 +89,28 @@ class TiledBlockDataSource extends TiledMetaTileset implements BlockDataSource
                     })
                     .collect(Collectors.toUnmodifiableList());
 
-            return new BlockAnimationModel(animationId, animationFrames, propertyTransformer.getProperties(blockTile));
+            return new BlockAnimationModel(animationId, blockTile.getType(), animationFrames,
+                                           propertyTransformer.getProperties(blockTile));
         }
+    }
+
+    @Override
+    public int getBlockSize()
+    {
+        return tileset.getTileWidth();
+    }
+
+    @Override
+    public URL getBlockImageSource()
+    {
+        return blockImageSource;
+    }
+
+    public TiledCollisionBlockDataSource readCollisionTileset()
+    {
+        return new TiledCollisionBlockDataSource(
+                getTileset(BLOCK_COLLISION_TILESET_NAME),
+                getTilesetImageURL(BLOCK_COLLISION_TILESET_NAME),
+                propertyTransformer);
     }
 }

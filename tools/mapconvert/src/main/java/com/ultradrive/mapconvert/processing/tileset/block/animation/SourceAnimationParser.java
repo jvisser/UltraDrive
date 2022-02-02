@@ -62,7 +62,14 @@ class SourceAnimationParser
             }
         }
 
-        return new SourceAnimation(animationId, animationBlocksOrderedByGraphicId, animationFrames,
+        return new SourceAnimation(animationId,
+                                   animationBlocks.stream()
+                                           .map(block -> block.getAnimationMetaData().getType())
+                                           .filter(type -> !type.isEmpty())
+                                           .findAny()
+                                           .orElse(""),
+                                   animationBlocksOrderedByGraphicId,
+                                   animationFrames,
                                    getAnimationProperties(animationBlocksOrderedByGraphicId));
     }
 
