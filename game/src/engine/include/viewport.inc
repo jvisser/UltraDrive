@@ -17,6 +17,12 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
 
 
 ;-------------------------------------------------
+; Viewport flags
+; ----------------
+    BIT_CONST.VIEWPORT_DIRTY    0
+
+
+;-------------------------------------------------
 ; Viewport structures
 ; ----------------
     DEFINE_STRUCT ViewportConfiguration
@@ -40,6 +46,7 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.l         activeObjectGroups, 13                          ; Null terminated array containing the active object groups
         STRUCT_MEMBER.w         chunkRefCache, 12                               ; Cache of all chunks references in view (foreground). Used as the basis for rendering the foreground. Can be dynamically patched to alter the appearance of the map.
         STRUCT_MEMBER.w         chunkRefCacheStride                             ; Number of bytes per row in the chunk reference cache
+        STRUCT_MEMBER.b         flags
     DEFINE_STRUCT_END
 
 
@@ -94,6 +101,20 @@ VIEWPORT_GET_X Macros target
 ; ----------------
 VIEWPORT_GET_Y Macros target
     move.w  (viewport + Viewport_foreground + Camera_y), \target
+
+
+;-------------------------------------------------
+; Set viewport flag
+; ----------------
+VIEWPORT_SET_FLAG Macros flag
+    bset    #\flag, (viewport + Viewport_flags)
+
+
+;-------------------------------------------------
+; Clear viewport flag
+; ----------------
+VIEWPORT_RESET_FLAG Macros flag
+    bclr    #\flag, (viewport + Viewport_flags)
 
 
 ;-------------------------------------------------

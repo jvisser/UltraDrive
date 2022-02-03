@@ -5,11 +5,14 @@
     Include './common/include/debug.inc'
     Include './common/include/profile.inc'
 
+    Include './engine/include/viewport.inc'
+
     Include './system/include/io.inc'
 
     DEFINE_VAR SHORT
-        VAR.l spriteAddr
-        VAR.Player player
+        VAR.l       spriteAddr
+        VAR.Player  player
+        VAR.w       lastInputState
     DEFINE_VAR_END
 
 
@@ -85,6 +88,33 @@ _UpdateManualTilesetAnimations:
 
 
 ;-------------------------------------------------
+; Toggle overlay at player position
+; ----------------
+_ToggleOverlay
+        IO_GET_DEVICE_STATE IO_PORT_1, d0
+
+        move.w  lastInputState, d1
+        eor.w   d0, d1
+        btst    #MD_PAD_START, d1
+        beq.s   .noStart
+
+            move.w  d0, lastInputState
+
+            btst    #MD_PAD_START, d0
+            bne.s   .noStart
+
+                move.w  (player + Entity_x), d0
+                move.w  (player + Entity_y), d1
+                jsr     MapGetMetadataContainer
+
+                bchg    #MMC_OVERLAY, MapMetadataContainerState_flags + 1(a1)
+
+                VIEWPORT_SET_FLAG VIEWPORT_DIRTY
+    .noStart:
+        rts
+
+
+;-------------------------------------------------
 ; Main program entry point
 ; ----------------
 Main:
@@ -127,6 +157,9 @@ Main:
 
         DEBUG_MSG 'UltraDrive Started!'
 
+        IO_GET_DEVICE_STATE IO_PORT_1, d0
+        move.w  d0, lastInputState
+
     .mainLoop:
             If ~def(MapHeaderCastle_map4)
                 PROFILE_FRAME_TIME $000e
@@ -154,7 +187,11 @@ Main:
 
             jsr     ViewportUpdateObjects
 
+            bsr     _ToggleOverlay
+
             jsr     VDPSpriteCommit
+
+            jsr     ViewportRender
 
             ;PROFILE_CPU_END
 
