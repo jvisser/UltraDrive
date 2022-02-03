@@ -170,15 +170,6 @@ _UPDATE_SCROLL Macro orientation
 
 
 ;-------------------------------------------------
-; Update all objects in the viewport
-; ----------------
-; Uses: d0/d7/a0/a3-a6
-ViewportUpdateObjects:
-        lea     (viewport + Viewport_activeObjectGroups), a3
-        jmp     MapUpdateObjects
-
-
-;-------------------------------------------------
 ; Ensure the tracking entity is within the viewport bounds
 ; ----------------
 ; Input:
@@ -211,6 +202,37 @@ _ENSURE_ACTIVE_AREA Macro screenMetric, activeAreaSize, axis, result
         CAMERA_MOVE d0, d1
 
         Purge _ENSURE_ACTIVE_AREA
+        rts
+
+
+;-------------------------------------------------
+; Update all objects in the viewport
+; ----------------
+; Uses: d0/d7/a0/a3-a6
+ViewportUpdateObjects:
+        lea     (viewport + Viewport_activeObjectGroups), a3
+        jmp     MapUpdateObjects
+
+
+;-------------------------------------------------
+; Repaint viewport if it is marked as dirty
+; TODO: Proper area repaint API
+; ----------------
+; Uses: all
+ViewportRender
+        bclr    #VIEWPORT_DIRTY, (viewport + Viewport_flags)
+        beq.s   .noChanges
+
+            ; Update data
+            VIEWPORT_GET_X d0
+            VIEWPORT_GET_Y d1
+
+            bsr.s   __ViewportUpdateActiveViewportData
+
+            ; Rerender
+            lea     (viewport + Viewport_foreground), a0
+            jmp     CameraRenderView
+    .noChanges:
         rts
 
 
