@@ -197,8 +197,7 @@ BlobUpdate:
 ; - a1: BlobState address
 ; Uses: d0-d7/a2
 _BlobMove:
-        MAP_GET a0
-        movea.l MapHeader_foregroundAddress(a0), a0
+        MAP_GET_FOREGROUND_MAP a0
         move.w  Entity_x(a1), d0
         move.w  Entity_y(a1), d1
         add.w   BlobState_speed(a1), d0

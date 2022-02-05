@@ -76,7 +76,6 @@ _INIT_SCROLL Macro orientation
         move.l  #_ViewportRenderColumn, Camera_columnRenderer(a0)
 
         ; Let background tracker initialize the background camera
-        MAP_GET a1
         PEEKL   a4                                                      ; a4 = current viewport configuration address
         movea.l ViewportConfiguration_backgroundTrackerConfiguration(a4), a3
         move.l  a3, (viewport + Viewport_backgroundTrackerConfiguration)
@@ -84,7 +83,7 @@ _INIT_SCROLL Macro orientation
         move.l  a4, (viewport + Viewport_backgroundTracker)
         movea.l BackgroundTracker_init(a4), a4
         lea     (viewport + Viewport_background), a0
-        movea.l MapHeader_backgroundAddress(a1), a1
+        MAP_GET_BACKGROUND_MAP a1
         lea     (viewport + Viewport_foreground), a2
         move.l  #VDP_PLANE_B, d0
         jsr     (a4)
@@ -362,12 +361,11 @@ _LOAD_METADATA_CONTAINER Macro target
         lsr.w   #7, d1                                                          ; d1 = vertical chunk coordinate
 
         ; Get pointers
-        MAP_GET a0
-        movea.l MapHeader_metadataMapAddress(a0), a1                            ; a1 = metadataMapAddress
+        MAP_GET_FOREGROUND_MAP a0
+        MAP_GET_METADATA_MAP a1                                                 ; a1 = metadataMapAddress
         movea.l MapMetadataMap_containersTableAddress(a1), a2                   ; a2 = containersTableAddress
         lea     (viewport + Viewport_chunkRefCache), a3                         ; a3 = current chunk ref cache address
         lea     (viewport + Viewport_activeObjectGroups), a5                    ; a5 = activeObjectGroups
-        movea.l MapHeader_foregroundAddress(a0), a0
         move.w  Map_stride(a0), d4
         subq.w  #SIZE_WORD, d4
         sub.w   d2, d4
@@ -401,8 +399,8 @@ _LOAD_METADATA_CONTAINER Macro target
                 _LOAD_METADATA_CONTAINER a6
 
                 ; Check if overlay state enabled
+                MAP_GET_STATE a4
                 move.w  MapMetadataContainer_stateOffset(a6), d7
-                movea.w mapStateAddress, a4
                 btst    #MMC_OVERLAY, MapMetadataContainerState_flags + 1(a4, d7)
                 bne.s   .overlayActive
                     swap    d7
