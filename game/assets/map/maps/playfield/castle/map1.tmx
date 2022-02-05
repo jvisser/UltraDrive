@@ -401,10 +401,6 @@
 </data>
  </layer>
  <objectgroup id="18" name="MetadataContainerProperties">
-  <object id="273" template="../../../objects/meta/MetadataContainerProperties.tx" x="3072" y="1152">
-   <properties>
-    <property name="overlayEnabled" type="bool" value="true"/>
-   </properties>
-  </object>
+  <object id="273" template="../../../objects/meta/MetadataContainerProperties.tx" x="3072" y="1152"/>
  </objectgroup>
 </map>

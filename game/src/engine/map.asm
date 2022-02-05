@@ -12,6 +12,7 @@
     DEFINE_VAR SHORT
         VAR.l                   mapLoadedMap                                    ; MapHeader
         VAR.w                   mapStateAddress
+        VAR.b                   mapStateFlags
         VAR.MapObjectGroupState mapGlobalObjectGroupState
 
         ; Cached values for quick access
@@ -58,7 +59,8 @@ MapLoad:
     .loadMap:
         move.l  a0, mapLoadedMap
 
-        ; Cache values
+        ; Cache/init values
+        clr.b   mapStateFlags
         move.l  MapHeader_metadataMapAddress(a0), mapMetadataMapAddress
         move.l  MapHeader_objectTypeTableAddress(a0), mapObjectTypeTableAddress
         move.l  MapHeader_foregroundAddress(a0), mapForegroundAddress
@@ -72,7 +74,7 @@ MapLoad:
         POPL    a0
 
         ; Load metadata container state
-        bsr.s   _MapInitMetadataContainerState
+        ;bsr.s   _MapInitMetadataContainerState
 
         ; Load associated tileset
         movea.l MapHeader_tilesetAddress(a0), a0
@@ -91,19 +93,19 @@ MapLoad:
 ; TODO: Support custom state loaders
 ; ----------------
 ; Uses: d0-d1/a1-a3
-_MapInitMetadataContainerState:
-        movea.l MapHeader_metadataMapAddress(a0), a1
-        move.w  MapMetadataMap_containerCount(a1), d0
-        movea.l MapMetadataMap_containersTableAddress(a1), a1
-        movea.w mapStateAddress, a2
-
-        subq.w  #1, d0
-    .containerLoop:
-            move.l  (a1)+, a3
-            move.w  MapMetadataContainer_stateOffset(a3), d1
-            move.w  MapMetadataContainer_flags(a3), MapMetadataContainerState_flags(a2, d1)
-        dbra    d0, .containerLoop
-        rts
+;_MapInitMetadataContainerState:
+;        movea.l MapHeader_metadataMapAddress(a0), a1
+;        move.w  MapMetadataMap_containerCount(a1), d0
+;        movea.l MapMetadataMap_containersTableAddress(a1), a1
+;        movea.w mapStateAddress, a2
+;
+;        subq.w  #1, d0
+;    .containerLoop:
+;            move.l  (a1)+, a3
+;            move.w  MapMetadataContainer_stateOffset(a3), d1
+;            move.w  MapMetadataContainer_flags(a3), MapMetadataContainerState_flags(a2, d1)
+;        dbra    d0, .containerLoop
+;        rts
 
 
 ;-------------------------------------------------

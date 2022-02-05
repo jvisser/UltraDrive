@@ -26,9 +26,9 @@ __ENGINE_MAP_INC Equ 1
 
 
 ;-------------------------------------------------
-; Metadata container flags
+; Map state flags
 ; ----------------
-    BIT_CONST.MMC_OVERLAY       0
+    BIT_CONST.MAP_STATE_OVERLAY         0
 
 
 ;-------------------------------------------------
@@ -90,14 +90,12 @@ __ENGINE_MAP_INC Equ 1
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapMetadataContainer
-        STRUCT_MEMBER.w flags;                                                  ; Initial state flags
         STRUCT_MEMBER.w stateOffset                                             ; Offset into the maps state array
         STRUCT_MEMBER.w objectGroupOffsetTableOffset                            ; Relative offset to object group offset table
         STRUCT_MEMBER.w overlayOffset                                           ; Relative offset to MapOverlay data
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapMetadataContainerState
-        STRUCT_MEMBER.w flags;
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectGroup
@@ -176,6 +174,34 @@ MAP_GET_FOREGROUND_MAP Macros target
 ; ----------------
 MAP_GET_OBJECT_TYPE_TABLE Macros target
         movea.l mapObjectTypeTableAddress, \target
+
+
+;-------------------------------------------------
+; Set map state flag
+; ----------------
+MAP_SET_STATE_FLAG  Macros flag
+        bset    #\flag, mapStateFlags
+
+
+;-------------------------------------------------
+; Clear map state flag
+; ----------------
+MAP_RESET_STATE_FLAG Macros flag
+        bclr    #\flag, mapStateFlags
+
+
+;-------------------------------------------------
+; Toggle map state flag
+; ----------------
+MAP_TOGGLE_STATE_FLAG Macros flag
+        bchg    #\flag, mapStateFlags
+
+
+;-------------------------------------------------
+; Test state flag
+; ----------------
+MAP_TEST_STATE_FLAG Macros flag
+        btst    #\flag, mapStateFlags
 
 
 ;-------------------------------------------------

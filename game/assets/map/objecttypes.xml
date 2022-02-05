@@ -13,7 +13,6 @@
  </objecttype>
  <objecttype name="GraphicsBlock" color="#a0a0a4"/>
  <objecttype name="MetadataContainerProperties" color="#a0a0a4">
-  <property name="overlayEnabled" type="bool" default="false"/>
   <property name="symbol" type="string"/>
   <property name="template" type="string"/>
  </objecttype>

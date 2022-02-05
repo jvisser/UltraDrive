@@ -394,21 +394,17 @@ _LOAD_METADATA_CONTAINER Macro target
             btst    #CHUNK_REF_OVERLAY,d7
             beq.s   .noOverlay
 
-                swap    d7
-
-                _LOAD_METADATA_CONTAINER a6
-
                 ; Check if overlay state enabled
-                MAP_GET_STATE a4
-                move.w  MapMetadataContainer_stateOffset(a6), d7
-                btst    #MMC_OVERLAY, MapMetadataContainerState_flags + 1(a4, d7)
-                bne.s   .overlayActive
-                    swap    d7
-                    bra.s   .overlayInactive
+                MAP_TEST_STATE_FLAG MAP_STATE_OVERLAY
+                beq.s   .noOverlay
 
-            .overlayActive:
+                    ; Overlay active, so load chunk ref from overlay
+                    swap    d7
+
+                    _LOAD_METADATA_CONTAINER a6
+
                     move.w  MapMetadataContainer_overlayOffset(a6), d7
-                    lea     (a6, d7), a4                                            ; a4 = MapOverlay address
+                    lea     (a6, d7), a4                                        ; a4 = MapOverlay address
 
                     move.w  d1, d7
                     sub.w   d3, d7
@@ -427,15 +423,13 @@ _LOAD_METADATA_CONTAINER Macro target
                     add.w   d7, d7
                     move.w  (a4, d7), d7
 
-            .overlayInactive:
+                    ; Update chunk ref cache
+                    move.w  d7, (a3)+
 
-                ; Update chunk ref cache
-                move.w  d7, (a3)+
-
-                ; Check if overlay chunk ref has an associated object group
-                andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
-                beq.s   .emptyObjectGroup
-                bra.s   .objectGroupFound
+                    ; Check if overlay chunk ref has an associated object group
+                    andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
+                    beq.s   .emptyObjectGroup
+                    bra.s   .objectGroupFound
         .noOverlay:
 
                 ; Update chunk ref cache

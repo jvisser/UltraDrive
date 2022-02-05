@@ -34,8 +34,6 @@
 
     ; struct MapMetadataContainer
     MapMetadataContainer[(${metadataContainer.id})][(${mapName})]:  ; /*[- Name referenced by MapMetadataContainerTable in main map template -]*/
-        ; .flags
-        dc.w [(${metadataContainer.properties.getOrDefault('overlayEnabled', false) ? 'MMC_OVERLAY_MASK' : '0'})]
         ; .stateOffset
         dc.w $\$ALLOC_STATE_OFFSET
         ; .objectGroupOffsetTableOffset
