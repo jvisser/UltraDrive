@@ -13,6 +13,12 @@
         VAR.l                   mapLoadedMap                                    ; MapHeader
         VAR.w                   mapStateAddress
         VAR.MapObjectGroupState mapGlobalObjectGroupState
+
+        ; Cached values for quick access
+        VAR.l                   mapMetadataMapAddress
+        VAR.l                   mapObjectTypeTableAddress
+        VAR.l                   mapForegroundAddress
+        VAR.l                   mapBackgroundAddress
     DEFINE_VAR_END
 
 
@@ -51,6 +57,12 @@ MapLoad:
 
     .loadMap:
         move.l  a0, mapLoadedMap
+
+        ; Cache values
+        move.l  MapHeader_metadataMapAddress(a0), mapMetadataMapAddress
+        move.l  MapHeader_objectTypeTableAddress(a0), mapObjectTypeTableAddress
+        move.l  MapHeader_foregroundAddress(a0), mapForegroundAddress
+        move.l  MapHeader_backgroundAddress(a0), mapBackgroundAddress
 
         ; Allocate map state area
         PUSHL   a0
@@ -125,8 +137,7 @@ MapGetMetadataContainer:
         rol.w   #7, d1
         andi.w  #$7e, d1
 
-        movea.l mapLoadedMap, a0
-        movea.l MapHeader_metadataMapAddress(a0), a0
+        movea.l mapMetadataMapAddress, a0
         move.w  MapMetadataMap_rowOffsetTable(a0, d1), d1
         movea.l MapMetadataMap_containersTableAddress(a0), a0
         add.w   d0, d1

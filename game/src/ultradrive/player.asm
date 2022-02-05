@@ -97,8 +97,7 @@ _MOVE_IF Macro up, down, var, disp, speed
 
         IO_GET_DEVICE_STATE IO_PORT_1, d6
 
-        MAP_GET a0
-        movea.l MapHeader_foregroundAddress(a0), a0
+        MAP_GET_FOREGROUND_MAP a0
         move.w  (player + Entity_x), d0
         move.w  (player + Entity_y), d1
 

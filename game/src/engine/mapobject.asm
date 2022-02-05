@@ -39,8 +39,7 @@ _RESET_GROUP_STATE Macro state
 ; ----------------
 ; Uses: d0-d7/a0-a6
 _RUN_OBJECT_TYPE_RESOURCE_ROUTINE Macro routine
-        MAP_GET a0
-        movea.l MapHeader_objectTypeTableAddress(a0), a0                        ; a0 = MapHeader.objectTypeTableAddress
+        MAP_GET_OBJECT_TYPE_TABLE a0
 
         move.w  (a0)+, d0
         beq.s   .noObjectTypes\@
@@ -93,9 +92,8 @@ MapInitObjects:
         _RESET_GROUP_STATE mapGlobalObjectGroupState
 
         ; Init addresses and loop counters
-        MAP_GET a4
-        movea.w mapStateAddress, a3                                             ; a3 = Map state base
-        movea.l MapHeader_metadataMapAddress(a4), a4
+        MAP_GET_STATE a3                                                        ; a3 = Map state base
+        MAP_GET_METADATA_MAP a4
         movea.l MapMetadataMap_objectGroupsBaseAddress(a4), a0                  ; a0 = Current group/object ObjectDescriptor
         move.w  MapMetadataMap_groupCount(a4), d7                               ; d7 = Object group counter
         beq     .noObjects
@@ -205,7 +203,7 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
         PUSHW   a0
 
         ; Load addresses
-        movea.w mapStateAddress, a4
+        MAP_GET_STATE a4
 
         ; Update global objects
         move.w  mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, d0
@@ -325,8 +323,7 @@ _MAP_ATTACH_OBJECT Macro
         lsr.w   #7, d0
         lsr.w   #7, d1
 
-        MAP_GET a1
-        movea.l MapHeader_foregroundAddress(a1), a2                             ; a2 = foreground map
+        MAP_GET_FOREGROUND_MAP a2                                               ; a2 = foreground map
         movea.l Map_dataAddress(a2), a3                                         ; a3 = map data
 
         ; Get chunk offset
@@ -380,7 +377,7 @@ _MAP_ATTACH_OBJECT Macro
         move.w  MapObjectGroup_stateOffset(a3, d0), d0                          ; d0 = MapObjectGroup.stateOffset
 
         ; Get group state address
-        movea.w mapStateAddress, a2
+        MAP_GET_STATE a2
         lea     MapObjectGroupState_activeObjectsHead(a2, d0), a2               ; a2 = MapObjectGroupState.activeObjectsHead address
     .linkObjectToGroup\@:
 

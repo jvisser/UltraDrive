@@ -97,7 +97,7 @@ __ENGINE_MAP_INC Equ 1
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapMetadataContainerState
-        STRUCT_MEMBER.w    flags;
+        STRUCT_MEMBER.w flags;
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT MapObjectGroup
@@ -148,5 +148,40 @@ __ENGINE_MAP_INC Equ 1
 ; ----------------
 MAP_GET Macros target
         movea.l mapLoadedMap, \target
+
+
+;-------------------------------------------------
+; Get loaded map's MapMetadataMap address in target
+; ----------------
+MAP_GET_METADATA_MAP Macros target
+        movea.l mapMetadataMapAddress, \target
+
+
+;-------------------------------------------------
+; Get loaded map's background map address in target
+; ----------------
+MAP_GET_BACKGROUND_MAP Macros target
+        movea.l mapBackgroundAddress, \target
+
+
+;-------------------------------------------------
+; Get loaded map's foreground map address in target
+; ----------------
+MAP_GET_FOREGROUND_MAP Macros target
+        movea.l mapForegroundAddress, \target
+
+
+;-------------------------------------------------
+; Get loaded map's ObjectTypeTable address in target
+; ----------------
+MAP_GET_OBJECT_TYPE_TABLE Macros target
+        movea.l mapObjectTypeTableAddress, \target
+
+
+;-------------------------------------------------
+; Get loaded map's state address in target
+; ----------------
+MAP_GET_STATE Macros target
+        movea.w mapStateAddress, \target
 
     EndIf
