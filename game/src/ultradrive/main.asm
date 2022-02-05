@@ -107,7 +107,7 @@ _ToggleOverlay
                 move.w  (player + Entity_y), d1
                 jsr     MapGetMetadataContainer
 
-                bchg    #MMC_OVERLAY, MapMetadataContainerState_flags + 1(a1)
+                MAP_TOGGLE_STATE_FLAG MAP_STATE_OVERLAY
 
                 VIEWPORT_SET_FLAG VIEWPORT_DIRTY
     .noStart:
