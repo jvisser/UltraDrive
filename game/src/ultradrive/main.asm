@@ -103,10 +103,6 @@ _ToggleOverlay
             btst    #MD_PAD_START, d0
             bne.s   .noStart
 
-                move.w  (player + Entity_x), d0
-                move.w  (player + Entity_y), d1
-                jsr     MapGetMetadataContainer
-
                 MAP_TOGGLE_STATE_FLAG MAP_STATE_OVERLAY
 
                 VIEWPORT_SET_FLAG VIEWPORT_DIRTY
