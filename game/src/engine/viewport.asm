@@ -352,9 +352,6 @@ _LOAD_METADATA_CONTAINER Macro target
         seq     d4
         ext.w   d4
         add.w   d4, d3                                                          ; d3 = number of rows - 1
-        move.w  d3, d4
-        swap    d3
-        move.w  d4, d3
 
         ; Convert pixel coordinates to chunk coordinates
         lsr.w   #7, d0                                                          ; d0 = horizontal chunk coordinate
@@ -399,18 +396,12 @@ _LOAD_METADATA_CONTAINER Macro target
                 beq.s   .noOverlay
 
                     ; Overlay active, so load chunk ref from overlay
-                    swap    d7
-
                     _LOAD_METADATA_CONTAINER a6
 
                     move.w  MapMetadataContainer_overlayOffset(a6), d7
                     lea     (a6, d7), a4                                        ; a4 = MapOverlay address
 
                     move.w  d1, d7
-                    sub.w   d3, d7
-                    swap    d3
-                    add.w   d3, d7
-                    swap    d3
                     andi.w  #7, d7
                     move.b  MapOverlay_rowOffsetTable(a4, d7), d7
                     ext.w   d7
