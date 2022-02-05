@@ -122,28 +122,3 @@ MapUnload:
         ; Reset map pointer
         move.l  #NULL, mapLoadedMap
         rts
-
-
-;-------------------------------------------------
-; Load the addresses of the container at the specified position and its associated state object
-; ----------------
-; Input:
-; - d0: x pixel position
-; - d1: y pixel position
-; Output:
-; - a0: Address of MapMetadataContainer
-; - a1: Address of MapMetadataContainerState
-MapGetMetadataContainer:
-        lsr.w   #8, d0
-        andi.w  #~3, d0
-        rol.w   #7, d1
-        andi.w  #$7e, d1
-
-        movea.l mapMetadataMapAddress, a0
-        move.w  MapMetadataMap_rowOffsetTable(a0, d1), d1
-        movea.l MapMetadataMap_containersTableAddress(a0), a0
-        add.w   d0, d1
-        movea.l (a0, d1), a0
-        movea.w mapStateAddress, a1
-        adda.w  MapMetadataContainer_stateOffset(a0), a1
-        rts

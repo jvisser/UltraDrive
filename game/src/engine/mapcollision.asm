@@ -8,10 +8,17 @@
 ; - MapCollisionFindRightWall
 
     Include './common/include/profile.inc'
-    
+
     Include './engine/include/map.inc'
     Include './engine/include/tileset.inc'
     Include './engine/include/angle.inc'
+
+
+;-------------------------------------------------
+; Experimental feature toggles
+; ----------------
+_MAP_COLLISION_OVERLAY_ENABLE = TRUE
+
 
 ;-------------------------------------------------
 ; Performance measurement macros
@@ -44,7 +51,55 @@ _MAP_COLLISION_PROFILE_END Macro
 ; Output:
 ; - d3: chunk ref
 _READ_CHUNK_REF Macro
-        move.w  (a3, d5), d3                                        ; d3 = chunk ref
+        move.w  (a3, d5), d3                                                ; d3 = chunk ref
+
+        If (_MAP_COLLISION_OVERLAY_ENABLE = TRUE)
+
+            btst    #CHUNK_REF_OVERLAY, d3
+            beq.s   .noOverlay\@
+
+                MAP_TEST_STATE_FLAG MAP_STATE_OVERLAY
+                beq.s   .noOverlay\@
+
+                    PUSHW   d0
+                    PUSHW   d1
+
+                    ; Load meta data container for current chunk
+                    MAP_GET_METADATA_MAP a1
+
+                    lsr.w   #8, d0
+                    andi.w  #~3, d0
+                    rol.w   #7, d1
+                    andi.w  #$7e, d1
+                    move.w  MapMetadataMap_rowOffsetTable(a1, d1), d1
+                    movea.l MapMetadataMap_containersTableAddress(a1), a1
+                    add.w   d0, d1
+                    movea.l (a1, d1), a1                                    ; a1 = MapMetadataContainer address
+
+                    ; Load overlay address
+                    adda.w  MapMetadataContainer_overlayOffset(a1), a1      ; a1 = MapOverlay address
+
+                    ; Reload positions
+                    move.w  2(sp), d0
+                    move.w  (sp), d1
+
+                    ; Calculate overlay chunk ref offset
+                    lsr.w   #6, d0
+                    andi.w  #$e, d0                                         ; d0 = overlay column offset
+                    lsr.w   #7, d1
+                    andi.w  #7, d1                                          ; d1 = row offset table index
+                    move.b  MapOverlay_rowOffsetTable(a1, d1), d1
+                    ext.w   d1                                              ; d1 = overlay row offset
+                    add.w   d0, d1                                          ; d1 = overlay chunk ref offset
+
+                    ; Load overlay chunk reference
+                    move.w  MapOverlay_chunkReferences(a1, d1), d3
+
+                    POPW    d1
+                    POPW    d0
+
+            .noOverlay\@:
+        EndIf
     Endm
 
 
@@ -243,7 +298,7 @@ _FIND_VERTICAL_COLLISION Macro requiredSolidity, solidBlockAngle
 
                     _READ_BLOCK_REF
 
-                    bra.s .checkNextBlock\@
+                    bra .checkNextBlock\@
 
             .checkNextChunk\@:
 
