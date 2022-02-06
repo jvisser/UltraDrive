@@ -115,8 +115,14 @@ _MOVE_IF Macro up, down, var, disp, speed
 
         ; If button B is pressed skip collision detection
         btst    #MD_PAD_B, d6
-        beq     .collisionDone
+        bne.s     .checkCollision
+        
+            ; Update player coordinates
+            move.w  d0, (player + Entity_x)
+            move.w  d1, (player + Entity_y)
 
+        bra     .done
+    .checkCollision:
         ; Right wall collision detection
         tst.w   d2
         bmi.s .skipRight
@@ -176,8 +182,6 @@ _MOVE_IF Macro up, down, var, disp, speed
         sub.w   #PLAYER_EXTENTS_X, d0
         add.w   #PLAYER_EXTENTS_Y, d1
 
-    .collisionDone:
-
         ; Update player coordinates
         move.w  d0, (player + Entity_x)
         move.w  d1, (player + Entity_y)
@@ -202,6 +206,10 @@ _MOVE_IF Macro up, down, var, disp, speed
         move.w  d3, AABBCollisionElement_maxY(a0)
         move.w  #10, HurtCollisionElement_damage(a0)
         jsr     CollisionCheck
+
+    .done:
+
+
 
         Purge _MOVE_IF
         rts

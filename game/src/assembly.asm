@@ -43,6 +43,7 @@
     Include './engine/trigtable.asm'
     Include './engine/tileset.asm'
     Include './engine/map.asm'
+    Include './engine/mapstate.asm'
     Include './engine/maprender.asm'
     Include './engine/mapobject.asm'
     Include './engine/mapcollision.asm'

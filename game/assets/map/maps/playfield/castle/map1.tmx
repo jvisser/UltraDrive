@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="19" nextobjectid="276">
+<map version="1.8" tiledversion="1.8.1" orientation="orthogonal" renderorder="right-down" width="40" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="25" nextobjectid="276">
  <properties>
   <property name="background" type="file" value="../../background/castle/dungeon.tmx"/>
  </properties>
  <tileset firstgid="1" source="../../../tilesets/castle/chunks.tsx"/>
  <tileset firstgid="385" source="../../../tilesets/meta/objectgroupchunks.tsx"/>
- <tileset firstgid="393" source="../../../editor/helperchunks.tsx"/>
- <tileset firstgid="400" source="../../../objects/objects.tsx"/>
+ <tileset firstgid="393" source="../../../objects/objects.tsx"/>
  <group id="15" name="Base">
   <layer id="1" name="Chunk" width="40" height="20" locked="1">
    <data encoding="csv">
@@ -32,8 +31,9 @@
 195,187,124,35,98,35,74,170,109,71,98,99,4,5,6,72,71,35,99,4,39,3,98,6,74,133,136,133,136,133,136,71,35,72,136,73,4,6,72,137
 </data>
   </layer>
-  <layer id="6" name="ObjectGroup" width="40" height="20" opacity="0.46">
-   <data encoding="csv">
+  <group id="22" name="Blueprint">
+   <layer id="6" name="Room" width="40" height="20" opacity="0.46">
+    <data encoding="csv">
 0,0,0,0,387,387,387,387,0,0,0,389,389,389,389,389,0,0,0,388,388,0,0,0,0,0,389,389,389,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,388,388,388,388,0,0,389,389,389,390,388,388,392,392,392,392,392,0,389,389,389,0,0,0,0,390,390,0,0,0,386,386,
 0,388,388,388,388,388,0,0,0,0,0,0,0,0,0,0,390,390,390,0,0,0,0,0,392,392,392,0,0,0,0,0,0,0,0,388,388,388,0,0,
@@ -55,7 +55,8 @@
 0,390,390,390,390,390,390,390,390,391,391,391,388,388,388,0,391,391,391,0,0,389,387,390,392,0,0,0,389,387,387,391,391,391,0,389,386,386,391,388,
 0,390,390,390,390,390,390,390,390,390,391,391,388,388,388,386,386,0,0,0,0,389,0,390,392,392,392,392,392,392,392,392,0,389,389,389,386,386,388,388
 </data>
-  </layer>
+   </layer>
+  </group>
   <objectgroup id="8" name="Object">
    <object id="1" template="../../../objects/entity/Orbison.tx" x="215" y="320" visible="1"/>
    <object id="3" template="../../../objects/entity/Orbison.tx" x="354" y="320"/>
@@ -225,13 +226,13 @@
    <object id="170" template="../../../objects/entity/Fireball.tx" x="2708" y="1822"/>
    <object id="171" template="../../../objects/entity/Fireball.tx" x="2745" y="1822"/>
    <object id="172" template="../../../objects/entity/Fireball.tx" x="2781" y="1822"/>
-   <object id="175" template="../../../objects/entity/Blob.tx" gid="2147484050" x="588" y="128"/>
+   <object id="175" template="../../../objects/entity/Blob.tx" gid="2147484043" x="588" y="128"/>
    <object id="176" template="../../../objects/entity/Blob.tx" x="210" y="1216"/>
-   <object id="177" template="../../../objects/entity/Blob.tx" gid="402" x="275" y="320"/>
+   <object id="177" template="../../../objects/entity/Blob.tx" gid="395" x="275" y="320"/>
    <object id="178" template="../../../objects/entity/Blob.tx" x="133" y="1728"/>
    <object id="180" template="../../../objects/entity/Blob.tx" x="914" y="128"/>
-   <object id="182" template="../../../objects/entity/Blob.tx" gid="2147484050" x="677" y="384"/>
-   <object id="183" template="../../../objects/entity/Blob.tx" gid="2147484050" x="412" y="320">
+   <object id="182" template="../../../objects/entity/Blob.tx" gid="2147484043" x="677" y="384"/>
+   <object id="183" template="../../../objects/entity/Blob.tx" gid="2147484043" x="412" y="320">
     <properties>
      <property name="active" type="bool" value="true"/>
     </properties>
@@ -306,17 +307,17 @@
    <object id="251" template="../../../objects/entity/Blob.tx" x="1284" y="678"/>
    <object id="252" template="../../../objects/entity/Blob.tx" x="991" y="576"/>
    <object id="253" template="../../../objects/entity/Blob.tx" x="1481" y="776"/>
-   <object id="255" template="../../../objects/entity/Blob.tx" gid="402" x="1329" y="701"/>
+   <object id="255" template="../../../objects/entity/Blob.tx" gid="395" x="1329" y="701"/>
    <object id="256" template="../../../objects/entity/Blob.tx" x="840" y="704"/>
-   <object id="258" template="../../../objects/entity/Blob.tx" gid="2147484050" x="895" y="704" rotation="0"/>
+   <object id="258" template="../../../objects/entity/Blob.tx" gid="2147484043" x="895" y="704" rotation="0"/>
    <object id="259" template="../../../objects/entity/Blob.tx" x="2819" y="192"/>
-   <object id="260" template="../../../objects/entity/Blob.tx" gid="2147484050" x="2984" y="249"/>
+   <object id="260" template="../../../objects/entity/Blob.tx" gid="2147484043" x="2984" y="249"/>
    <object id="261" template="../../../objects/entity/Blob.tx" x="3013" y="263"/>
    <object id="262" template="../../../objects/entity/Blob.tx" x="3342" y="428"/>
    <object id="263" template="../../../objects/entity/Blob.tx" x="3654" y="576"/>
-   <object id="264" template="../../../objects/entity/Blob.tx" gid="2147484050" x="3492" y="502"/>
+   <object id="264" template="../../../objects/entity/Blob.tx" gid="2147484043" x="3492" y="502"/>
    <object id="265" template="../../../objects/entity/Blob.tx" x="2627" y="192"/>
-   <object id="266" template="../../../objects/entity/Blob.tx" gid="2147484050" x="2763" y="192"/>
+   <object id="266" template="../../../objects/entity/Blob.tx" gid="2147484043" x="2763" y="192"/>
    <object id="267" template="../../../objects/entity/Blob.tx" x="3206" y="359"/>
    <object id="268" template="../../../objects/entity/Blob.tx" x="3091" y="302"/>
   </objectgroup>
@@ -346,8 +347,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
   </layer>
-  <layer id="13" name="ObjectGroup" width="40" height="20" opacity="0.45">
-   <data encoding="csv">
+  <group id="19" name="Blueprint">
+   <layer id="13" name="Room" width="40" height="20" opacity="0.45">
+    <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -369,7 +371,8 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
-  </layer>
+   </layer>
+  </group>
   <objectgroup id="12" name="Object">
    <object id="269" template="../../../objects/entity/Orbison.tx" x="3454.55" y="1969.7"/>
    <object id="270" template="../../../objects/entity/Orbison.tx" x="3618.18" y="1987.88"/>
@@ -378,30 +381,9 @@
    <object id="275" template="../../../objects/entity/Blob.tx" x="851" y="2240"/>
   </objectgroup>
  </group>
- <layer id="5" name="MetadataContainerGrid" width="40" height="20" locked="1" opacity="0.38">
-  <data encoding="csv">
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,
-393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393,0,0,0,0,0,0,0,0,393,393,393,393,393,393,393,393
-</data>
- </layer>
+ <imagelayer id="24" name="MetadataGrid" repeatx="1" repeaty="1">
+  <image source="../../../editor/metadatagrid.tmx" width="2048" height="2048"/>
+ </imagelayer>
  <objectgroup id="18" name="MetadataContainerProperties">
   <object id="273" template="../../../objects/meta/MetadataContainerProperties.tx" x="3072" y="1152"/>
  </objectgroup>

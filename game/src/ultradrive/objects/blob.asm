@@ -134,10 +134,10 @@ BlobUpdate:
             bne.s .notDeadYet
 
                 ; We are dead so remove from playfield
-                MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE  &
-                    MAP_OBJECT_STATE_CHANGE_DEACTIVATE,     &
-                    a1,                                     &
-                    a2
+                MAP_STATE_CHANGE           &
+                    MAP_STATE_CHANGE_OBJECT_DEACTIVATE, &
+                    a0,                                 &
+                    a1
                 rts
 
             .notDeadYet:
@@ -153,7 +153,7 @@ BlobUpdate:
         ;PROFILE_CPU_START
 
         PUSHW   d7
-        PUSHM.l a3-a5
+        PUSHM.l a2-a5
 
         bsr.s   _BlobMove
         bsr     _BlobRender
@@ -182,7 +182,7 @@ BlobUpdate:
 
         jsr     CollisionCheck
 
-        POPM.l  a3-a5
+        POPM.l  a2-a5
         POPW    d7
 
         ;PROFILE_CPU_END

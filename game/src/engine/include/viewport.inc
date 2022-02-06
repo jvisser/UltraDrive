@@ -41,9 +41,9 @@ VIEWPORT_ACTIVE_AREA_SIZE_V     Equ 224/4
         STRUCT_MEMBER.l         verticalVDPScrollUpdater                        ; Used to update the vertical VDP scroll values
         STRUCT_MEMBER.w         trackingEntity                                  ; Entity to keep in view
         STRUCT_MEMBER.l         foregroundMovementCallback
-        STRUCT_MEMBER.w         subChunkId                                      ; Used to detect viewport chunk changes on movement
-        STRUCT_MEMBER.l         activeObjectGroupConfigurationId                ; Current object group configuration used to detect object group configuration changes
-        STRUCT_MEMBER.l         activeObjectGroups, 13                          ; Null terminated array containing the active object groups
+        STRUCT_MEMBER.w         subChunkId                                      ; Used to detect viewport chunk changes on movement (ie when do we need to scan the viewport for new information)
+        STRUCT_MEMBER.l         activeObjectGroupConfigurationId                ; Used to detect object group changes (ie when do we need to rebuild the objectGroupRootNode tree)
+        STRUCT_MEMBER.w         objectGroupRootNode                             ; MapObjectGroupNode root node for this viewport
         STRUCT_MEMBER.w         chunkRefCache, 12                               ; Cache of all chunks references in view (foreground). Used as the basis for rendering the foreground. Can be dynamically patched to alter the appearance of the map.
         STRUCT_MEMBER.w         chunkRefCacheStride                             ; Number of bytes per row in the chunk reference cache
         STRUCT_MEMBER.b         flags

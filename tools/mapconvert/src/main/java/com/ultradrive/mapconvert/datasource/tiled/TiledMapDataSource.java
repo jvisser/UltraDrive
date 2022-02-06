@@ -16,15 +16,10 @@ import static java.lang.String.format;
 
 class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
 {
-    private static final String CHUNK_TILESET_NAME = "chunks";
+    private static final String CHUNK_TILESET_NAME = "Chunks";
 
-    private static final String CHUNK_LAYER_NAME = "Base_Chunk";
-    private static final String OBJECT_GROUP_LAYER_NAME = "Base_ObjectGroup";
-    private static final String OBJECT_LAYER_NAME = "Base_Object";
-
-    private static final String OVERLAY_CHUNK_LAYER_NAME = "Overlay_Chunk";
-    private static final String OVERLAY_OBJECT_GROUP_LAYER_NAME = "Overlay_ObjectGroup";
-    private static final String OVERLAY_OBJECT_LAYER_NAME = "Overlay_Object";
+    private static final String BASE_GROUP_NAME = "Base";
+    private static final String OVERLAY_GROUP_NAME = "Overlay";
 
     private static final String METADATA_LAYER_NAME = "MetadataContainerProperties";
 
@@ -63,19 +58,13 @@ class TiledMapDataSource extends AbstractTiledMap implements MapDataSource
     @Override
     public MapLayer getBaseLayer()
     {
-        return new TiledMapLayer(this,
-                                 CHUNK_LAYER_NAME,
-                                 OBJECT_GROUP_LAYER_NAME,
-                                 OBJECT_LAYER_NAME);
+        return new TiledMapLayer(this, BASE_GROUP_NAME);
     }
 
     @Override
     public MapLayer getOverlayLayer()
     {
-        return new TiledMapLayer(this,
-                                 OVERLAY_CHUNK_LAYER_NAME,
-                                 OVERLAY_OBJECT_GROUP_LAYER_NAME,
-                                 OVERLAY_OBJECT_LAYER_NAME);
+        return new TiledMapLayer(this, OVERLAY_GROUP_NAME);
     }
 
     @Override

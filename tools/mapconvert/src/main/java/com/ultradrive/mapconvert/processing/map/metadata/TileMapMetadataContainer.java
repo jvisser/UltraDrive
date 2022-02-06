@@ -10,12 +10,12 @@ public final class TileMapMetadataContainer implements PropertySource
 {
     private final int id;
     private final Map<String, Object> properties;
-    private final List<ObjectGroup> objectGroups;
+    private final List<TileMapObjectGroup> objectGroups;
     private final TileMapOverlay mapOverlay;
 
     public TileMapMetadataContainer(int id,
                              Map<String, Object> properties,
-                             List<ObjectGroup> objectGroups,
+                             List<TileMapObjectGroup> objectGroups,
                              TileMapOverlay mapOverlay)
     {
         this.id = id;
@@ -35,7 +35,7 @@ public final class TileMapMetadataContainer implements PropertySource
         return id;
     }
 
-    public List<ObjectGroup> getObjectGroups()
+    public List<TileMapObjectGroup> getObjectGroups()
     {
         return objectGroups;
     }

@@ -1,22 +1,17 @@
 package com.ultradrive.mapconvert.processing.map;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 import com.ultradrive.mapconvert.datasource.model.ChunkReferenceModel;
 import com.ultradrive.mapconvert.datasource.model.MapLayer;
 import com.ultradrive.mapconvert.datasource.model.MapModel;
 import com.ultradrive.mapconvert.datasource.model.MapObject;
-import com.ultradrive.mapconvert.processing.map.metadata.ObjectGroup;
 import com.ultradrive.mapconvert.processing.map.metadata.TileMapMetadataMap;
 import com.ultradrive.mapconvert.processing.map.metadata.TileMapOverlay;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
 import com.ultradrive.mapconvert.processing.tileset.TilesetReferenceBuilderSource;
 import com.ultradrive.mapconvert.processing.tileset.chunk.ChunkReference;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,57 +20,87 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 
 
-class TileMapBuilder
+class TileMapBuilder extends GroupLayerBuilder<TileMapObjectGroupBuilder>
 {
-    private final MapModel mapModel;
     private final List<TileMapMetadataContainerBuilder> metadataContainerBuilders;
-    private final Set<ObjectGroupBuilder> objectGroupBuilders;
     private final int objectGroupMapHeight;
     private final int objectGroupMapWidth;
-    private final int screenHeight;
-    private final int screenWidth;
     private final TilesetReferenceBuilderSource tilesetReferenceBuilder;
 
-    List<ChunkReference> chunkReferences;
-    TileMapMetadataMap mapMetadata;
+    private int maxGroupsInView;
+    private int maxNodesInView;
+    private TileMapMetadataMap mapMetadata;
+    private List<ChunkReference> chunkReferences;
 
     public TileMapBuilder(MapModel mapModel,
                           TilesetReferenceBuilderSource tilesetReferenceBuilder,
                           int screenWidth, int screenHeight)
     {
-        this.mapModel = mapModel;
+        super(mapModel, screenWidth, screenHeight);
+
         this.objectGroupMapWidth = ((mapModel.getWidth() + 7) >> 3);
         this.objectGroupMapHeight = ((mapModel.getHeight() + 7) >> 3);
         this.tilesetReferenceBuilder = tilesetReferenceBuilder;
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
-
-        this.objectGroupBuilders = new LinkedHashSet<>();
         this.metadataContainerBuilders = new ArrayList<>();
+    }
+
+    @Override
+    protected int getGroupId(ChunkReferenceModel chunkReference)
+    {
+        return chunkReference.getObjectGroupId();
+    }
+
+    @Override
+    protected TileMapObjectGroupBuilder getDefaultGroup(int groupId)
+    {
+        return groupId == ChunkReferenceModel.EMPTY_GROUP_ID
+               ? TileMapObjectGroupBuilder.ZERO
+               : null;
+    }
+
+    @Override
+    protected TileMapObjectGroupBuilder[][] createMap()
+    {
+        return new TileMapObjectGroupBuilder[mapModel.getHeight()][mapModel.getWidth()];
+    }
+
+    @Override
+    protected TileMapObjectGroupBuilder createGroup()
+    {
+        return new TileMapObjectGroupBuilder();
     }
 
     public void preCompile()
     {
+        TileMapObjectGroupContainerLayerBuilder containerLayerBuilder =
+                new TileMapObjectGroupContainerLayerBuilder(mapModel, screenWidth, screenHeight);
+        containerLayerBuilder.compile();
+
         MapLayer baseLayer = mapModel.getBaseLayer();
         MapLayer overlayLayer = mapModel.getOverlayLayer();
 
-        ObjectGroupBuilder[][] groupMap = createGroupMap(baseLayer);
-        ObjectGroupBuilder[][] overlayGroupMap = createGroupMap(overlayLayer);
+        TileMapObjectGroupBuilder[][] groupMap = createGroupMap(baseLayer);
+        TileMapObjectGroupBuilder[][] overlayGroupMap = createGroupMap(overlayLayer);
+
+        setGroupContainers(groupMap, containerLayerBuilder.getBaseContainers());
+        setGroupContainers(overlayGroupMap, containerLayerBuilder.getOverlayContainers());
 
         addObjects(baseLayer.getObjects(), groupMap);
         addObjects(overlayLayer.getObjects(), overlayGroupMap);
 
         createMetadataContainers(groupMap, overlayGroupMap);
 
-        linkObjectGroupsBasedOnScreenSpace(groupMap);
-        linkObjectGroupsBasedOnScreenSpace(mergeGroupMaps(groupMap, overlayGroupMap));
+        associateObjectGroupsBasedOnScreenSpace(groupMap);
+        associateObjectGroupsBasedOnScreenSpace(mergeGroupMaps(groupMap, overlayGroupMap));
+
+        calculateMaxima(groupMap, overlayGroupMap);
 
         createObjectGroupFlags();
 
         boolean[][] overlayStatus = createOverlays(overlayLayer, overlayGroupMap);
 
-        mapMetadata = createMapMetadata();
-        chunkReferences = collectionChunkReferences(baseLayer, groupMap, overlayStatus);
+        mapMetadata = createMapMetadata(containerLayerBuilder);
+        chunkReferences = collectChunkReferences(baseLayer, groupMap, overlayStatus);
     }
 
     public TileMap build(Tileset tileset)
@@ -89,60 +114,72 @@ class TileMapBuilder
                            mapModel.getProperties());
     }
 
-    private ObjectGroupBuilder[][] createGroupMap(MapLayer mapLayer)
+    private void setGroupContainers(TileMapObjectGroupBuilder[][] groupMap,
+                                    GroupSubLayer<TileMapObjectGroupContainerBuilder> containerLayer)
     {
-        int width = mapModel.getWidth();
-        int height = mapModel.getHeight();
-
-        ObjectGroupBuilder[][] groupMap = new ObjectGroupBuilder[height][width];
-
-        int[][] sourceGroupIds = new int[height][width];
-        for (int row = 0; row < height; row++)
+        for (int row = 0; row < mapModel.getHeight(); row++)
         {
-            for (int column = 0; column < width; column++)
+            for (int column = 0; column < mapModel.getWidth(); column++)
             {
-                int startGroupId = mapLayer.getChunkReference(row, column).getObjectGroupId();
-                ObjectGroupBuilder currentGroup = startGroupId == ChunkReferenceModel.EMPTY_GROUP_ID
-                                                  ? ObjectGroupBuilder.ZERO
-                                                  : null;
-
-                if (row > 0 && sourceGroupIds[row - 1][column] == startGroupId)
+                TileMapObjectGroupBuilder groupBuilder = groupMap[row][column];
+                if (!groupBuilder.isZeroGroup())
                 {
-                    currentGroup = groupMap[row - 1][column];
-                }
-
-                int startColumn = column;
-                for (int i = column + 1; i < width; i++, column++)
-                {
-                    int currentGroupId = mapLayer.getChunkReference(row, i).getObjectGroupId();
-                    if (startGroupId != currentGroupId)
-                    {
-                        break;
-                    }
-
-                    if (row > 0 && currentGroup == null && sourceGroupIds[row - 1][i] == currentGroupId)
-                    {
-                        currentGroup = groupMap[row - 1][i];
-                    }
-                }
-
-                if (currentGroup == null)
-                {
-                    currentGroup = addGroup();
-                }
-
-                for (int i = startColumn; i <= column; i++)
-                {
-                    sourceGroupIds[row][i] = startGroupId;
-                    groupMap[row][i] = currentGroup;
+                    groupBuilder.setContainer(containerLayer.get(row, column));
                 }
             }
         }
-
-        return groupMap;
     }
 
-    private void addObjects(List<MapObject> objects, ObjectGroupBuilder[][] objectGroupBuilderMap)
+    private void calculateMaxima(TileMapObjectGroupBuilder[][] groupMap,
+                                 TileMapObjectGroupBuilder[][] overlayGroupMap)
+    {
+        maxGroupsInView = 0;
+        maxNodesInView = 0;
+
+        calculateMaxima(groupMap);
+        calculateMaxima(mergeGroupMaps(groupMap, overlayGroupMap));
+    }
+
+    private void calculateMaxima(TileMapObjectGroupBuilder[][] groupMap)
+    {
+        int screenHorizontalChunks = (screenWidth + 255) >> 7;
+        int screenVerticalChunks = (screenHeight + 255) >> 7;
+
+        for (int rowIndex = 0; rowIndex < groupMap.length - screenVerticalChunks; rowIndex++)
+        {
+            TileMapObjectGroupBuilder[] row = groupMap[rowIndex];
+            for (int columnIndex = 0; columnIndex < row.length - screenHorizontalChunks; columnIndex++)
+            {
+                Set<TileMapObjectGroupBuilder> groupsInView = new HashSet<>();
+                for (int screenRow = 0; screenRow < screenVerticalChunks; screenRow++)
+                {
+                    for (int screenColumn = 0; screenColumn < screenHorizontalChunks; screenColumn++)
+                    {
+                        TileMapObjectGroupBuilder objectGroupBuilder = groupMap[rowIndex + screenRow][columnIndex + screenColumn];
+                        if (!objectGroupBuilder.isZeroGroup())
+                        {
+                            groupsInView.add(objectGroupBuilder);
+                        }
+                    }
+                }
+
+                Set<Object> nodesInView = new HashSet<>(groupsInView);
+                for (TileMapObjectGroupBuilder groupBuilder : groupsInView)
+                {
+                    TileMapObjectGroupContainerBuilder parent = groupBuilder.getContainer();
+                    while (parent != null)
+                    {
+                        nodesInView.add(parent);
+                        parent = parent.getParent();
+                    }
+                }
+                maxGroupsInView = Math.max(maxGroupsInView, groupsInView.size());
+                maxNodesInView = Math.max(maxNodesInView, nodesInView.size());
+            }
+        }
+    }
+
+    private void addObjects(List<MapObject> objects, TileMapObjectGroupBuilder[][] objectGroupBuilderMap)
     {
         objects.forEach(mapObject ->
                         {
@@ -153,8 +190,8 @@ class TileMapBuilder
                         });
     }
 
-    private void createMetadataContainers(ObjectGroupBuilder[][] groupMap,
-                                          ObjectGroupBuilder[][] overlayGroupMap)
+    private void createMetadataContainers(TileMapObjectGroupBuilder[][] groupMap,
+                                          TileMapObjectGroupBuilder[][] overlayGroupMap)
     {
         Map<Integer, Map<String, Object>> containerProperties = mapModel.getMetadataObjects().stream()
                 .collect(toMap(mapObject -> (mapObject.getY() >> 10) * objectGroupMapWidth + (mapObject.getX() >> 10),
@@ -163,8 +200,8 @@ class TileMapBuilder
         Map<Integer, TileMapMetadataContainerBuilder> containers = new LinkedHashMap<>();
         for (int rowIndex = 0; rowIndex < groupMap.length; rowIndex++)
         {
-            ObjectGroupBuilder[] row = groupMap[rowIndex];
-            ObjectGroupBuilder[] overlayRow = overlayGroupMap[rowIndex];
+            TileMapObjectGroupBuilder[] row = groupMap[rowIndex];
+            TileMapObjectGroupBuilder[] overlayRow = overlayGroupMap[rowIndex];
             for (int columnIndex = 0; columnIndex < row.length; columnIndex++)
             {
                 int groupId = (rowIndex >> 3) * objectGroupMapWidth + (columnIndex >> 3);
@@ -174,13 +211,13 @@ class TileMapBuilder
                                 new TileMapMetadataContainerBuilder(
                                         containerProperties.computeIfAbsent(groupId, key -> Map.of())));
 
-                ObjectGroupBuilder objectGroupBuilder = row[columnIndex];
+                TileMapObjectGroupBuilder objectGroupBuilder = row[columnIndex];
                 if (!objectGroupBuilder.isZeroGroup())
                 {
                     metadataContainerBuilder.add(objectGroupBuilder);
                 }
 
-                ObjectGroupBuilder overlayObjectGroupBuilder = overlayRow[columnIndex];
+                TileMapObjectGroupBuilder overlayObjectGroupBuilder = overlayRow[columnIndex];
                 if (!overlayObjectGroupBuilder.isZeroGroup())
                 {
                     metadataContainerBuilder.add(overlayObjectGroupBuilder);
@@ -191,71 +228,7 @@ class TileMapBuilder
         metadataContainerBuilders.addAll(containers.values());
     }
 
-    private void linkObjectGroupsBasedOnScreenSpace(ObjectGroupBuilder[][] groupMap)
-    {
-        int screenHorizontalChunks = (screenWidth + 255) >> 7;
-        int screenVerticalChunks = (screenHeight + 255) >> 7;
-
-        for (int rowIndex = 0; rowIndex < groupMap.length - screenVerticalChunks; rowIndex++)
-        {
-            ObjectGroupBuilder[] row = groupMap[rowIndex];
-            for (int columnIndex = 0; columnIndex < row.length - screenHorizontalChunks; columnIndex++)
-            {
-                Set<ObjectGroupBuilder> groupsInView = new HashSet<>();
-                for (int screenRow = 0; screenRow < screenVerticalChunks; screenRow++)
-                {
-                    for (int screenColumn = 0; screenColumn < screenHorizontalChunks; screenColumn++)
-                    {
-                        ObjectGroupBuilder
-                                objectGroupBuilder =
-                                groupMap[rowIndex + screenRow][columnIndex + screenColumn];
-                        if (!objectGroupBuilder.isZeroGroup())
-                        {
-                            groupsInView.add(objectGroupBuilder);
-                        }
-                    }
-                }
-
-                Sets.cartesianProduct(groupsInView, groupsInView)
-                        .forEach(associatedGroups ->
-                                         associatedGroups.get(0).associateGroup(associatedGroups.get(1)));
-            }
-        }
-    }
-
-    private ObjectGroupBuilder[][] mergeGroupMaps(ObjectGroupBuilder[][] chunkGroupMap,
-                                                  ObjectGroupBuilder[][] overlayChunkGroupMap)
-    {
-        int width = mapModel.getWidth();
-        int height = mapModel.getHeight();
-
-        ObjectGroupBuilder[][] mergedMap = new ObjectGroupBuilder[height][width];
-        for (int row = 0; row < height; row++)
-        {
-            for (int column = 0; column < width; column++)
-            {
-                if (overlayChunkGroupMap[row][column].isZeroGroup())
-                {
-                    mergedMap[row][column] = chunkGroupMap[row][column];
-                }
-                else
-                {
-                    mergedMap[row][column] = overlayChunkGroupMap[row][column];
-                }
-            }
-        }
-
-        return mergedMap;
-    }
-
-    private void createObjectGroupFlags()
-    {
-        objectGroupBuilders.stream()
-                .sorted(Comparator.comparingLong(ObjectGroupBuilder::priority).reversed())
-                .forEach(ObjectGroupBuilder::calculateFlag);
-    }
-
-    private boolean[][] createOverlays(MapLayer overlayLayer, ObjectGroupBuilder[][] overlayGroupMap)
+    private boolean[][] createOverlays(MapLayer overlayLayer, TileMapObjectGroupBuilder[][] overlayGroupMap)
     {
         boolean[][] overlayStatus = new boolean[mapModel.getHeight()][mapModel.getWidth()];
 
@@ -280,7 +253,7 @@ class TileMapBuilder
                         ChunkReference.Builder chunkReferenceBuilder =
                                 tilesetReferenceBuilder.getTileReference(chunkReferenceModel.getChunkId());
 
-                        ObjectGroupBuilder objectGroupBuilder = overlayGroupMap[yy][xx];
+                        TileMapObjectGroupBuilder objectGroupBuilder = overlayGroupMap[yy][xx];
                         if (!objectGroupBuilder.isZeroGroup())
                         {
                             chunkReferenceBuilder.setObjectContainerGroupIndex(
@@ -301,15 +274,30 @@ class TileMapBuilder
         return overlayStatus;
     }
 
-    private List<ChunkReference> collectionChunkReferences(MapLayer mapLayer,
-                                                           ObjectGroupBuilder[][] groupMap,
-                                                           boolean[][] overlayStatus)
+    private TileMapMetadataMap createMapMetadata(
+            TileMapObjectGroupContainerLayerBuilder containerLayerBuilder)
+    {
+        return new TileMapMetadataMap(
+                metadataContainerBuilders.stream()
+                        .map(TileMapMetadataContainerBuilder::build)
+                        .collect(Collectors.toList()),
+                containerLayerBuilder.getGroupBuilders().stream().map(TileMapObjectGroupContainerBuilder::build)
+                        .collect(Collectors.toList()),
+                groupBuilders.stream().map(TileMapObjectGroupBuilder::build)
+                        .collect(Collectors.toList()),
+                objectGroupMapWidth, objectGroupMapHeight,
+                maxGroupsInView, maxNodesInView);
+    }
+
+    private List<ChunkReference> collectChunkReferences(MapLayer mapLayer,
+                                                        TileMapObjectGroupBuilder[][] groupMap,
+                                                        boolean[][] overlayStatus)
     {
         List<ChunkReference> references = new ArrayList<>();
 
         for (int rowIndex = 0; rowIndex < groupMap.length; rowIndex++)
         {
-            ObjectGroupBuilder[] row = groupMap[rowIndex];
+            TileMapObjectGroupBuilder[] row = groupMap[rowIndex];
             for (int columnIndex = 0; columnIndex < row.length; columnIndex++)
             {
                 int containerPosition = (rowIndex >> 3) * objectGroupMapWidth + (columnIndex >> 3);
@@ -329,27 +317,5 @@ class TileMapBuilder
         }
 
         return references;
-    }
-
-    private TileMapMetadataMap createMapMetadata()
-    {
-        Map<Integer, ObjectGroup> objectGroupsById = objectGroupBuilders.stream()
-                .map(ObjectGroupBuilder::build)
-                .collect(toMap(ObjectGroup::getId, objectGroup -> objectGroup));
-
-        return new TileMapMetadataMap(metadataContainerBuilders.stream()
-                                              .map(metadataContainerBuilder ->
-                                                           metadataContainerBuilder.build(objectGroupsById))
-                                              .collect(Collectors.toList()),
-                                      ImmutableList.copyOf(objectGroupsById.values()),
-                                      objectGroupMapWidth, objectGroupMapHeight);
-    }
-
-    public ObjectGroupBuilder addGroup()
-    {
-        ObjectGroupBuilder group = new ObjectGroupBuilder();
-        objectGroupBuilders.add(group);
-
-        return group;
     }
 }
