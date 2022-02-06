@@ -8,4 +8,8 @@ public interface MapLayer
     ChunkReferenceModel getChunkReference(int row, int column);
 
     List<MapObject> getObjects();
+
+    int getWidth();
+
+    int getHeight();
 }

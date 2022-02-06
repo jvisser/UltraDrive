@@ -185,9 +185,9 @@ Main:
 
             bsr     _ToggleOverlay
 
-            jsr     VDPSpriteCommit
+            jsr     ViewportCommit
 
-            jsr     ViewportRender
+            jsr     VDPSpriteCommit
 
             ;PROFILE_CPU_END
 

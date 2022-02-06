@@ -126,7 +126,8 @@ ViewportMove:
 
 
 ;-------------------------------------------------
-; Update cameras
+; Finalize the viewport position for the current frame.
+; This updates the active viewport data such as the objects that are active in the viewport.
 ; ----------------
 ; Uses: d0-d7/a0-a6
 ViewportFinalize:
@@ -141,7 +142,7 @@ _UPDATE_SCROLL Macro orientation
         move.w  (viewport + Viewport_trackingEntity), d0
         beq.s   .noTrackingEntity
         movea.w d0, a1
-        bsr     _ViewportEnsureEntityVisible
+        bsr.s    _ViewportEnsureEntityVisible
     .noTrackingEntity:
 
         ; Finalize foreground camera
@@ -209,24 +210,26 @@ _ENSURE_ACTIVE_AREA Macro screenMetric, activeAreaSize, axis, result
 ; ----------------
 ; Uses: d0/d7/a0/a3-a6
 ViewportUpdateObjects:
-        lea     (viewport + Viewport_activeObjectGroups), a3
+        move.w  (viewport + Viewport_objectGroupRootNode), a0
         jmp     MapUpdateObjects
 
 
 ;-------------------------------------------------
-; Repaint viewport if it is marked as dirty
+; Commit current viewport for display
 ; TODO: Proper area repaint API
 ; ----------------
 ; Uses: all
-ViewportRender
-        bclr    #VIEWPORT_DIRTY, (viewport + Viewport_flags)
+ViewportCommit
+        jsr     MapProcessStateChanges
+
+        VIEWPORT_RESET_FLAG VIEWPORT_DIRTY
         beq.s   .noChanges
 
             ; Update data
             VIEWPORT_GET_X d0
             VIEWPORT_GET_Y d1
 
-            bsr.s   __ViewportUpdateActiveViewportData
+            bsr.s   _ViewportScan
 
             ; Rerender
             lea     (viewport + Viewport_foreground), a0
@@ -236,7 +239,7 @@ ViewportRender
 
 
 ;-------------------------------------------------
-; Called whenever the foreground camera changes
+; Called whenever the foreground camera position changes
 ; ----------------
 ; Input:
 ; - a0: Camera
@@ -273,7 +276,9 @@ _CALCULATE_SUB_CHUNK_ID Macro result, scratch
 ; ----------------
 ; Uses: d0-d7/a0-a6
 _ViewportInitActiveViewportData:
-        clr.l   (viewport + Viewport_activeObjectGroupConfigurationId)
+        moveq   #0, d0
+        move.l  d0, (viewport + Viewport_activeObjectGroupConfigurationId)
+        move.w  d0, (viewport + Viewport_objectGroupRootNode)
 
         VIEWPORT_GET_X d0
         VIEWPORT_GET_Y d1
@@ -281,7 +286,7 @@ _ViewportInitActiveViewportData:
         _CALCULATE_SUB_CHUNK_ID d2, d3
 
         move.w  d2, (viewport + Viewport_subChunkId)
-        bra.s   __ViewportUpdateActiveViewportData
+        bra.s   _ViewportScan
 
 
 ;-------------------------------------------------
@@ -302,20 +307,20 @@ _ViewportUpdateActiveViewportData:
     .updateActiveViewportData:
         move.w  d2, (viewport + Viewport_subChunkId)
 
-        ; NB: Fall through to __ViewportUpdateActiveViewportData
+        ; NB: Fall through to _ViewportScan
 
 
 ;-------------------------------------------------
 ; Update/collect viewport data for the current viewport:
 ; - Viewport chunk cache
-; - Active object groups
-; - Shared object resource update routines
+; - Active object hierarchy
+; - Shared object resource update routines for active objects
 ; ----------------
 ; Input:
 ; - d0: Left coordinate of view
 ; - d1: Top coordinate of view
 ; Uses: d0-d7/a0-a6
-__ViewportUpdateActiveViewportData:
+_ViewportScan:
 ;-------------------------------------------------
 ; Load map metadata container address at current chunk
 ; Uses: d7.w
@@ -357,24 +362,35 @@ _LOAD_METADATA_CONTAINER Macro target
         lsr.w   #7, d0                                                          ; d0 = horizontal chunk coordinate
         lsr.w   #7, d1                                                          ; d1 = vertical chunk coordinate
 
-        ; Get pointers
-        MAP_GET_FOREGROUND_MAP a0
+        ; Get map pointers
+        MAP_GET_FOREGROUND_MAP a5
         MAP_GET_METADATA_MAP a1                                                 ; a1 = metadataMapAddress
-        movea.l MapMetadataMap_containersTableAddress(a1), a2                   ; a2 = containersTableAddress
+
+        ; Allocate some stack memory for the active object group list
+        move.w  MapMetadataMap_maxObjectGroupsInView(a1), d4
+        addq.w  #1, d4  ; Add one for list terminator
+        add.w   d4, d4
+        add.w   d4, d4
+        movea.l sp, a0
+        sub.w   d4, sp
+        move.w  a0, -(sp)
+        lea     SIZE_WORD(sp), a0
+
+        ; Load/calculate addresses
+        movea.l MapMetadataMap_metadataContainersTableAddress(a1), a2           ; a2 = containersTableAddress
         lea     (viewport + Viewport_chunkRefCache), a3                         ; a3 = current chunk ref cache address
-        lea     (viewport + Viewport_activeObjectGroups), a5                    ; a5 = activeObjectGroups
-        move.w  Map_stride(a0), d4
+        move.w  Map_stride(a5), d4
         subq.w  #SIZE_WORD, d4
         sub.w   d2, d4
         sub.w   d2, d4                                                          ; d4 map stride - number of columns in view
         move.w  d1, d5
         add.w   d5, d5
-        move.w  Map_rowOffsetTable(a0, d5), d5                                  ; d5 = map row offset of top visible row
-        movea.l Map_dataAddress(a0), a0
-        adda.w  d5, a0
+        move.w  Map_rowOffsetTable(a5, d5), d5                                  ; d5 = map row offset of top visible row
+        movea.l Map_dataAddress(a5), a5
+        adda.w  d5, a5
         move.w  d0, d6
         add.w   d6, d6
-        adda.w  d6, a0                                                          ; a0 = address of top left coordinate of first chunk in viewport
+        adda.w  d6, a5                                                          ; a5 = address of top left coordinate of first chunk in viewport
 
         moveq   #0, d6                                                          ; d6 = accumulated group flags
     .rowLoop:
@@ -385,43 +401,45 @@ _LOAD_METADATA_CONTAINER Macro target
         .colLoop:
 
             ; Load chunk ref
-            move.w  (a0)+, d7                                                   ; d7 = chunk ref
+            move.w  (a5)+, d7                                                   ; d7 = chunk ref
 
-            ; Check for overlay
-            btst    #CHUNK_REF_OVERLAY,d7
-            beq.s   .noOverlay
-
-                ; Check if overlay state enabled
-                MAP_TEST_STATE_FLAG MAP_STATE_OVERLAY
+            If (MAP_OVERLAY_ENABLE)
+                ; Check for overlay
+                btst    #CHUNK_REF_OVERLAY,d7
                 beq.s   .noOverlay
 
-                    ; Overlay active, so load chunk ref from overlay
-                    _LOAD_METADATA_CONTAINER a6
+                    ; Check if overlay state enabled
+                    MAP_TEST_STATE_FLAG MAP_STATE_OVERLAY
+                    beq.s   .noOverlay
 
-                    move.w  MapMetadataContainer_overlayOffset(a6), d7
-                    lea     (a6, d7), a4                                        ; a4 = MapOverlay address
+                        ; Overlay active, so load chunk ref from overlay
+                        _LOAD_METADATA_CONTAINER a6
 
-                    move.w  d1, d7
-                    andi.w  #7, d7
-                    move.b  MapOverlay_rowOffsetTable(a4, d7), d7
-                    ext.w   d7
-                    lea     MapOverlay_chunkReferences(a4, d7), a4
+                        move.w  MapMetadataContainer_overlayOffset(a6), d7
+                        lea     (a6, d7), a4                                        ; a4 = MapOverlay address
 
-                    move.w  d0, d7
-                    sub.w   d4, d7
-                    add.w   d2, d7
-                    andi.w  #7, d7
-                    add.w   d7, d7
-                    move.w  (a4, d7), d7
+                        move.w  d1, d7
+                        andi.w  #7, d7
+                        move.b  MapOverlay_rowOffsetTable(a4, d7), d7
+                        ext.w   d7
+                        lea     MapOverlay_chunkReferences(a4, d7), a4
 
-                    ; Update chunk ref cache
-                    move.w  d7, (a3)+
+                        move.w  d0, d7
+                        sub.w   d4, d7
+                        add.w   d2, d7
+                        andi.w  #7, d7
+                        add.w   d7, d7
+                        move.w  (a4, d7), d7
 
-                    ; Check if overlay chunk ref has an associated object group
-                    andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
-                    beq.s   .emptyObjectGroup
-                    bra.s   .objectGroupFound
-        .noOverlay:
+                        ; Update chunk ref cache
+                        move.w  d7, (a3)+
+
+                        ; Check if overlay chunk ref has an associated object group
+                        andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d7
+                        beq.s   .emptyObjectGroup
+                        bra.s   .objectGroupFound
+            .noOverlay:
+            EndIf
 
                 ; Update chunk ref cache
                 move.w  d7, (a3)+
@@ -447,12 +465,12 @@ _LOAD_METADATA_CONTAINER Macro target
                 lea     (a4, d7), a6                                                ; a6 = object group address
 
                 ; Check if new group
-                move.b  MapObjectGroup_flagNumber(a6), d7
+                move.b  MapObjectGroupContainer_flagNumber(a6), d7
                 bset    d7, d6
                 bne.s   .objectGroupAlreadyActive
 
                     ; Add to active group list
-                    move.l  a6, (a5)+
+                    move.l  a6, (a0)+
 
             .objectGroupAlreadyActive:
 
@@ -462,12 +480,12 @@ _LOAD_METADATA_CONTAINER Macro target
             dbra    d4, .colLoop
 
         swap    d4
-        adda.w  d4, a0
+        adda.w  d4, a5
         addq.w  #1, d1
         dbra    d3, .rowLoop
 
         ; Terminate active object group list
-        move.l  #NULL, (a5)
+        move.l  #NULL, (a0)
 
         ; Check if the viewport's object group configuration changed
         cmp.l   (viewport + Viewport_activeObjectGroupConfigurationId), d6
@@ -476,13 +494,19 @@ _LOAD_METADATA_CONTAINER Macro target
             ; Store new viewport object group configuration id
             move.l  d6, (viewport + Viewport_activeObjectGroupConfigurationId)
 
-            ; TODO: If so update shared resource updaters for objects in the active groups
+            ; Rebuild active object group hierarchy from the collected object group leaf nodes
+            lea     SIZE_WORD(sp), a0
+            jsr     MapBuildObjectGroupHierarchy
+            move.w  a0, (viewport + Viewport_objectGroupRootNode)
+
+            ; TODO: Rebuild shared active shared resource type list (shared animation for all instances for example)
                 ; TODO: using k-way set merge where each set element is an rle element into the map's object type array
                     ; TODO: Sort map object array by edge strength between nodes (how many times are they related in groups)
 
-            DEBUG_MSG 'VIEWPORT_OBJECT_GROUP_CONFIG_CHANGE'
-
     .viewportObjectGroupConfigurationChangeDone:
+
+        ; Restore stack
+        move.w  (sp), sp
         rts
 
         Purge _LOAD_METADATA_CONTAINER

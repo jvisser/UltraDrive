@@ -2,7 +2,6 @@ package com.ultradrive.mapconvert.processing.map;
 
 import com.google.common.collect.Iterables;
 import com.ultradrive.mapconvert.common.UID;
-import com.ultradrive.mapconvert.processing.map.metadata.ObjectGroup;
 import com.ultradrive.mapconvert.processing.map.metadata.TileMapMetadataContainer;
 import com.ultradrive.mapconvert.processing.map.metadata.TileMapOverlay;
 import java.util.LinkedHashSet;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 class TileMapMetadataContainerBuilder
 {
     private final int id;
-    private final Set<ObjectGroupBuilder> objectGroupBuilders;
+    private final Set<TileMapObjectGroupBuilder> objectGroupBuilders;
     private final Map<String, Object> properties;
 
     private int assignedFlags;
@@ -29,7 +28,7 @@ class TileMapMetadataContainerBuilder
         this.assignedFlags = 0;
     }
 
-    public void add(ObjectGroupBuilder objectGroupBuilder)
+    public void add(TileMapObjectGroupBuilder objectGroupBuilder)
     {
         objectGroupBuilders.add(objectGroupBuilder);
 
@@ -38,7 +37,7 @@ class TileMapMetadataContainerBuilder
             throw new IllegalStateException("Too many object groups in container");
         }
 
-        objectGroupBuilder.addContainer(this);
+        objectGroupBuilder.addMetadataContainer(this);
     }
 
     public void addFlag(int flag)
@@ -46,18 +45,18 @@ class TileMapMetadataContainerBuilder
         assignedFlags |= flag;
     }
 
-    public TileMapMetadataContainer build(Map<Integer, ObjectGroup> objectGroupsById)
+    public TileMapMetadataContainer build()
     {
         return new TileMapMetadataContainer(
                 id,
                 properties,
                 objectGroupBuilders.stream()
-                        .map(objectGroupBuilder -> objectGroupsById.get(objectGroupBuilder.getId()))
+                        .map(TileMapObjectGroupBuilder::build)
                         .collect(Collectors.toList()),
                 mapOverlay);
     }
 
-    public int getGroupIndex(ObjectGroupBuilder objectGroupBuilder)
+    public int getGroupIndex(TileMapObjectGroupBuilder objectGroupBuilder)
     {
         if (objectGroupBuilder.isZeroGroup())
         {

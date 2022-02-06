@@ -80,7 +80,7 @@ abstract class AbstractTiledMap
         TiledGroupLayer parent = tiledLayer.getParent();
         while (parent != null)
         {
-            fullLayerName.insert(0, "_");
+            fullLayerName.insert(0, ".");
             fullLayerName.insert(0, parent.getName());
 
             parent = parent.getParent();

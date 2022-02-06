@@ -8,7 +8,7 @@
 ; Macros
 ; ----------------
 ALLOC_OBJECT_GROUP_STATE Macro objectName
-ALLOC_STATE_OFFSET = ((ALLOC_STATE_OFFSET + MapObjectGroupState_Size + 1) & -2)
+ALLOC_STATE_OFFSET = ((ALLOC_STATE_OFFSET + MapObjectGroupContainerState_Size + 1) & -2)
     Endm
 
 ALLOC_STATE Macro stateType
@@ -56,14 +56,24 @@ ALLOC_STATE_OFFSET = 0;
             dc.w [(${metadataMap.width})]
             ; .height
             dc.w [(${metadataMap.height})]
-            ; .groupCount
+            ; .objectGroupContainerCount
+            dc.w [(${metadataMap.objectGroupContainers.size})]
+            ; .objectGroupCount
             dc.w [(${metadataMap.objectGroups.size})]
-            ; .containerCount
+            ; .objectContainerFlagCount
+            dc.w [(${metadataMap.objectContainerFlagCount})]
+            ; .maxObjectGroupsInView
+            dc.w [(${metadataMap.maxGroupsInView})]
+            ; .maxObjectNodesInView
+            dc.w [(${metadataMap.maxNodesInView})]
+            ; .metadataContainerCount
             dc.w [(${metadataMap.metadataContainers.size})]
-            ; .containersTableAddress
+            ; .metadataContainersTableAddress
             dc.l MapMetadataContainerTable[(${mapName})]
             ; .objectGroupsBaseAddress
-            dc.l MapObjectGroupsBase[(${mapName})]
+            dc.l (MapObjectGroupsBase[(${mapName})] + 32768)
+            ; .objectGroupContainersBaseAddress
+            dc.l (MapObjectGroupContainersBase[(${mapName})] + 32768)
             ; .rowOffsetTable
             dc.w [# th:each="index, iter : ${#numbers.sequence(0, metadataMap.height - 1)}"][(${index * metadataMap.width * 4})][# th:if="${!iter.last}"], [/][/]
 
@@ -97,6 +107,34 @@ ALLOC_STATE_OFFSET = 0;
 
         Even
 
+        MapObjectGroupContainersBase[(${mapName})]:
+            [# th:each="objectGroupContainer : ${metadataMap.objectGroupContainers}"]
+                ; struct MapObjectGroupContainer
+                MapObjectGroupContainer[(${objectGroupContainer.id})][(${mapName})]:
+                    ; .stateOffset
+                    dc.w $\$ALLOC_STATE_OFFSET
+                    [# th:switch="${objectGroupContainer.flagNumber}"]
+                        [# th:case="0"]
+                            ; .parentOffset
+                            dc.w NULL
+                            ; .flagNumber
+                            dc.b 0  ; flag 0 is reserved for the root node
+                        [/]
+                        [# th:case="*"]
+                            ; .parentOffset
+                            dc.w MapObjectGroupContainer[(${objectGroupContainer.parent.id})][(${mapName})] - MapObjectGroupContainersBase[(${mapName})] - 32768
+                            ; .flagNumber
+                            dc.b [(${objectGroupContainer.flagNumber})]
+                        [/]
+                    [/]
+
+                    Even
+
+                    ALLOC_OBJECT_GROUP_STATE
+            [/]
+
+        Even
+
         MapObjectGroupsBase[(${mapName})]:
             [# th:each="objectGroup : ${metadataMap.objectGroups}"]
                 [# th:with="objectsByTransferable=${#collection.ensureGroups({{true}, {false}}, #collection.groupBy({'objectTypeTransferable'}, #lists.sort(objectGroup.objects)))},
@@ -106,6 +144,10 @@ ALLOC_STATE_OFFSET = 0;
 
                     ; struct MapObjectGroup
                     MapObjectGroup[(${objectGroup.id})][(${mapName})]:
+                        ; .stateOffset
+                        dc.w $\$ALLOC_STATE_OFFSET
+                        ; .parentOffset
+                        dc.w MapObjectGroupContainer[(${objectGroup.container.id})][(${mapName})] - MapObjectGroupContainersBase[(${mapName})] - 32768
                         ; .flagNumber
                         dc.b [(${objectGroup.flagNumber})]
                         ; .objectCount
@@ -114,8 +156,6 @@ ALLOC_STATE_OFFSET = 0;
                         dc.b [(${transferableObjects.size})]
                         ; .totalObjectCount
                         dc.b [(${staticObjects.size + transferableObjects.size})]
-                        ; .mapogObjectStateOffset
-                        dc.w $\$ALLOC_STATE_OFFSET
 
                         ALLOC_OBJECT_GROUP_STATE
 
@@ -152,6 +192,7 @@ ALLOC_STATE_OFFSET = 0;
 
                 Even
             [/]
+        MapObjectGroupsEnd[(${mapName})]:
 
         MapObjectTypeTable[(${mapName})]:
             [# th:each="objectTypeName : ${#sets.toSet(metadataMap.objects.{#this.name})}"]
@@ -178,6 +219,7 @@ ALLOC_STATE_OFFSET = 0;
             ; .viewportConfigurationAddress
             dc.l [(${#strings.unCapitalize(map.properties.getOrDefault('viewportConfiguration', map.properties['background'].properties.getOrDefault('viewportConfiguration', 'default')))})]ViewportConfiguration
 
+            Inform 0, 'Total object storage size for map [(${mapName})] = %d bytes out of 65,536 bytes', (MapObjectGroupsEnd[(${mapName})] - MapObjectGroupsBase[(${mapName})])
             Inform 0, 'Total RAM allocation size for map [(${mapName})] = \#ALLOC_STATE_OFFSET bytes'
 
         Even

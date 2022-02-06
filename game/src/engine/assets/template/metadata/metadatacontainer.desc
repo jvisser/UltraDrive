@@ -10,7 +10,7 @@
 
     MapMetadataContainer[(${metadataContainer.id})][(${mapName})]ObjectGroupTable:
         [# th:each="objectGroup : ${metadataContainer.objectGroups}"]
-            dc.w MapObjectGroup[(${objectGroup.id})][(${mapName})] - MapObjectGroupsBase[(${mapName})]
+            dc.w MapObjectGroup[(${objectGroup.id})][(${mapName})] - MapObjectGroupsBase[(${mapName})] - 32768
         [/]
 
     MapMetadataContainer[(${metadataContainer.id})][(${mapName})]Overlay:

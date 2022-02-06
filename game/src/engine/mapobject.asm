@@ -3,35 +3,18 @@
 ;
 ; Public API's:
 ; - MapUpdateObjects
-; - MAP_TRANSFERABLE_OBJECT_QUEUE_STATE_CHANGE
 ;------------------------------------------------------------------------------------------
 
     Include './system/include/m68k.inc'
 
-    Include './engine/include/mapobject.inc'
     Include './engine/include/map.inc'
-
-;-------------------------------------------------
-; Constants
-; ----------------
-MAP_TRANSFERABLE_STATE_CHANGE_QUEUE_ALLOCATION_SIZE Equ (64*SIZE_WORD)
-
 
 ;-------------------------------------------------
 ; Map object state
 ; ----------------
     DEFINE_VAR SHORT
-        VAR.w                   mapTransferableStateChangeQueueAddress
-        VAR.w                   mapTransferableStateChangeQueueCount
+        VAR.w mapNodeCache
     DEFINE_VAR_END
-
-
-;-------------------------------------------------
-; Reset group state
-; ----------------
-_RESET_GROUP_STATE Macro state
-        clr.l \state
-    Endm
 
 
 ;-------------------------------------------------
@@ -78,111 +61,275 @@ MapReleaseObjectResources:
 
 
 ;-------------------------------------------------
-; Initialize all objects in the map
+; Initialize all object related stuff in the map
 ; ----------------
 ; Uses: d0-d7/a0-a6
 MapInitObjects:
-        ; Allocate object state change queue
-        move.w  #MAP_TRANSFERABLE_STATE_CHANGE_QUEUE_ALLOCATION_SIZE, d0
-        jsr     MemoryAllocate
-        move.w  a0, mapTransferableStateChangeQueueAddress
-        clr.w   mapTransferableStateChangeQueueCount
-
-        ; Clear global group state
-        _RESET_GROUP_STATE mapGlobalObjectGroupState
-
-        ; Init addresses and loop counters
+        ; Init addresses
         MAP_GET_STATE a3                                                        ; a3 = Map state base
         MAP_GET_METADATA_MAP a4
-        movea.l MapMetadataMap_objectGroupsBaseAddress(a4), a0                  ; a0 = Current group/object ObjectDescriptor
-        move.w  MapMetadataMap_groupCount(a4), d7                               ; d7 = Object group counter
+
+        ; Allocate object node cache
+        move.w  MapMetadataMap_maxObjectNodesInView(a4), d0
+        mulu    #MapObjectGroupNode_Size, d0
+        jsr     MemoryAllocate
+        move.w  a0, mapNodeCache
+
+        ;-------------------------------------------------
+        ; Initialize all MapObjectGroupContainer's
+        ; ----------------
+
+        movea.l MapMetadataMap_objectGroupContainersBaseAddress(a4), a5         ; a5 = MapObjectGroupContainer base address
+        movea.l a5, a6
+        PUSHL   a5                                                              ; Store MapObjectGroupContainer's base address on the stack
+        adda.w  #-32768, a5                                                     ; MapMetadataMap.objectGroupContainersBaseAddress is stored adjusted for 64k addressing using signed values, revert this here as we are using direct addressing instead of indexed
+        move.w  MapMetadataMap_objectGroupContainerCount(a4), d0
+        subq.w  #1, d0
+    .objectContainerLoop:
+
+            ; Calculate parent container state address
+            moveq   #0, d1
+            tst.b   MapObjectGroupContainer_flagNumber(a5)
+            beq.s   .noParent
+
+                move.w  MapObjectGroupContainer_parentOffset(a5), d1
+                move.w  MapObjectGroupContainer_stateOffset(a6, d1), d1         ; d1 = this.parent.stateOffset
+                add.w   a3, d1                                                  ; d1 = this.parent state address
+        .noParent:
+
+            ; Init state for MapObjectGroupContainer
+            move.w  MapObjectGroupContainer_stateOffset(a5), d2
+            ; Reset group state links (activeObjectsHead/inactiveObjectsHead)
+            clr.l   MapObjectGroupContainerState_activeObjectsHead(a3, d2)
+            ; Set container state's parent address to the container's associated parent container state
+            move.w  d1, MapObjectGroupContainerState_parent(a3, d2)      ; Write parent address
+
+            adda.w  #MapObjectGroupContainer_Size, a5
+
+        dbra    d0, .objectContainerLoop
+
+        ;-------------------------------------------------
+        ; Initialize all MapObjectGroup's
+        ; ----------------
+
+        move.w  MapMetadataMap_objectGroupCount(a4), d7                         ; d7 = Object group counter
         beq     .noObjects
 
-        ; Loop over all groups and objects and call Object.init()
-        subq.w  #1, d7
-    .objectGroupLoop:
+            movea.l MapMetadataMap_objectGroupsBaseAddress(a4), a0              ; a0 = Current group/object ObjectDescriptor
+            adda.w  #-32768, a0                                                 ; MapMetadataMap.objectGroupsBaseAddress is stored adjusted for 64k addressing using signed values, revert this here as we are using direct addressing instead of indexed
 
-            ; Init group state (reset links)
-            move.w  MapObjectGroup_stateOffset(a0), d0
-            lea     (a3, d0), a4                                                ; a4 = MapObjectGroupState address
-            _RESET_GROUP_STATE (a4)
+            subq.w  #1, d7
+        .objectGroupLoop:
 
-            move.b  MapObjectGroup_totalObjectCount(a0), d6
-            addq.w  #MapObjectGroup_objectDescriptors, a0                       ; a0 = Current MapObjectDescriptor address for current group
-            beq.s   .emptyGroup
-            ext.w   d6                                                          ; d6 = Object counter
+                ;-------------------------------------------------
+                ; Initialize state for the current MapObjectGroup
+                ; ----------------
 
-            subq.w  #1, d6
-        .objectLoop:
+                move.w  MapObjectGroupContainer_stateOffset(a0), d0
+                lea     (a3, d0), a2                                            ; a2 = MapObjectGroup's MapObjectGroupContainerState address
+                ; Reset group state links (activeObjectsHead/inactiveObjectsHead)
+                clr.l   MapObjectGroupContainerState_activeObjectsHead(a2)
+                ; Set group state parent address to the groups's associated parent container state
+                PEEKL   a4
+                adda.w  MapObjectGroupContainer_parentOffset(a0), a4            ; a4 = MapObjectGroupContainer address
+                move.w  MapObjectGroupContainer_stateOffset(a4), d6
+                lea     (a3, d6), a4                                            ; a4 = MapObjectGroupContainer's MapObjectGroupContainerState address
+                move.w  a4, MapObjectGroupContainerState_parent(a2)
 
-                btst    #MODF_TRANSFERABLE, MapObjectDescriptor_flags(a0)
-                beq.s   .notTransferable
+                ;-------------------------------------------------
+                ; Initialize all object instances in the current MapObjectGroup
+                ; ----------------
 
-                    move.w  MapStatefulObjectDescriptor_stateOffset(a0), d1
-                    lea     -MapObjectLink_Size(a3, d1), a5                     ; a5 = MapObjectLink address for current transferable object
-                    LINKED_LIST_INIT (a5)
-                    move.l  a0, MapObjectLink_objectDescriptorAddress(a5)
-                    move.w  a4, MapObjectLink_objectGroupStateAddress(a5)
+                move.b  MapObjectGroup_totalObjectCount(a0), d6
+                addq.w  #MapObjectGroup_objectDescriptors, a0                   ; a0 = Current MapObjectDescriptor address for current group
+                ext.w   d6                                                      ; d6 = Object counter
+                beq.s   .emptyGroup
 
-                    btst    #MODF_ENABLED, MapObjectDescriptor_flags(a0)
-                    beq.s   .notEnabled
+                subq.w  #1, d6
+            .objectLoop:
 
-                        ; Link enabled
-                        lea     MapObjectGroupState_activeObjectsHead(a4), a2   ; a2 = Active transferable object list head
-                        bra.s   .linkObject
-                .notEnabled:
+                    btst    #MODF_TRANSFERABLE, MapObjectDescriptor_flags(a0)
+                    beq.s   .notTransferable
 
-                        ; Link disabled
-                        lea MapObjectGroupState_inactiveObjectsHead(a4), a2     ; a2 = Inactive transferable object list head
+                        move.w  MapStatefulObjectDescriptor_stateOffset(a0), d1
+                        lea     -MapObjectLink_Size(a3, d1), a5                 ; a5 = MapObjectLink address for current transferable object
+                        LINKED_LIST_INIT (a5)
+                        move.l  a0, MapObjectLink_objectDescriptor(a5)
+                        move.w  a2, MapObjectLink_objectGroupState(a5)
 
-                .linkObject:
+                        btst    #MODF_ENABLED, MapObjectDescriptor_flags(a0)
+                        beq.s   .notEnabled
 
-                LINKED_LIST_INSERT_AFTER a2, a5, a6
+                            ; Link enabled
+                            lea     MapObjectGroupContainerState_activeObjectsHead(a2), a4 ; a4 = Active transferable object list head
+                            bra.s   .linkObject
+                    .notEnabled:
 
-            .notTransferable:
+                            ; Link disabled
+                            lea     MapObjectGroupContainerState_inactiveObjectsHead(a2), a4 ; a4 = Inactive transferable object list head
 
-                ; Call Object.init(MapObjectDescriptor*, ObjectState*)
-                movea.w MapObjectDescriptor_type(a0), a5
-                movea.l MapObjectType_init(a5), a5
-                move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0         ; d0 = State offset
-                lea     (a3, d0), a1                                            ; a1 = State address
-                jsr     (a5)
+                    .linkObject:
 
-                ; Next object
-                move.b  MapObjectDescriptor_size(a0), d0
-                ext.w   d0
-                adda.w  d0, a0                                                  ; a0 = Next MapObjectDescriptor address
-            dbra    d6, .objectLoop
+                    LINKED_LIST_INSERT_AFTER a4, a5, a6
 
-        .emptyGroup:
+                .notTransferable:
 
-        dbra    d7, .objectGroupLoop
+                    ; Call Object.init(MapObjectDescriptor*, ObjectState*, ObjectContainerState*)
+                    movea.w MapObjectDescriptor_type(a0), a5
+                    movea.l MapObjectType_init(a5), a5
+                    move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0     ; d0 = State offset
+                    lea     (a3, d0), a1                                        ; a1 = State address
+                    jsr     (a5)
+
+                    ; Next object
+                    move.b  MapObjectDescriptor_size(a0), d0
+                    ext.w   d0
+                    adda.w  d0, a0                                              ; a0 = Next MapObjectDescriptor address
+                dbra    d6, .objectLoop
+
+            .emptyGroup:
+
+            dbra    d7, .objectGroupLoop
     .noObjects:
+
+        ; Restore stack
+        POPL
         rts
 
 
 ;-------------------------------------------------
-; Update all objects in the global object group and the specified object groups
-; Tests collisions against the current/caller collision state.
-; Restores the collisions state to that of the caller. This means collision elements added after the call to MapUpdateObjects will not interact with map objects.
+; Build MapObjectGroupNode hierarchy from the given MapObjectGroup leaf nodes
 ; ----------------
-; Input: (TODO: Rearange register allocation to align with calling convention)
-; - a3: Address of null terminated array of MapObjectGroup pointers
-; Uses: d0-d7/a0-a6
-MapUpdateObjects:
+; Input:
+; - a0: Address of null terminated array of MapObjectGroup pointers (leaf nodes)
+; Output:
+; - a0: Address of the root MapObjectGroupNode instance or NULL of no leaf nodes are specified
+; Uses: d4-d7/a0-a6
+MapBuildObjectGroupHierarchy:
+
+        MAP_GET_METADATA_MAP a6
+
+        ; Array of allocated MapObjectGroupNode pointers indexed by flagNumber
+        move.w  MapMetadataMap_objectContainerFlagCount(a6), d4
+        movea.l sp, a5
+        add.w   d4, d4
+        suba.w  d4, sp                                                          ; sp/a7 = MapObjectGroupNode pointer array
+        move.w  a5, -(sp)                                                       ; Store previous stack value
+
+        move.l  MapMetadataMap_objectGroupContainersBaseAddress(a6), a6         ; a6 = MapObjectGroupContainer map base address
+        move.w  mapNodeCache, a5                                                ; a5 = currently allocated MapObjectGroupNode
+
+        moveq   #0, d5                                                          ; d5 = #0
+
+        ; Write NULL as the default value for the root node
+        move.w  d5, SIZE_WORD(sp)
+
+        moveq   #0, d7                                                          ; d7 = bitset indicating currently allocated MapObjectGroupContainer MapObjectGroupNode's
+    .leafNodeLoop:
+        move.l  (a0)+, d4
+        beq.s   .done
+
+            movea.l d4, a4                                                      ; a4 = current MapObjectGroupContainer
+
+            ; Allocate leaf node
+            movea.l a5, a1                                                      ; a1 = MapObjectGroupNode
+            adda.w  #MapObjectGroupNode_Size, a5                                ; a5 = next node allocation pointer
+
+            ; Init node
+            move.l  d5, MapObjectGroupNode_nextSibling(a1)
+            move.l  a4, MapObjectGroupNode_group(a1)
+
+            ; Allocate MapObjectGroupNode branch
+        .findRootLoop:
+
+                ; Get or allocate MapObjectGroupNode for parent
+                move.w  MapObjectGroupContainer_parentOffset(a4), d4
+                lea     (a6, d4), a3                                            ; a3 = address of parent MapObjectGroupContainer
+                move.b  MapObjectGroupContainer_flagNumber(a3), d6              ; d6 = MapObjectGroupContainer.flagNumber
+                ext.w   d6
+                bset    d6, d7
+                beq.s   .allocateNode
+                    ; Node has been allocated retreive from cache
+                    add.w   d6, d6
+                    movea.w SIZE_WORD(sp, d6), a2                               ; a2 = MapObjectGroupNode
+
+                    move.w  d5, d6                                              ; Mark as done. If allocated it means the whole branch is already allocated.
+                    bra.s   .nodeReady
+            .allocateNode:
+                    ; Allocate new node
+                    movea.l a5, a2                                              ; a2 = MapObjectGroupNode
+                    adda.w  #MapObjectGroupNode_Size, a5                        ; a5 = next node allocation pointer
+
+                    ; Store node pointer in cache
+                    add.w   d6, d6
+                    move.w  a2, SIZE_WORD(sp, d6)
+
+                    ; Init node
+                    move.l  d5, MapObjectGroupNode_nextSibling(a2)
+                    move.l  a3, MapObjectGroupNode_group(a2)
+            .nodeReady:
+
+                ; a2 = parent node
+                ; a1 = child node
+
+                move.w  MapObjectGroupNode_firstChild(a2), MapObjectGroupNode_nextSibling(a1)
+                move.w  a1, MapObjectGroupNode_firstChild(a2)
+
+                ; Is the branch completed, then move on to the next leaf node
+                tst.b   d6
+                beq.s   .leafNodeLoop
+
+                ; Next parent node
+                movea.l a2, a1
+                movea.l a3, a4
+                bra.s   .findRootLoop
+    .done:
+
+        ; Retreive the root node address
+        movea.w  SIZE_WORD(sp), a0
+
+        ; Restore stack
+        movea.w (sp), sp
+        rts
+
 
 ;-------------------------------------------------
-; Update transferable object list.
-; Input:
-; - d0: MapObjectLink address
+; Update all objects in the specified tree depth first.
+; Limits collision checks so that only objects in the same branch can collide with each other.
 ; ----------------
-; Uses: d0/d7/a0/a3-a6
-_PROCESS_TRANSFERABLE_OBJECTS Macro
-        .transferableObjectLoop\@:
+; Input:
+; - a0: Address of the root MapObjectGroupNode
+; Uses: d0-d7/a0-a6
+MapUpdateObjects:
+        ; Check if root node available
+        move.w  a0, d0
+        bne.s   .rootNodeAvailable
+            rts
+    .rootNodeAvailable:
+
+        MAP_GET_STATE a3
+        movea.l a0, a2
+
+        ; RootNode.parent = NULL
+        PUSHW   #NULL
+
+        ; Create collision snapshot of caller state
+        jsr     CollisionCreateSnapshotBefore
+        PUSHW   a0
+
+    .processNode:
+
+        ; Process transferable objects
+        movea.l MapObjectGroupNode_group(a2), a4                                ; a4 = MapObjectGroupContainer address
+        move.w  MapObjectGroupContainer_stateOffset(a4), d0
+        move.w  MapObjectGroupContainerState_activeObjectsHead(a3, d0), d0      ; d0 = MapObjectGroupContainerState.activeObjectsHead
+        beq.s   .noTransferableObjects
+
+        .transferableObjectLoop:
             movea.w d0, a5                                                      ; a5 = address of transferable object's MapObjectLink
-            move.l  MapObjectLink_objectDescriptorAddress(a5), a0               ; a0 = MapStatefulObjectDescriptor address
+            move.l  MapObjectLink_objectDescriptor(a5), a0                      ; a0 = MapStatefulObjectDescriptor address
             move.w  MapStatefulObjectDescriptor_stateOffset(a0), d0
-            lea     (a4, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
+            lea     (a3, d0), a1                                                ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
 
             ; Call Object.update(MapObjectDescriptor*, ObjectState*)
             movea.w MapObjectDescriptor_type(a0), a6
@@ -191,258 +338,132 @@ _PROCESS_TRANSFERABLE_OBJECTS Macro
 
             ; Process next transferable object
             move.w  LinkedList_next(a5), d0
-            bne     .transferableObjectLoop\@
-    Endm
+            bne     .transferableObjectLoop
 
-        ;-------------------------------------------------
-        ; Start of MapUpdateObjects
-        ; ----------------
+    .noTransferableObjects:
 
-        ; Create collision snapshot of caller collision state and store snapshot ptr on the stack
-        jsr     CollisionCreateSnapshotBefore
-        PUSHW   a0
+        ; Process non transferables if leaf node (= MapObjectGroup)
+        tst.w   MapObjectGroupNode_firstChild(a2)
+        bne.s   .branchNode
 
-        ; Load addresses
-        MAP_GET_STATE a4
+            move.b  MapObjectGroup_objectCount(a4), d7
+            beq.s   .noObjects
+                addq.w  #MapObjectGroup_objectDescriptors, a4                   ; a4 = Current non transferable object descriptor
 
-        ; Update global objects
-        move.w  mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, d0
-        beq.s   .noGlobalTransferableObjects
+                ext.w   d7
+                subq.w  #1, d7
+            .objectLoop:
 
-            _PROCESS_TRANSFERABLE_OBJECTS
+                ; Call Object.update(MapObjectDescriptor*, ObjectState*)
+                movea.l a4, a0                                                  ; a0 = Current object descriptor
+                move.w  MapStatefulObjectDescriptor_stateOffset(a4), d0
+                lea     (a3, d0), a1                                            ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
+                movea.w MapObjectDescriptor_type(a0), a6
+                movea.l MapObjectType_update(a6), a6
+                jsr     (a6)
 
-    .noGlobalTransferableObjects:
+                ; Process next object
+                move.b  MapObjectDescriptor_size(a4), d0
+                ext.w   d0
+                adda.w  d0, a4                                                  ; a4 = Next MapObjectDescriptor address
 
-        ; Create collision snapshot containing all global objects and store snapshot pointer on the stack
-        PUSHW   a4
-        jsr     CollisionCreateSnapshotAfter
-        POPW    a4
-        PUSHW   a0
-
-        ; Update group local objects
-    .activeGroupLoop:
-
-            move.l  (a3), d7
-            beq.s   .done
-                movea.l d7, a5                                                  ; a5 = Current active group
-
-                move.w  MapObjectGroup_stateOffset(a5), d0
-                move.w  MapObjectGroupState_activeObjectsHead(a4, d0), d0       ; d0 = address of transferable object's MapObjectLink
-                beq.s   .noTransferableObjects
-
-                    _PROCESS_TRANSFERABLE_OBJECTS
-
-        .noTransferableObjects:
-            move.l  (a3)+, d7
-            beq.s   .done
-                movea.l d7, a5                                                  ; a5 = Current active group
-
-                move.b  MapObjectGroup_objectCount(a5), d7
-                beq.s   .noObjects
-                    addq.w  #MapObjectGroup_objectDescriptors, a5               ; a5 = Current non transferable object descriptor
-
-                    ext.w   d7
-                    subq.w  #1, d7
-                .objectLoop:
-
-                    ; Call Object.update(MapObjectDescriptor*, ObjectState*)
-                    movea.l a5, a0                                              ; a0 = Current object descriptor
-                    move.w  MapStatefulObjectDescriptor_stateOffset(a5), d0
-                    lea     (a4, d0), a1                                        ; a1 = ObjectState address (undefined if not based on MapStatefulObjectDescriptor)
-                    movea.w MapObjectDescriptor_type(a0), a6
-                    movea.l MapObjectType_update(a6), a6
-                    jsr     (a6)
-
-                    ; Process next object
-                    move.b  MapObjectDescriptor_size(a5), d0
-                    ext.w   d0
-                    adda.w  d0, a5                                              ; a5 = Next MapObjectDescriptor address
-
-                    dbra d7, .objectLoop
+                dbra d7, .objectLoop
 
         .noObjects:
 
-            ; Restore global object collision state for next group to test against
-            PEEKW   a0
-            jsr     CollisionRestoreSnapshot
+    .branchNode:
 
-        bra .activeGroupLoop
+        ; Process children
+        move.w  MapObjectGroupNode_firstChild(a2), d0
+        beq.s   .noChildren
 
-    .done:
+            ; Push parent node onto the stack and load child node into a2
+            PUSHW   a2
+            movea.w d0, a2
 
-        ; Free global object collision state snapshot ptr stack space
-        POPW
+            ; Create collision snapshot of parent state
+            jsr     CollisionCreateSnapshotAfter
+            PUSHW   a0
 
-        ; Restore collision state to caller state
-        POPW    a0
+            ; Process child node
+            bra.s   .processNode
+    .noChildren:
+
+        ; Process siblings
+    .checkSibling:
+
+        ; Restore collision snapshot
+        PEEKW   a0
         jsr     CollisionRestoreSnapshot
 
-        Purge _PROCESS_TRANSFERABLE_OBJECTS
+        ; Load and process next sibling
+        move.w  MapObjectGroupNode_nextSibling(a2), d0
+        beq.s   .noSibling
+            movea.w d0, a2
+            bra.s   .processNode
+    .noSibling:
 
-        ; NB: Fall through to _MapProcessTransferableObjectStateChangeQueue
+        ; Delete collision snapshot
+        POPW
 
-
-;-------------------------------------------------
-; Process transferable state changes
-; ----------------
-_MapProcessTransferableObjectStateChangeQueue:
-        move.w  mapTransferableStateChangeQueueCount, d4
-        beq.s   .noStateChanges
-            movea.w  mapTransferableStateChangeQueueAddress, a5
-            subq.w  #1, d4
-        .stateChangeLoop:
-            move.w  -(a5), d0
-            movea.w -(a5), a0
-            jsr     _MapProcessObjectStateChangesBaseOffset(pc, d0)
-            dbra    d4, .stateChangeLoop
-        move.w  a5, mapTransferableStateChangeQueueAddress
-        clr.w   mapTransferableStateChangeQueueCount
-    .noStateChanges:
-        rts
-
-
-_MapProcessObjectStateChangesBaseOffset:
-
-
-;-------------------------------------------------
-; Transfer the object to the active object list of the object group at the specified coordinates. If no group is found the object will be attached to the global group.
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
-;
-; TODO: Add support for ceilings (ie search down instead of up)
-; ----------------
-; Input:
-; - d0: x position
-; - d1: y position
-; - a0: ObjectState address
-;
-; - Any macro parameter to also check the chunk above for a local group if no local group is found
-; Uses: d0-d3/a1-a4
-_MAP_ATTACH_OBJECT Macro
-
-        ; Convert pixel coordinates to chunk coordinates
-        lsr.w   #7, d0
-        lsr.w   #7, d1
-
-        MAP_GET_FOREGROUND_MAP a2                                               ; a2 = foreground map
-        movea.l Map_dataAddress(a2), a3                                         ; a3 = map data
-
-        ; Get chunk offset
-        add.w   d1, d1                                                          ; d1 = map row offset table offset
-        move.w  Map_rowOffsetTable(a2, d1), d2
-        add.w   d0, d2
-        add.w   d0, d2                                                          ; d2 = row chunk offset
-
-        ; Read chunk ref object group id
-        move.w  (a3, d2), d3
-        andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                            ; d3 = chunk object group id
-        bne.s   .objectGroupFound\@
-
-            If (narg=1)
-
-                ; No object group found, look one chunk up (slope case)
-                tst.w   d1
-                beq.s   .linkToGlobalGroup\@
-
-                    sub.w   Map_stride(a2), d2                                  ; d2 = chunk offset
-                    move.w  (a3, d2), d3
-                    andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                ; d3 = chunk object group id
-                    bne.s   .objectGroupFound\@
-
-            EndIf
-
-        .linkToGlobalGroup\@:
-            ; Link to global group
-            lea     (mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead), a2
-            bra.s   .linkObjectToGroup\@
-
-    .objectGroupFound\@:
-        rol.w   #4, d3                                                          ; d3 = container local group offset
-        subq.w  #2, d3
-
-        movea.l MapHeader_metadataMapAddress(a1), a2                            ; a2 = object group map
-        movea.l MapMetadataMap_containersTableAddress(a2), a1
-        movea.l MapMetadataMap_objectGroupsBaseAddress(a2), a3
-
-        ; Get MapObjectGroup
-        lsr.w   #3, d0
-        add.w   d0, d0
-        add.w   d0, d0
-        lsr.w   #4, d1
-        add.w   d1, d1
-        move.w  MapMetadataMap_rowOffsetTable(a2, d1), d1
-        add.w   d0, d1                                                          ; d1 = container table offset
-        movea.l (a1, d1), a1                                                    ; a1 = container address
-        adda.w  MapMetadataContainer_objectGroupOffsetTableOffset(a1), a1       ; a1 = object group offset table address
-        move.w  (a1, d3), d0                                                    ; d0 = object group offset
-        move.w  MapObjectGroup_stateOffset(a3, d0), d0                          ; d0 = MapObjectGroup.stateOffset
-
-        ; Get group state address
-        MAP_GET_STATE a2
-        lea     MapObjectGroupState_activeObjectsHead(a2, d0), a2               ; a2 = MapObjectGroupState.activeObjectsHead address
-    .linkObjectToGroup\@:
-
-        ; Transfer object from its current group to the found group if different (unlink/link)
-        suba.w  #MapObjectLink_Size, a0
-        cmpa.w  MapObjectLink_objectGroupStateAddress(a0), a2
-        beq.s   .sameGroup\@
-
-            move.w  a2, MapObjectLink_objectGroupStateAddress(a0)
-
-            LINKED_LIST_REMOVE a0, a3
-            LINKED_LIST_INSERT_AFTER a2, a0, a3
-
-    .sameGroup\@:
-    Endm
-
-
-;-------------------------------------------------
-; Transfer the object to the active object list of the object group at the specified coordinates.
-; If still no group is found the object will be attached to the global group.
-;
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
-; ----------------
-; Input:
-; - a0: ObjectState address
-; - a5: Object transition queue top containing parameters
-; Uses: d0-d3/a1-a4
-_MapAttachTransferableObject:
-        move.w  -(a5), d0       ; x position
-        move.w  -(a5), d1       ; y position
-
-        _MAP_ATTACH_OBJECT
+        ; Load parent node
+        POPW    d0
+        movea.w d0, a2
+        bne.s   .checkSibling
         rts
 
 
 ;-------------------------------------------------
-; Transfer the object to the active object list of the object group at the specified coordinates.
-; If no group is found the chunk above it is checked for a group (floor case)
-; If still no group is found the object will be attached to the global group.
-;
-; NB: This only works for Objects created from MapObjectDescriptor's flagged as MODF_TRANSFERABLE
+; State change handler for: MAP_STATE_CHANGE_OBJECT_ATTACH
 ; ----------------
 ; Input:
-; - a0: ObjectState address
-; - a5: Object transition queue top containing parameters
-; Uses: d0-d3/a1-a4
-_MapAttachTransferableObjectFloor:
-        move.w  -(a5), d0       ; x position
-        move.w  -(a5), d1       ; y position
+; - a6: Address of the state change parameter stack
+; Uses:
+_MapStateChangeAttachTransferableObject:
+        move.w  -(a6), a0       ; ObjectState
+        move.w  -(a6), d0       ; x position
+        move.w  -(a6), d1       ; y position
 
-        _MAP_ATTACH_OBJECT FLOOR
+        ; TODO
         rts
-
-    Purge _MAP_ATTACH_OBJECT
 
 
 ;-------------------------------------------------
-; Transfer the object to the active object list of the object group (parent)
+; State change handler for: MAP_STATE_CHANGE_OBJECT_ASCENT
 ; ----------------
 ; Input:
-; - a0: ObjectState address
-; Uses: a1-a3
-_MapActivateTransferableObject:
+; - a6: Address of the state change parameter stack
+; Uses:
+_MapStateChangeAscendTransferableObject:
+        move.w  -(a6), a0       ; ObjectState
+
         lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
-        movea.w MapObjectLink_objectGroupStateAddress(a1), a2                   ; a2 = MapObjectGroupState_inactiveObjectsHead address
+        movea.w MapObjectLink_objectGroupState(a1), a2                          ; a2 = MapObjectGroupContainerState address
+        move.w  MapObjectGroupContainerState_parent(a2), d0                     ; d0 = MapObjectGroupContainerState.parent.activeObjectsHead address
+
+        ; Check if parent available
+        beq.s .noParent
+
+            movea.w d0, a2                                                      ; a2 = MapObjectGroupContainerState.parent.activeObjectsHead address
+
+            LINKED_LIST_REMOVE a1, a3
+            LINKED_LIST_INSERT_AFTER a2, a1, a3
+
+    .noParent:
+        rts
+
+
+;-------------------------------------------------
+; State change handler for: MAP_STATE_CHANGE_OBJECT_ACTIVATE
+; ----------------
+; Input:
+; - a6: Address of the state change parameter stack
+; Uses: a1-a3
+_MapStateChangeActivateTransferableObject:
+        move.w  -(a6), a0       ; ObjectState
+
+        lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
+        movea.w MapObjectLink_objectGroupState(a1), a2                          ; a2 = MapObjectGroupContainerState.activeObjectsHead address
 
         LINKED_LIST_REMOVE a1, a3
         LINKED_LIST_INSERT_AFTER a2, a1, a3
@@ -450,51 +471,22 @@ _MapActivateTransferableObject:
 
 
 ;-------------------------------------------------
-; Transfer the object to the inactive object list of the object group (parent)
+; State change handler for: MAP_STATE_CHANGE_OBJECT_DEACTIVATE
 ; ----------------
 ; Input:
-; - a0: ObjectState address
+; - a6: Address of the state change parameter stack
 ; Uses: a1-a3
-_MapDeactivateTransferableObject:
+_MapStateChangeDeactivateTransferableObject:
+        move.w  -(a6), a0       ; ObjectState
+
         lea     -MapObjectLink_Size(a0), a1                                     ; a1 = MapObjectLink address
-        movea.w MapObjectLink_objectGroupStateAddress(a1), a2
-        addq.w  #MapObjectGroupState_inactiveObjectsHead, a2                    ; a2 = MapObjectGroupState_inactiveObjectsHead address
+        movea.w MapObjectLink_objectGroupState(a1), a2
+        addq.w  #MapObjectGroupContainerState_inactiveObjectsHead, a2           ; a2 = MapObjectGroupContainerState.inactiveObjectsHead address
 
         LINKED_LIST_REMOVE a1, a3
         LINKED_LIST_INSERT_AFTER a2, a1, a3
-        rts
-
-
-;-------------------------------------------------
-; Transfer the object to the active object list of the global object group
-; ----------------
-; Input:
-; - a0: ObjectState address
-; Uses: a1-a3
-_MapActivateTransferableObjectGlobal:
-        lea     mapGlobalObjectGroupState + MapObjectGroupState_activeObjectsHead, a1
-        lea     -MapObjectLink_Size(a0), a2
-
-        LINKED_LIST_REMOVE a2, a3
-        LINKED_LIST_INSERT_AFTER a1, a2, a3
-        rts
-
-
-;-------------------------------------------------
-; Transfer the object to the inactive object list of the global object group
-; ----------------
-; Input:
-; - a0: ObjectState address
-; Uses: a1-a3
-_MapDeactivateTransferableObjectGlobal:
-        lea     mapGlobalObjectGroupState + MapObjectGroupState_inactiveObjectsHead, a1
-        lea     -MapObjectLink_Size(a0), a2
-
-        LINKED_LIST_REMOVE a2, a3
-        LINKED_LIST_INSERT_AFTER a1, a2, a3
         rts
 
 
     ; Cleanup
-    Purge _RESET_GROUP_STATE
     Purge _RUN_OBJECT_TYPE_RESOURCE_ROUTINE

@@ -41,7 +41,7 @@ __LONG_RAM_ALLOCATION_PTR  = MEM_RAM_START   ; Absolute short addressing
 DEFINE_STRUCT Macro name, base
         Pushp '\name'
         If (narg=2)
-            RsSet \base\_Size
+            RsSet \base\_RawSize
         Else
             RsReset
         EndIf
@@ -90,7 +90,8 @@ MEMBER_NAME Equs '\STRUCT_NAME\_\name'
 DEFINE_STRUCT_END Macro
         Local STRUCT_NAME
         Popp STRUCT_NAME
-\STRUCT_NAME\_Size Equ __rs
+\STRUCT_NAME\_RawSize   Equ __rs
+\STRUCT_NAME\_Size      Equ ((__rs + 1) & ~1)
     Endm
 
 
@@ -279,6 +280,14 @@ MEMORY_ALLOCATE Macro bytes, target, scratch
 
 
 ;-------------------------------------------------
+; Set top of allocated memory to the specified restore point. Can be used for temporary/local buffers. Use with caution!
+; ----------------
+MEMORY_RESTORE Macro restorePoint
+        movea.w  \restorePoint, memAllocationPointer
+    Endm
+
+
+;-------------------------------------------------
 ; Memory allocation report
 ; ----------------
 MEMORY_ALLOCATION_REPORT Macro
@@ -288,7 +297,7 @@ _LONG_MEM_BYTES  Equ __LONG_RAM_ALLOCATION_PTR  - MEM_RAM_START
         Inform 0, '-----------------'
         Inform 0, 'Memory allocation'
         Inform 0, '-----------------'
-        Inform 0, 'Absolute short addressable allocation $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_MID, __SHORT_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES, (MEM_RAM_END - __SHORT_RAM_ALLOCATION_PTR)
+        Inform 0, 'Absolute short addressable allocation $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_MID, __SHORT_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES, (MEM_RAM_END - __SHORT_RAM_ALLOCATION_PTR - MEM_RAM_STACK_SIZE)
         Inform 0, 'Absolute long addressable allocation  $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_START, __LONG_RAM_ALLOCATION_PTR, _LONG_MEM_BYTES, (MEM_RAM_MID - __LONG_RAM_ALLOCATION_PTR)
         Inform 0, ''
     Endm

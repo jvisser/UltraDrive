@@ -7,6 +7,7 @@
     Include './system/include/memory.inc'
     Include './system/include/m68k.inc'
     Include './system/include/memory.inc'
+    Include './system/include/vdp.inc'
     Include './system/include/os.inc'
 
 ;-------------------------------------------------
@@ -109,6 +110,10 @@ OSNextFrameReadyWait:
         OS_UNLOCK
 
     .waitNextFrameLoop:
+
+        ; Suspend the CPU until the next interrupt, let it cool down a bit.
+        stop    #M68k_SR_SUPERVISOR
+
         cmp.l  (osContext + OSContext_framesProcessed), d0
         beq     .waitNextFrameLoop
         rts

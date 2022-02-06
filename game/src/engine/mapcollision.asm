@@ -15,12 +15,6 @@
 
 
 ;-------------------------------------------------
-; Experimental feature toggles
-; ----------------
-_MAP_COLLISION_OVERLAY_ENABLE = TRUE
-
-
-;-------------------------------------------------
 ; Performance measurement macros
 ; ----------------
 _MAP_COLLISION_PROFILE_ENABLE = FALSE
@@ -53,7 +47,7 @@ _MAP_COLLISION_PROFILE_END Macro
 _READ_CHUNK_REF Macro
         move.w  (a3, d5), d3                                                ; d3 = chunk ref
 
-        If (_MAP_COLLISION_OVERLAY_ENABLE = TRUE)
+        If (MAP_OVERLAY_ENABLE & MAP_OVERLAY_COLLISION_ENABLE)
 
             btst    #CHUNK_REF_OVERLAY, d3
             beq.s   .noOverlay\@
@@ -72,7 +66,7 @@ _READ_CHUNK_REF Macro
                     rol.w   #7, d1
                     andi.w  #$7e, d1
                     move.w  MapMetadataMap_rowOffsetTable(a1, d1), d1
-                    movea.l MapMetadataMap_containersTableAddress(a1), a1
+                    movea.l MapMetadataMap_metadataContainersTableAddress(a1), a1
                     add.w   d0, d1
                     movea.l (a1, d1), a1                                    ; a1 = MapMetadataContainer address
 
