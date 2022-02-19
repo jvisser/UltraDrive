@@ -2,12 +2,13 @@
 ; Fireball "AI"
 ;------------------------------------------------------------------------------------------
 
+    Include './common/include/angle.inc'
+    
     Include './system/include/memory.inc'
     Include './system/include/os.inc'
 
     Include './engine/include/object.inc'
     Include './engine/include/map.inc'
-    Include './engine/include/angle.inc'
 
 ;-------------------------------------------------
 ; Fireball constants

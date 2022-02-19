@@ -2,7 +2,7 @@
 ; Trigonometry tables in 8:8 fixed point format (1 is represented by 255 instead of 256 making it easier to work with using binary operations)
 ;------------------------------------------------------------------------------------------
 
-    Include './engine/include/angle.inc'
+    Include './common/include/angle.inc'
 
 ;-------------------------------------------------
 ; Sine/Cosine tables
