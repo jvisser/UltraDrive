@@ -11,6 +11,7 @@
     Include './common/include/common.inc'
 
     Include './common/nooperation.asm'
+    Include './common/trigtable.asm'
     Include './common/compression/comper.asm'
     ;Include './common/compression/unaplib.asm'
 
@@ -40,7 +41,6 @@
     Include './engine/include/engine.inc'
 
     Include './engine/scheduler.asm'
-    Include './engine/trigtable.asm'
     Include './engine/tileset.asm'
     Include './engine/map.asm'
     Include './engine/mapstate.asm'
