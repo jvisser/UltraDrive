@@ -2,8 +2,8 @@
 ; 16.16 fixed point macros
 ;------------------------------------------------------------------------------------------
 
-    If (~def(__ENGINE_CAMERA_INC))
-__ENGINE_CAMERA_INC Equ 1
+    If (~def(__ENGINE_FP16_INC))
+__ENGINE_FP16_INC Equ 1
 
 ;-------------------------------------------------
 ; Convert a 16 bit integer to a 16.16 fixed point number

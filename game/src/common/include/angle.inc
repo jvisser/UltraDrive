@@ -2,8 +2,8 @@
 ; Trigonometry tables constants
 ;------------------------------------------------------------------------------------------
 
-    If (~def(__ENGINE_TRIGTABLE_INC))
-__ENGINE_TRIGTABLE_INC Equ 1
+    If (~def(__ENGINE_ANGLE_INC))
+__ENGINE_ANGLE_INC Equ 1
 
 ;-------------------------------------------------
 ; Angle constants (table indices)
