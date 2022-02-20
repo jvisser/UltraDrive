@@ -420,12 +420,100 @@ MapUpdateObjects:
 ; - a6: Address of the state change parameter stack
 ; Uses:
 _MapStateChangeAttachTransferableObject:
+_LOAD_MAP_METADATA Macro x, y
+        MAP_GET_METADATA_MAP a4                                                 ; a4 = meta data map address
+        lsr.w   #1, \x
+        andi.w  #~3, \x
+        lsr.w   #3, \y
+        add.w   \y, \y
+        add.w   \x, \y
+        move.w  MapMetadataMap_rowOffsetTable(a4, \y), \y
+        movea.l MapMetadataMap_metadataContainersTableAddress(a4), a1
+        movea.l (a1, \y), a1                                                    ; a1 = container address
+    Endm
+
+        ; Read parameters
         move.w  -(a6), a0       ; ObjectState
         move.w  -(a6), d0       ; x position
         move.w  -(a6), d1       ; y position
 
-        ; TODO
+        ; Convert pixel coordinates to chunk coordinates
+        lsr.w   #7, d0
+        lsr.w   #7, d1
+
+        ; Read chunk ref
+        MAP_GET_FOREGROUND_MAP a2                                               ; a2 = foreground map
+        move.w  d1, d2
+        add.w   d1, d2                                                          ; d1 = map row offset table offset
+        move.w  Map_rowOffsetTable(a2, d2), d2
+        add.w   d0, d2
+        add.w   d0, d2                                                          ; d2 = map chunk offset
+        movea.l Map_dataAddress(a2), a3                                         ; a3 = map data
+        move.w  (a3, d2), d3                                                    ; d3 = chunk ref
+
+        If (MAP_OVERLAY_ENABLE)
+            ; Check overlay
+            btst    #CHUNK_REF_OVERLAY, d3
+            beq.s   .noOverlay
+
+                ; Check if overlay state enabled
+                MAP_TEST_STATE_FLAG MAP_STATE_OVERLAY
+                beq.s   .noOverlay
+
+                    move.w  d0, d2
+                    move.w  d1, d3
+
+                    _LOAD_MAP_METADATA d2, d3
+
+                    move.w  MapMetadataContainer_overlayOffset(a1), d2
+                    lea     (a1, d2), a2                                        ; a2 = MapOverlay address
+
+                    andi.w  #7, d1
+                    move.b  MapOverlay_rowOffsetTable(a2, d1), d1
+                    ext.w   d1
+                    andi.w  #7, d0
+                    add.w   d0, d1
+                    add.w   d0, d1
+
+                    move.w  MapOverlay_chunkReferences(a2, d1), d3
+                    andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                ; d3 = chunk object group id
+                    bne.s   .objectGroupFoundOverlay
+                        DEBUG_MSG   'MAP_STATE_CHANGE_OBJECT_ATTACH: No object group found (overlay)'
+                        rts
+        .noOverlay:
+        EndIf
+
+        andi.w  #CHUNK_REF_OBJECT_GROUP_IDX_MASK, d3                            ; d3 = chunk object group id
+        bne.s   .objectGroupFound
+            DEBUG_MSG   'MAP_STATE_CHANGE_OBJECT_ATTACH: No object group found'
+            rts
+
+    .objectGroupFound:
+
+        _LOAD_MAP_METADATA d0, d1
+
+    .objectGroupFoundOverlay:
+
+        rol.w   #4, d3                                                          ; d3 = container local group offset
+        subq.w  #2, d3
+
+        ; Get MapObjectGroup offset
+        adda.w  MapMetadataContainer_objectGroupOffsetTableOffset(a1), a1       ; a1 = object group offset table address
+        move.w  (a1, d3), d0                                                    ; d0 = object group offset
+
+        ; Update MapObjectLink
+        movea.l MapMetadataMap_objectGroupsBaseAddress(a4), a3
+        move.w  MapObjectGroupContainer_stateOffset(a3, d0), d0                 ; d0 = MapObjectGroup.stateOffset
+        MAP_GET_STATE a2
+        adda.w  d0, a2                                                          ; a2 = MapObjectGroupState address (= MapObjectGroupState.activeObjectsHead address)
+        suba.w  #MapObjectLink_Size, a0                                         ; a0 = MapObjectLink address
+        move.w  a2, MapObjectLink_objectGroupState(a0)
+
+        LINKED_LIST_REMOVE a0, a3
+        LINKED_LIST_INSERT_AFTER a2, a0, a3
         rts
+
+    Purge _LOAD_MAP_METADATA
 
 
 ;-------------------------------------------------
