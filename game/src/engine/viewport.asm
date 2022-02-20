@@ -405,7 +405,7 @@ _LOAD_METADATA_CONTAINER Macro target
 
             If (MAP_OVERLAY_ENABLE)
                 ; Check for overlay
-                btst    #CHUNK_REF_OVERLAY,d7
+                btst    #CHUNK_REF_OVERLAY, d7
                 beq.s   .noOverlay
 
                     ; Check if overlay state enabled
