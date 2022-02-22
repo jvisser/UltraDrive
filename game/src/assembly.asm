@@ -6,12 +6,11 @@
     Include 'layout.asm'
 
     ;-------------------------------------------------
-    ; Common
+    ; Common/Shared code
     ; ----------------
     Include './lib/common/include/common.inc'
 
     Include './lib/common/nooperation.asm'
-    Include './lib/common/trigtable.asm'
     Include './lib/compression/comper.asm'
     ;Include './lib/compression/unaplib.asm'
 
@@ -58,33 +57,35 @@
     Include './engine/scroll/vdplinehscroll.asm'
     Include './engine/scroll/vdpcellhscroll.asm'
     Include './engine/scroll/vdpcellvscroll.asm'
-    Include './engine/scroll/updaters/scrollupdaterutil.asm'
     Include './engine/scroll/updaters/planescrollcamera.asm'
     Include './engine/scroll/updaters/multivaluescrollcamera.asm'
-    Include './engine/scroll/updaters/rotatescroll.asm'
-    Include './engine/rasterfx/paletteswaprasterfx.asm'
 
 
     ;-------------------------------------------------
     ; Game
     ; ----------------
+    
+    ; Lib code
+    Include './lib/rasterfx/paletteswaprasterfx.asm'
+    Include './lib/game/scroll/rotatescroll.asm'
 
     ; Game code
-    Include 'ultradrive/metadata.asm'
-    Include 'ultradrive/player.asm'
-    Include 'ultradrive/viewport.asm'
-    Include 'ultradrive/water.asm'
-    Include 'ultradrive/collisiontypes.asm'
-    Include 'ultradrive/objects/orbison.asm'
-    Include 'ultradrive/objects/fireball.asm'
-    Include 'ultradrive/objects/blob.asm'
+    Include './ultradrive/metadata.asm'
+    Include './ultradrive/trigtable.asm'
+    Include './ultradrive/player.asm'
+    Include './ultradrive/viewport.asm'
+    Include './ultradrive/water.asm'
+    Include './ultradrive/collisiontypes.asm'
+    Include './ultradrive/objects/orbison.asm'
+    Include './ultradrive/objects/fireball.asm'
+    Include './ultradrive/objects/blob.asm'
 
     ; Assets
-    Include 'ultradrive/assets/generated/tilesets.asm'
-    Include 'ultradrive/assets/generated/maps.asm'
+    Include './ultradrive/assets/generated/tilesets.asm'
+    Include './ultradrive/assets/generated/maps.asm'
 
     ; Main
-    Include 'ultradrive/main.asm'
+    Include './ultradrive/main.asm'
 
 
     ;-------------------------------------------------
