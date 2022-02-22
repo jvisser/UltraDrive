@@ -7,8 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +25,15 @@ import static java.util.stream.Collectors.toList;
 public class MapExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapExporter.class.getName());
-    private final File additionalTemplatePath;
     private final File templatePath;
+    private final List<File> additionalTemplatePaths;
 
-    public MapExporter(String templatePath, String additionalTemplatePath)
+    public MapExporter(String templatePath, Collection<String> additionalTemplatePaths)
     {
         this.templatePath = new File(templatePath);
-        this.additionalTemplatePath = Optional.ofNullable(additionalTemplatePath)
+        this.additionalTemplatePaths = additionalTemplatePaths.stream()
                 .map(File::new)
-                .orElse(null);
+                .collect(toList());
     }
 
     public void export(TileMapCompilation mapCompilation, String outputDirectory) throws IOException
@@ -71,10 +71,7 @@ public class MapExporter
         templateEngine.addDialect(new MapExporterDialect());
 
         templateEngine.addTemplateResolver(createFileTemplateResolver(templatePath));
-        if (additionalTemplatePath != null)
-        {
-            templateEngine.addTemplateResolver(createFileTemplateResolver(additionalTemplatePath));
-        }
+        additionalTemplatePaths.forEach(path -> templateEngine.addTemplateResolver(createFileTemplateResolver(path)));
 
         return templateEngine;
     }
