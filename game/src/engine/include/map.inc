@@ -5,8 +5,8 @@
     If (~def(__ENGINE_MAP_INC))
 __ENGINE_MAP_INC Equ 1
 
-    Include './common/include/constants.inc'
-    Include './common/include/linkedlist.inc'
+    Include './lib/common/include/constants.inc'
+    Include './lib/common/include/linkedlist.inc'
 
     Include './system/include/memory.inc'
 

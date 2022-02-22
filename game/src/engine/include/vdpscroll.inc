@@ -7,7 +7,7 @@
     If (~def(__ENGINE_VDP_SCROLL_INC))
 __ENGINE_VDP_SCROLL_INC Equ 1
 
-    Include './common/include/constants.inc'
+    Include './lib/common/include/constants.inc'
     
     Include './system/include/memory.inc'
     Include './system/include/vdpdmaqueue.inc'

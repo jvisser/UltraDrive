@@ -2,7 +2,7 @@
 ; Viewport. Manages background and foreground plane etc...
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/init.inc'
     Include './system/include/vdp.inc'

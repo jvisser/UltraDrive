@@ -5,7 +5,7 @@
     If (~def(__SYSTEM_VDP_INC))
 __SYSTEM_VDP_INC Equ 1
 
-    Include './common/include/constants.inc'
+    Include './lib/common/include/constants.inc'
 
     Include './system/include/memory.inc'
     Include './system/include/vdpcmd.inc'

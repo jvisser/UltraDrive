@@ -8,12 +8,12 @@
     ;-------------------------------------------------
     ; Common
     ; ----------------
-    Include './common/include/common.inc'
+    Include './lib/common/include/common.inc'
 
-    Include './common/nooperation.asm'
-    Include './common/trigtable.asm'
-    Include './common/compression/comper.asm'
-    ;Include './common/compression/unaplib.asm'
+    Include './lib/common/nooperation.asm'
+    Include './lib/common/trigtable.asm'
+    Include './lib/common/compression/comper.asm'
+    ;Include './lib/common/compression/unaplib.asm'
 
 
     ;-------------------------------------------------

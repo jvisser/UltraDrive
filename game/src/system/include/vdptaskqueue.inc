@@ -5,7 +5,7 @@
     If (~def(__SYSTEM_VDP_TASK_QUEUE_INC))
 __SYSTEM_VDP_TASK_QUEUE_INC Equ 1
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/memory.inc'
     Include './system/include/os.inc'

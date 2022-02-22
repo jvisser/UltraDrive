@@ -5,7 +5,7 @@
     If (~def(__SYSTEM_IO_INC))
 __SYSTEM_IO_INC Equ 1
 
-    Include './common/include/constants.inc'
+    Include './lib/common/include/constants.inc'
 
     Include './system/include/memory.inc'
 

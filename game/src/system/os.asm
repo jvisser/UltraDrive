@@ -2,7 +2,7 @@
 ; Basic OS. Handles all mandatory tasks (updating VDP state and reading IO state for use by the main program loop)
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/memory.inc'
     Include './system/include/m68k.inc'
