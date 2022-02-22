@@ -12,8 +12,8 @@
 
     Include './lib/common/nooperation.asm'
     Include './lib/common/trigtable.asm'
-    Include './lib/common/compression/comper.asm'
-    ;Include './lib/common/compression/unaplib.asm'
+    Include './lib/compression/comper.asm'
+    ;Include './lib/compression/unaplib.asm'
 
 
     ;-------------------------------------------------
