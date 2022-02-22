@@ -21,13 +21,13 @@ fi
 
 # Compile assets to source
 java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
-        -m "$map"                                           \
         -t './engine/assets/template'                       \
         -s './ultradrive/assets/template'                   \
         -o './ultradrive/assets/generated'                  \
         -f '../assets/map/objecttypes.xml'                  \
-        -a './ultradrive/config/vram.yaml'                  \
-        -r
+        -v './ultradrive/config/vram.yaml'                  \
+        -r                                                  \
+        "$map"                                              \
 
 # Clean output from previous run
 rm -f 'ultradrive-tracelog.json' 'ultradrive.sym.txt'

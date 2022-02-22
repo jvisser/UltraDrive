@@ -1,76 +1,116 @@
 package com.ultradrive.mapconvert;
 
+import com.ultradrive.mapconvert.config.PatternAllocationConfiguration;
+import com.ultradrive.mapconvert.config.PatternAllocationRange;
+import com.ultradrive.mapconvert.config.PreAllocatedPattern;
 import com.ultradrive.mapconvert.datasource.tiled.TiledObjectFactory;
 import com.ultradrive.mapconvert.export.MapExporter;
 import com.ultradrive.mapconvert.processing.map.TileMap;
 import com.ultradrive.mapconvert.processing.map.TileMapCompilation;
 import com.ultradrive.mapconvert.processing.map.TileMapCompiler;
 import com.ultradrive.mapconvert.processing.tileset.Tileset;
+import com.ultradrive.mapconvert.processing.tileset.block.pattern.Pattern;
 import com.ultradrive.mapconvert.render.MapRenderer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 
 
-public final class MapConvert
+public final class MapConvert implements Runnable
 {
-    private static final String APP_NAME = "MapConvert";
     private static final Logger LOGGER = LoggerFactory.getLogger(MapConvert.class.getName());
 
     private static final String TILED_MAP_FILE_EXTENSION = ".tmx";
     private static final String PNG_FILE_EXTENSION = ".png";
 
-    public static void main(String[] args) throws IOException
-    {
-        MapConvert mapConvert = new MapConvert();
+    @CommandLine.Parameters (
+            arity = "1",
+            paramLabel = "MAPFILE",
+            description = "A single map file or a directory containing the maps to process.")
+    private String mapPath;
 
-        mapConvert.run(args);
+    @CommandLine.Option (
+            names = { "-o", "--output-dir" },
+            required = true,
+            description = "Directory where the processed map/tileset data will be placed.")
+    private String outputDirectory;
+
+    @CommandLine.Option (
+            names = { "-r", "--recursive" },
+            description = "Search for map files recursively if a directory is specified.")
+    private boolean recursive;
+
+    @CommandLine.Option (
+            names = { "-t", "--template-dir" },
+            description = "Directory containing the input templates used to transform the map data.")
+    private String templateDirectory;
+
+    @CommandLine.Option (
+            names = { "-s", "--search-dir" },
+            description = "Additional template search directories for templates referenced by the input templates. Can be specified multiple times.")
+    private List<String> additionalTemplateDirectories = new ArrayList<>();
+
+    @CommandLine.Option (
+            names = { "-i", "--save-image" },
+            description = "Render maps to PNG file from the internally processed map structure.")
+    private boolean saveImages;
+
+    @CommandLine.Option (
+            names = { "-f", "--object-types-file" },
+            description = "Location of the Tiled editor objecttypes.xml file.")
+    private String objectTypesFile;
+
+    @CommandLine.Option (
+            names = { "-v", "--vram-config" },
+            description = "Location of the VRAM layout configuration file.")
+    private String vramConfigurationFile;
+
+    public static void main(String[] args)
+    {
+        System.exit(new CommandLine(new MapConvert()).execute(args));
     }
 
-    private void run(String[] commandLineArguments) throws IOException
+    @Override
+    public void run()
     {
-        MapConvertConfiguration config = loadConfiguration(commandLineArguments);
-
-        TileMapCompilation mapCompilation = compileMaps(config);
-
-        logTilesetStatistics(mapCompilation);
-
-        if (config.isProcessTemplates())
+        try
         {
-            export(config, mapCompilation);
+            TileMapCompilation mapCompilation = compileMaps();
+
+            logTilesetStatistics(mapCompilation);
+
+            if (templateDirectory != null)
+            {
+                export(mapCompilation);
+            }
+
+            if (saveImages)
+            {
+                exportPNG(mapCompilation);
+            }
         }
-
-        if (config.isSaveImages())
+        catch (IOException e)
         {
-            exportPNG(config, mapCompilation);
+            throw new IllegalStateException(e);
         }
     }
 
-    private MapConvertConfiguration loadConfiguration(String[] commandLineArguments)
+    private TileMapCompilation compileMaps() throws IOException
     {
-        MapConvertConfiguration config = new MapConvertConfiguration();
-        if (!config.parseCommandLine(commandLineArguments))
-        {
-            config.printHelp(APP_NAME);
+        TiledObjectFactory tiledObjectFactory = new TiledObjectFactory(objectTypesFile);
 
-            System.exit(1);
-        }
+        TileMapCompiler mapCompiler = new TileMapCompiler(getPatternAllocationConfiguration());
 
-        return config;
-    }
-
-    private TileMapCompilation compileMaps(MapConvertConfiguration config) throws IOException
-    {
-        TiledObjectFactory tiledObjectFactory = new TiledObjectFactory(config.getObjectTypesFile());
-
-        TileMapCompiler mapCompiler = new TileMapCompiler(config.getPatternAllocationConfiguration());
-
-        File mapFile = new File(config.getMapFile());
+        File mapFile = new File(mapPath);
         if (mapFile.exists())
         {
             if (mapFile.isFile())
@@ -80,7 +120,7 @@ public final class MapConvert
             else
             {
                 try (Stream<Path> pathStream = Files.walk(Path.of(mapFile.getAbsolutePath()),
-                                                          config.getDirectorySearchDepth()))
+                                                          recursive ? Integer.MAX_VALUE : 1))
                 {
                     pathStream.filter(path -> path.toString().endsWith(TILED_MAP_FILE_EXTENSION))
                             .map(path -> tiledObjectFactory.getMapDataSource(path.toAbsolutePath().toString()))
@@ -90,6 +130,20 @@ public final class MapConvert
         }
 
         return mapCompiler.compile();
+    }
+
+    private PatternAllocationConfiguration getPatternAllocationConfiguration() throws IOException
+    {
+        if (vramConfigurationFile == null)
+        {
+            return new PatternAllocationConfiguration(
+                    Collections.singletonList(new PatternAllocationRange("Main", 1, Integer.MAX_VALUE)),
+                    Collections.singletonList(new PreAllocatedPattern(0, new Pattern(Collections.nCopies(64, 0)))));
+        }
+        else
+        {
+            return PatternAllocationConfiguration.read(new File(vramConfigurationFile));
+        }
     }
 
     private void logTilesetStatistics(TileMapCompilation mapCompilation)
@@ -104,17 +158,17 @@ public final class MapConvert
         }
     }
 
-    private void export(MapConvertConfiguration config, TileMapCompilation compile) throws IOException
+    private void export(TileMapCompilation compile) throws IOException
     {
         MapExporter mapExporter =
-                new MapExporter(config.getTemplateDirectory(), config.getAdditionalTemplateDirectory());
+                new MapExporter(templateDirectory, additionalTemplateDirectories);
 
-        mapExporter.export(compile, config.getOutputDirectory());
+        mapExporter.export(compile, outputDirectory);
     }
 
-    private void exportPNG(MapConvertConfiguration config, TileMapCompilation mapCompilation) throws IOException
+    private void exportPNG(TileMapCompilation mapCompilation) throws IOException
     {
-        File imageDirectory = new File(config.getImageOutputDirectory()).getAbsoluteFile();
+        File imageDirectory = new File(outputDirectory).getAbsoluteFile();
 
         if (imageDirectory.exists() || imageDirectory.mkdirs())
         {
