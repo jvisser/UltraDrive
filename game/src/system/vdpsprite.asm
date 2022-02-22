@@ -2,7 +2,7 @@
 ; VDP Low level sprite handling routines/macros
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/init.inc'
     Include './system/include/vdp.inc'

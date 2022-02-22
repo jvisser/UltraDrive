@@ -5,7 +5,7 @@
     If (~def(__SYSTEM_OS_INC))
 __SYSTEM_OS_INC Equ 1
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/memory.inc'
 

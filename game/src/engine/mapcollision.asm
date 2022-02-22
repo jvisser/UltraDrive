@@ -7,8 +7,8 @@
 ; - MapCollisionFindLeftWall
 ; - MapCollisionFindRightWall
 
-    Include './common/include/profile.inc'
-    Include './common/include/angle.inc'
+    Include './lib/common/include/profile.inc'
+    Include './lib/common/include/angle.inc'
 
     Include './engine/include/map.inc'
     Include './engine/include/tileset.inc'

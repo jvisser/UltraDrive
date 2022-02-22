@@ -9,7 +9,7 @@
 ;       - All allocations will be released after a DMA queue flush.
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/memory.inc'
     Include './system/include/os.inc'

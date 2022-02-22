@@ -5,7 +5,7 @@
     If (~def(__ENGINE_TILESET_INC))
 __ENGINE_TILESET_INC Equ 1
 
-    Include './common/include/constants.inc'
+    Include './lib/common/include/constants.inc'
 
     Include './system/include/memory.inc'
 

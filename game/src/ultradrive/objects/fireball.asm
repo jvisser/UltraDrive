@@ -2,7 +2,7 @@
 ; Fireball "AI"
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/angle.inc'
+    Include './lib/common/include/angle.inc'
     
     Include './system/include/memory.inc'
     Include './system/include/os.inc'

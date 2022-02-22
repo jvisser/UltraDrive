@@ -8,7 +8,7 @@
 ; TODO: Remove direct Tileset dependency (Move required data to PaletteSwapRasterEffectConfiguration)
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/debug.inc'
+    Include './lib/common/include/debug.inc'
 
     Include './system/include/m68k.inc'
     Include './system/include/z80.inc'

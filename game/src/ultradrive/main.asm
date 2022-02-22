@@ -2,8 +2,8 @@
 ; Main entry point.
 ;------------------------------------------------------------------------------------------
 
-    Include './common/include/debug.inc'
-    Include './common/include/profile.inc'
+    Include './lib/common/include/debug.inc'
+    Include './lib/common/include/profile.inc'
 
     Include './engine/include/viewport.inc'
 
