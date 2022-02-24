@@ -111,7 +111,7 @@ OSNextFrameReadyWait:
 
     .waitNextFrameLoop:
 
-        ; Suspend the CPU until the next interrupt, let it cool down a bit.
+        ; Suspend the CPU until the next interrupt (= better interrupt response and cooldown).
         stop    #M68k_SR_SUPERVISOR
 
         cmp.l  (osContext + OSContext_framesProcessed), d0
