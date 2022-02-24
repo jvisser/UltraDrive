@@ -62,7 +62,7 @@ CollisionReset:
 ; Uses:
 ; - a0-a2
 CollisionAllocateElement:
-        COLLISION_ALLOCATE_ELEMENT d0, a0, a1, a2
+        COLLISION_ALLOCATE d0, a0, a1, a2
         rts
 
 
@@ -72,11 +72,11 @@ CollisionAllocateElement:
 ; ----------------
 ; Input:
 ; - a0: Address of the collision element
+; - a1: Address of the collision type meta data for the element to register
 ; Uses:
-; - d0-d6/a1-a6
+; - d0-d6/a2-a6
 CollisionCheck:
         ; Check collisions against known collision elements
-        movea.w CollisionElement_metadata(a0), a1                   ; a1 = collision type metadata
         lea     CollisionTypeMetadata_relations(a1), a2             ; a2 = related collision type metadata
         move.w  collisionAllocationBaseAddress, a3                  ; a3 = current collision state (CollisionState)
 
@@ -102,7 +102,7 @@ CollisionCheck:
                     movea.w d1, a5                                  ; a5 = head of the related type element list (CollisionElementLink)
 
                     ; Do AABB collision check
-                    lea     CollisionElementLink_Size(a5), a6       ; a6 = related element
+                    movea.w CollisionElementLink_element(a5), a6    ; a6 = related element
                     move.l  AABBCollisionElement_minX(a6), d4       ; d4 = (minX, minY) of related element
                     move.l  AABBCollisionElement_maxX(a6), d5       ; d5 = (maxX, maxY) of related element
 
@@ -129,9 +129,9 @@ CollisionCheck:
                         ; We have a collision!
 
                         ; Call related type handler first (its element was registered before this)
-                        move.w  CollisionTypeMetadata_typeId(a1), d4
+                        move.w  CollisionTypeMetadata_typeId(a1), d0
                         move.w  CollisionTypeMetadata_dependencyMask(a4), d5
-                        btst    d4, d5
+                        btst    d0, d5
                         beq.s   .noDependent
 
                             PUSHW   a1
@@ -139,7 +139,7 @@ CollisionCheck:
 
                             movea.l a6, a1
                             exg     a0, a1
-                            movea.l CollisionTypeMetadata_handlerAddress(a4), a6
+                            movea.l CollisionTypeMetadata_handler(a4), a6
                             jsr     (a6)
                             movea.l a1, a0
 
@@ -149,16 +149,16 @@ CollisionCheck:
                     .noDependent:
 
                         ; Call this type handler
-                        move.w  CollisionTypeMetadata_typeId(a4), d4
+                        move.w  CollisionTypeMetadata_typeId(a4), d0
                         move.w  CollisionTypeMetadata_dependencyMask(a1), d5
-                        btst    d4, d5
+                        btst    d0, d5
                         beq.s   .noDependency
 
                             ; Call type handler
                             PUSHW   a1
                             PUSHW   a5
 
-                            movea.l CollisionTypeMetadata_handlerAddress(a1), a5
+                            movea.l CollisionTypeMetadata_handler(a1), a5
                             movea.l a6, a1
                             jsr     (a5)
 
@@ -185,12 +185,15 @@ CollisionCheck:
 
     .collisionCheckDone:
 
+        ; Allocate link
+        COLLISION_ALLOCATE #CollisionElementLink_Size, a2, a5, a6
+
         ; Register this element
+        move.w  a0, CollisionElementLink_element(a2)            ; Save element pointer in link
         move.w  CollisionTypeMetadata_typeId(a1), d1            ; d1 = element type id
         add.w   d1, d1                                          ; d1 = offset into element type array
-        subq.w  #CollisionElementLink_Size, a0                  ; a0 = element link for this element
-        move.w  CollisionState_typeHeadArray(a3, d1), CollisionElementLink_next(a0)
-        move.w  a0, CollisionState_typeHeadArray(a3, d1)
+        move.w  CollisionState_typeHeadArray(a3, d1), CollisionElementLink_next(a2)
+        move.w  a2, CollisionState_typeHeadArray(a3, d1)
         rts
 
 
