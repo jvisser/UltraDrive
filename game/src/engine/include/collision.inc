@@ -62,22 +62,18 @@ COLLISION_ELEMENT_TYPE_POINT    Equ 1                                   ; TODO: 
     DEFINE_STRUCT CollisionTypeMetadata
         STRUCT_MEMBER.w typeId                                          ; Sequential type id starting at 0
         STRUCT_MEMBER.w elementTypeId                                   ; AABB or point
-        STRUCT_MEMBER.l handlerAddress                                  ; Address of subroutine handling the collision. Must preserve d6-d7/a0-a6.
+        STRUCT_MEMBER.l handler                                         ; handler(*thisElement, *thatElement, thatCollisionType). Must preserve d6-d7/a0-a6.
         STRUCT_MEMBER.w dependencyMask                                  ; Combined typeMask of all dependencies (ie what collisions are we interested in)
         STRUCT_MEMBER.w dependentsMask                                  ; Combined typeMask of all dependents (types that are interested in this type)
-        STRUCT_MEMBER.w relations                                       ; Marker. List of related type metadata (short pointers) as defined by outgoingTypeRelationsMask and incomingTypeRelationsMask terminated by NULL.
+        STRUCT_MEMBER.w relations                                       ; Marker. List of related type metadata (short pointers) as defined by dependencyMask and dependentsMask terminated by NULL.
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT CollisionElement
-        STRUCT_MEMBER.w metadata                                        ; Pointer to CollisionTypeMetadata
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT PointCollisionElement, CollisionElement
+    DEFINE_STRUCT PointCollisionElement
         STRUCT_MEMBER.w x
         STRUCT_MEMBER.w y
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT AABBCollisionElement, CollisionElement
+    DEFINE_STRUCT AABBCollisionElement
         STRUCT_MEMBER.w minX
         STRUCT_MEMBER.w minY
         STRUCT_MEMBER.w maxX
@@ -86,7 +82,7 @@ COLLISION_ELEMENT_TYPE_POINT    Equ 1                                   ; TODO: 
 
     DEFINE_STRUCT CollisionElementLink
         STRUCT_MEMBER.w next                                            ; Next CollisionElementLink
-        ; Data follows immediately after next
+        STRUCT_MEMBER.w element
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT CollisionState
@@ -271,12 +267,11 @@ CURRENT_COLLISION_TYPE = CURRENT_COLLISION_TYPE + 1
 ; - result: Address register receiving the resuling value
 ; - scratch; Scratch address register
 ; - scratch2; Scratch address register
-COLLISION_ALLOCATE_ELEMENT Macro size, result, scratch, scratch2
+COLLISION_ALLOCATE Macro size, result, scratch, scratch2
         movea.w collisionAllocationBaseAddress, \scratch
         movea.w CollisionState_freeMemory(\scratch), \result
-        addq.w  #CollisionElementLink_Size, \result
         movea.l \result, \scratch2
-        adda.w  \size, \scratch2
+        add.w   \size, \scratch2
         move.w  \scratch2, CollisionState_freeMemory(\scratch)
     Endm
 
