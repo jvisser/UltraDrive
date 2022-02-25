@@ -17,7 +17,7 @@ DEFAULT_EXCEPTION_HANDLER Macro handler
     DEFAULT_EXCEPTION_HANDLER VBlankInterruptHandler
 
 Vector68k:
-    dc.l   $00000000                        ; Initial stack pointer value
+    dc.l   MEM_RAM_MID                      ; Initial stack pointer value
     dc.l   Boot                             ; Start of program
     dc.l   Exception                        ; Bus error
     dc.l   Exception                        ; Address error
