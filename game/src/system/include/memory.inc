@@ -297,8 +297,8 @@ _LONG_MEM_BYTES  Equ __LONG_RAM_ALLOCATION_PTR  - MEM_RAM_START
         Inform 0, '-----------------'
         Inform 0, 'Memory allocation'
         Inform 0, '-----------------'
-        Inform 0, 'Absolute short addressable allocation $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_MID, __SHORT_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES, (MEM_RAM_END - __SHORT_RAM_ALLOCATION_PTR - MEM_RAM_STACK_SIZE)
-        Inform 0, 'Absolute long addressable allocation  $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_START, __LONG_RAM_ALLOCATION_PTR, _LONG_MEM_BYTES, (MEM_RAM_MID - __LONG_RAM_ALLOCATION_PTR)
+        Inform 0, 'Absolute short addressable allocation $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_MID, __SHORT_RAM_ALLOCATION_PTR, _SHORT_MEM_BYTES, (MEM_RAM_END - __SHORT_RAM_ALLOCATION_PTR)
+        Inform 0, 'Absolute long addressable allocation  $%h-$%h: %d bytes (%d bytes free)', MEM_RAM_START, __LONG_RAM_ALLOCATION_PTR, _LONG_MEM_BYTES, (MEM_RAM_MID - __LONG_RAM_ALLOCATION_PTR - MEM_RAM_STACK_SIZE)
         Inform 0, ''
     Endm
 
