@@ -82,7 +82,7 @@ MapInitObjects:
         movea.l MapMetadataMap_objectGroupContainersBaseAddress(a4), a5         ; a5 = MapObjectGroupContainer base address
         movea.l a5, a6
         PUSHL   a5                                                              ; Store MapObjectGroupContainer's base address on the stack
-        adda.w  #-32768, a5                                                     ; MapMetadataMap.objectGroupContainersBaseAddress is stored adjusted for 64k addressing using signed values, revert this here as we are using direct addressing instead of indexed
+        add.w  #-32768, a5                                                      ; MapMetadataMap.objectGroupContainersBaseAddress is stored adjusted for 64k addressing using signed values, revert this here as we are using direct addressing instead of indexed
         move.w  MapMetadataMap_objectGroupContainerCount(a4), d0
         subq.w  #1, d0
     .objectContainerLoop:
@@ -104,7 +104,7 @@ MapInitObjects:
             ; Set container state's parent address to the container's associated parent container state
             move.w  d1, MapObjectGroupContainerState_parent(a3, d2)      ; Write parent address
 
-            adda.w  #MapObjectGroupContainer_Size, a5
+            add.w   #MapObjectGroupContainer_Size, a5
 
         dbra    d0, .objectContainerLoop
 
@@ -233,7 +233,7 @@ MapBuildObjectGroupHierarchy:
 
             ; Allocate leaf node
             movea.l a5, a1                                                      ; a1 = MapObjectGroupNode
-            adda.w  #MapObjectGroupNode_Size, a5                                ; a5 = next node allocation pointer
+            add.w   #MapObjectGroupNode_Size, a5                                ; a5 = next node allocation pointer
 
             ; Init node
             move.l  d5, MapObjectGroupNode_nextSibling(a1)
@@ -258,7 +258,7 @@ MapBuildObjectGroupHierarchy:
             .allocateNode:
                     ; Allocate new node
                     movea.l a5, a2                                              ; a2 = MapObjectGroupNode
-                    adda.w  #MapObjectGroupNode_Size, a5                        ; a5 = next node allocation pointer
+                    add.w  #MapObjectGroupNode_Size, a5                         ; a5 = next node allocation pointer
 
                     ; Store node pointer in cache
                     add.w   d6, d6

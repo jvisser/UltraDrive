@@ -153,7 +153,7 @@ _TilesetLoadAnimations:
         move.w  TilesetAnimation_animationInitialTrigger(a4), TilesetAnimationSchedule_trigger(a3)
         move.l  #_TilesetAnimationStart, TilesetAnimationSchedule_triggerCallback(a3)
         move.l  a4, TilesetAnimationSchedule_animation(a3)
-        adda.w  #TilesetAnimationSchedule_Size, a3
+        add.w   #TilesetAnimationSchedule_Size, a3
 
         ; Transfer animation frames
         movea.l TilesetAnimationBase_animationFrameTransferListAddress(a4), a0 ; a0 = Animation frame transfer list address
@@ -205,7 +205,7 @@ TilesetScheduleManualAnimations:
         move.w  #1, TilesetAnimationSchedule_trigger(a0)
 
     .scheduledAnimation:
-        adda.w  #TilesetAnimationSchedule_Size, a0
+        add.w   #TilesetAnimationSchedule_Size, a0
         dbra    d0, .animationLoop
 
     .noAnimations:
@@ -242,7 +242,7 @@ TilesetSchedule:
         POPW    d0
 
     .nextAnimationTrigger:
-        adda.w  #TilesetAnimationSchedule_Size, a0
+        add.w   #TilesetAnimationSchedule_Size, a0
         dbra    d0, .animationLoop
         rts
 

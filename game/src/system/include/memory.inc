@@ -271,7 +271,7 @@ __MEMORY_CHECK_OVERFLOW Macro scratch
 MEMORY_ALLOCATE Macro bytes, target, scratch
         movea.w  memAllocationPointer, \target
         movea.l \target, \scratch
-        adda.w  #(((\bytes) + 1) & $fffe), \scratch
+        add.w   #(((\bytes) + 1) & $fffe), \scratch
         move.w  \scratch, memAllocationPointer
 
         __MEMORY_CHECK_OVERFLOW \scratch

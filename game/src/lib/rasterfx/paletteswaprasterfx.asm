@@ -290,7 +290,7 @@ _PaletteSwapRasterEffectColorTransitionHblank:
             TILESET_GET a0
             movea.l Tileset_colorTransitionTableAddress(a0), a1
             movea.l Tileset_alternativePaletteAddress(a0), a0
-            adda.l  #TilesetPalette_colors, a0
+            add.l   #TilesetPalette_colors, a0
             lea     MEM_VDP_DATA, a2
             lea     MEM_VDP_CTRL, a3
 
