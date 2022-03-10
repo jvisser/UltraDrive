@@ -1,47 +1,5 @@
 ;------------------------------------------------------------------------------------------
-; General collision detection system.
-;
-; Allows for the specification of collision types and their interactions with other types (ie what can collide with what).
-;
-; The snapshot system makes it easy to implement interaction hierarchies of grouped objects. Children can interact with their parents groups but siblings groups can not interact with each other for example.
-;
-; Setup:
-;   Determine collision types required for the specific use case.
-;   - Specify collision types with DEFINE_COLLISION_TYPES
-;   - Create collision meta data for each type using the DEFINE_COLLISION_TYPE_METADATA* macros
-;       - Specify element type (AABB or Point)
-;       - Specify incoming and outgoing type relations
-;       - Specify collision handler routine
-;
-; Usage:
-;   - Call CollisionInit once
-;   - Call CollisionReset at the start of each frame/update unit
-;   - For each collidable object:
-;       - Allocate collision element using the COLLISION_ALLOCATE_ELEMENT macro or CollisionAllocateElement subroutine
-;       - Populate members
-;       - Call CollisionCheck on element
-;
-; Performance considerations:
-;   Insertion order does have an impact on performance.
-;   For example:
-;       There is one instance of player that interacts with many bullets. Adding all the bullets first will have more opportunities for loop optimizations.
-;
-; Public API:
-;   Setup macros:
-;   - DEFINE_COLLISION_TYPES
-;   - DEFINE_COLLISION_TYPE_METADATA
-;       - COLLISION_TYPE_DEPENDENCIES
-;       - COLLISION_TYPE_DEPENDENTS
-;   - DEFINE_COLLISION_TYPE_METADATA_END
-;   Subroutines/Macros:
-;   - COLLISION_ALLOCATE_ELEMENT
-;   - CollisionInit
-;   - CollisionReset
-;   - CollisionAllocateElement
-;   - CollisionCheck
-;   - CollisionCreateSnapshotBefore
-;   - CollisionCreateSnapshotAfter
-;   - CollisionRestoreSnapshot
+; General AABB collision detection system.
 ;------------------------------------------------------------------------------------------
 
     If (~def(__ENGINE_COLLISION_INC))
@@ -50,39 +8,32 @@ __ENGINE_COLLISION_INC Equ 1
     Include './system/include/memory.inc'
 
 ;-------------------------------------------------
-; Collision detection constants
+; Collision constants
 ; ----------------
-COLLISION_ELEMENT_TYPE_AABB     Equ 0
-COLLISION_ELEMENT_TYPE_POINT    Equ 1                                   ; TODO: Implement
+COLLISION_MAX_RELATIONS Equ (SIZE_WORD * 8)
 
 
 ;-------------------------------------------------
 ; Collision detection structures
 ; ----------------
-    DEFINE_STRUCT CollisionTypeMetadata
-        STRUCT_MEMBER.w typeId                                          ; Sequential type id starting at 0
-        STRUCT_MEMBER.w elementTypeId                                   ; AABB or point
-        STRUCT_MEMBER.l handler                                         ; handler(*thisElement, *thatElement, thatCollisionType). Must preserve d6-d7/a0-a6.
-        STRUCT_MEMBER.w dependencyMask                                  ; Combined typeMask of all dependencies (ie what collisions are we interested in)
-        STRUCT_MEMBER.w dependentsMask                                  ; Combined typeMask of all dependents (types that are interested in this type)
-        STRUCT_MEMBER.w relations                                       ; Marker. List of related type metadata (short pointers) as defined by dependencyMask and dependentsMask terminated by NULL.
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT PointCollisionElement
-        STRUCT_MEMBER.w x
-        STRUCT_MEMBER.w y
-    DEFINE_STRUCT_END
-
-    DEFINE_STRUCT AABBCollisionElement
-        STRUCT_MEMBER.w minX
-        STRUCT_MEMBER.w minY
-        STRUCT_MEMBER.w maxX
-        STRUCT_MEMBER.w maxY
+    DEFINE_STRUCT CollisionElementType
+        STRUCT_MEMBER.w typeMask                                        ; Type mask for the implementing types
+        STRUCT_MEMBER.w incomingRelationMask                            ; Combined typeMask of all dependencies (ie what collisions are we interested in)
+        STRUCT_MEMBER.w outgoingRelationMask                            ; Combined typeMask of all dependents (types that are interested in this type)
+        STRUCT_MEMBER.w allocationSize                                  ; Total size required for allocating an element for this type (including Element_Size, Element type ptr)
+        STRUCT_MEMBER.l handler                                         ; handler(*thisElement, *thatElement, incomingTypeMask). Must preserve d2-d7/a0-a6
+        ; Offset to the following variable size struct:
+        ;   - word relatedCollisionTypeCount - 1
+        ;   - word relatedCollisionTypes[relatedCollisionTypeCount]
+        ;   - word linkAllocationSize                                   ; Allocation size for all links combined
+        ;   - word ownCollisionTypeCount - 1
+        ;   - word ownCollisionTypes[ownCollisionTypeCount]
+        STRUCT_MEMBER.w relations                                       ; Marker
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT CollisionElementLink
         STRUCT_MEMBER.w next                                            ; Next CollisionElementLink
-        STRUCT_MEMBER.w element
+        STRUCT_MEMBER.w element                                         ; Short ptr to element
     DEFINE_STRUCT_END
 
     DEFINE_STRUCT CollisionState
@@ -91,23 +42,27 @@ COLLISION_ELEMENT_TYPE_POINT    Equ 1                                   ; TODO: 
     DEFINE_STRUCT_END
 
 
+; Entering macro hell...
+
+
 ;-------------------------------------------------
 ; Define all the collision types.
-; NB: The list order also determines the order of processing between collisions types.
 ; ----------------
 ; Input:
 ; - types: List of collision type names
 ; Output:
-; - COLLISION_TYPE_[type]: Type id constant
-; - COLLISION_STATE_SIZE: Size in bytes of collision state
-; - COLLISION_TYPE_COUNT: Number of collision types
+; - COLLISION_TYPE_[type]
+; - COLLISION_TYPE_[type]_MASK
+; - COLLISION_TYPE_[type]_RELATION_IN
+; - COLLISION_TYPE_[type]_RELATION_OUT
 DEFINE_COLLISION_TYPES Macro types
         Local TYPE_ID
 
 COLLISION_STATE_SIZE Equ ((narg + 1) * SIZE_WORD)
 COLLISION_TYPE_COUNT Equ (narg)
 
-        SECTION_START S_PROGRAM
+        ; Code generation
+        SECTION_START S_PROGRAM_SHORT
             ;-------------------------------------------------
             ; Clear collision state
             ; ----------------
@@ -118,9 +73,14 @@ COLLISION_TYPE_COUNT Equ (narg)
             _CollisionClearState:
                 moveq   #0, d7
                 move.w  d7, (a6)+       ; CollisionState_freeMemory
-        SECTION_END
+                Rept (COLLISION_TYPE_COUNT >> 1)
+                    move.l  d7, (a6)+
+                Endr
+                Rept (COLLISION_TYPE_COUNT & 1)
+                    move.w  d7, (a6)+
+                Endr
+                rts
 
-        SECTION_START S_PROGRAM_SHORT
             ;-------------------------------------------------
             ; Copy collisions state
             ; ----------------
@@ -131,131 +91,163 @@ COLLISION_TYPE_COUNT Equ (narg)
             ; - a5-a6
             _CollisionCopyState:
                 move.w  (a5)+, (a6)+    ; CollisionState_freeMemory
-        SECTION_END
-
-        Rept (COLLISION_TYPE_COUNT >> 1)
-                SECTION_START S_PROGRAM
-                    move.l  d7, (a6)+
-                SECTION_END
-
-                SECTION_START S_PROGRAM_SHORT
+                Rept (COLLISION_TYPE_COUNT >> 1)
                     move.l  (a5)+, (a6)+
-                SECTION_END
-        Endr
-        Rept (COLLISION_TYPE_COUNT & 1)
-                SECTION_START S_PROGRAM
-                    move.w  d7, (a6)+
-                SECTION_END
-
-                SECTION_START S_PROGRAM_SHORT
+                Endr
+                Rept (COLLISION_TYPE_COUNT & 1)
                     move.w  (a5)+, (a6)+
-                SECTION_END
-        Endr
-        SECTION_START S_PROGRAM
-            rts
-        SECTION_END
-        SECTION_START S_PROGRAM_SHORT
-            rts
+                Endr
+                rts
         SECTION_END
 
-TYPE_ID = 0
         SECTION_START S_RODATA_SHORT
             collisionStateSize:
                 dc.w COLLISION_STATE_SIZE
-            CollisionTypeMetadataTable:
         SECTION_END
 
-            Rept narg
-COLLISION_TYPE_\1    Equ  \#TYPE_ID
-                SECTION_START S_RODATA_SHORT
-                    dc.w \1\CollisionTypeMetadata
-                SECTION_END
-TYPE_ID = TYPE_ID + 1
-                Shift
-            Endr
+TYPE_ID     = 0
+TYPE_MASK   = 0
+        Rept narg
+COLLISION_TYPE_\1                       Equ \#TYPE_ID
+COLLISION_TYPE_\1\_MASK                 Equ (1 << TYPE_MASK)
+COLLISION_TYPE_\1\_RELATION_IN          = 0
+COLLISION_TYPE_\1\_RELATION_OUT         = 0
+
+COLLISION_TYPE_\#TYPE_ID\_NAME          Equs '\1'
+COLLISION_TYPE_MASK\#TYPE_MASK\_NAME    Equs '\1'
+
+TYPE_ID     = TYPE_ID + 1
+TYPE_MASK   = (1 << TYPE_ID)
+            Shift
+        Endr
     Endm
 
 
 ;-------------------------------------------------
-; Start collision type metadata block for the specified type
+; Specify relation to other types. Can be specified multiple times.
+;
+; Best practice is to define only one relation per collision type (between sender/receiver).
+; This way the handler subroutine can identify the exact relation based on the passed relation mask
+; Then let the element type implement multiple collision types to define more complex relations.
+;   The exception to this rule is for self referencing collision types.
+;   This can not be defined through composition on the element type and must be defined on the collision type itself.
 ; ----------------
 ; Input:
-; - type: Type as defined by DEFINE_COLLISION_TYPES
-; - collisionElementType: Either AABB or POINT
-; - handlerAddress: Optional address of the subroutine handling the collision
+; - \0: Relation type: Either IN or OUT
+; - type: Collision type for which to define the relations
+; - relatedTypes: List of related collision types for with the specified relation type
 ; Output:
-; - [type]CollisionTypeMetadata: Address of the meta data (short addressable)
-DEFINE_COLLISION_TYPE_METADATA Macro type, collisionElementType, handlerAddress
-    Local TYPE_ID
-        If (strcmp('\collisionElementType', 'POINT'))
-            Inform 3, 'POINT collision element type not (yet) supported'
+; - COLLISION_TYPE_[type]_RELATION_IN
+; - COLLISION_TYPE_[type]_RELATION_OUT
+DEFINE_COLLISION_TYPE_RELATION Macro type, relatedTypes
+    Local __OPPOSITE_REL
+        If (strcmp('\0', 'OUT'))
+__OPPOSITE_REL Equs 'IN'
+        Else
+__OPPOSITE_REL Equs 'OUT'
         EndIf
-TYPE_ID Equ COLLISION_TYPE_\type
-        SECTION_START S_RODATA_SHORT
-        _\#TYPE_ID\CollisionTypeMetadata:
+        Rept narg(relatedTypes)
+COLLISION_TYPE_\relatedTypes\_RELATION_\__OPPOSITE_REL = COLLISION_TYPE_\relatedTypes\_RELATION_\__OPPOSITE_REL | (1 << COLLISION_TYPE_\type)
+COLLISION_TYPE_\type\_RELATION_\0 = COLLISION_TYPE_\type\_RELATION_\0 | (1 << COLLISION_TYPE_\relatedTypes)
+            Shift relatedTypes
+        Endr
+    Endm
 
-        ; struct CollisionType
-        \type\CollisionTypeMetadata:
-            ; .typeId
-            dc.w COLLISION_TYPE_\type
-            ; .elementTypeId
-            dc.w COLLISION_ELEMENT_TYPE_\collisionElementType
-            If (narg<3)
+
+;-------------------------------------------------
+; Start collision element type block
+; NB: Care must be taken so that all outgoing collision type relations are compatible with the specified data type
+; ----------------
+; Input:
+; - \0: Symbol addressing the element type
+; - dataType: The data type of the element instance (Should be based on/structurally compatible with Rectangle)
+; - types: The list of collision types this element implements
+; - handlerAddress: Optional address of the subroutine handling the collision for incoming connections
+DEFINE_COLLISION_ELEMENT_TYPE Macro types, dataType, handlerAddress
+    Local __TYPE_RELATION, __TYPE_RELATION_NAME, __TYPES, __TYPE_NAME, __TYPE_COUNT, __RELATION_COUNT, __INDEX, __INCOMING_RELATIONS, __OUTGOING_RELATIONS, __RELATIONS
+
+__TYPE_COUNT            Equ narg(types)
+__TYPES                 = 0
+__INCOMING_RELATIONS    = 0
+__OUTGOING_RELATIONS    = 0
+        Rept narg(types)
+__TYPES                 = __TYPES | (1 << COLLISION_TYPE_\types)
+            Shift types
+        Endr
+
+__INDEX = 0;
+        Rept COLLISION_MAX_RELATIONS
+            If (__TYPES & (1 << __INDEX))
+__TYPE_NAME             Equs COLLISION_TYPE_\#__INDEX\_NAME
+__INCOMING_RELATIONS    = __INCOMING_RELATIONS | (COLLISION_TYPE_\__TYPE_NAME\_RELATION_IN)
+__OUTGOING_RELATIONS    = __OUTGOING_RELATIONS | (COLLISION_TYPE_\__TYPE_NAME\_RELATION_OUT)
+
+__TYPE_RELATION = (COLLISION_TYPE_\__TYPE_NAME\_RELATION_IN) | (COLLISION_TYPE_\__TYPE_NAME\_RELATION_OUT)
+                If ((((__TYPE_RELATION & __TYPES) <> 0) & ((__TYPE_RELATION & (1 << __INDEX)) = 0)))
+                    ; Collision types can reference themselves directly in the collision type graph. But not by composition of separate sender and receiver collision types in the same collision element type.
+                    ; This would cause collision checks for both sides of the relation on the same element which then need to be mitigated etc... it would tank performance in any case. Also it will probably not really be used in real world scenarios?!
+                    If ((__TYPE_RELATION & (__TYPE_RELATION - 1)) = 0)
+__TYPE_RELATION_NAME Equs COLLISION_TYPE_MASK\#__TYPE_RELATION\_NAME
+                    Else
+__TYPE_RELATION_NAME Equs 'one in collision type mask $\$__TYPE_RELATION'
+                    EndIf
+                    Inform 3, 'Circular collision type dependency found in collision element type "\0" between collision type "\__TYPE_NAME" and collision type "\__TYPE_RELATION_NAME". Self referential collisions must be configured in the collision type graph using DEFINE_COLLISION_TYPE_RELATION. Not at the collision element type level.'
+                EndIf
+            EndIf
+__INDEX = __INDEX + 1;
+        Endr
+
+__RELATIONS             = __INCOMING_RELATIONS | __OUTGOING_RELATIONS
+__RELATION_COUNT = 0;
+__INDEX = 0;
+        Rept COLLISION_MAX_RELATIONS
+            If (__RELATIONS & (1 << __INDEX))
+__RELATION_COUNT = __RELATION_COUNT + 1;
+            EndIf
+__INDEX = __INDEX + 1;
+        Endr
+
+        SECTION_START S_RODATA_SHORT
+    \0:
+        ; struct CollisionElementType
+            ; .typeMask
+            dc.w __TYPES
+            ; .incomingRelationMask
+            dc.w __INCOMING_RELATIONS
+            ; .outgoingRelationMask
+            dc.w __OUTGOING_RELATIONS
+            ; .allocationSize
+            dc.w SIZE_WORD + \dataType\_Size
+            ; .handler
+            If (narg < 3)
                 dc.l NoOperation
             Else
-                ; .handlerAddress
                 dc.l \handlerAddress
-            Endif
-    Endm
-
-
-;-------------------------------------------------
-; Define outgoing type relations
-; ----------------
-; Input:
-; - types: List of collision type names as defined by DEFINE_COLLISION_TYPES
-COLLISION_TYPE_DEPENDENCIES Macro types
-DEPENDENCY_COLLISION_MASK = 0
-        Rept narg
-DEPENDENCY_COLLISION_MASK = DEPENDENCY_COLLISION_MASK | (1 << (COLLISION_TYPE_\1\))
-            Shift
-        Endr
-        ; .dependencyMask
-        dc.w DEPENDENCY_COLLISION_MASK
-    Endm
-
-
-;-------------------------------------------------
-; Define incoming type relations
-; ----------------
-; Input:
-; - types: List of collision type names as defined by DEFINE_COLLISION_TYPES
-COLLISION_TYPE_DEPENDENTS Macro typeIds
-DEPENDENTS_COLLISION_MASK = 0
-        Rept narg
-DEPENDENTS_COLLISION_MASK = DEPENDENTS_COLLISION_MASK | (1 << (COLLISION_TYPE_\1\))
-            Shift
-        Endr
-        ; .dependentsMask
-        dc.w DEPENDENTS_COLLISION_MASK
-    Endm
-
-
-;-------------------------------------------------
-; End collision type metadata block
-; ----------------
-DEFINE_COLLISION_TYPE_METADATA_END Macro
-COLLISION_RELATION_MASK = (DEPENDENCY_COLLISION_MASK | DEPENDENTS_COLLISION_MASK)
-CURRENT_COLLISION_TYPE = 0
-        Rept 16
-            If (COLLISION_RELATION_MASK & (1 << CURRENT_COLLISION_TYPE))
-                ; .relations
-                dc.w _\#CURRENT_COLLISION_TYPE\CollisionTypeMetadata
             EndIf
-CURRENT_COLLISION_TYPE = CURRENT_COLLISION_TYPE + 1
-        Endr
-        dc.w NULL                 ; list terminator
-        SECTION_END
+            ; .relations
+                ; .relatedCollisionTypeCount
+                dc.w __RELATION_COUNT - 1
+                ; .relatedCollisionTypes
+__INDEX = 0;
+                Rept COLLISION_MAX_RELATIONS
+                    If (__RELATIONS & (1 << __INDEX))
+                        dc.w __INDEX
+                    EndIf
+__INDEX = __INDEX + 1;
+                Endr
+                ; .linkAllocationSize
+                dc.w __TYPE_COUNT * CollisionElementLink_Size
+                ; .ownCollisionTypeCount
+                dc.w __TYPE_COUNT - 1
+                ; .ownCollisionTypes
+__INDEX = 0;
+                Rept COLLISION_MAX_RELATIONS
+                    If (__TYPES & (1 << __INDEX))
+                        dc.w __INDEX
+                    EndIf
+__INDEX = __INDEX + 1;
+                Endr
+            SECTION_END
     Endm
 
 
@@ -272,6 +264,26 @@ COLLISION_ALLOCATE Macro size, result, scratch, scratch2
         movea.w CollisionState_freeMemory(\scratch), \result
         movea.l \result, \scratch2
         add.w   \size, \scratch2
+        move.w  \scratch2, CollisionState_freeMemory(\scratch)
+    Endm
+
+
+;-------------------------------------------------
+; Allocate collision element instance
+; ----------------
+; Input:
+; - elementType: Address of the element type
+; - result: Address register receiving the resulting element address
+; - scratch; Scratch address register
+; - scratch2; Scratch address register
+; - scratch3; Scratch address register
+COLLISION_ALLOCATE_ELEMENT Macro elementType, result, scratch, scratch2, scratch3
+        lea     elementType, \scratch3
+        movea.w collisionAllocationBaseAddress, \scratch
+        movea.w CollisionState_freeMemory(\scratch), \result
+        movea.l \result, \scratch2
+        add.w   CollisionElementType_allocationSize(\scratch3), \scratch2
+        move.w  \scratch3, (\result)+
         move.w  \scratch2, CollisionState_freeMemory(\scratch)
     Endm
 
