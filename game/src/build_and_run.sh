@@ -39,7 +39,7 @@ if [ -z "$debug" ]
     asm68k //p ./assembly.asm,ultradrive.bin,ultradrive.sym
 else
     # Debug
-    asm68k //p //e "DEBUG='$debug'" ./assembly.asm,ultradrive.bin,ultradrive.sym,ultradrive.lst
+    asm68k //m //p //e "DEBUG='$debug'" ./assembly.asm,ultradrive.bin,ultradrive.sym,ultradrive.lst
 fi
 
 # Dump symbols to text file
