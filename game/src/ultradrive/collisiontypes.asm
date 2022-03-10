@@ -4,53 +4,62 @@
 
     Include './engine/include/collision.inc'
 
+    Include './lib/common/include/geometry.inc'
+
+;-------------------------------------------------
+; Collision type graph
+; ----------------
+
+    ; Collision types
     DEFINE_COLLISION_TYPES &
         Player,            &
+        PlayerAware,       &
         Enemy,             &
+        EnemyAware,        &
         HurtPlayer,        &
-        HurtEnemy
+        HurtPlayerAware,   &
+        HurtEnemy,         &
+        HurtEnemyAware
 
-    ; Player collision type metadata
-    DEFINE_COLLISION_TYPE_METADATA Player, AABB, _HandleCollision
-            COLLISION_TYPE_DEPENDENCIES                             &
-                HurtPlayer
-            COLLISION_TYPE_DEPENDENTS
-    DEFINE_COLLISION_TYPE_METADATA_END
-
-    ; Enemy collision type metadata
-    DEFINE_COLLISION_TYPE_METADATA Enemy, AABB, _HandleCollision
-            COLLISION_TYPE_DEPENDENCIES                             &
-                HurtEnemy,                                          &
-                Enemy
-            COLLISION_TYPE_DEPENDENTS
-    DEFINE_COLLISION_TYPE_METADATA_END
-
-    ; Hurt player collision type metadata
-    DEFINE_COLLISION_TYPE_METADATA HurtPlayer, AABB
-            COLLISION_TYPE_DEPENDENCIES
-            COLLISION_TYPE_DEPENDENTS                               &
-                Player
-    DEFINE_COLLISION_TYPE_METADATA_END
-
-    ; Hurt enemy collision type metadata
-    DEFINE_COLLISION_TYPE_METADATA HurtEnemy, AABB
-            COLLISION_TYPE_DEPENDENCIES
-            COLLISION_TYPE_DEPENDENTS                               &
-                Enemy
-    DEFINE_COLLISION_TYPE_METADATA_END
+    ; Collision type relations
+    DEFINE_COLLISION_TYPE_RELATION.OUT Player,       {PlayerAware}
+    DEFINE_COLLISION_TYPE_RELATION.OUT Enemy,        {Enemy, EnemyAware}
+    DEFINE_COLLISION_TYPE_RELATION.OUT HurtPlayer,   {HurtPlayerAware}
+    DEFINE_COLLISION_TYPE_RELATION.OUT HurtEnemy,    {HurtEnemyAware}
 
 
 ;-------------------------------------------------
-; Game specific collision elements
+; Collision element type system
 ; ----------------
-    DEFINE_STRUCT HandlerCollisionElement, AABBCollisionElement
+
+    ; AABB collision elements
+    DEFINE_STRUCT HandlerCollisionElement, Rectangle
         STRUCT_MEMBER.w data
-        STRUCT_MEMBER.l handlerAddress  ; Must preserve d6-d7/a0-a5
+        STRUCT_MEMBER.l handlerAddress
     DEFINE_STRUCT_END
 
-    DEFINE_STRUCT HurtCollisionElement, AABBCollisionElement
+    DEFINE_STRUCT HurtCollisionElement, Rectangle
         STRUCT_MEMBER.w damage
     DEFINE_STRUCT_END
+
+
+    ; AABB collision element type information
+    DEFINE_COLLISION_ELEMENT_TYPE.PlayerCollisionElementType        {Player, HurtPlayerAware},              &
+        HandlerCollisionElement,                                                                            &
+        _HandleCollision
+
+    DEFINE_COLLISION_ELEMENT_TYPE.EnemyCollisionElementType         {Enemy, HurtEnemyAware},                &
+        HandlerCollisionElement,                                                                            &
+        _HandleCollision
+
+    DEFINE_COLLISION_ELEMENT_TYPE.HurtPlayerCollisionElementType    {HurtPlayer},                           &
+        HurtCollisionElement                                                                                &
+
+    DEFINE_COLLISION_ELEMENT_TYPE.HurtEnemyCollisionElementType     {HurtEnemy},                            &
+        HurtCollisionElement                                                                                &
+
+    DEFINE_COLLISION_ELEMENT_TYPE.HurtAllCollisionElementType       {HurtEnemy, HurtPlayer},                &
+        HurtCollisionElement                                                                                &
 
 
 ;-------------------------------------------------

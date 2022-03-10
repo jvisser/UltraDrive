@@ -11,6 +11,8 @@
 ;   - CollisionRestoreSnapshot
 ;------------------------------------------------------------------------------------------
 
+    Include './lib/common/include/geometry.inc'
+
     Include './system/include/m68k.inc'
 
     Include './engine/include/collision.inc'
@@ -45,7 +47,7 @@ CollisionReset:
         ; Clear state
         movea.w collisionAllocationBaseAddress, a0
         movea.l a0, a6
-        jsr     _CollisionClearState
+        jsr     _CollisionClearState.w
 
         ; a6 will be the first free memory address now. Store.
         move.w  a6, CollisionState_freeMemory(a0)
@@ -53,45 +55,39 @@ CollisionReset:
 
 
 ;-------------------------------------------------
-; Allocate memory for collision element of specified size
+; Check collisions of the specified collision element against its related elements.
 ; ----------------
 ; Input:
-; - d0: Size in bytes of memory to allocate
-; Output:
-; - a0: Address of allocated element memory
-; Uses:
-; - a0-a2
-CollisionAllocateElement:
-        COLLISION_ALLOCATE d0, a0, a1, a2
-        rts
+; - a0: Address of the collision element instance
+CollisionCheck:
+    movea.w -SIZE_WORD(a0), a1                                      ; a1 = element type address for this element
+
+    ; NB: Fall through to CollisionCheckEx
 
 
 ;-------------------------------------------------
 ; Check collisions of the specified collision element against its related elements.
-; NB: Other elements this element interacts with that are added at a later point will also trigger the collision response for this element.
 ; ----------------
 ; Input:
-; - a0: Address of the collision element
-; - a1: Address of the collision type meta data for the element to register
+; - a0: Address of the collision element instance
+; - a1: Address of the element type for the element to register
 ; Uses:
-; - d0-d6/a2-a6
-CollisionCheck:
+; - d0-d7/a2-a6
+CollisionCheckEx:
         ; Check collisions against known collision elements
-        lea     CollisionTypeMetadata_relations(a1), a2             ; a2 = related collision type metadata
+        lea     CollisionElementType_relations(a1), a2              ; a2 = related collision type metadata
         move.w  collisionAllocationBaseAddress, a3                  ; a3 = current collision state (CollisionState)
 
-        move.w  (a2)+, d0
-        beq.s    .collisionCheckDone
-
         ; Store bounds in d6, d7
-        move.l  AABBCollisionElement_minX(a0), d6                   ; d6 = (minX, minY)
-        move.l  AABBCollisionElement_maxX(a0), d7                   ; d7 = (maxX, maxY)
+        move.l  Rectangle_minX(a0), d6                              ; d6 = (minX, minY)
+        move.l  Rectangle_maxX(a0), d7                              ; d7 = (maxX, maxY)
 
-        ; Loop over related types
+        move.w  (a2)+, d3                                           ; d3 = relation loop counter (relatedCollisionTypeCount)
+
+        ; Loop over related types (this assumes at least one relation exists for the types this element implements)
         .relationLoop:
-            move.w  d0, a4                                          ; a4 = related element metadata
 
-            move.w  CollisionTypeMetadata_typeId(a4), d1            ; d1 = related element type id
+            move.w  (a2)+, d1                                       ; d1 = related element type id
             add.w   d1, d1                                          ; d1 = offset into element type array
             move.w  CollisionState_typeHeadArray(a3, d1), d1        ; d1 = head of the related type element list (CollisionElementLink)
             beq.s   .noRelatedElements
@@ -103,8 +99,9 @@ CollisionCheck:
 
                     ; Do AABB collision check
                     movea.w CollisionElementLink_element(a5), a6    ; a6 = related element
-                    move.l  AABBCollisionElement_minX(a6), d4       ; d4 = (minX, minY) of related element
-                    move.l  AABBCollisionElement_maxX(a6), d5       ; d5 = (maxX, maxY) of related element
+                    movea.w -SIZE_WORD(a6), a4                      ; a4 = related element meta data
+                    move.l  Rectangle_minX(a6), d4                  ; d4 = (minX, minY) of related element
+                    move.l  Rectangle_maxX(a6), d5                  ; d5 = (maxX, maxY) of related element
 
                     ; If this.minY > related.maxY: no intersection
                     cmp.w   d5, d6
@@ -129,43 +126,41 @@ CollisionCheck:
                         ; We have a collision!
 
                         ; Call related type handler first (its element was registered before this)
-                        move.w  CollisionTypeMetadata_typeId(a1), d0
-                        move.w  CollisionTypeMetadata_dependencyMask(a4), d5
-                        btst    d0, d5
-                        beq.s   .noDependent
+                        move.w  CollisionElementType_typeMask(a1), d0
+                        and.w   CollisionElementType_incomingRelationMask(a4), d0
+                        beq.s   .noOutgoingRelation
 
                             PUSHW   a1
                             PUSHW   a6
 
                             movea.l a6, a1
                             exg     a0, a1
-                            movea.l CollisionTypeMetadata_handler(a4), a6
+                            movea.l CollisionElementType_handler(a4), a6
                             jsr     (a6)
                             movea.l a1, a0
 
                             POPW   a6
                             POPW   a1
 
-                    .noDependent:
+                    .noOutgoingRelation:
 
                         ; Call this type handler
-                        move.w  CollisionTypeMetadata_typeId(a4), d0
-                        move.w  CollisionTypeMetadata_dependencyMask(a1), d5
-                        btst    d0, d5
-                        beq.s   .noDependency
+                        move.w  CollisionElementType_typeMask(a4), d0
+                        and.w   CollisionElementType_incomingRelationMask(a1), d0
+                        beq.s   .noIncomingRelation
 
                             ; Call type handler
                             PUSHW   a1
                             PUSHW   a5
 
-                            movea.l CollisionTypeMetadata_handler(a1), a5
+                            movea.l CollisionElementType_handler(a1), a5
                             movea.l a6, a1
                             jsr     (a5)
 
                             POPW    a5
                             POPW    a1
 
-                    .noDependency:
+                    .noIncomingRelation:
 
                 .noCollisionMaxX:
                     swap    d7
@@ -180,20 +175,28 @@ CollisionCheck:
         .noRelatedElements:
 
             ; Next type relation
-            move.w  (a2)+, d0
-            bne     .relationLoop
+            dbra    d3, .relationLoop
 
     .collisionCheckDone:
 
-        ; Allocate link
-        COLLISION_ALLOCATE #CollisionElementLink_Size, a2, a5, a6
+        ; a2 points to CollisionElementType_linkAllocationSize at this point
 
-        ; Register this element
-        move.w  a0, CollisionElementLink_element(a2)            ; Save element pointer in link
-        move.w  CollisionTypeMetadata_typeId(a1), d1            ; d1 = element type id
-        add.w   d1, d1                                          ; d1 = offset into element type array
-        move.w  CollisionState_typeHeadArray(a3, d1), CollisionElementLink_next(a2)
-        move.w  a2, CollisionState_typeHeadArray(a3, d1)
+        ; Allocate memory for all links
+        COLLISION_ALLOCATE (a2)+, a4, a5, a6
+
+        ; Register links for all collision types this element implements
+        move.w  (a2)+, d0
+    .registerLinkLoop:
+
+            move.w  a0, CollisionElementLink_element(a4)            ; Save element pointer in link
+            move.w  (a2)+, d1                                       ; d1 = element type id
+            add.w   d1, d1                                          ; d1 = offset into element type array
+            move.w  CollisionState_typeHeadArray(a3, d1), CollisionElementLink_next(a4)
+            move.w  a4, CollisionState_typeHeadArray(a3, d1)
+
+            ; Next link
+            add.w   #CollisionElementLink_Size, a4
+        dbra    d0, .registerLinkLoop
         rts
 
 

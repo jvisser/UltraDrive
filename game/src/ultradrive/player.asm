@@ -187,9 +187,7 @@ _MOVE_IF Macro up, down, var, disp, speed
         move.w  d1, (player + Entity_y)
 
         ; Do collision check
-        COLLISION_ALLOCATE              &
-            #HurtCollisionElement_Size, &
-            a0, a2, a3
+        COLLISION_ALLOCATE_ELEMENT HurtEnemyCollisionElementType, a0, a2, a3, a4
 
         moveq   #PLAYER_EXTENTS_X, d2
         moveq   #PLAYER_EXTENTS_Y, d3
@@ -199,17 +197,14 @@ _MOVE_IF Macro up, down, var, disp, speed
         add.w   d3, d3
         add.w   d0, d2
         add.w   d1, d3
-        move.w  d0, AABBCollisionElement_minX(a0)
-        move.w  d1, AABBCollisionElement_minY(a0)
-        move.w  d2, AABBCollisionElement_maxX(a0)
-        move.w  d3, AABBCollisionElement_maxY(a0)
+        move.w  d0, Rectangle_minX(a0)
+        move.w  d1, Rectangle_minY(a0)
+        move.w  d2, Rectangle_maxX(a0)
+        move.w  d3, Rectangle_maxY(a0)
         move.w  #10, HurtCollisionElement_damage(a0)
-        lea     HurtEnemyCollisionTypeMetadata, a1
         jsr     CollisionCheck
 
     .done:
-
-
 
         Purge _MOVE_IF
         rts

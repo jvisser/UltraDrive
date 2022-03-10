@@ -159,26 +159,23 @@ BlobUpdate:
         bsr     _BlobRender
 
         ; Do collision check
-        COLLISION_ALLOCATE                  &
-            #HandlerCollisionElement_Size,  &
-            a0, a2, a3
+        COLLISION_ALLOCATE_ELEMENT EnemyCollisionElementType, a0, a2, a3, a4
 
         move.w  Entity_x(a1), d0
         move.w  Entity_y(a1), d1
         moveq   #BLOB_EXTENTS, d2
         sub.w   d2, d0
         sub.w   d2, d1
-        move.w  d0, AABBCollisionElement_minX(a0)
-        move.w  d1, AABBCollisionElement_minY(a0)
+        move.w  d0, Rectangle_minX(a0)
+        move.w  d1, Rectangle_minY(a0)
         add.w   d2, d2
         subq.w  #1, d2  ; inclusive max
         add.w   d2, d0
         add.w   d2, d1
-        move.w  d0, AABBCollisionElement_maxX(a0)
-        move.w  d1, AABBCollisionElement_maxY(a0)
+        move.w  d0, Rectangle_maxX(a0)
+        move.w  d1, Rectangle_maxY(a0)
         move.w  a1, HandlerCollisionElement_data(a0)
         move.l  #BlobCollision, HandlerCollisionElement_handlerAddress(a0)
-        lea     EnemyCollisionTypeMetadata, a1
 
         jsr     CollisionCheck
 
@@ -310,13 +307,14 @@ _BlobRender:
 ; Handle collision
 ; ----------------
 ; Input:
+; - d0: Incoming relation type mask
 ; - a0: HandlerCollisionElement we created
 ; - a1: Colliding/target CollisionElement
 BlobCollision:
         movea.w HandlerCollisionElement_data(a0), a6                            ; a6 = BlobState
 
-        cmpi.w  #COLLISION_TYPE_Enemy, d0
-        beq.s   .enemyCollision
+        btst    #COLLISION_TYPE_Enemy, d0
+        bne.s   .enemyCollision
 
     .hurtCollision:
 
