@@ -4,18 +4,18 @@
 ; Public API:
 ;   - CollisionInit
 ;   - CollisionReset
-;   - CollisionAllocateElement
 ;   - CollisionCheck
+;   - CollisionCheckEx
 ;   - CollisionCreateSnapshotBefore
 ;   - CollisionCreateSnapshotAfter
 ;   - CollisionRestoreSnapshot
 ;------------------------------------------------------------------------------------------
 
-    Include './lib/common/include/geometry.inc'
-
     Include './system/include/m68k.inc'
 
     Include './engine/include/collision.inc'
+
+    Include './lib/common/include/geometry.inc'
 
 ;-------------------------------------------------
 ; Collision detection internal variables
