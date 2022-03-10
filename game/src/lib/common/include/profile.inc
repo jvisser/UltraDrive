@@ -2,8 +2,8 @@
 ; Simple profiling macros using the VDP background color to show cruding percentage of frametime
 ;------------------------------------------------------------------------------------------
 
-    If (~def(__COMMON_PROFILE_INC))
-__COMMON_PROFILE_INC Equ 1
+    If (~def(__LIB_COMMON_PROFILE_INC))
+__LIB_COMMON_PROFILE_INC Equ 1
 
     Include './system/include/vdp.inc'
 

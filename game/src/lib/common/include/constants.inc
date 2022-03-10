@@ -2,8 +2,8 @@
 ; System wide constants and support macros
 ;------------------------------------------------------------------------------------------
 
-    If (~def(__COMMON_CONSTANTS_INC))
-__COMMON_CONSTANTS_INC Equ 1
+    If (~def(__LIB_COMMON_CONSTANTS_INC))
+__LIB_COMMON_CONSTANTS_INC Equ 1
 
 ;-------------------------------------------------
 ; Constants
