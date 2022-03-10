@@ -4,8 +4,8 @@
 ; TODO: Split into separate implementation modules (genskmod+everdrive)
 ;------------------------------------------------------------------------------------------
 
-    If (~def(__COMMON_DEBUG_INC))
-__COMMON_DEBUG_INC Equ 1
+    If (~def(__LIB_COMMON_DEBUG_INC))
+__LIB_COMMON_DEBUG_INC Equ 1
 
     Include './system/include/vdp.inc'
 

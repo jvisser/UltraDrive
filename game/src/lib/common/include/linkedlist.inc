@@ -2,8 +2,8 @@
 ; Linked list
 ;------------------------------------------------------------------------------------------
 
-    If (~def(__ENGINE_LINKEDLIST_INC))
-__ENGINE_LINKEDLIST_INC Equ 1
+    If (~def(__LIB_COMMON_LINKEDLIST_INC))
+__LIB_COMMON_LINKEDLIST_INC Equ 1
 
     Include './system/include/memory.inc'
 
