@@ -64,10 +64,14 @@
     ;-------------------------------------------------
     ; Game
     ; ----------------
-    
-    ; Lib code
-    Include './lib/rasterfx/paletteswaprasterfx.asm'
+
+    ; Game lib
+    Include './lib/game/include/collisiontypes.inc'
+    Include './lib/game/include/collisionelements.inc'
     Include './lib/game/scroll/rotatescroll.asm'
+
+    ; Raster effects lib
+    Include './lib/rasterfx/paletteswaprasterfx.asm'
 
     ; Game code
     Include './ultradrive/metadata.asm'
@@ -75,7 +79,6 @@
     Include './ultradrive/player.asm'
     Include './ultradrive/viewport.asm'
     Include './ultradrive/water.asm'
-    Include './ultradrive/collisiontypes.asm'
     Include './ultradrive/objects/orbison.asm'
     Include './ultradrive/objects/fireball.asm'
     Include './ultradrive/objects/blob.asm'

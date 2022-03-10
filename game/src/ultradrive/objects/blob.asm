@@ -9,6 +9,9 @@
     Include './engine/include/map.inc'
     Include './engine/include/collision.inc'
 
+    Include './lib/game/include/collisiontypes.inc'
+    Include './lib/game/include/collisionelements.inc'
+
 ;-------------------------------------------------
 ; Blob constants
 ; ----------------
@@ -41,6 +44,11 @@ BLOB_SPEED      Equ 1
         dc.l    BlobInit                    ; MapObjectType.init()
         dc.l    BlobUpdate                  ; MapObjectType.update()
     DEFINE_OBJECT_TYPE_END
+
+    ; Collision element type
+    DEFINE_COLLISION_ELEMENT_TYPE.BlobCollisionElementType  {Enemy, PlayerAware},   &
+        MapObjectCollisionElement,                                                  &
+        BlobCollision
 
 
 ;-------------------------------------------------
@@ -159,24 +167,25 @@ BlobUpdate:
         bsr     _BlobRender
 
         ; Do collision check
-        COLLISION_ALLOCATE_ELEMENT EnemyCollisionElementType, a0, a2, a3, a4
+        COLLISION_ALLOCATE_ELEMENT BlobCollisionElementType, a2, a3, a4, a5
 
         move.w  Entity_x(a1), d0
         move.w  Entity_y(a1), d1
         moveq   #BLOB_EXTENTS, d2
         sub.w   d2, d0
         sub.w   d2, d1
-        move.w  d0, Rectangle_minX(a0)
-        move.w  d1, Rectangle_minY(a0)
+        move.w  d0, Rectangle_minX(a2)
+        move.w  d1, Rectangle_minY(a2)
         add.w   d2, d2
         subq.w  #1, d2  ; inclusive max
         add.w   d2, d0
         add.w   d2, d1
-        move.w  d0, Rectangle_maxX(a0)
-        move.w  d1, Rectangle_maxY(a0)
-        move.w  a1, HandlerCollisionElement_data(a0)
-        move.l  #BlobCollision, HandlerCollisionElement_handlerAddress(a0)
+        move.w  d0, Rectangle_maxX(a2)
+        move.w  d1, Rectangle_maxY(a2)
+        move.w  MapObjectDescriptor_type(a0), MapObjectCollisionElement_objectType(a2)
+        move.w  a1, MapObjectCollisionElement_objectInstance(a2)
 
+        exg     a2, a0
         jsr     CollisionCheck
 
         POPM.l  a2-a5
@@ -308,15 +317,10 @@ _BlobRender:
 ; ----------------
 ; Input:
 ; - d0: Incoming relation type mask
-; - a0: HandlerCollisionElement we created
+; - a0: MapObjectCollisionElement we created
 ; - a1: Colliding/target CollisionElement
 BlobCollision:
-        movea.w HandlerCollisionElement_data(a0), a6                            ; a6 = BlobState
-
-        btst    #COLLISION_TYPE_Enemy, d0
-        bne.s   .enemyCollision
-
-    .hurtCollision:
+        movea.w MapObjectCollisionElement_objectInstance(a0), a6 ; a6 = BlobState
 
         ; Flip vertically
         ori.w   #VDP_SPRITE_ATTR3_VFLIP_MASK, BlobState_spriteAttr(a6)
@@ -326,13 +330,4 @@ BlobCollision:
 
         ; Blink for 1,5 seconds before dying
         move.w  #90, BlobState_deathCounter(a6)
-
-        rts
-
-    .enemyCollision:
-
-        ; Change direction
-        eori.w  #VDP_SPRITE_ATTR3_HFLIP_MASK, BlobState_spriteAttr(a6)
-        neg.w   BlobState_speed(a6)
-
         rts

@@ -8,6 +8,9 @@
     Include './engine/include/entity.inc'
     Include './engine/include/collision.inc'
 
+    Include './lib/game/include/collisiontypes.inc'
+    Include './lib/game/include/collisionelements.inc'
+
 ;-------------------------------------------------
 ; Player constants
 ; ----------------
@@ -28,6 +31,10 @@ PLAYER_EXTENTS_WALL_Y   Equ     7
         STRUCT_MEMBER.l groundSpeed
         STRUCT_MEMBER.w angle
     DEFINE_STRUCT_END
+
+    ; Collision element type
+    DEFINE_COLLISION_ELEMENT_TYPE.PlayerCollisionElementType  {Player}, &
+        PlayerCollisionElement
 
 
 ;-------------------------------------------------
@@ -187,7 +194,7 @@ _MOVE_IF Macro up, down, var, disp, speed
         move.w  d1, (player + Entity_y)
 
         ; Do collision check
-        COLLISION_ALLOCATE_ELEMENT HurtEnemyCollisionElementType, a0, a2, a3, a4
+        COLLISION_ALLOCATE_ELEMENT PlayerCollisionElementType, a0, a2, a3, a4
 
         moveq   #PLAYER_EXTENTS_X, d2
         moveq   #PLAYER_EXTENTS_Y, d3
@@ -201,7 +208,7 @@ _MOVE_IF Macro up, down, var, disp, speed
         move.w  d1, Rectangle_minY(a0)
         move.w  d2, Rectangle_maxX(a0)
         move.w  d3, Rectangle_maxY(a0)
-        move.w  #10, HurtCollisionElement_damage(a0)
+        move.w  player, PlayerCollisionElement_player(a0)
         jsr     CollisionCheck
 
     .done:
