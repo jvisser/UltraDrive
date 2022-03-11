@@ -294,10 +294,55 @@ _RotateVerticalCellCalculateScrollValues:
         rts
 
 
-    ;-------------------------------------------------
-    ; Macro to generate angle tables where the rotation point is at the center of the screen for the rotateHorizontalLineScroll ScrollValueUpdater.
-    ; 64 positions represent angles between -30 to +30
-    ; ----------------
+;-------------------------------------------------
+; Create a viewport configuration with a static background that rotates and translates according to the specified RotateScrollCameraConfiguration
+; ----------------
+DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG Macro config
+        ; .backgroundTracker
+        dc.l staticBackgroundTracker
+        ; .backgroundTrackerConfiguration
+        dc.l NULL
+        ; .horizontalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
+            dc.l lineHorizontalVDPScrollUpdater
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
+                dc.l \config
+                ; .updater
+                dc.l rotateHorizontalLineScroll
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
+                dc.l lineHorizontalScrollCameraConfig
+                ; .updater
+                dc.l multiScrollCamera
+        ; .verticalScrollConfiguration
+            ; .vdpScrollUpdaterAddress
+            dc.l cellVerticalVDPScrollUpdater
+            ; .backgroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_background
+                ; .updaterData
+                dc.l \config
+                ; .updater
+                dc.l rotateVerticalCellScroll
+            ; .foregroundScrollUpdaterConfiguration
+                ; .camera
+                dc.w Viewport_foreground
+                ; .updaterData
+                dc.l cellVerticalScrollCameraConfig
+                ; .updater
+                dc.l multiScrollCamera
+    Endm
+
+
+;-------------------------------------------------
+; Macro to generate angle tables where the rotation point is at the center of the screen for the rotateHorizontalLineScroll ScrollValueUpdater.
+; 64 positions represent angles between -30 to +30
+; ----------------
 DEFINE_ROTATE_SCROLL_CENTER_HORIZONTAL_ANGLE_TABLE Macro
         ; RotateScrollAngleEntry[64]
         dc.l $001cfcdc, $ffffbdbf, $001c1a08, $ffffbfc5, $001b36ba, $ffffc1cd, $001a52f4, $ffffc3d5
@@ -319,10 +364,10 @@ DEFINE_ROTATE_SCROLL_CENTER_HORIZONTAL_ANGLE_TABLE Macro
     Endm
 
 
-    ;-------------------------------------------------
-    ; Macro to generate angle tables where the rotation point is at the top of the screen for the rotateHorizontalLineScroll ScrollValueUpdater.
-    ; 64 positions represent angles between -30 to +30
-    ; ----------------
+;-------------------------------------------------
+; Macro to generate angle tables where the rotation point is at the top of the screen for the rotateHorizontalLineScroll ScrollValueUpdater.
+; 64 positions represent angles between -30 to +30
+; ----------------
 DEFINE_ROTATE_SCROLL_TOP_HORIZONTAL_ANGLE_TABLE Macro
         ; RotateScrollAngleEntry[64]
         dc.l $ffd80000, $ffffbdbf, $ffd92391, $ffffbfc5, $ffda49cc, $ffffc1cd, $ffdb729c, $ffffc3d5
@@ -344,11 +389,11 @@ DEFINE_ROTATE_SCROLL_TOP_HORIZONTAL_ANGLE_TABLE Macro
     Endm
 
 
-    ;-------------------------------------------------
-    ; Macro to generate angle tables where the rotation point is at the center for the rotateVerticalCellScroll ScrollValueUpdater.
-    ; 64 positions represent angles between -30 to +30
-    ; ----------------
-    ; RotateScrollAngleEntry[64]
+;-------------------------------------------------
+; Macro to generate angle tables where the rotation point is at the center for the rotateVerticalCellScroll ScrollValueUpdater.
+; 64 positions represent angles between -30 to +30
+; ----------------
+; RotateScrollAngleEntry[64]
 DEFINE_ROTATE_SCROLL_CENTER_VERTICAL_ANGLE_TABLE Macro
         dc.l $0029693a, $fffbdbe1, $00282531, $fffbfc48, $0026e077, $fffc1cc1, $00259b14, $fffc3d4b
         dc.l $0024550b, $fffc5de6, $00230e63, $fffc7e90, $0021c721, $fffc9f4a, $00207f4a, $fffcc013
