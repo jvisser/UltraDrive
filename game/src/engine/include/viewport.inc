@@ -209,49 +209,4 @@ DEFINE_TILING_BACKGROUND_VIEWPORT_CONFIG Macro speed
                 dc.l planeScrollCamera
     Endm
 
-
-;-------------------------------------------------
-; Create a viewport configuration with a static background that rotates and translates according to the specified RotateScrollCameraConfiguration
-; ----------------
-DEFINE_ROTATING_BACKGROUND_VIEWPORT_CONFIG Macro config
-        ; .backgroundTracker
-        dc.l staticBackgroundTracker
-        ; .backgroundTrackerConfiguration
-        dc.l NULL
-        ; .horizontalScrollConfiguration
-            ; .vdpScrollUpdaterAddress
-            dc.l lineHorizontalVDPScrollUpdater
-            ; .backgroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_background
-                ; .updaterData
-                dc.l \config
-                ; .updater
-                dc.l rotateHorizontalLineScroll
-            ; .foregroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_foreground
-                ; .updaterData
-                dc.l lineHorizontalScrollCameraConfig
-                ; .updater
-                dc.l multiScrollCamera
-        ; .verticalScrollConfiguration
-            ; .vdpScrollUpdaterAddress
-            dc.l cellVerticalVDPScrollUpdater
-            ; .backgroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_background
-                ; .updaterData
-                dc.l \config
-                ; .updater
-                dc.l rotateVerticalCellScroll
-            ; .foregroundScrollUpdaterConfiguration
-                ; .camera
-                dc.w Viewport_foreground
-                ; .updaterData
-                dc.l cellVerticalScrollCameraConfig
-                ; .updater
-                dc.l multiScrollCamera
-    Endm
-
     EndIf
