@@ -20,7 +20,8 @@ if [ -z "$map" ]
 fi
 
 # Compile assets to source
-java -jar '../../tools/mapconvert/target/MapConvert.jar'    \
+java --add-opens java.base/java.util=ALL-UNNAMED            \
+        -jar '../../tools/mapconvert/target/MapConvert.jar' \
         -t './engine/assets/template'                       \
         -s './ultradrive/assets/template'                   \
         -o './ultradrive/assets/generated'                  \
